@@ -1,0 +1,156 @@
+<application>
+    <name>iCub_Logging_SIMULATOR</name>
+
+    <dependencies>
+    </dependencies>
+
+    <module>
+        <name>iCub_SIM</name>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>iCub_SIM</tag>
+    </module>
+           
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/skin/tactile_comp_left_hand --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperSkinLeftHandComp</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/skin/tactile_comp_right_hand --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperSkinRightHandComp</tag>
+    </module>
+     
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/joints/head_joints --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperHeadJoints</tag>
+    </module> 
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/joints/torso_joints --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperTorsoJoints</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/joints/leftArm_joints --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperLeftArmJoints</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/joints/rightArm_joints --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperRightArmJoints</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/joints/leftLeg_joints --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperLeftLegJoints</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/joints/rightLeg_joints --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperRightLegJoints</tag>
+    </module>
+    
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/inertial --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperInertial</tag>
+    </module>
+    
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/images/left --type image --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperLeftEye</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/images/right --type image --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperRightEye</tag>
+    </module>
+    
+       
+    <connection>
+        <from>/icubSim/skin/left_hand</from>
+	<to>/data/skin/tactile_comp_left_hand</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icubSim/skin/right_hand</from>
+	<to>/data/skin/tactile_comp_right_hand</to>
+        <protocol>udp</protocol>
+    </connection>
+         
+    <connection>
+        <from>/icubSim/head/state:o</from>
+	<to>/data/joints/head_joints</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icubSim/torso/state:o</from>
+        <to>/data/joints/torso_joints</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icubSim/left_arm/state:o</from>
+        <to>/data/joints/leftArm_joints</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icubSim/right_arm/state:o</from>
+        <to>/data/joints/rightArm_joints</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icubSim/left_leg/state:o</from>
+        <to>/data/joints/leftLeg_joints</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icubSim/right_leg/state:o</from>
+        <to>/data/joints/rightLeg_joints</to>
+        <protocol>udp</protocol>
+    </connection>
+   
+    <connection>
+        <from>/icubSim/inertial</from>
+        <to>/data/inertial</to>
+        <protocol>udp</protocol>
+    </connection>
+     
+    <connection>
+        <from>/icubSim/cam/left</from>
+        <to>/data/images/left</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icubSim/cam/right</from>
+        <to>/data/images/right</to>
+        <protocol>udp</protocol>
+    </connection>
+    
+  
+</application>

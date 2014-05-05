@@ -1,0 +1,96 @@
+<application>
+    <name>doubleTouch_SIMULATOR</name>
+
+    <dependencies>
+    </dependencies>
+
+    <module>
+        <name>iCub_SIM</name>
+        <node>alecivecubo</node>
+        <stdio></stdio>
+        <tag>iCub_SIM</tag>
+    </module>
+    <module>
+        <name>iKinGazeCtrl</name>
+        <parameters>--from configSim.ini</parameters>
+        <node>alecivecubo</node>
+        <stdio></stdio>
+        <tag>iKinGazeCtrl</tag>
+    </module>
+    <module>
+        <name>doubleTouch</name>
+        <parameters>--from doubleTouchDemoSIM.ini</parameters>
+        <node>alecivecubo</node>
+        <stdio></stdio>
+        <tag>doubleTouch</tag>
+    </module>
+    <module>
+        <name>visuoTactileRF</name>
+        <parameters>--rate 100 --robot icubSim</parameters>
+        <node>alecivecubo</node>
+        <stdio></stdio>
+        <tag>visuoTactileRF</tag>
+    </module>
+    <module>
+        <name>yarpview</name>
+        <parameters>/vtRF/left</parameters>
+        <node>alecive</node>
+        <stdio></stdio>
+        <tag>yarpview</tag>
+    </module>
+    <module>
+        <name>yarpview</name>
+        <parameters>/vtRF/right</parameters>
+        <node>alecive</node>
+        <stdio></stdio>
+        <tag>yarpview</tag>
+    </module>
+    <module>
+        <name>dataSetPlayer</name>
+        <node>alecive</node>
+        <stdio></stdio>
+        <tag>dataSetPlayer</tag>
+    </module>
+    <module>
+        <name>iCubSkinGui</name>
+        <parameters> --context periPersonalSpace --from left_forearm_vtRF.ini --name /vtRFSkinGui --useCalibration</parameters>
+        <node>alecive</node>
+        <tag>skinGui</tag>
+    </module>
+
+    <connection>
+        <from>/skinManager/skin_events:o</from>
+        <to>/doubleTouch/contacts:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/doubleTouch/status:o</from>
+        <to>/visuoTactileRF/input:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/icubSim/cam/left</from>
+        <to>/visuoTactileRF/imageL:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/icubSim/cam/right</from>
+        <to>/visuoTactileRF/imageR:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/visuoTactileRF/imageL:o</from>
+        <to>/vtRF/left</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/visuoTactileRF/imageR:o</from>
+        <to>/vtRF/right</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/visuoTactileRF/input:i</from>
+        <to>/visuoTactileRF/input:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+</application>

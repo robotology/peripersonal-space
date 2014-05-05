@@ -1,0 +1,294 @@
+<application>
+    <name>iCub_Logging</name>
+
+    <dependencies>
+    </dependencies>
+
+   <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/skin/skin_events --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperSkinContact</tag>
+    </module>
+   
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/skin/tactile_comp_left_hand --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperSkinLeftHandComp</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/skin/tactile_comp_left_forearm --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperSkinLeftForearmComp</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/skin/tactile_comp_left_arm --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperSkinLeftArmComp</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/skin/tactile_comp_right_hand --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperSkinRightHandComp</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/skin/tactile_comp_right_forearm --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperSkinRightForearmComp</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/skin/tactile_comp_right_arm --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperSkinRightArmComp</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/skin/tactile_comp_torso --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperSkinTorsoComp</tag>
+    </module>
+     
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/joints/head_joints --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperHeadJoints</tag>
+    </module> 
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/joints/torso_joints --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperTorsoJoints</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/joints/leftArm_joints --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperLeftArmJoints</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/joints/rightArm_joints --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperRightArmJoints</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/joints/leftLeg_joints --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperLeftLegJoints</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/joints/rightLeg_joints --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperRightLegJoints</tag>
+    </module>
+    
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/inertial --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperInertial</tag>
+    </module>
+    
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/images/left --type image --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperLeftEye</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/images/right --type image --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperRightEye</tag>
+    </module>
+
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/forces_and_torques/leftArm_forces --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperLeftArmForces</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/forces_and_torques/rightArm_forces --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperRightArmForces</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/forces_and_torques/leftLeg_forces --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperLeftLegForces</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/forces_and_torques/rightLeg_forces --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperRightLegForces</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/forces_and_torques/leftFoot_forces --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperLeftFootForces</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+	<parameters>--name /data/forces_and_torques/rightFoot_forces --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperRightFootForces</tag>
+    </module>
+
+    <connection>
+        <from>/skinManager/skin_events:o</from>
+	    <to>/data/skin/skin_events</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/skin/left_hand_comp</from>
+	    <to>/data/skin/tactile_comp_left_hand</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/skin/left_forearm_comp</from>
+	    <to>/data/skin/tactile_comp_left_forearm</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/skin/left_arm_comp</from>
+	    <to>/data/skin/tactile_comp_left_arm</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/skin/right_hand_comp</from>
+	    <to>/data/skin/tactile_comp_right_hand</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/skin/right_forearm_comp</from>
+	    <to>/data/skin/tactile_comp_right_forearm</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/skin/right_arm_comp</from>
+	    <to>/data/skin/tactile_comp_right_arm</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/skin/torso_comp</from>
+	    <to>/data/skin/tactile_comp_torso</to>
+        <protocol>udp</protocol>
+    </connection>          
+     
+    <connection>
+        <from>/icub/head/state:o</from>
+	<to>/data/joints/head_joints</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/torso/state:o</from>
+        <to>/data/joints/torso_joints</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/left_arm/state:o</from>
+        <to>/data/joints/leftArm_joints</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/right_arm/state:o</from>
+        <to>/data/joints/rightArm_joints</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/left_leg/state:o</from>
+        <to>/data/joints/leftLeg_joints</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/right_leg/state:o</from>
+        <to>/data/joints/rightLeg_joints</to>
+        <protocol>udp</protocol>
+    </connection>
+
+    <connection>
+        <from>/icub/inertial</from>
+        <to>/data/inertial</to>
+        <protocol>udp</protocol>
+    </connection>
+    
+    <connection>
+        <from>/icub/camcalib/left/out</from>
+        <to>/data/images/left</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/camcalib/right/out</from>
+        <to>/data/images/right</to>
+        <protocol>udp</protocol>
+    </connection>
+    
+    <connection>
+        <from>/icub/left_arm/analog:o</from>
+	    <to>/data/forces_and_torques/leftArm_forces</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/right_arm/analog:o</from>
+	    <to>/data/forces_and_torques/rightArm_forces</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/left_leg/analog:o</from>
+	    <to>/data/forces_and_torques/leftLeg_forces</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/right_leg/analog:o</from>
+	    <to>/data/forces_and_torques/rightLeg_forces</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/left_foot/analog:o</from>
+	    <to>/data/forces_and_torques/leftFoot_forces</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/right_foot/analog:o</from>
+	    <to>/data/forces_and_torques/rightFoot_forces</to>
+        <protocol>udp</protocol>
+    </connection>
+    
+</application>
