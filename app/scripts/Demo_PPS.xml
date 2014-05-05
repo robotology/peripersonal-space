@@ -47,31 +47,31 @@
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /PF3DT_viewer --RefreshTime 33 --x 920 --y 300 --w 400 --h 400</parameters>
+        <parameters>--name /PF3DT_viewer --RefreshTime 33 --x 840 --y 0 --w 400 --h 400</parameters>
         <node>icub13</node>
         <tag>PF3DTracker_viewer</tag>
     </module>
     <module>
         <name>iCubSkinGui</name>
-        <parameters> --context periPersonalSpace --from left_forearm_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 0 --ypos 690 --width 350 --height 350</parameters>
+        <parameters> --context periPersonalSpace --from left_forearm_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 0 --ypos 640 --width 350 --height 350</parameters>
         <node>icub13</node>
         <tag>iCubSkinGui_left_forearm</tag>
     </module>
     <module>
         <name>iCubSkinGui</name>
-        <parameters> --context periPersonalSpace --from left_hand_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 370 --ypos 690 --width 350 --height 350</parameters>
+        <parameters> --context periPersonalSpace --from left_hand_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 370 --ypos 640 --width 350 --height 350</parameters>
         <node>icub13</node>
         <tag>iCubSkinGui_left_hand</tag>
     </module>
     <module>
         <name>iCubSkinGui</name>
-        <parameters> --context periPersonalSpace --from right_forearm_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 740 --ypos 690 --width 350 --height 350</parameters>
+        <parameters> --context periPersonalSpace --from right_forearm_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 740 --ypos 640 --width 350 --height 350</parameters>
         <node>icub13</node>
         <tag>iCubSkinGui_right_forearm</tag>
     </module>
     <module>
         <name>iCubSkinGui</name>
-        <parameters> --context periPersonalSpace --from right_hand_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 1110 --ypos 690 --width 350 --height 350</parameters>
+        <parameters> --context periPersonalSpace --from right_hand_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 1110 --ypos 640 --width 350 --height 350</parameters>
         <node>icub13</node>
         <tag>iCubSkinGui_right_hand</tag>
     </module>
