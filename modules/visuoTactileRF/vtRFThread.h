@@ -46,8 +46,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <vector>
-#include <set>
-#include <list>
 
 #include <cv.h>
 #include <highgui.h>
@@ -86,8 +84,8 @@ protected:
     // INTERNAL VARIABLES:
     BufferedPort<ImageOf<PixelRgb> > *imagePortInR;  // port for reading images
     BufferedPort<ImageOf<PixelRgb> > *imagePortInL;  // port for reading images
-    Port imagePortOutR;                              // port for streaming images
-    Port imagePortOutL;                              // port for streaming images
+    BufferedPort<ImageOf<PixelRgb> > *imagePortOutR; // port for streaming images
+    BufferedPort<ImageOf<PixelRgb> > *imagePortOutL; // port for streaming images
     ImageOf<PixelRgb> *imageInR;
     ImageOf<PixelRgb> *imageInL;
 
@@ -98,15 +96,14 @@ protected:
     Bottle                 *event;
     vector <IncomingEvent>  incomingEvents;
 
-    Port skinGuiPortForearmL;     // output to the skinGui
-    Port skinGuiPortForearmR;    
-    Port skinGuiPortHandL;     
-    Port skinGuiPortHandR;    
+    BufferedPort<Vector> *skinGuiPortForearmL;     // output to the skinGui
+    BufferedPort<Vector> *skinGuiPortForearmR;    
+    BufferedPort<Vector> *skinGuiPortHandL;     
+    BufferedPort<Vector> *skinGuiPortHandR;    
+    Vector               *skinGuiVecL;
 
     BufferedPort<iCub::skinDynLib::skinContactList> *skinPortIn;  // input from the skinManager
-    Port skinPortOut;                                             // output for the events
-    Port dataDumperPortOut;                                       // output for the dataDumper (quick thing
-    yarp::sig::Vector dumpedVector;
+    BufferedPort<Bottle> *skinPortOut; // input for the events
     
     // iCubSkin
     vector <string>   filenames;
@@ -124,7 +121,7 @@ protected:
     //   HN  -> the finger that has to touch
     //   EER -> the right end-effector (the wrist)
     //   EEL -> the left  end-effector (the wrist)
-    // vector <skinPart> H;
+    vector <skinPart> H;
 
     // EYEWRAPPER
     eyeWrapper      *eWR;
@@ -168,79 +165,35 @@ protected:
     int contextGaze;
 
     /**
-    * Locates a taxel in the World Reference Frame, given its
-    * position w.r.t. the arm
-    * @param _pos is the taxel position wrt the arm
-    * @param part is the chain the taxel is attached to. It can be
-    *             either left_forearm, left_hand, right_forearm, or right_hand
-    * @return the position of the taxel in the WRF
+    * Locates a taxel in the World Reference Frame
     **/
-    yarp::sig::Vector locateTaxel(const yarp::sig::Vector &_pos,
-                                  const string &part);
+    yarp::sig::Vector locateTaxel(const yarp::sig::Vector &_pos, const string &arm);
 
     /**
-    * Projects all the taxels belonging to a skinPart from their
-    * position in the WRF into the image plane of an eye
-    * @param sP   is the skinPart to project
-    * @param _eye is the eye to project the skinPart into. It can be
-    *             either rightEye, or leftEye
-    * @return true/false for success/failure
+    * Project a point from its position in the WRF to the image plane of an eye
     **/
-    bool projectIntoImagePlane(vector <skinPart> &sP, const string &_eye);
+    bool projectIntoImagePlane(vector <skinPart> &spw, const string &eye, const bool flag);
     
-    /**
-    * Projects a generic 3D point from its position in the WRF
-    * into the image plane of an eye
-    * @param x    is the 3D point (x,y,z) in the WRF
-    * @param px   is the 2D point (u,v) in the image plane
-    * @param _eye is the eye to project the point into. It can be
-    *             either rightEye, or leftEye
-    * @return true/false for success/failure
-    **/
-    bool projectPoint(const yarp::sig::Vector &x,
-                      yarp::sig::Vector &px, const string &_eye);
+    // if flag == 1, use the old projection
+    bool projectPoint(const string &type, const yarp::sig::Vector &x,
+                      yarp::sig::Vector &px, const bool flag);
 
     /**
-    * Handles the images, by drawing taxels in either the left or right eye.
-    * @param _eye is the eye to draw the taxels into. It can be
-    *             either rightEye, or leftEye.
+    * 
     **/
-    void drawTaxels(string _eye);
+    void drawTaxel(const yarp::sig::Vector &px, const string &bodypart,
+                   ImageOf<PixelRgb> &Im, const int act, const bool flag);
 
     /**
-    * Physically draws a taxel into an image, given its position and its activation.
-    * Color changes according to the body part involved as well as the activation.
-    * @param Im   is the image to draw the taxel into
-    * @param px   is the vector of 2D coordinates (u,v) of the point to be drawed
-    * @param part is the chain the taxel is attached to. It can be
-    *             either left_forearm, left_hand, right_forearm, or right_hand
-    * @param act  is the activation level of the taxel
+    * 
     **/
-    void drawTaxel(ImageOf<PixelRgb> &Im, const yarp::sig::Vector &px,
-                   const string &part, const int act);
+    void handleImages(string eye);
 
     /**
-    * Finds out the positions of the taxels w.r.t. their respective limbs
+    *
     **/
     bool setTaxelPosesFromFile(const string filePath,skinPart &spw);
 
-    /**
-    * If it is defined for the respective skin part, it fills the taxelIDtoRepresentativeTaxelID vector that is indexed by taxel IDs
-    * and returns taxel IDs of their representatives - e.g. triangle centers.
-    **/
-    void initRepresentativeTaxels(skinPart &sP);    
-   
-    
-    /**
-    * For all active taxels, it returns a set of "representative" active taxels if they were defined for the respective skin part 
-    * E.g. if at least one taxel from a triangle was active, the center of this triangle will be part of the output list 
-    * @param IDv  is a vector of IDs of the taxels activated
-    * @param IDx  is the index of the iCubSkin affected by the contact
-                  (basically, the index of the skinPart that has been touched)
-    * @param v    is a vector of IDs of the representative taxels activated
-    **/
-    bool getRepresentativeTaxelsToTrain(const std::vector<unsigned int> IDv, const int IDx, std::vector<unsigned int> &v);
-        
     /**
     *
     **/
@@ -257,31 +210,23 @@ protected:
     void sendContactsToSkinGui();
 
     /**
-    * Detects a contact onto the skin:
-    * @param _sCL is the skinContactList from which sorting out the events
-    *             (usually provided by the skinManager)
-    * @param _IDx is the index of the iCubSkin affected by the contact
-                  (basically, the index of the skinPart that has been touched)
-    * @param _IDv is a vector of IDs of the taxels activated
+    * detects a contact:
+    * idx : index of the iCubSkin
+    * v   : IDs of the taxels
     **/
-    bool detectContact(iCub::skinDynLib::skinContactList *_sCL, int &_IDx,
-                       std::vector <unsigned int> &_IDv);
+    bool detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx,
+                       std::vector <unsigned int> &v);
 
     /**
     *
     **/
-    IncomingEvent4Taxel projectIntoTaxelRF(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e);
-    // Vector projectIntoTaxelRF(const Matrix &RF,const Matrix &T_a,const Vector &wrfpos);
+    IncomingEvent projectIntoTaxelRF(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e);
+    Vector projectIntoTaxelRF(const Matrix &RF,const Matrix &T_a,const Vector &wrfpos);
 
     /**
     *
     **/
     bool computeResponse();
-
-    /**
-    * Compute the NRM and TTC for a specific event
-    **/
-    bool computeX(IncomingEvent4Taxel &ie);
 
     /**
     * Prints a message according to the verbosity level:
@@ -303,41 +248,44 @@ public:
     virtual void threadRelease();
 
     /**
-    * Pushes extrinsic parameters to either the right or the left eye
-    * @param M   is the transform matrix to push
-    * @param eye is the eye to push the matrix into
+    * 
+    *
     **/
     bool pushExtrinsics(const Matrix &M, string eye);
 
     /**
-    * Trains the taxels according to the incoming event.
-    * @param IDv is the transform matrix to push
-    * @param IDx is the eye to push the matrix into
+    *
     **/
     bool trainTaxels(const std::vector<unsigned int> IDv, const int IDx);
 
     /**
-    * Saving function. It saves the skinParts as well as their receptive fields.
+    *
+    **/
+    bool bufferizeEvents();
+
+    /**
+    *
     **/
     bool save();
 
     /**
-    * Loading function. It saves the skinParts as well as their receptive fields.
+    *
     **/
     bool load();
 
+
     /**
-    * It resets the learning
+    *
     **/
     bool resetParzenWindows();
 
     /**
-    * It stops the learning
+    *
     **/
     bool stopLearning();
 
     /**
-    * It restore the learning
+    *
     **/
     bool restoreLearning();
 };

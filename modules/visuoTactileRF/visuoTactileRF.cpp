@@ -52,7 +52,7 @@ YARP, ICUB libraries and OPENCV
 
 --taxelsFile    \e file
 - The name of the file the receptive fields are gonna be saved in (and loaded from).
-  Default 'taxels2D.ini'.
+  Default 'taxels.ini'.
 
 \section portsc_sec Ports Created
 - <i> /<name>/contacts:i </i> it reads the skinContacts from the skinManager.
@@ -67,9 +67,9 @@ None.
 None. 
  
 \section tested_os_sec Tested OS
-Linux (Ubuntu 12.04, Debian Squeeze, Debian Wheezy).
+Linux (Ubuntu 12.04, Debian Squeeze).
 
-\author: Alessandro Roncone and Matej Hoffmann
+\author: Alessandro Roncone
 */ 
 
 #include <yarp/os/all.h>
@@ -126,50 +126,37 @@ public:
             switch (command.get(0).asVocab())
             {
                 //-----------------
+                // case VOCAB4('b','u','f','f'):
+                // {
+                //     vtRFThrd -> bufferizeEvents();
+                //     reply.addVocab(ack); return true;
+                // }
                 case VOCAB4('s','a','v','e'):
                 {
-                    int res=Vocab::encode("saved");
-                    if (vtRFThrd -> save())
-                    {
-                        reply.addVocab(ack);
-                    }
-                    else
-                        reply.addVocab(nack);
-                    
-                    reply.addVocab(res);
-                    return true;
+                    vtRFThrd -> save();
+                    reply.addVocab(ack); return true;
                 }
                 case VOCAB4('l','o','a','d'):
                 {
-                    int res=Vocab::encode("loaded");
-                    if (vtRFThrd -> load())
-                    {
-                        reply.addVocab(ack);
-                    }
-                    else
-                        reply.addVocab(nack);
-                    
-                    reply.addVocab(res);
-                    return true;
+
+                    vtRFThrd -> load();
+                    reply.addVocab(ack); return true;
                 }
                 case VOCAB4('r','e','s','e'):
                 {
                     vtRFThrd -> resetParzenWindows();
-                    reply.addVocab(ack);
-                    return true;
+                    reply.addVocab(ack); return true;
                 }
                 case VOCAB4('s','t','o','p'):
                 {
                     vtRFThrd -> stopLearning();
-                    reply.addVocab(ack);
-                    return true;
+                    reply.addVocab(ack); return true;
                 }
                case VOCAB4('r','e','s','t'):
                 {
                     vtRFThrd -> restoreLearning();
-                    reply.addVocab(ack);
-                    return true;
-                }     
+                    reply.addVocab(ack); return true;
+                }                
                 //-----------------
                 default:
                     return RFModule::respond(command,reply);
@@ -186,7 +173,7 @@ public:
         robot = "icub";
 
         verbosity  = 0;      // verbosity
-        rate       = 100;    // rate of the vtRFThread
+        rate       = 50;    // rate of the vtRFThread
 
         //******************************************************
         //********************** CONFIGS ***********************
@@ -238,34 +225,25 @@ public:
             int partNum=4;
 
             Bottle &skinEventsConf = skinRF.findGroup("SKIN_EVENTS");
-            if(!skinEventsConf.isNull())
-            {
+            if(!skinEventsConf.isNull()){
                 printf("SKIN_EVENTS section found\n");
 
-                if(skinEventsConf.check("skinParts"))
-                {
+                if(skinEventsConf.check("skinParts")){
                     Bottle* skinPartList = skinEventsConf.find("skinParts").asList();
                     partNum=skinPartList->size();
                 }
 
-                if(skinEventsConf.check("taxelPositionFiles"))
-                {
+                if(skinEventsConf.check("taxelPositionFiles")){
                     Bottle *taxelPosFiles = skinEventsConf.find("taxelPositionFiles").asList();
 
-                    for(int i=0;i<partNum;i++)     // all of the skinparts
-                    // for(int i=1;i<2;i++)           // only left forearm
-                    // for(int i=0;i<1;i++)           // only left hand
-                    // for(int i=1;i<partNum;i++)     // everything but the left hand
+                    for(int i=0;i<partNum;i++)
                     {
-                        if (i==2)                   // only right hand
+                        string taxelPosFile = taxelPosFiles->get(i).asString().c_str();
+                        string filePath(skinRF.findFile(taxelPosFile.c_str()));
+                        if (filePath!="")
                         {
-                            string taxelPosFile = taxelPosFiles->get(i).asString().c_str();
-                            string filePath(skinRF.findFile(taxelPosFile.c_str()));
-                            if (filePath!="")
-                            {
-                                printf("*** VisuoTactileRF: filePath [%i] %s\n",i,filePath.c_str());
-                                filenames.push_back(filePath);
-                            }
+							printf("*** VisuoTactileRF: filePath [%i] %s\n",i,filePath.c_str());
+                            filenames.push_back(filePath);
                         }
                     }
                     // filenames.pop_back();           // only left forearm
@@ -329,7 +307,7 @@ public:
 
     bool close()
     {
-        cout << "VISUO TACTILE RECEPTIVE FIELDS: Stopping thread.." << endl;
+        cout << "VISUO TACTILE RECEPTIVE FIELDS: Stopping threads.." << endl;
         if (vtRFThrd)
         {
             vtRFThrd->stop();
@@ -372,7 +350,7 @@ int main(int argc, char * argv[])
         cout << "   --robot      robot:  the name of the robot. Default icub." << endl;
         cout << "   --rate       rate:   the period used by the thread. Default 50ms." << endl;
         cout << "   --verbosity  int:    verbosity level (default 0)." << endl;
-        cout << "   --taxelsFile string: the file from which load and save taxels (default taxels2D.ini)." << endl;
+        cout << "   --taxelsFile string: the file from which load and save taxels (default taxels.ini)." << endl;
         cout << endl;
         return 0;
     }
