@@ -4,7 +4,7 @@ yarp::sig::Vector toVector(yarp::sig::Matrix m)
 {
     Vector res(m.rows()*m.cols(),0.0);
     
-    for (size_t r = 0; r < m.rows(); r++)
+    for (int r = 0; r < m.rows(); r++)
     {
         res.setSubvector(r*m.cols(),m.getRow(r));
     }
@@ -29,9 +29,9 @@ yarp::sig::Matrix matrixFromBottle(const Bottle b, int in, const int r, const in
     yarp::sig::Matrix m(r,c);
     m.zero();
     
-    for (size_t i = 0; i<r; i++)
+    for (int i = 0; i<r; i++)
     {
-        for (size_t j = 0; j<c; j++)
+        for (int j = 0; j<c; j++)
         {
             m(i,j) =  b.get(in).asDouble();
             in++;
@@ -45,7 +45,7 @@ yarp::sig::Vector vectorFromBottle(const Bottle b, int in, const int size)
 {
     yarp::sig::Vector v(size,0.0);
 
-    for (size_t i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
         v[i] = b.get(in).asDouble();
         in++;
@@ -80,7 +80,7 @@ string int_to_string( const int a )
 
 /****************************************************************/
 /* INCOMING EVENT WRAPPER
-*****************************************************************/
+/****************************************************************/
     IncomingEvent::IncomingEvent()
     {
         Pos.resize(3,0.0);
@@ -168,80 +168,24 @@ string int_to_string( const int a )
     }
 
 /****************************************************************/
-/* INCOMING EVENT 4 TAXEL WRAPPER
-*****************************************************************/
-    IncomingEvent4Taxel::IncomingEvent4Taxel() : IncomingEvent()
-    {
-        NRM = 0;
-        TTC = 0;
-    }
-
-    IncomingEvent4Taxel::IncomingEvent4Taxel(const Vector &p, const Vector &v,
-                                             const double r, const string &s):
-                                            IncomingEvent(p,v,r,s)
-    {
-        NRM = 0;
-        TTC = 0;
-    }
-
-    IncomingEvent4Taxel::IncomingEvent4Taxel(const IncomingEvent4Taxel &e)
-    {
-        *this = e;   
-    }
-
-    IncomingEvent4Taxel::IncomingEvent4Taxel(const IncomingEvent &e)
-    {
-        *this = e;   
-    }
-
-    IncomingEvent4Taxel & IncomingEvent4Taxel::operator=(const IncomingEvent4Taxel &e)
-    {
-        IncomingEvent::operator=(e);
-        TTC    = e.TTC;
-        NRM    = e.NRM;
-        return *this;
-    }
-
-    IncomingEvent4Taxel & IncomingEvent4Taxel::operator=(const IncomingEvent &e)
-    {
-        Pos    = e.Pos;
-        Vel    = e.Vel;
-        Src    = e.Src;
-        Radius = e.Radius;
-        TTC    = 0;
-        NRM    = 0;
-        return *this;
-    }
-
-    void IncomingEvent4Taxel::print()
-    {
-        printf("NRM: %g\t TTC: %g ", NRM*100, TTC);
-        IncomingEvent::print();
-    }
-
-/****************************************************************/
 /* TAXEL WRAPPER
-*****************************************************************/
-    void Taxel::init()
+/****************************************************************/
+    Taxel::Taxel()
     {
         ID   = 0;
         Resp = 0;
         Pos.resize(3,0.0);
         WRFPos.resize(3,0.0);
         Norm.resize(3,0.0);
-        px.resize(2,0.0);
-        RF = eye(4);
-        rfAngle = 40*M_PI/180;        
-    }
-
-    Taxel::Taxel()
-    {
-        init();
+        pxR.resize(2,0.0);
+        pxRR.resize(2,0.0);
+        pxL.resize(2,0.0);
+        pxLL.resize(2,0.0);
+        RF = eye(4);        
     }
 
     Taxel::Taxel(const Vector &p, const Vector &n)
     {
-        init();
         Pos  = p;
         Norm = n;
         setRF();
@@ -249,7 +193,6 @@ string int_to_string( const int a )
 
     Taxel::Taxel(const Vector &p, const Vector &n, const int &i)
     {
-        init();
         ID   = i;
         Pos  = p;
         Norm = n;
@@ -263,24 +206,23 @@ string int_to_string( const int a )
         Pos    = t.Pos;
         WRFPos = t.WRFPos;
         Norm   = t.Norm;
-        px     = t.px;
+        pxR    = t.pxR;
+        pxRR   = t.pxRR;
+        pxL    = t.pxL;
+        pxLL   = t.pxLL;
         RF     = t.RF;
         return *this;
     }
 
     void Taxel::print(int verbosity)
     {
-        if (verbosity > 4)
-            printf("ID %i \tPos %s \tNorm %s \n\tPosHst \n%s\n\n\tNegHst \n%s\n", ID,
-                    Pos.toString().c_str(), Norm.toString().c_str(),
-                    pwe2D.getPosHist().toString().c_str(),
-                    pwe2D.getNegHist().toString().c_str());
-        else 
+        if (verbosity == 0)
             printf("ID %i \tPos %s \tNorm %s\n", ID,
                     Pos.toString().c_str(), Norm.toString().c_str());
-            // printf("ID %i \tPos %s \tNorm %s \n\tHst %s\n", ID,
-            //         Pos.toString().c_str(), Norm.toString().c_str(),
-            //         pwe.getHist().toString().c_str());
+        else 
+            printf("ID %i \tPos %s \tNorm %s \n\tHst %s\n", ID,
+                    Pos.toString().c_str(), Norm.toString().c_str(),
+                    pwe.getHist().toString().c_str());
     }
 
     string Taxel::toString(int precision)
@@ -289,10 +231,7 @@ string int_to_string( const int a )
         res << "ID: " << ID << "\tPos: "<< Pos.toString() << "\t Norm: "<< Norm.toString();
 
         if (precision)
-        {
-            res << "\n Hst:\n"<< pwe2D.getPosHist().toString();
-            res << "\n Hst:\n"<< pwe2D.getNegHist().toString() << endl;
-        }
+            res << "\n Hst: "<< pwe.getHist().toString() << endl;
         return res.str();
     }
 
@@ -310,7 +249,7 @@ string int_to_string( const int a )
         z = Norm;
         if (z[0] == 0.0)
         {
-            z[0] = 0.00000001;    // Avoid the division by 0
+            z[0] = 0.00000001;
         }
         y[0] = -z[2]/z[0]; y[2] = 1;
         x = -1*(cross(z,y));
@@ -327,80 +266,29 @@ string int_to_string( const int a )
         RF.setSubcol(Pos,0,3);
     }
 
-    bool Taxel::addSample(const IncomingEvent4Taxel ie)
-    {
-        if (!insideRFCheck(ie))
-            return false;
-
-        std::vector <double> X;
-        X.push_back(ie.NRM);
-        X.push_back(ie.TTC);
-
-        return pwe2D.addSample(X);
-    }
-
-    bool Taxel::removeSample(const IncomingEvent4Taxel ie)
-    {
-        if (!insideRFCheck(ie))
-            return false;
-
-        std::vector <double> X;
-        X.push_back(ie.NRM);
-        X.push_back(ie.TTC);
-
-        return pwe2D.removeSample(X);
-    }
-
     bool Taxel::resetParzenWindow()
     {
-        pwe2D.resetAllHist();
+        pwe.resetHist();
         return true;
     }
 
     bool Taxel::computeResponse()
     {
-        if (!insideRFCheck(Evnt))
-            return false;
-
-        std::vector<double> In;
-        In.push_back(Evnt.NRM);
-        In.push_back(Evnt.TTC);
-        Resp = pwe2D.computeResponse(In);
+        double RFExtension = double(pwe.getExt());
+        if (norm(Evnt.Pos) <= RFExtension && Evnt.Pos[2] >= 0)
+        {
+            //Resp = ((RFExtension - norm(Evnt.Pos))/RFExtension)*255;
+            Resp = (int)pwe.getF_X_scaled(norm(Evnt.Pos));
+        }
+        else
+            Resp = 0;
 
         return true;
     }
 
-    bool Taxel::insideRFCheck(const IncomingEvent4Taxel ie)
-    {
-        std::vector<double> binWidth = pwe2D.getBinWidth();
-        double binLimit = 2*binWidth[0];
-
-        // the x,y limit of the receptive field at the incoming event's Z
-        double RFlimit = ie.Pos(2)/tan(rfAngle);
-
-        // the x,y limit of the receptive field in the first bin
-        double RFlimit_cyl = binLimit/tan(rfAngle);
-
-        // printf("binLimit: %g RFlimit_cyl: %g rfAngle: %g \n", binLimit, RFlimit_cyl, rfAngle);
-        // printf("ie.Pos\t%s\n", ie.Pos.toString().c_str());
-        // printf("Hist:\n%s\n", pwe2D.getHist().toString().c_str());
-
-        if (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit*RFlimit )
-        {
-            return true;
-        }
-        // There are two ifs only to let me debug things
-        if ( (abs(ie.Pos(2))<=binLimit) && (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit_cyl*RFlimit_cyl) )
-        {
-            return true;
-        }
-
-        return false;
-    }
-
 /****************************************************************/
 /* SKINPART WRAPPER
-*****************************************************************/
+/****************************************************************/
     skinPart::skinPart()
     {
         name="";
@@ -419,39 +307,9 @@ string int_to_string( const int a )
     {
         printf("**********\n");
         printf("name: %s\t", name.c_str());
-        printf("size: %i\t", size);
-        printf("taxel's size: %lu\n", taxel.size());
-        
+        printf("size: %i\n", size);
         for (size_t i = 0; i < taxel.size(); i++)
             taxel[i].print(verbosity);
-        
-        if (verbosity>=4)
-        {
-            printf("\nTaxel ID -> representative ID:\n");
-
-            for (size_t i=0; i<size; i++)
-            {
-                printf("[ %lu -> %d ]\t",i,Taxel2Repr[i]);
-                if (i % 8 == 7)
-                {
-                    printf("\n");
-                }
-            }
-            printf("\n");
-            
-            printf("Representative ID -> Taxel IDs:\n");
-            for(map<unsigned int, list<unsigned int> >::const_iterator iter_map = Repr2TaxelList.begin(); iter_map != Repr2TaxelList.end(); ++iter_map)
-            {
-                list<unsigned int> l = iter_map->second;
-                printf("%d -> {",iter_map->first);
-                for(list<unsigned int>::const_iterator iter_list = l.begin(); iter_list != l.end(); iter_list++)
-                {
-                    printf("%u, ",*iter_list);
-                }
-                printf("}\n");
-            }    
-            printf("\n");
-        }
         printf("**********\n");
     }
 
@@ -465,9 +323,14 @@ string int_to_string( const int a )
         return res.str();
     }
 
+    bool skinPart::toProperty(Property &info)
+    {
+        return true;
+    }
+
 /****************************************************************/
 /* EYE WRAPPER
-*****************************************************************/
+/****************************************************************/
     bool getAlignHN(const ResourceFinder &rf, const string &type,
                     iKinChain *chain, const bool verbose)
     {
@@ -487,7 +350,7 @@ string int_to_string( const int a )
                         int j=0;
 
                         Matrix HN(4,4); HN=0.0;
-                        for (size_t cnt=0; (cnt<bH->size()) && (cnt<HN.rows()*HN.cols()); cnt++)
+                        for (int cnt=0; (cnt<bH->size()) && (cnt<HN.rows()*HN.cols()); cnt++)
                         {
                             HN(i,j)=bH->get(cnt).asDouble();
                             if (++j>=HN.cols())
