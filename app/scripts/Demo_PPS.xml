@@ -47,7 +47,7 @@
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /PF3DT_viewer --RefreshTime 33 --x 840 --y 0 --w 400 --h 400</parameters>
+        <parameters>--name /PF3DT_viewer --RefreshTime 33 --x 920 --y 300 --w 400 --h 400</parameters>
         <node>icub13</node>
         <tag>PF3DTracker_viewer</tag>
     </module>
