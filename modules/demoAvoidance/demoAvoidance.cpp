@@ -196,15 +196,15 @@ public:
         data["left"].iarm->waitMotionDone();
         data["right"].iarm->waitMotionDone();
 
-        IControlMode      *imode; driverJointL.view(imode);
+        IInteractionMode  *imode; driverJointL.view(imode);
         IImpedanceControl *iimp;  driverJointL.view(iimp);
         for (int i=0; i<2; i++)
         {
-            imode->setImpedanceVelocityMode(0); iimp->setImpedance(0,0.4,0.03); 
-            imode->setImpedanceVelocityMode(1); iimp->setImpedance(1,0.4,0.03);
-            imode->setImpedanceVelocityMode(2); iimp->setImpedance(2,0.4,0.03);
-            imode->setImpedanceVelocityMode(3); iimp->setImpedance(3,0.2,0.01);
-            imode->setImpedanceVelocityMode(4); iimp->setImpedance(4,0.2,0.0);
+            imode->setInteractionMode(0,VOCAB_IM_COMPLIANT); iimp->setImpedance(0,0.4,0.03); 
+            imode->setInteractionMode(1,VOCAB_IM_COMPLIANT); iimp->setImpedance(1,0.4,0.03);
+            imode->setInteractionMode(2,VOCAB_IM_COMPLIANT); iimp->setImpedance(2,0.4,0.03);
+            imode->setInteractionMode(3,VOCAB_IM_COMPLIANT); iimp->setImpedance(3,0.2,0.01);
+            imode->setInteractionMode(4,VOCAB_IM_COMPLIANT); iimp->setImpedance(4,0.2,0.0);
 
             driverJointR.view(imode);
             driverJointR.view(iimp);
@@ -252,20 +252,20 @@ public:
 
         if (driverJointL.isValid())
         {
-            IControlMode *imode;
+            IInteractionMode *imode;
             driverJointL.view(imode);
             for (int j=0; j<5; j++)
-                imode->setVelocityMode(j);
+                imode->setInteractionMode(j,VOCAB_IM_STIFF);
 
             driverJointL.close();
         }
 
         if (driverJointR.isValid())
         {
-            IControlMode *imode;
+            IInteractionMode *imode;
             driverJointR.view(imode);
             for (int j=0; j<5; j++)
-                imode->setVelocityMode(j);
+                imode->setInteractionMode(j,VOCAB_IM_STIFF);
 
             driverJointR.close();
         }
