@@ -33,21 +33,21 @@
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /vtRF/left --RefreshTime 33 --x 0 --y 0 --w 400 --h 400</parameters>
+        <parameters>--name /vtRF/left --RefreshTime 33 --x 1470 --y 0 --w 400 --h 400 --compact</parameters>
         <node>icub15</node>
         <stdio></stdio>
         <tag>yarpview</tag>
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /vtRF/right --RefreshTime 33 --x 420 --y 0 --w 400 --h 400</parameters>
+        <parameters>--name /vtRF/right --RefreshTime 33 --x 1470 --y 400 --w 400 --h 400 --compact</parameters>
         <node>icub15</node>
         <stdio></stdio>
         <tag>yarpview</tag>
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /PF3DT_viewer --RefreshTime 33 --x 920 --y 300 --w 400 --h 400</parameters>
+        <parameters>--name /PF3DT_viewer --RefreshTime 33 --x 970 --y 340 --w 300 --h 300 --compact</parameters>
         <node>icub13</node>
         <tag>PF3DTracker_viewer</tag>
     </module>
