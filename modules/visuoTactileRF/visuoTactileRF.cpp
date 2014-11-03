@@ -236,9 +236,9 @@ public:
                 if(skinEventsConf.check("taxelPositionFiles")){
                     Bottle *taxelPosFiles = skinEventsConf.find("taxelPositionFiles").asList();
 
-                    if (rf.check("--leftHand") || rf.check("--leftForeArm") || rf.check("--rightHand") || rf.check("--rightForeArm"))
+                    if (rf.check("leftHand") || rf.check("leftForeArm") || rf.check("rightHand") || rf.check("rightForeArm"))
                     {
-                        if (rf.check("--leftHand"))
+                        if (rf.check("leftHand"))
                         {
                             string taxelPosFile = taxelPosFiles->get(0).asString().c_str();
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
@@ -248,7 +248,7 @@ public:
                                 filenames.push_back(filePath);
                             }
                         }
-                        if (rf.check("--leftForeArm"))
+                        if (rf.check("leftForeArm"))
                         {
                             string taxelPosFile = taxelPosFiles->get(1).asString().c_str();
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
@@ -258,7 +258,7 @@ public:
                                 filenames.push_back(filePath);
                             }
                         }
-                        if (rf.check("--rightHand"))
+                        if (rf.check("rightHand"))
                         {
                             string taxelPosFile = taxelPosFiles->get(2).asString().c_str();
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
@@ -268,7 +268,7 @@ public:
                                 filenames.push_back(filePath);
                             }
                         }
-                        if (rf.check("--rightForeArm"))
+                        if (rf.check("rightForeArm"))
                         {
                             string taxelPosFile = taxelPosFiles->get(3).asString().c_str();
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
