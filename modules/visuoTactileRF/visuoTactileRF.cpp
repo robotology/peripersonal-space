@@ -236,17 +236,62 @@ public:
                 if(skinEventsConf.check("taxelPositionFiles")){
                     Bottle *taxelPosFiles = skinEventsConf.find("taxelPositionFiles").asList();
 
-                    for(int i=0;i<partNum;i++)
+                    if (rf.check("--leftHand") || rf.check("--leftForeArm") || rf.check("--rightHand") || rf.check("--rightForeArm"))
                     {
-                        string taxelPosFile = taxelPosFiles->get(i).asString().c_str();
-                        string filePath(skinRF.findFile(taxelPosFile.c_str()));
-                        if (filePath!="")
+                        if (rf.check("--leftHand"))
                         {
-							printf("*** VisuoTactileRF: filePath [%i] %s\n",i,filePath.c_str());
-                            filenames.push_back(filePath);
+                            string taxelPosFile = taxelPosFiles->get(0).asString().c_str();
+                            string filePath(skinRF.findFile(taxelPosFile.c_str()));
+                            if (filePath!="")
+                            {
+                                printf("*** VisuoTactileRF: filePath [%i] %s\n",0,filePath.c_str());
+                                filenames.push_back(filePath);
+                            }
+                        }
+                        if (rf.check("--leftForeArm"))
+                        {
+                            string taxelPosFile = taxelPosFiles->get(1).asString().c_str();
+                            string filePath(skinRF.findFile(taxelPosFile.c_str()));
+                            if (filePath!="")
+                            {
+                                printf("*** VisuoTactileRF: filePath [%i] %s\n",1,filePath.c_str());
+                                filenames.push_back(filePath);
+                            }
+                        }
+                        if (rf.check("--rightHand"))
+                        {
+                            string taxelPosFile = taxelPosFiles->get(2).asString().c_str();
+                            string filePath(skinRF.findFile(taxelPosFile.c_str()));
+                            if (filePath!="")
+                            {
+                                printf("*** VisuoTactileRF: filePath [%i] %s\n",2,filePath.c_str());
+                                filenames.push_back(filePath);
+                            }
+                        }
+                        if (rf.check("--rightForeArm"))
+                        {
+                            string taxelPosFile = taxelPosFiles->get(3).asString().c_str();
+                            string filePath(skinRF.findFile(taxelPosFile.c_str()));
+                            if (filePath!="")
+                            {
+                                printf("*** VisuoTactileRF: filePath [%i] %s\n",3,filePath.c_str());
+                                filenames.push_back(filePath);
+                            }
                         }
                     }
-                    // filenames.pop_back();           // only left forearm
+                    else
+                    {
+                        for(int i=0;i<partNum;i++)     // all of the skinparts
+                        {
+                            string taxelPosFile = taxelPosFiles->get(i).asString().c_str();
+                            string filePath(skinRF.findFile(taxelPosFile.c_str()));
+                            if (filePath!="")
+                            {
+                                printf("*** VisuoTactileRF: filePath [%i] %s\n",i,filePath.c_str());
+                                filenames.push_back(filePath);
+                            }
+                        }
+                    }
                 }
             }
             else
