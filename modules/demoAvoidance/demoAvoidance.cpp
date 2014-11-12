@@ -30,7 +30,7 @@
 #include <iCub/ctrl/math.h>
 
 #define PPS_AVOIDANCE_RADIUS        0.2     // [m]
-#define PPS_AVOIDANCE_VELOCITY      0.05    // [m/s]
+#define PPS_AVOIDANCE_VELOCITY      0.10    // [m/s]
 #define PPS_AVOIDANCE_PERSISTENCE   0.3     // [s]
 #define PPS_AVOIDANCE_TIMEOUT       1.0     // [s]
 
@@ -53,6 +53,7 @@ protected:
     PolyDriver driverJointL,driverJointR;
     int contextL,contextR;
     Port dataPort;
+    int motionGain;
 
     Mutex mutex;
     struct Data {
@@ -104,7 +105,7 @@ protected:
             if (norm(x-data.home_x)>PPS_AVOIDANCE_RADIUS)
                 data.iarm->stopControl();
             else
-                data.iarm->setTaskVelocities((-PPS_AVOIDANCE_VELOCITY/norm(data.dir))*data.dir,Vector(4,0.0)); 
+                data.iarm->setTaskVelocities((motionGain*PPS_AVOIDANCE_VELOCITY/norm(data.dir))*data.dir,Vector(4,0.0)); 
 
             data.persistence=std::max(data.persistence-getPeriod(),0.0);
             if (data.persistence==0.0)
@@ -138,6 +139,11 @@ public:
         data["right"].home_x[1]=-data["right"].home_x[1];
 
         string name=rf.check("name",Value("avoidance")).asString().c_str();
+        motionGain = -1.0;
+        if (rf.check("catching"))
+        {
+            motionGain = 1.0;
+        }
 
         Property optionCartL;
         optionCartL.put("device","cartesiancontrollerclient");
