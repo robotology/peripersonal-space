@@ -26,6 +26,7 @@
 #include <yarp/os/RateThread.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/RFModule.h>
+#include <yarp/os/Log.h>
 
 #include <yarp/sig/Vector.h>
 #include <yarp/sig/Matrix.h>
@@ -92,20 +93,26 @@ protected:
         Vector                pf3dTrackerPos;
         Vector                pf3dTrackerVelEstimate;
 
-        BufferedPort<Bottle>  motionCUTPort;
-        Bottle               *motionCUTBottle;
-        Vector                motionCUTPos;
-        Vector                motionCUTVelEstimate;
+        BufferedPort<Bottle>  optFlowPort;
+        Bottle               *optFlowBottle;
+        Vector                optFlowPos;
+        Vector                optFlowVelEstimate;
 
         BufferedPort<Bottle>  doubleTouchPort;           
         Bottle               *doubleTouchBottle;
         Vector                doubleTouchPos;
         Vector                doubleTouchVelEstimate;
 
+        BufferedPort<Bottle>  fgtTrackerPort;           
+        Bottle               *fgtTrackerBottle;
+        Vector                fgtTrackerPos;
+        Vector                fgtTrackerVelEstimate;
+
     // Velocity Estimators (using adaptive window linear fitting)
-        AWLinEstimator       *linEst_motionCUT;
+        AWLinEstimator       *linEst_optFlow;
         AWLinEstimator       *linEst_pf3dTracker;
         AWLinEstimator       *linEst_doubleTouch;
+        AWLinEstimator       *linEst_fgtTracker;
 
     // Drivers and Interfaces
         // Right arm

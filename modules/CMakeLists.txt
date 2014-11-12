@@ -4,10 +4,11 @@
 
 find_package(OpenCV REQUIRED)
 
-#add_subdirectory(doubleTouch)
+add_subdirectory(doubleTouch)
 add_subdirectory(visuoTactileRF)
 add_subdirectory(visuoTactileWrapper)
 add_subdirectory(demoAvoidance)
+add_subdirectory(ultimateTracker)
 #add_subdirectory(selfCalibration)
 #add_subdirectory(sceneFlowMod)
 #add_subdirectory(alignEyes)

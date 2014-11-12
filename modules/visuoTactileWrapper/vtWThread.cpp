@@ -10,14 +10,17 @@
 vtWThread::vtWThread(int _rate, const string &_name, const string &_robot, int _v) :
                        RateThread(_rate), name(_name), robot(_robot), verbosity(_v)
 {
-    motionCUTPos.resize(3,0.0);
-    motionCUTVelEstimate.resize(3,0.0);
+    optFlowPos.resize(3,0.0);
+    optFlowVelEstimate.resize(3,0.0);
 
     pf3dTrackerPos.resize(3,0.0);
     pf3dTrackerVelEstimate.resize(3,0.0);
 
     doubleTouchPos.resize(3,0.0);
     doubleTouchVelEstimate.resize(3,0.0);
+
+    fgtTrackerPos.resize(3,0.0);
+    fgtTrackerVelEstimate.resize(3,0.0);
     
     armR = new iCubArm("right");
     armL = new iCubArm("left");
@@ -27,15 +30,17 @@ vtWThread::vtWThread(int _rate, const string &_name, const string &_robot, int _
 
 bool vtWThread::threadInit()
 {
-    motionCUTPort.open(("/"+name+"/motionCUT:i").c_str());
+    optFlowPort.open(("/"+name+"/optFlow:i").c_str());
     pf3dTrackerPort.open(("/"+name+"/pf3dTracker:i").c_str());
     doubleTouchPort.open(("/"+name+"/doubleTouch:i").c_str());
+    fgtTrackerPort.open(("/"+name+"/fingertipTracker:i").c_str());
     eventsPort.open(("/"+name+"/events:o").c_str());
     depth2kinPort.open(("/"+name+"/depth2kin:o").c_str());
     
-    Network::connect("/motionCUT/blobs:o",("/"+name+"/motionCUT:i").c_str());
+    Network::connect("/ultimateTracker/Manager/events:o",("/"+name+"/optFlow:i").c_str());
     Network::connect("/pf3dTracker/data:o",("/"+name+"/pf3dTracker:i").c_str());
     Network::connect("/doubleTouch/status:o",("/"+name+"/doubleTouch:i").c_str());
+    Network::connect("/fingertipTracker/out:o",("/"+name+"/fingertipTracker:i").c_str());
     Network::connect(("/"+name+"/events:o").c_str(),"/visuoTactileRF/events:i");
 
     Property OptGaze;
@@ -105,9 +110,10 @@ bool vtWThread::threadInit()
         iencsL->getAxes(&jntsL);
         encsL = new yarp::sig::Vector(jntsL,0.0);
 
-    linEst_motionCUT   = new AWLinEstimator(16,0.05);
+    linEst_optFlow     = new AWLinEstimator(16,0.05);
     linEst_pf3dTracker = new AWLinEstimator(16,0.05);
     linEst_doubleTouch = new AWLinEstimator(16,0.05);
+    linEst_fgtTracker  = new AWLinEstimator(16,0.05);
     
     return true;
 }
@@ -117,65 +123,19 @@ void vtWThread::run()
     bool isTarget = false;
     events.clear();
 
-    // process the motionCUT
-    if (motionCUTBottle = motionCUTPort.read(false))
+    // process the optFlow
+    if (optFlowBottle = optFlowPort.read(false))
     {
-        if (motionCUTBottle!=NULL)
+        if (optFlowBottle->size()>=3)
         {
-            motionCUTPos.zero();
-            int maxSize = -1;
-            int blobidx = -1;
-            int size    = -1;
-            Bottle *blob;
+            optFlowPos.zero();
+            
+            optFlowPos[0]=optFlowBottle->get(0).asDouble();
+            optFlowPos[1]=optFlowBottle->get(1).asDouble();
+            optFlowPos[2]=optFlowBottle->get(2).asDouble();
 
-            // Let's process the blob with the maximum size
-            blob = motionCUTBottle->get(blobidx).asList();
-
-            Vector px(2,0.0);
-            px(0) = blob->get(0).asInt();
-            px(1) = blob->get(1).asInt();
-
-            if (SFMPort.getOutputCount()>0)
-            {
-                Bottle cmd,reply;
-                cmd.addInt(px[0]);
-                cmd.addInt(px[1]);
-
-                SFMPort.write(cmd,reply);
-                motionCUTPos[0]=reply.get(1).asDouble();
-                motionCUTPos[1]=reply.get(2).asDouble();
-                motionCUTPos[2]=reply.get(3).asDouble();
-            }
-            else
-            {
-                // 0 is for the left image
-                // 1 is the distance [m] of the object from the image plane (extended to infinity)
-                igaze->get3DPoint(0,px,1,motionCUTPos);
-            }
-
-            if (motionCUTPos[0]!=0.0 && motionCUTPos[1]!=0.0 && motionCUTPos[2]!=0.0)
-            {
-                if (depth2kinPort.getOutputCount()>0)
-                {
-                    Bottle cmd,reply;
-                    cmd.addString("getPoint");
-                    cmd.addString("right");   // TO BE MODIFIED
-                    cmd.addDouble(motionCUTPos[0]);
-                    cmd.addDouble(motionCUTPos[1]);
-                    cmd.addDouble(motionCUTPos[2]);
-
-                    depth2kinPort.write(cmd,reply);
-                    motionCUTPos[0]=reply.get(1).asDouble();
-                    motionCUTPos[1]=reply.get(2).asDouble();
-                    motionCUTPos[2]=reply.get(3).asDouble();
-                }
-
-                AWPolyElement el(motionCUTPos,Time::now());
-                motionCUTVelEstimate=linEst_motionCUT->estimate(el);
-                
-                events.push_back(IncomingEvent(motionCUTPos,motionCUTVelEstimate,0.05,"motionCUT"));
-                isTarget=true;
-            }
+            events.push_back(IncomingEvent(optFlowPos,optFlowVelEstimate,0.05,"optFlow"));
+            isTarget=true;
         }
     }
 
@@ -216,6 +176,37 @@ void vtWThread::run()
         }
     }
 
+    // process the fingertipTracker
+    if(fgtTrackerBottle = fgtTrackerPort.read(false))
+    {
+        if (doubleTouchBottle = doubleTouchPort.read(false))
+        {           
+            if(fgtTrackerBottle != NULL && doubleTouchBottle != NULL)
+            {
+                if (doubleTouchBottle->get(3).asString() != "" && fgtTrackerBottle->get(0).asInt() != 0)
+                {
+                    doubleTouchStep = doubleTouchBottle->get(0).asInt();
+                    fgtTrackerPos[0] = fgtTrackerBottle->get(1).asDouble();
+                    fgtTrackerPos[1] = fgtTrackerBottle->get(2).asDouble();
+                    fgtTrackerPos[2] = fgtTrackerBottle->get(3).asDouble();
+                    AWPolyElement el2(fgtTrackerPos,Time::now());
+                    fgtTrackerVelEstimate=linEst_fgtTracker->estimate(el2);
+
+                    if(doubleTouchStep<=1)
+                    {
+                        Vector ang(3,0.0);
+                        igaze -> lookAtAbsAngles(ang);
+                    }
+                    else if(doubleTouchStep>1 && doubleTouchStep<8)
+                    {
+                        events.clear();
+                        events.push_back(IncomingEvent(fgtTrackerPos,fgtTrackerVelEstimate,-1.0,"fingertipTracker"));
+                        isTarget=true;
+                    }
+                }
+            }
+        }
+    }
     // process the doubleTouch
     if(doubleTouchBottle = doubleTouchPort.read(false))
     {
@@ -224,55 +215,66 @@ void vtWThread::run()
             if (doubleTouchBottle->get(3).asString() != "")
             {
                 Matrix T = eye(4);
-                Vector fingertipPos(4,0.0), fingertipPosWRF(4,0.0);
+                Vector fingertipPos(4,0.0);
+                doubleTouchPos.resize(4,0.0);
                 
                 currentTask = doubleTouchBottle->get(3).asString();
                 doubleTouchStep = doubleTouchBottle->get(0).asInt();
                 fingertipPos = matrixFromBottle(*doubleTouchBottle,20,4,4).subcol(0,3,3); // fixed translation from the palm
                 fingertipPos.push_back(1.0);
 
-                if((doubleTouchStep>3) && (doubleTouchStep<7))
+                if(doubleTouchStep<=1)
                 {
-                    if(currentTask=="R2L") //right to left -> the right index finger will be generating events
+                    Vector ang(3,0.0);
+                    igaze -> lookAtAbsAngles(ang);
+                }
+                else if(doubleTouchStep>1 && doubleTouchStep<8)
+                {
+                    if(currentTask=="LtoR" || currentTask=="LHtoR") //right to left -> the right index finger will be generating events
                     { 
                         iencsR->getEncoders(encsR->data());
                         Vector qR=encsR->subVector(0,6);
                         armR -> setAng(qR*CTRL_DEG2RAD);                        
                         T = armR -> getH(3+6, true);  // torso + up to wrist
-                        fingertipPosWRF = T * fingertipPos; 
+                        doubleTouchPos = T * fingertipPos; 
                         //optionally, get the finger encoders and get the fingertip position using iKin Finger based on the current joint values 
                         //http://wiki.icub.org/iCub/main/dox/html/icub_cartesian_interface.html#sec_cart_tipframe
-                        fingertipPosWRF.pop_back(); //take out the last dummy value from homogenous form
+                        doubleTouchPos.pop_back(); //take out the last dummy value from homogenous form
                     }
-                    else if(currentTask=="L2R") //left to right -> the left index finger will be generating events
+                    else if(currentTask=="RtoL" || currentTask=="RHtoL") //left to right -> the left index finger will be generating events
                     {   
                         iencsL->getEncoders(encsL->data());
                         Vector qL=encsL->subVector(0,6);
                         armL -> setAng(qL*CTRL_DEG2RAD);                        
                         T = armL -> getH(3+6, true);  // torso + up to wrist
-                        fingertipPosWRF = T * fingertipPos; 
+                        doubleTouchPos = T * fingertipPos; 
                         //optionally, get the finger encoders and get the fingertip position using iKin Finger based on the current joint values 
                         //http://wiki.icub.org/iCub/main/dox/html/icub_cartesian_interface.html#sec_cart_tipframe
-                        fingertipPosWRF.pop_back(); //take out the last dummy value from homogenous form
+                        doubleTouchPos.pop_back(); //take out the last dummy value from homogenous form
                     } 
                     else
                     {
-                        printMessage(0,"\nERROR: vtWThread::run(): Unknown task received from double touch thread!\n");
+                        yError(" vtWThread::run(): Unknown task received from double touch thread!");
                     }
                                    
-                    AWPolyElement el2(fingertipPosWRF,Time::now());
+                    AWPolyElement el2(doubleTouchPos,Time::now());
                     doubleTouchVelEstimate=linEst_doubleTouch->estimate(el2);
-                    events.push_back(IncomingEvent(fingertipPosWRF,doubleTouchVelEstimate,-1.0,"doubleTouch"));
+                    events.push_back(IncomingEvent(doubleTouchPos,doubleTouchVelEstimate,-1.0,"doubleTouch"));
                     isTarget=true;
                 }
             }
         }
     }
     
-    if (isTarget)
-    {
+    if (pf3dTrackerPos[0]!=0.0 && pf3dTrackerPos[1]!=0.0 && pf3dTrackerPos[2]!=0.0)
         igaze -> lookAtFixationPoint(pf3dTrackerPos);
-
+    else if (doubleTouchPos[0]!=0.0 && doubleTouchPos[1]!=0.0 && doubleTouchPos[2]!=0.0)
+        igaze -> lookAtFixationPoint(doubleTouchPos);
+    else if (optFlowPos[0]!=0.0 && optFlowPos[1]!=0.0 && optFlowPos[2]!=0.0)
+        igaze -> lookAtFixationPoint(optFlowPos);
+    
+    if (isTarget)
+    {        
         Bottle& eventsBottle = eventsPort.prepare();
         eventsBottle.clear();
         for (size_t i = 0; i < events.size(); i++)
@@ -281,6 +283,13 @@ void vtWThread::run()
         }
         eventsPort.write();
     }
+    // else
+    // {
+    //     linEst_optFlow     -> reset();
+    //     linEst_pf3dTracker -> reset();
+    //     linEst_doubleTouch -> reset();
+    //     linEst_fgtTracker  -> reset();
+    // }
 }
 
 int vtWThread::printMessage(const int l, const char *f, ...) const
@@ -309,10 +318,23 @@ void vtWThread::threadRelease()
         igaze -> stopControl();
         ddG.close();
 
+    printMessage(0,"Closing estimators..\n");
+        delete linEst_optFlow;
+        linEst_optFlow = NULL;
+        
+        delete linEst_pf3dTracker;
+        linEst_pf3dTracker = NULL;
+
+        delete linEst_doubleTouch;
+        linEst_doubleTouch = NULL;
+
+        delete linEst_fgtTracker;
+        linEst_fgtTracker = NULL;
+
     printMessage(0,"Closing ports..\n");
-        motionCUTPort.interrupt();
-        motionCUTPort.close();
-        printMessage(1,"motionCUTPort successfully closed!\n");
+        optFlowPort.interrupt();
+        optFlowPort.close();
+        printMessage(1,"optFlowPort successfully closed!\n");
         pf3dTrackerPort.interrupt();
         pf3dTrackerPort.close();
         printMessage(1,"pf3dTrackerPort successfully closed!\n");

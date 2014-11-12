@@ -148,19 +148,18 @@ public:
             if (rf.check("name"))
             {
                 name = rf.find("name").asString();
-                cout << "Module name set to "<<name<<endl;  
+                yInfo("Module name set to %s", name.c_str());  
             }
-            else cout << "Module name set to default, i.e. " << name << endl;
+            else yWarning("Module name set to default, i.e. %s", name.c_str());  
             setName(name.c_str());
 
         //******************* ROBOT ******************
             if (rf.check("robot"))
             {
                 robot = rf.find("robot").asString();
-                cout << "Robot is: " << robot << endl;
+                yInfo("Robot is: %s", robot.c_str());  
             }
-            else cout << "Could not find robot option in the config file; using "
-                      << robot << " as default\n";
+            else yWarning("Could not find robot option in the config file; using %s as default.", robot.c_str());
 
         //******************* VERBOSE ******************
             if (rf.check("verbosity"))
@@ -187,17 +186,17 @@ public:
             {
                 delete vtWThrd;
                 vtWThrd = 0;
-                cout << "\nERROR!!! vtWThread wasn't instantiated!!\n";
+                yError("ERROR!!! vtWThread wasn't instantiated!!");
                 return false;
             }
-            cout << "VISUO TACTILE WRAPPER: vtWThread istantiated...\n";
+            yInfo("VISUO TACTILE WRAPPER: vtWThread istantiated...");
 
         return true;
     }
 
     bool close()
     {
-        cout << "VISUO TACTILE RECEPTIVE FIELDS: Stopping threads.." << endl;
+        yInfo("VISUO TACTILE RECEPTIVE FIELDS: Stopping threads..");
         if (vtWThrd)
         {
             vtWThrd->stop();
@@ -223,6 +222,8 @@ public:
 */
 int main(int argc, char * argv[])
 {
+    Network yarp;
+
 /*    parzenWindowEstimator pwe(0.2,10);
     for (int i = 0; i < 10; i++)
     {
@@ -264,8 +265,7 @@ int main(int argc, char * argv[])
         cout << endl;
         return 0;
     }
-
-    Network yarp;
+    
     if (!yarp.checkNetwork())
     {
         printf("No Network!!!\n");
