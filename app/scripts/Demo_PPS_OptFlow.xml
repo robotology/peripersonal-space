@@ -100,7 +100,7 @@
         <protocol>tcp</protocol>
     </connection>
     <connection>
-        <from>/ultimateTracker/gui:o</from>
+        <from>/ultimateTracker/Manager/gui:o</from>
         <to>/iCubGui/objects</to>
         <protocol>tcp</protocol>
     </connection>
@@ -133,11 +133,6 @@
         <from>/motionCUT/img:o</from>
         <to>/motionCUT_viewer</to>
         <protocol>udp</protocol>
-    </connection>
-    <connection>
-        <from>/motionCUT/data:o</from>
-        <to>/visuoTactileWrapper/motionCUT:i</to>
-        <protocol>tcp</protocol>
     </connection>
     <connection>
         <from>/visuoTactileWrapper/events:o</from>
