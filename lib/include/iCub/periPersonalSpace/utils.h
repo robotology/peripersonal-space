@@ -105,8 +105,13 @@ void vectorIntoBottle(const yarp::sig::Vector v, Bottle &b);
 
 /**
 * Converts an int to a string
-*/
+**/
 string int_to_string( const int a );
+
+/**
+* Computes the factorial using a recursive method
+**/
+unsigned int factorial(unsigned int n);
 
 /**
 * Struct that encloses all the information related to a taxel.
@@ -133,6 +138,9 @@ struct IncomingEvent
     **/   
     IncomingEvent(const Bottle &b);
 
+    /**
+    * Copy constructor
+    **/
     IncomingEvent(const IncomingEvent &e);
 
     /**

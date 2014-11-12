@@ -4,7 +4,7 @@ yarp::sig::Vector toVector(yarp::sig::Matrix m)
 {
     Vector res(m.rows()*m.cols(),0.0);
     
-    for (int r = 0; r < m.rows(); r++)
+    for (size_t r = 0; r < m.rows(); r++)
     {
         res.setSubvector(r*m.cols(),m.getRow(r));
     }
@@ -29,9 +29,9 @@ yarp::sig::Matrix matrixFromBottle(const Bottle b, int in, const int r, const in
     yarp::sig::Matrix m(r,c);
     m.zero();
     
-    for (int i = 0; i<r; i++)
+    for (size_t i = 0; i<r; i++)
     {
-        for (int j = 0; j<c; j++)
+        for (size_t j = 0; j<c; j++)
         {
             m(i,j) =  b.get(in).asDouble();
             in++;
@@ -45,7 +45,7 @@ yarp::sig::Vector vectorFromBottle(const Bottle b, int in, const int size)
 {
     yarp::sig::Vector v(size,0.0);
 
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
         v[i] = b.get(in).asDouble();
         in++;
@@ -78,9 +78,16 @@ string int_to_string( const int a )
     return ss.str();
 }
 
+unsigned int factorial(unsigned int n) 
+{
+    if (n == 0)
+       return 1;
+    return n * factorial(n - 1);
+}
+
 /****************************************************************/
 /* INCOMING EVENT WRAPPER
-/****************************************************************/
+*****************************************************************/
     IncomingEvent::IncomingEvent()
     {
         Pos.resize(3,0.0);
@@ -162,7 +169,7 @@ string int_to_string( const int a )
     string IncomingEvent::toString(int precision) const
     {
         stringstream res;
-        res << "Pos: "<< Pos.toString() << "\t Vel: "<< Vel.toString()
+        res << "Pos: "<< Pos.toString(3,3) << "\t Vel: "<< Vel.toString(3,3)
             << "\t Radius: "<< Radius << "\t Src: "<< Src;
         return res.str();
     }
