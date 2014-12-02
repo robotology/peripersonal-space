@@ -761,7 +761,6 @@ bool vtRFThread::stopLearning()
 	return true;
 }
 
-
 bool vtRFThread::restoreLearning()
 {
 	learningFlag = true;
