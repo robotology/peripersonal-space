@@ -120,6 +120,12 @@ bool vtWThread::threadInit()
 
 void vtWThread::run()
 {
+
+    optFlowPos.resize(3,0.0);
+    pf3dTrackerPos.resize(3,0.0);
+    doubleTouchPos.resize(3,0.0);
+    fgtTrackerPos.resize(3,0.0);
+
     bool isTarget = false;
     events.clear();
 
