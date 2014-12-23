@@ -1,4 +1,4 @@
-# Copyright: (C) 2013 RobotCub Consortium
+# Copyright: (C) 2013 iCub Facility
 # Author: Alessandro Roncone
 # CopyPolicy: Released under the terms of the GNU GPL v2.0.
 
