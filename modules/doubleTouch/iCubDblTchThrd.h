@@ -71,13 +71,13 @@ protected:
     string name;
     // Name of the robot (to address the module toward icub or icubSim):
     string robot;
-    // Type of the chain (either "R2L", "L2R", or "both")
+    // Type of the chain (either "LtoR", "RtoL", or "both")
     string type;
     // Flag to know if a recording session is needed.
     int record;
     // Name of the file that will store data
     string filename;
-    // Name of the file that will store data
+    // Color of the robot (to identify which one is which)
     string color;
 
     /***************************************************************************/
@@ -90,10 +90,8 @@ protected:
                             // x axis normal to the cover
     int cntctLinkNum;       // Link number
     double cntctPressure;   // Pressure
-    string cntctArm;        // Affected Arm
     skinContact cntctSkin;  // SkinContact
     string cntctSkinPart;   // SkinPart (verbose form)
-    string currentTask;     // current task (either R2L or L2R)
 
     /***************************************************************************/
     // INTERNAL VARIABLES:
@@ -104,8 +102,7 @@ protected:
     // SkinPart to be handled
     // it can be either 2 (forearm_left), 5 (forearm_right)
     // or even 3 (upperarm_left) and 6 (upperarm_right) [TO DO]
-    int R2LskinPart;
-    int L2RskinPart;
+    int skinPart;
 
     // Port that reads contacts:
     BufferedPort<iCub::skinDynLib::skinContactList> *skinPort;
@@ -116,50 +113,41 @@ protected:
     PolyDriver       ddL; // left arm  device driver
     PolyDriver       ddG; // gaze controller  driver
 
-    // "Classical" interfaces - RIGHT ARM
-    IEncoders         *iencsR;
-    IPositionControl  *iposR;
-    IControlMode      *ictrlR;
-    IImpedanceControl *iimpR;
-    IControlLimits    *ilimR;
-    Vector            *encsR;
-    iCubArm           *armR;
-    int jntsR;
-    // "Classical" interfaces - LEFT ARM
-    IEncoders         *iencsL;
-    IPositionControl  *iposL;
-    IControlMode      *ictrlL;
-    IImpedanceControl *iimpL;
-    IControlLimits    *ilimL;
-    Vector            *encsL;
-    iCubArm           *armL;
-    int jntsL;
-
-    // Wrappers (to be arm-agnostic) M = Master S = Slave
-    IPositionControl  *iposM;   IPositionControl  *iposS;
-    IEncoders         *iencsM;  IEncoders         *iencsS;
-    IControlMode      *ictrlM;  IControlMode      *ictrlS;
-    Vector            *encsM;   Vector            *encsS;
-    iCubArm           *armM;    iCubArm           *armS;
+    // "Classical" interfaces - SLAVE ARM
+    IEncoders         *iencsS;
+    IPositionControl2 *iposS;
+    IInteractionMode  *imodeS;
+    IImpedanceControl *iimpS;
+    IControlLimits    *ilimS;
+    Vector            *encsS;
+    iCubArm           *armS;
+    int jntsS;
+    // "Classical" interfaces - MASTER ARM
+    IEncoders         *iencsM;
+    IPositionControl2 *iposM;
+    IImpedanceControl *iimpM;
+    IControlLimits    *ilimM;
+    Vector            *encsM;
+    iCubArm           *armM;
+    int jntsM;
 
     // Gaze controller interface
     IGazeControl       *igaze;
     int contextGaze;
 
     // IPOPT STUFF
-    iCubDoubleTouch_Variables *g;      // guess
-    iCubDoubleTouch_Variables *s0;     // solution - waypoint
-    iCubDoubleTouch_Variables *s1;     // solution
-    iCubDoubleTouch_Solver    *slv;    // solver
+    doubleTouch_Variables *gue;    // guess
+    doubleTouch_Variables *sol;    // solution
+    doubleTouch_Solver    *slv;    // solver
     Vector solution;
+    int nDOF;
 
     // CUSTOM LIMB (for testing the achievement of the task)
-    iCubCustomLimb *testLimbL2R;
-    iCubCustomLimb *testLimbR2L;
+    iCubCustomLimb *testLimb;
 
     // CHECKMOTIONDONE VARIABLES:
-    Vector oldEER;
-    Vector oldEEL;
+    Vector oldEES;
+    Vector oldEEM;
 
     /**
     * Aligns joint bounds according to the actual limits of the robot
@@ -213,13 +201,12 @@ protected:
     /**
     * Handles the gaze controller for each step of the module
     */
-    bool handleGaze();
+    void handleGaze();
 
     /**
     * Locates the contact in World Reference Frame's coordinates
-    * @param sc is the skinContact for which the location is computed
     */
-    Vector locateContact(skinContact &sc);
+    Vector locateContact();
 
     /**
     * Find the final configuration for the gaze interface to look at.
@@ -270,26 +257,4 @@ public:
 };
 
 #endif
-
-// PERSONAL NOTES (remember to remove them sooner or later!)
-// iCub/main/src/tools/skinManagerGui
-// iCub/main/src/modules/skinManager
-// iCub/main/src/libraries/skinDynLib
-//
-// A skinContactList is represented as a list of lists
-// where each list is a skinContact
-// basically, it's a vector of skinContact
-//
-// A skinContact is a list of 8 elements that are:
-// - a list of 4 int, i.e. contactId, bodyPart, linkNumber, skinPart
-// - a list of 3 double, i.e. the CoP
-// - a list of 3 double, i.e. the force
-// - a list of 3 double, i.e. the moment
-// - a list of 3 double, i.e. the geometric center
-// - a list of 3 double, i.e. the normal direction
-// - a list of N int, i.e. the active taxel ids
-// - a double, i.e. the pressure
-// 
-// ((48725 4 4 5) (-0.017 0.062 -0.036) (0.476424 0.109944 0.611614)
-// (0.0 0.0 0.0) (-0.017 0.062 -0.036) (-0.585 -0.135 -0.751) (134) 16.288001)
 

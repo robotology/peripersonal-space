@@ -63,7 +63,7 @@ YARP, ICUB libraries and IPOPT
   with rec==2 is started
 
 --type       \e type
-- Type of the task (right now it can be either "R2L" or "L2R" or "both")
+- Type of the task (right now it can be either "LtoR" or "RtoL" or "both")
 
 --filename   \e file
 - The name of the file to be saved in case of a recording session.
@@ -130,9 +130,9 @@ public:
     {
         dblTchThrd=0;
 
-        robot    ="icubSim";
-        name     ="doubleTouch";
-        type     ="R2L"; // "L2R" "both"
+        robot    = "icubSim";
+        name     = "doubleTouch";
+        type     = "LtoR";
         filename = ".txt";
         color    = "";
 
@@ -171,7 +171,7 @@ public:
                     {
                         delete dblTchThrd;
                         dblTchThrd = 0;
-                        cout << "ERROR!!! doubleTouchThread wasn't instantiated!!\n";
+                        yError("doubleTouchThread wasn't instantiated!!");
                         reply.addVocab(nack);
                     }
                     else
@@ -195,7 +195,7 @@ public:
                 {
                     if (dblTchThrd)
                     {
-                        cout << "DOUBLE TOUCH: Stopping threads.." << endl;
+                        yInfo("DOUBLE TOUCH: Stopping threads..");
                         dblTchThrd->stop();
                         delete dblTchThrd;
                         dblTchThrd=0;
@@ -223,75 +223,69 @@ public:
             if (rf.check("name"))
             {
                 name = rf.find("name").asString();
-                cout << "Module name set to "<<name<<endl;  
+                yInfo("Module name set to %s", name.c_str());
             }
-            else cout << "Module name set to default, i.e. " << name << endl;
+            else yInfo("Module name set to default, i.e. %s", name.c_str());
             setName(name.c_str());
 
         //******************* ROBOT ******************
             if (rf.check("robot"))
             {
                 robot = rf.find("robot").asString();
-                cout << "Robot is: " << robot << endl;
+                yInfo("Robot is: %s", robot.c_str());
             }
-            else cout << "Could not find robot option in the config file; using "
-                      << robot << " as default\n";
+            else yInfo("Could not find robot option in the config file; using %s as default",robot.c_str());
 
         //******************* TYPE ******************
             if (rf.check("type"))
             {
                 type = rf.find("type").asString();
-                cout << "Type is: " << type << endl;
+                yInfo("Type is: %s", type.c_str());
             }
-            else cout << "Could not find Type option in the config file; using "
-                      << type << " as default\n";
+            else yInfo("Could not find type option in the config file; using %s as default",type.c_str());
 
         //******************* VERBOSE ******************
             if (rf.check("verbosity"))
             {
                 verbosity = rf.find("verbosity").asInt();
-                cout << "doubleTouchThread verbosity set to " << verbosity << endl;
+                yInfo("doubleTouchThread verbosity set to %i", verbosity);
             }
-            else cout << "Could not find verbosity option in the" <<
-                         "config file; using "<< verbosity <<" as default\n";
+            else yInfo("Could not find verbosity option in the config file; using %i as default",verbosity);
 
         //****************** rate ******************
             if (rf.check("rate"))
             {
                 rate = rf.find("rate").asInt();
-                cout << "doubleTouchThread rateThread working at " << rate << " ms\n";
+                yInfo("doubleTouchThread rateThread working at %i ms.",rate);
             }
-            else cout << "Could not find rate in the config file; using "
-                      << rate << " ms as default\n";
+            else yInfo("Could not find rate in the config file; using %i as default",rate);
 
         //****************** record ******************
             if (rf.check("record"))
             {
                 record = rf.find("record").asInt();
-                cout << "doubleTouchThread record variable is set to " << record << "\n";
+                yInfo("doubleTouchThread record variable is set to %i",record);
             }
-            else cout << "Could not find record in the config file; using "
-                      << record <<" as default\n";
+            else yInfo("Could not find record in the config file; using %i as default",record);
 
         //***************** Filename *****************
             if (rf.check("filename")) {
                 filename = rf.find("filename").asString();
-                cout << "Module filename set to " << filename << endl;  
+                yInfo("Module filename set to %s", filename.c_str());
             }
-            else cout << "Module filename set to default, i.e. " << filename << endl;
+            else yInfo("Module filename set to default, i.e. %s", filename.c_str());
 
         //***************** color *****************
             if (rf.check("color")) {
                 color = rf.find("color").asString();
-                cout << "Robot color set to " << color << endl;  
+                yInfo("Robot color set to %s", color.c_str());
             }
             else 
             {
                 if (record==2)
                 {
-                    cout << "ERROR! Robot color wasn't instantiated, and this should";
-                    cout << " be a recording session for calibration purposes!." << endl;
-                    cout << "I will finish here." << endl;
+                    yError("Robot color wasn't instantiated, and this should be a recording session for calibration purposes!.");
+                    yInfo("I will finish here.");
                     return false;
                 }
             }
@@ -314,7 +308,7 @@ public:
             {
                 filename = "../data/"+time+filename;
             }
-            cout << "Storing file set to: " << filename << endl;
+            yInfo("Storing file set to: %s",filename.c_str());
 
         //******************************************************
         //************************ PORTS ***********************
@@ -333,7 +327,7 @@ public:
             {
                 delete dblTchThrd;
                 dblTchThrd = 0;
-                cout << "ERROR!!! doubleTouchThread wasn't instantiated!!\n";
+                yInfo("ERROR!!! doubleTouchThread wasn't instantiated!!");
                 return false;
             }
         }
@@ -343,7 +337,7 @@ public:
 
     bool close()
     {
-        cout << "DOUBLE TOUCH: Stopping threads.." << endl;
+        yInfo("DOUBLE TOUCH: Stopping threads..");
         if (dblTchThrd)
         {
             dblTchThrd->stop();
@@ -363,6 +357,8 @@ public:
 */
 int main(int argc, char * argv[])
 {
+    Network yarp;
+
     YARP_REGISTER_DEVICES(icubmod)
 
     ResourceFinder rf;
@@ -372,30 +368,32 @@ int main(int argc, char * argv[])
     rf.configure(argc,argv);
 
     if (rf.check("help"))
-    {    
-        cout << endl << "Options:" << endl;
-        cout << "   --context    path:  where to find the called resource" << endl;
-        cout << "   --from       from:  the name of the .ini file." << endl;
-        cout << "   --name       name:  the name of the module (default doubleTouch)." << endl;
-        cout << "   --robot      robot: the name of the robot. Default icubSim." << endl;
-        cout << "   --rate       rate:  the period used by the thread. Default 100ms." << endl;
-        cout << "   --verbosity  int:   verbosity level (default 0)." << endl;
-        cout << "   --record     int:   if to record data or not." << endl;
-        cout << "       record==0 -> nothing is recorded, the double touch is iterating over and" << endl;
-        cout << "                    over again. Demonstrative and testing purposes." << endl;
-        cout << "       record==1 -> recording for visuo-tactile reference frames purposes." << endl;
-        cout << "       record==2 -> recording for kinematic calibration purposes." << endl;
-        cout << "   --color      color: robot color (black or white - MANDATORY!)" << endl;
-        cout << "   --type       type:  the type of task (default 'R2L')" << endl;
-        cout << "   --filename   file:  the name of the file to be saved in case of" << endl;
-        cout << "                       a recording session. Default 'calibration.txt'." << endl;
-        cout << "                       A date is appended at the beginning for completeness." << endl;
-        cout << "   --alignEyes  flag:  if or not to use the rpc-thing and sync with alignEyes module." << endl;
-        cout << endl;
+    {   
+        yInfo(""); 
+        yInfo("Options:");
+        yInfo("");
+        yInfo("   --context    path:  where to find the called resource");
+        yInfo("   --from       from:  the name of the .ini file.");
+        yInfo("   --name       name:  the name of the module (default doubleTouch).");
+        yInfo("   --robot      robot: the name of the robot. Default icubSim.");
+        yInfo("   --rate       rate:  the period used by the thread. Default 100ms.");
+        yInfo("   --verbosity  int:   verbosity level (default 0).");
+        yInfo("   --record     int:   if to record data or not.");
+        yInfo("       record==0 -> nothing is recorded, the double touch is iterating over and");
+        yInfo("                    over again. Demonstrative and testing purposes.");
+        yInfo("       record==1 -> recording for visuo-tactile reference frames purposes.");
+        yInfo("       record==2 -> recording for kinematic calibration purposes.");
+        yInfo("   --color      color: robot color (black or white - MANDATORY!)");
+        yInfo("   --type       type:  the type of task (default 'LtoR'). Allowed type names:");
+        yInfo("   --type              'RtoL','LtoR','RHtoL','LHtoR','both_5DOF','both_7DOF','both_LtoR','both_RtoL'");
+        yInfo("   --filename   file:  the name of the file to be saved in case of");
+        yInfo("                       a recording session. Default 'calibration.txt'.");
+        yInfo("                       A date is appended at the beginning for completeness.");
+        yInfo("   --alignEyes  flag:  if or not to use the rpc-thing and sync with alignEyes module.");
+        yInfo("");
         return 0;
     }
-
-    Network yarp;
+    
     if (!yarp.checkNetwork())
     {
         printf("No Network!!!\n");
