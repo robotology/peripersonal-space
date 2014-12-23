@@ -171,21 +171,17 @@ double gauss2D(const double x_0, const double y_0,
             }
             firstPosBin.push_back(idx);
             firstPosBinShift.push_back(binStart[i]);
-            // printf("idx: %g\n", firstPosBinShift[i]);
         }
 
         int j=0;
-        //printf("Creating bins:\n");
         for(j=0; j<binsNum[X_DIM];j++)
         {  
             binStartsX.push_back(extX[START]+(j*binWidth[X_DIM]));
-          //   printf("<%f %f %f> ",binStartsX[j],binStartsX[j]+0.5*binWidth[X_DIM],binStartsX[j]+binWidth[X_DIM]);
         }
-        //printf("\n");
+
         for(j=0; j<binsNum[Y_DIM];j++)
         { 
             binStartsY.push_back(extY[START]+(j*binWidth[Y_DIM]));    
-          //   printf("^\n%f\n\n%f\n\n%f\nv\n\n",binStartsY[j],binStartsY[j]+0.5*binWidth[Y_DIM],binStartsY[j]+binWidth[Y_DIM]);
         }
                       
         posHist.resize(binsNum[0],binsNum[1]); posHist.zero();

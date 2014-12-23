@@ -53,6 +53,9 @@
 
 #include <cmath>
 
+// These are basically some semi-useless constants. I can remove them but
+// I've preserved them in order for me to ease the process of future improvements
+// to the library
 #define X_DIM 0
 #define Y_DIM 1
 #define START 0
