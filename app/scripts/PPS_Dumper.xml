@@ -1,0 +1,20 @@
+<application>
+    <name>PPS_Dumper</name>
+
+    <dependencies>
+    </dependencies>
+
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /pps/dumper --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>ppsDumper</tag>
+    </module>
+
+    <connection>
+        <from>/visuoTactileRF/dataDumper:o</from>
+	    <to>/pps/dumper</to>
+        <protocol>udp</protocol>
+    </connection>
+</application>
