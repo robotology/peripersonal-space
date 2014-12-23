@@ -150,7 +150,7 @@ public:
                 name = rf.find("name").asString();
                 yInfo("Module name set to %s", name.c_str());  
             }
-            else yWarning("Module name set to default, i.e. %s", name.c_str());  
+            else yInfo("Module name set to default, i.e. %s", name.c_str());  
             setName(name.c_str());
 
         //******************* ROBOT ******************
@@ -159,25 +159,23 @@ public:
                 robot = rf.find("robot").asString();
                 yInfo("Robot is: %s", robot.c_str());  
             }
-            else yWarning("Could not find robot option in the config file; using %s as default.", robot.c_str());
+            else yInfo("Could not find robot option in the config file; using %s as default.", robot.c_str());
 
         //******************* VERBOSE ******************
             if (rf.check("verbosity"))
             {
                 verbosity = rf.find("verbosity").asInt();
-                cout << "vtWThread verbosity set to " << verbosity << endl;
+                yInfo("vtWThread verbosity set to %i", verbosity);
             }
-            else cout << "Could not find verbosity option in the" <<
-                         "config file; using "<< verbosity <<" as default\n";
+            else yInfo("Could not find verbosity option in the config file; using %i as default",verbosity);
 
         //****************** rate ******************
             if (rf.check("rate"))
             {
                 rate = rf.find("rate").asInt();
-                cout << "vtWThread rateThread working at " << rate << " ms\n";
+                yInfo("vtWThread rateThread working at %i ms", rate);
             }
-            else cout << "Could not find rate in the config file; using "
-                      << rate << " ms as default\n";
+            else yInfo("Could not find rate in the config file; using %i as default",rate);
 
         //******************************************************
         //*********************** THREAD **********************
@@ -255,14 +253,16 @@ int main(int argc, char * argv[])
 
     if (moduleRF.check("help"))
     {    
-        cout << endl << "Options:" << endl;
-        cout << "   --context    path:  where to find the called resource (default periPersonalSpace)." << endl;
-        cout << "   --from       from:  the name of the .ini file (default visuoTactileWrapper.ini)." << endl;
-        cout << "   --name       name:  the name of the module (default visuoTactileWrapper)." << endl;
-        cout << "   --robot      robot: the name of the robot. Default icub." << endl;
-        cout << "   --rate       rate:  the period used by the thread. Default 50ms." << endl;
-        cout << "   --verbosity  int:   verbosity level (default 0)." << endl;
-        cout << endl;
+        yInfo("");
+        yInfo("Options:");
+        yInfo("");
+        yInfo("   --context    path:  where to find the called resource (default periPersonalSpace).");
+        yInfo("   --from       from:  the name of the .ini file (default visuoTactileWrapper.ini).");
+        yInfo("   --name       name:  the name of the module (default visuoTactileWrapper).");
+        yInfo("   --robot      robot: the name of the robot. Default icub.");
+        yInfo("   --rate       rate:  the period used by the thread. Default 50ms.");
+        yInfo("   --verbosity  int:   verbosity level (default 0).");
+        yInfo("");
         return 0;
     }
     

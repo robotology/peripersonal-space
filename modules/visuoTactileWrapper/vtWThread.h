@@ -102,6 +102,9 @@ protected:
         Bottle               *doubleTouchBottle;
         Vector                doubleTouchPos;
         Vector                doubleTouchVelEstimate;
+    
+        int doubleTouchStep;                 // the step the doubleTouch is in
+        string      currentTask;
 
         BufferedPort<Bottle>  fgtTrackerPort;           
         Bottle               *fgtTrackerBottle;
@@ -136,9 +139,7 @@ protected:
         IGazeControl    *igaze;
         int contextGaze;
 
-        
-    int doubleTouchStep;                 // the step the doubleTouch is in
-    string      currentTask;
+    double timeNow;
 
     /**
     * Prints a message according to the verbosity level:

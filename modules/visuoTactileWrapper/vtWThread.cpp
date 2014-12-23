@@ -49,7 +49,7 @@ bool vtWThread::threadInit()
     OptGaze.put("local",("/"+name+"/gaze").c_str());
 
     if ((!ddG.open(OptGaze)) || (!ddG.view(igaze))){
-       printMessage(0,"Error: could not open the Gaze Controller!\n");
+       yError(" could not open the Gaze Controller!");
        return false;
     }
 
@@ -68,17 +68,17 @@ bool vtWThread::threadInit()
 
         if (!ddR.open(OptR))
         {
-            printMessage(0,"ERROR: could not open right_arm PolyDriver!\n");
+            yError(" could not open right_arm PolyDriver!");
             return false;
         }
-        bool ok = 1;
+        bool okR = 1;
         if (ddR.isValid())
         {
-            ok = ok && ddR.view(iencsR);
+            okR = okR && ddR.view(iencsR);
         }
-        if (!ok)
+        if (!okR)
         {
-            printMessage(0,"\nERROR: Problems acquiring right_arm interfaces!!!!\n");
+            yError(" Problems acquiring right_arm interfaces!!!!");
             return false;
         }
         iencsR->getAxes(&jntsR);
@@ -94,17 +94,17 @@ bool vtWThread::threadInit()
 
         if (!ddL.open(OptL))
         {
-            printMessage(0,"ERROR: could not open left_arm PolyDriver!\n");
+            yError(" could not open left_arm PolyDriver!");
             return false;
         }
-        ok = 1;
+        bool okL = 1;
         if (ddL.isValid())
         {
-            ok = ok && ddL.view(iencsL);
+            okL = okL && ddL.view(iencsL);
         }
-        if (!ok)
+        if (!okL)
         {
-            printMessage(0,"\nERROR: Problems acquiring left_arm interfaces!!!!\n");
+            yError(" Problems acquiring left_arm interfaces!!!!");
             return false;
         }
         iencsL->getAxes(&jntsL);
@@ -114,6 +114,8 @@ bool vtWThread::threadInit()
     linEst_pf3dTracker = new AWLinEstimator(16,0.05);
     linEst_doubleTouch = new AWLinEstimator(16,0.05);
     linEst_fgtTracker  = new AWLinEstimator(16,0.05);
+
+    timeNow = yarp::os::Time::now();
     
     return true;
 }
@@ -140,6 +142,9 @@ void vtWThread::run()
             optFlowPos[1]=optFlowBottle->get(1).asDouble();
             optFlowPos[2]=optFlowBottle->get(2).asDouble();
 
+            AWPolyElement el(optFlowPos,Time::now());
+            optFlowVelEstimate=linEst_optFlow->estimate(el);
+
             events.push_back(IncomingEvent(optFlowPos,optFlowVelEstimate,0.05,"optFlow"));
             isTarget=true;
         }
@@ -160,7 +165,7 @@ void vtWThread::run()
 
                 if (!gsl_isnan(fp[0]) && !gsl_isnan(fp[1]) && !gsl_isnan(fp[2]))
                 {
-                    printMessage(1,"Computing data from the pf3dTracker %g\n",getEstUsed());
+                    yDebug("Computing data from the pf3dTracker %g\n",getEstUsed());
                     Vector x,o;
                     igaze->getLeftEyePose(x,o);
                     
@@ -213,6 +218,7 @@ void vtWThread::run()
             }
         }
     }
+
     // process the doubleTouch
     if(doubleTouchBottle = doubleTouchPort.read(false))
     {
@@ -288,14 +294,18 @@ void vtWThread::run()
             eventsBottle.addList()= events[i].toBottle();
         }
         eventsPort.write();
+        timeNow = yarp::os::Time::now();
     }
-    // else
-    // {
-    //     linEst_optFlow     -> reset();
-    //     linEst_pf3dTracker -> reset();
-    //     linEst_doubleTouch -> reset();
-    //     linEst_fgtTracker  -> reset();
-    // }
+    else if (yarp::os::Time::now() - timeNow > 1.0)
+    {
+        yDebug("No significant event in the last second. Resetting the velocity estimators..");
+        timeNow = yarp::os::Time::now();
+
+        linEst_optFlow     -> reset();
+        linEst_pf3dTracker -> reset();
+        linEst_doubleTouch -> reset();
+        linEst_fgtTracker  -> reset();
+    }
 }
 
 int vtWThread::printMessage(const int l, const char *f, ...) const
@@ -317,14 +327,14 @@ int vtWThread::printMessage(const int l, const char *f, ...) const
 
 void vtWThread::threadRelease()
 {
-    printMessage(0,"Closing gaze controller..\n");
+    yDebug("Closing gaze controller..");
         Vector ang(3,0.0);
         igaze -> lookAtAbsAngles(ang);
         igaze -> restoreContext(contextGaze);
         igaze -> stopControl();
         ddG.close();
 
-    printMessage(0,"Closing estimators..\n");
+    yDebug("Closing estimators..");
         delete linEst_optFlow;
         linEst_optFlow = NULL;
         
@@ -337,22 +347,22 @@ void vtWThread::threadRelease()
         delete linEst_fgtTracker;
         linEst_fgtTracker = NULL;
 
-    printMessage(0,"Closing ports..\n");
+    yDebug("Closing ports..");
         optFlowPort.interrupt();
         optFlowPort.close();
-        printMessage(1,"optFlowPort successfully closed!\n");
+        yTrace("optFlowPort successfully closed!");
         pf3dTrackerPort.interrupt();
         pf3dTrackerPort.close();
-        printMessage(1,"pf3dTrackerPort successfully closed!\n");
+        yTrace("pf3dTrackerPort successfully closed!");
         doubleTouchPort.interrupt();
         doubleTouchPort.close();
-        printMessage(1,"doubleTouchPort successfully closed!\n");
+        yTrace("doubleTouchPort successfully closed!");
         eventsPort.interrupt();
         eventsPort.close();
-        printMessage(1,"eventsPort successfully closed!\n");
+        yTrace("eventsPort successfully closed!");
         depth2kinPort.interrupt();
         depth2kinPort.close();
-        printMessage(1,"depth2kinPort successfully closed!\n");
+        yTrace("depth2kinPort successfully closed!");
 }
 
 // empty line to make gcc happy
