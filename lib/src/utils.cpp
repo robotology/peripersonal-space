@@ -176,23 +176,26 @@ unsigned int factorial(unsigned int n)
 
 /****************************************************************/
 /* TAXEL WRAPPER
-/****************************************************************/
-    Taxel::Taxel()
+*****************************************************************/
+    void Taxel::init()
     {
         ID   = 0;
         Resp = 0;
         Pos.resize(3,0.0);
         WRFPos.resize(3,0.0);
         Norm.resize(3,0.0);
-        pxR.resize(2,0.0);
-        pxRR.resize(2,0.0);
-        pxL.resize(2,0.0);
-        pxLL.resize(2,0.0);
-        RF = eye(4);        
+        px.resize(2,0.0);
+        RF = eye(4);
+    }
+
+    Taxel::Taxel()
+    {
+        init();
     }
 
     Taxel::Taxel(const Vector &p, const Vector &n)
     {
+        init();
         Pos  = p;
         Norm = n;
         setRF();
@@ -200,6 +203,7 @@ unsigned int factorial(unsigned int n)
 
     Taxel::Taxel(const Vector &p, const Vector &n, const int &i)
     {
+        init();
         ID   = i;
         Pos  = p;
         Norm = n;
@@ -213,33 +217,9 @@ unsigned int factorial(unsigned int n)
         Pos    = t.Pos;
         WRFPos = t.WRFPos;
         Norm   = t.Norm;
-        pxR    = t.pxR;
-        pxRR   = t.pxRR;
-        pxL    = t.pxL;
-        pxLL   = t.pxLL;
+        px     = t.px;
         RF     = t.RF;
         return *this;
-    }
-
-    void Taxel::print(int verbosity)
-    {
-        if (verbosity == 0)
-            printf("ID %i \tPos %s \tNorm %s\n", ID,
-                    Pos.toString().c_str(), Norm.toString().c_str());
-        else 
-            printf("ID %i \tPos %s \tNorm %s \n\tHst %s\n", ID,
-                    Pos.toString().c_str(), Norm.toString().c_str(),
-                    pwe.getHist().toString().c_str());
-    }
-
-    string Taxel::toString(int precision)
-    {
-        stringstream res;
-        res << "ID: " << ID << "\tPos: "<< Pos.toString() << "\t Norm: "<< Norm.toString();
-
-        if (precision)
-            res << "\n Hst: "<< pwe.getHist().toString() << endl;
-        return res.str();
     }
 
     void Taxel::setRF()
@@ -256,7 +236,7 @@ unsigned int factorial(unsigned int n)
         z = Norm;
         if (z[0] == 0.0)
         {
-            z[0] = 0.00000001;
+            z[0] = 0.00000001;    // Avoid the division by 0
         }
         y[0] = -z[2]/z[0]; y[2] = 1;
         x = -1*(cross(z,y));
@@ -273,13 +253,37 @@ unsigned int factorial(unsigned int n)
         RF.setSubcol(Pos,0,3);
     }
 
-    bool Taxel::resetParzenWindow()
+/****************************************************************/
+/* TAXEL WRAPPER 1D
+*****************************************************************/
+    void Taxel1D::print(int verbosity)
+    {
+        if (verbosity == 0)
+            printf("ID %i \tPos %s \tNorm %s\n", ID,
+                    Pos.toString().c_str(), Norm.toString().c_str());
+        else 
+            printf("ID %i \tPos %s \tNorm %s \n\tHst %s\n", ID,
+                    Pos.toString().c_str(), Norm.toString().c_str(),
+                    pwe.getHist().toString().c_str());
+    }
+
+    string Taxel1D::toString(int precision)
+    {
+        stringstream res;
+        res << "ID: " << ID << "\tPos: "<< Pos.toString() << "\t Norm: "<< Norm.toString();
+
+        if (precision)
+            res << "\n Hst: "<< pwe.getHist().toString() << endl;
+        return res.str();
+    }
+
+    bool Taxel1D::resetParzenWindow()
     {
         pwe.resetHist();
         return true;
     }
 
-    bool Taxel::computeResponse()
+    bool Taxel1D::computeResponse()
     {
         double RFExtension = double(pwe.getExt());
         if (norm(Evnt.Pos) <= RFExtension && Evnt.Pos[2] >= 0)
@@ -294,8 +298,151 @@ unsigned int factorial(unsigned int n)
     }
 
 /****************************************************************/
-/* SKINPART WRAPPER
+/* TAXEL WRAPPER 2D
+*****************************************************************/
+    void Taxel2D::init()
+    {
+        Taxel::init();
+        rfAngle = 40*M_PI/180;
+    }
+
+    Taxel2D::Taxel2D()
+    {
+        init();
+    }
+
+    Taxel2D::Taxel2D(const Vector &p, const Vector &n)
+    {
+        init();
+        Pos  = p;
+        Norm = n;
+        setRF();
+    }
+
+    Taxel2D::Taxel2D(const Vector &p, const Vector &n, const int &i)
+    {
+        init();
+        ID   = i;
+        Pos  = p;
+        Norm = n;
+        setRF();
+    }
+
+    Taxel2D & Taxel2D::operator=(const Taxel2D &t)
+    {
+        ID      = t.ID;
+        Resp    = t.Resp;
+        Pos     = t.Pos;
+        WRFPos  = t.WRFPos;
+        Norm    = t.Norm;
+        px      = t.px;
+        RF      = t.RF;
+        rfAngle = t.rfAngle;
+        return *this;
+    }
+
+    bool Taxel2D::addSample(const IncomingEvent4Taxel2D ie)
+    {
+        if (!insideRFCheck(ie))
+            return false;
+
+        std::vector <double> X;
+        X.push_back(ie.NRM);
+        X.push_back(ie.TTC);
+
+        return pwe2D.addSample(X);
+    }
+
+    bool Taxel2D::removeSample(const IncomingEvent4Taxel2D ie)
+    {
+        if (!insideRFCheck(ie))
+            return false;
+
+        std::vector <double> X;
+        X.push_back(ie.NRM);
+        X.push_back(ie.TTC);
+
+        return pwe2D.removeSample(X);
+    }
+
+    void Taxel2D::print(int verbosity)
+    {
+        if (verbosity > 4)
+            printf("ID %i \tPos %s \tNorm %s \n\tPosHst \n%s\n\n\tNegHst \n%s\n", ID,
+                    Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str(),
+                    pwe2D.getPosHist().toString(3,3).c_str(),
+                    pwe2D.getNegHist().toString(3,3).c_str());
+        else 
+            printf("ID %i \tPos %s \tNorm %s\n", ID,
+                    Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str());
+            // printf("ID %i \tPos %s \tNorm %s \n\tHst %s\n", ID,
+            //         Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str(),
+            //         pwe.getHist().toString(3,3).c_str());
+    }
+
+    string Taxel2D::toString(int precision)
+    {
+        stringstream res;
+        res << "ID: " << ID << "\tPos: "<< Pos.toString(3,3) << "\t Norm: "<< Norm.toString(3,3);
+
+        if (precision)
+        {
+            res << "\n Hst:\n"<< pwe2D.getPosHist().toString(3,3);
+            res << "\n Hst:\n"<< pwe2D.getNegHist().toString(3,3) << endl;
+        }
+        return res.str();
+    }
+
+    bool Taxel2D::resetParzenWindow()
+    {
+        pwe2D.resetAllHist();
+        return true;
+    }
+
+    bool Taxel2D::computeResponse()
+    {
+        if (!insideRFCheck(Evnt))
+            return false;
+
+        std::vector<double> In;
+        In.push_back(Evnt.NRM);
+        In.push_back(Evnt.TTC);
+        Resp = pwe2D.computeResponse(In);
+
+        return true;
+    }
+
+    bool Taxel2D::insideRFCheck(const IncomingEvent4Taxel2D ie)
+    {
+        std::vector<double> binWidth = pwe2D.getBinWidth();
+        double binLimit = 2*binWidth[0];
+
+        // the x,y limit of the receptive field at the incoming event's Z
+        double RFlimit = ie.Pos(2)/tan(rfAngle);
+
+        // the x,y limit of the receptive field in the first bin
+        double RFlimit_cyl = binLimit/tan(rfAngle);
+
+        // printf("binLimit: %g RFlimit_cyl: %g rfAngle: %g \n", binLimit, RFlimit_cyl, rfAngle);
+        // printf("ie.Pos\t%s\n", ie.Pos.toString(3,3).c_str());
+        // printf("Hist:\n%s\n", pwe2D.getHist().toString(3,3).c_str());
+
+        if (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit*RFlimit )
+        {
+            return true;
+        }
+        // There are two ifs only to let me debug things
+        if ( (abs(ie.Pos(2))<=binLimit) && (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit_cyl*RFlimit_cyl) )
+        {
+            return true;
+        }
+
+        return false;
+    }
+
 /****************************************************************/
+/* SKINPART WRAPPER
+*****************************************************************/
     skinPart::skinPart()
     {
         name="";
@@ -314,9 +461,39 @@ unsigned int factorial(unsigned int n)
     {
         printf("**********\n");
         printf("name: %s\t", name.c_str());
-        printf("size: %i\n", size);
+        printf("size: %i\t", size);
+        printf("taxel's size: %lu\n", taxel.size());
+        
         for (size_t i = 0; i < taxel.size(); i++)
             taxel[i].print(verbosity);
+        
+        if (verbosity>=4)
+        {
+            printf("\nTaxel ID -> representative ID:\n");
+
+            for (size_t i=0; i<size; i++)
+            {
+                printf("[ %lu -> %d ]\t",i,Taxel2Repr[i]);
+                if (i % 8 == 7)
+                {
+                    printf("\n");
+                }
+            }
+            printf("\n");
+            
+            printf("Representative ID -> Taxel IDs:\n");
+            for(map<unsigned int, list<unsigned int> >::const_iterator iter_map = Repr2TaxelList.begin(); iter_map != Repr2TaxelList.end(); ++iter_map)
+            {
+                list<unsigned int> l = iter_map->second;
+                printf("%d -> {",iter_map->first);
+                for(list<unsigned int>::const_iterator iter_list = l.begin(); iter_list != l.end(); iter_list++)
+                {
+                    printf("%u, ",*iter_list);
+                }
+                printf("}\n");
+            }    
+            printf("\n");
+        }
         printf("**********\n");
     }
 
@@ -330,14 +507,9 @@ unsigned int factorial(unsigned int n)
         return res.str();
     }
 
-    bool skinPart::toProperty(Property &info)
-    {
-        return true;
-    }
-
 /****************************************************************/
 /* EYE WRAPPER
-/****************************************************************/
+*****************************************************************/
     bool getAlignHN(const ResourceFinder &rf, const string &type,
                     iKinChain *chain, const bool verbose)
     {
@@ -357,7 +529,7 @@ unsigned int factorial(unsigned int n)
                         int j=0;
 
                         Matrix HN(4,4); HN=0.0;
-                        for (int cnt=0; (cnt<bH->size()) && (cnt<HN.rows()*HN.cols()); cnt++)
+                        for (size_t cnt=0; (cnt<bH->size()) && (cnt<HN.rows()*HN.cols()); cnt++)
                         {
                             HN(i,j)=bH->get(cnt).asDouble();
                             if (++j>=HN.cols())
