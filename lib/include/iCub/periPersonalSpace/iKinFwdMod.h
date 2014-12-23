@@ -1054,26 +1054,29 @@ class iKinLimbMod : public iKinChainMod
 * It implements a serial floating-base chain that spans the joints
 * from the "touched" arm toward the opposite end-effector. There are
 * two chains that can be implemented right now (to be extended):
-*   - "R2L" -> from the left  forearm toward the right end-eff
-*   - "L2R" -> from the right forearm toward the left  end-eff
+*   - "LtoR"  -> from the left  forearm toward the right end-eff
+*   - "RtoL"  -> from the right forearm toward the left  end-eff
 *
+*   - "LHtoR" -> from the left  hand toward the right end-eff
+*   - "RHtoL" -> from the right hand toward the left  end-eff
+*   
 * To be implemented (right now are not implemented simply because
 * the robot is kinematically unable to do that): 
 *
-*   - "L2Ru" -> from the right upperarm toward the left  end-eff
-*   - "R2Lu" -> from the left  upperarm toward the right end-eff
+*   - "LUtoR" -> from the right upperarm toward the left  end-eff
+*   - "RUtoL" -> from the left  upperarm toward the right end-eff
 *
-*   - "L2T"  -> from the torso toward the left  end-eff
-*   - "R2T"  -> from the torso toward the right end-eff
+*   - "T2L"  -> from the torso toward the left  end-eff
+*   - "T2R"  -> from the torso toward the right end-eff
 *
 * When the skin will be mounted on the legs, there also will be the
 * possibility of having these chains:
 *
-*   - "L2Ll"  -> from the left leg toward the left  end-eff
-*   - "R2Ll"  -> from the left leg toward the right end-eff
+*   - "LLtoL"  -> from the left leg toward the left  end-eff
+*   - "LLtoR"  -> from the left leg toward the right end-eff
 *
-*   - "L2Rl"  -> from the right leg toward the left  end-eff
-*   - "R2Rl"  -> from the right leg toward the right end-eff
+*   - "RLtoL"  -> from the right leg toward the left  end-eff
+*   - "RLtoR"  -> from the right leg toward the right end-eff
 * 
 */
 class iCubCustomLimb : public iKinLimbMod
@@ -1091,13 +1094,13 @@ class iCubCustomLimb : public iKinLimbMod
         */
         iCubCustomLimb()
         {
-            allocate("R2L");
+            allocate("LtoR");
         }
 
         /**
         * Constructor. 
         * @param _type is a string to discriminate between the chain's type
-        *              type which can be either "R2L" or "L2R" (other chains
+        *              type which can be either "LtoR" or "RtoL" (other chains
         *              will be implemented, see the description of this class
         *              for further information)
         */
@@ -1116,6 +1119,11 @@ class iCubCustomLimb : public iKinLimbMod
         }
 
         /**
+        * Appends a pre-defined limb to the chain. It allows for a better code re-use.
+        */
+        void append(const std::string _part);
+        
+        /**
         * Returns a pointer to the Limb seen as Chain object.
         * Useful to to operate on the Links of Limb.
         * @return a pointer to a Chain object with the same Links of 
@@ -1128,7 +1136,7 @@ class iCubCustomLimb : public iKinLimbMod
 
         /**
         * Returns the Limb type as a string. 
-        * @return the type as a string {"R2L", "L2R", etc.}.
+        * @return the type as a string {"LtoR", "RtoL", etc.}.
         */
         std::string getType() const
         {
@@ -1157,8 +1165,8 @@ class iCubCustomLimb : public iKinLimbMod
         /**
         * Sets the joint angles from the encoder values. It automatically computes the 
         * inversion of the relevant joints.
-        * @param qs is the encoders' vector of the slave  chain (e.g. right if "R2L")
-        * @param qm is the encoders' vector of the master chain (e.g. left  if "R2L")
+        * @param qs is the encoders' vector of the slave  chain (e.g. right if "LtoR")
+        * @param qm is the encoders' vector of the master chain (e.g. left  if "LtoR")
         */
         yarp::sig::Vector setAng(const yarp::sig::Vector &qs, const yarp::sig::Vector &qm);
 };
@@ -1189,10 +1197,10 @@ class iCubShoulderConstrMod : public iKinLinIneqConstr
         * @param chain        the iKinChainMod object.
         * @param readingmode  reading mode, either 'd' for direct
         *                     or 'i' for inverse (e.g. the left shoulder of
-        *                     a "R2L" chain is inverse)
+        *                     a "LtoR" chain is inverse)
         * @param sh           index for the first joint of the shoulder (e.g. for
-        *                     an "R2L" chain the left arm's index should be '2',
-        *                     whereas for an "R2Lu" chain it should be equal to '1')
+        *                     an "LtoR" chain the left arm's index should be '2',
+        *                     whereas for an "LtoRu" chain it should be equal to '1')
         *
         */
         iCubShoulderConstrMod(iKinChainMod *_chain, char _readingmode, int _sh);

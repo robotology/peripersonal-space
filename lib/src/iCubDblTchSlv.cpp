@@ -6,73 +6,9 @@
 using namespace iCub::iKin;
 
 /************************************************************************/
-/* ICUBDOUBLETOUCH_SUBPROBLEM
+/* DOUBLETOUCH_VARIABLES
 /************************************************************************/
-    iCubDoubleTouch_SubProblem & iCubDoubleTouch_SubProblem::operator=(const iCubDoubleTouch_SubProblem &sp)
-    {
-        limb    = sp.limb;    index   = sp.index;
-        mLIC    = sp.mLIC;    sLIC    = sp.sLIC;
-        nJoints = sp.nJoints; nVars   = sp.nVars;
-        return *this;
-    }
-
-    /************************************************************************/
-    iCubDoubleTouch_SubProblem::iCubDoubleTouch_SubProblem(string _type, string _indextype)
-            : limb(_type), index(_indextype), guess(limb.getDOF())
-    {
-        nVars   = limb.getDOF();
-        nJoints = limb.getDOF();
-        mLIC = new iCubShoulderConstrMod(limb.asChainMod(),'d', 6); // master shoulder constraints are inverted
-        sLIC = new iCubShoulderConstrMod(limb.asChainMod(),'i', 2); // slave  shoulder constraints are direct
-    }
-
-/************************************************************************/
-/* ICUBDOUBLETOUCH_PROBLEM
-/************************************************************************/
-    iCubDoubleTouch_Problem::iCubDoubleTouch_Problem(string _type)
-    {   
-        if (_type == "both")
-        {
-            R2L = new iCubDoubleTouch_SubProblem("R2L","right_index");
-            L2R = new iCubDoubleTouch_SubProblem("L2R","left_index");
-        }
-        else if (_type == "R2L")
-        {
-            R2L = new iCubDoubleTouch_SubProblem("R2L","right_index");
-            L2R = NULL;
-        }
-        else if (_type == "L2R")
-        {
-            R2L = NULL;
-            L2R = new iCubDoubleTouch_SubProblem("L2R","left_index");
-        }
-        else
-        {
-            R2L = NULL;
-            L2R = NULL;
-        }
-    }
-
-    /************************************************************************/
-    iCubDoubleTouch_Problem::~iCubDoubleTouch_Problem()
-    {
-        if (R2L)
-        {
-            delete R2L;
-            R2L = NULL;
-        }
-        
-        if (L2R)
-        {
-            delete L2R;
-            L2R = NULL;
-        }
-    }    
-
-/************************************************************************/
-/* ICUBDOUBLETOUCH_VARIABLES
-/************************************************************************/
-    iCubDoubleTouch_Variables::iCubDoubleTouch_Variables(int dim)
+    doubleTouch_Variables::doubleTouch_Variables(int dim)
     {
         joints.resize(dim,0.0);
         ee.resize(3,0.0);
@@ -87,7 +23,7 @@ using namespace iCub::iKin;
     }
 
     /************************************************************************/
-    void iCubDoubleTouch_Variables::clone(const iCubDoubleTouch_Variables &v)
+    void doubleTouch_Variables::clone(const doubleTouch_Variables &v)
     {
         ee     = v.ee;
         joints = v.joints;
@@ -99,14 +35,14 @@ using namespace iCub::iKin;
     }
 
     /************************************************************************/
-    iCubDoubleTouch_Variables &iCubDoubleTouch_Variables::operator=(const iCubDoubleTouch_Variables &v)
+    doubleTouch_Variables &doubleTouch_Variables::operator=(const doubleTouch_Variables &v)
     {
         clone(v);
         return *this;
     }
 
     /************************************************************************/
-    void iCubDoubleTouch_Variables::print()
+    void doubleTouch_Variables::print()
     {
         printf("joints [deg]  = (%s)\n",(CTRL_RAD2DEG*joints).toString().c_str());
         printf("EE   = (%s)\t",ee.toString().c_str());
@@ -116,13 +52,50 @@ using namespace iCub::iKin;
     }
 
 /************************************************************************/
-/* ICUBDOUBLETOUCH_NONLINEARPROBLEM
+/* DOUBLETOUCH_PROBLEM
 /************************************************************************/
-    class iCubDoubleTouch_NLP : public Ipopt::TNLP
+    doubleTouch_Problem::doubleTouch_Problem(string _type, string _indextype)
+            : limb(_type), index(_indextype), guess(limb.getDOF())
+    {
+        nVars   = limb.getDOF();
+        nJoints = limb.getDOF();
+
+        if (_type == "RtoL" || _type == "LtoR")
+        {
+            // master shoulder constraints are direct, whereas slave shoulder constraints are inverted
+            // The first "inverted" shoulder starts at #2, whereas the "direct" one starts at #6
+            sLIC = new iCubShoulderConstrMod(limb.asChainMod(),'i', 2);
+            mLIC = new iCubShoulderConstrMod(limb.asChainMod(),'d', 6); 
+        }
+        else if (_type == "RHtoL" || _type == "LHtoR")
+        {
+            // Master shoulder constraints are direct, whereas slave shoulder constraints are inverted
+            // Here we have two more joints to begin with, so the slave starts at #4 and the master at #8
+            sLIC = new iCubShoulderConstrMod(limb.asChainMod(),'i', 4);
+            mLIC = new iCubShoulderConstrMod(limb.asChainMod(),'d', 8); 
+        }
+        else
+        {
+            printf("ERROR in configuring the shoulder constraints!! Type: %s\n\n", _type.c_str());
+        }
+    }
+
+    doubleTouch_Problem & doubleTouch_Problem::operator=(const doubleTouch_Problem &sp)
+    {
+        limb    = sp.limb;    index   = sp.index;
+        mLIC    = sp.mLIC;    sLIC    = sp.sLIC;
+        nJoints = sp.nJoints; nVars   = sp.nVars;
+        return *this;
+    }
+
+/************************************************************************/
+/* DOUBLETOUCH_NONLINEARPROBLEM
+/************************************************************************/
+    class doubleTouch_NLP : public Ipopt::TNLP
     {
     protected:
-        iCubDoubleTouch_Variables  guess;
-        iCubDoubleTouch_Variables  solution;
+        doubleTouch_Variables  guess;
+        doubleTouch_Variables  solution;
 
         iKinChainMod      *chain;
         iKinLinIneqConstr *mLIC;
@@ -195,7 +168,7 @@ using namespace iCub::iKin;
         }
 
         /****************************************************************/
-        iCubDoubleTouch_NLP(iKinChainMod *_chain, int _dim, iKinLinIneqConstr *_mLIC, iKinLinIneqConstr *_sLIC)
+        doubleTouch_NLP(iKinChainMod *_chain, int _dim, iKinLinIneqConstr *_mLIC, iKinLinIneqConstr *_sLIC)
                             : chain(_chain), guess(_dim), solution(_dim), mLIC(_mLIC), sLIC(_sLIC)
         {
             dim=chain->getDOF();
@@ -228,14 +201,14 @@ using namespace iCub::iKin;
         yarp::sig::Vector get_qd() { return qd; }
 
         /****************************************************************/
-        virtual void setInitialGuess(const iCubDoubleTouch_Variables &g)
+        virtual void setInitialGuess(const doubleTouch_Variables &g)
         {
             guess=g;
             q0=guess.joints;
         }
 
         /****************************************************************/
-        virtual iCubDoubleTouch_Variables getSolution() const
+        virtual doubleTouch_Variables getSolution() const
         {
             return solution;
         }
@@ -491,60 +464,28 @@ using namespace iCub::iKin;
     };
 
 /************************************************************************/
-/* ICUBDOUBLETOUCH_SOLVER
+/* DOUBLETOUCH_SOLVER
 /************************************************************************/
-    iCubDoubleTouch_Solver::iCubDoubleTouch_Solver(string _type): problem(_type)
+    doubleTouch_Solver::doubleTouch_Solver(string _type)
     {
-        if (_type == "R2L" || _type == "L2R")
+        if (_type == "RtoL" || _type == "RHtoL")
         {
-            setSubProblem(_type);
+            probl = new doubleTouch_Problem(_type,"left_index");
+        }
+        else if (_type == "LtoR" || _type == "LHtoR")
+        {
+            probl = new doubleTouch_Problem(_type,"right_index");
         }
     }
 
     /************************************************************************/
-    iCubDoubleTouch_Solver::iCubDoubleTouch_Solver(iCubDoubleTouch_Problem &_problem) : problem(_problem)
+    void doubleTouch_Solver::setInitialGuess(const doubleTouch_Variables &g)
     {
-        current_subproblem = NULL;
+        probl->guess=g;
     }
 
     /************************************************************************/
-    iCubDoubleTouch_SubProblem* iCubDoubleTouch_Solver::getSubProblem(string _type)
-    {
-        if (_type == "R2L" || _type == "L2R")
-        {
-            setSubProblem(_type);
-        }
-        return current_subproblem;
-    };
-
-    /************************************************************************/
-    bool iCubDoubleTouch_Solver::setSubProblem(string _type)
-    {
-        if      (_type == "R2L")
-        {
-            current_subproblem_type = _type;
-            current_subproblem = problem.R2L;
-            return true;
-        }
-        else if (_type == "L2R")
-        {
-            current_subproblem_type = _type;
-            current_subproblem = problem.L2R;
-            return true;
-        }
-        current_subproblem_type = "";
-        current_subproblem      = NULL;
-        return false;
-    };
-
-    /************************************************************************/
-    void iCubDoubleTouch_Solver::setInitialGuess(const iCubDoubleTouch_Variables &g)
-    {
-        current_subproblem->guess=g;
-    }
-
-    /************************************************************************/
-    bool iCubDoubleTouch_Solver::solve(iCubDoubleTouch_Variables &solution)
+    bool doubleTouch_Solver::solve(doubleTouch_Variables &solution)
     {
         Ipopt::SmartPtr<Ipopt::IpoptApplication> app=new Ipopt::IpoptApplication;
         app->Options()->SetNumericValue("tol",1e-8);
@@ -569,10 +510,10 @@ using namespace iCub::iKin;
 
         app->Initialize();
         
-        Ipopt::SmartPtr<iCubDoubleTouch_NLP> nlp = new iCubDoubleTouch_NLP(current_subproblem->asChainMod(),
-                    current_subproblem->getNVars(),current_subproblem->getMLIC(),current_subproblem->getSLIC());
+        Ipopt::SmartPtr<doubleTouch_NLP> nlp = new doubleTouch_NLP(probl->asChainMod(),
+                                               probl->getNVars(),probl->getMLIC(),probl->getSLIC());
 
-        nlp->setInitialGuess(current_subproblem->guess);
+        nlp->setInitialGuess(probl->guess);
 
         Ipopt::ApplicationReturnStatus status=app->OptimizeTNLP(GetRawPtr(nlp));
         solution=nlp->getSolution();

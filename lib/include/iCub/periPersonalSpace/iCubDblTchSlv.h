@@ -53,7 +53,7 @@ using namespace std;
 * chain, that is not a parameter :P)
 *  
 */
-struct iCubDoubleTouch_Variables
+struct doubleTouch_Variables
 {    
     yarp::sig::Vector ee;
     yarp::sig::Vector joints;
@@ -73,7 +73,7 @@ struct iCubDoubleTouch_Variables
     *            because there's no need to hide the members of such a simple
     *            struct to the final user)
     */
-    iCubDoubleTouch_Variables(int dim);
+    doubleTouch_Variables(int dim);
 
     /**
     * Prints the state of the variable
@@ -83,40 +83,12 @@ struct iCubDoubleTouch_Variables
     /**
     * Copy Operator
     */
-    iCubDoubleTouch_Variables &operator=(const iCubDoubleTouch_Variables &v);
+    doubleTouch_Variables &operator=(const doubleTouch_Variables &v);
 
     /**
     * Clone Function
     */
-    void clone (const iCubDoubleTouch_Variables &v);
-};
-
-/**
-* @ingroup doubleTouchSlvLib
-*
-* A struct for defining a subProblem (right now, either "R2L" or "L2R"). It encloses everything
-* is needed for the solver to solve the problem (also the chain!).
-* 
-*/
-struct iCubDoubleTouch_SubProblem
-{
-    iCubCustomLimb              limb;
-    iCubFinger                  index;
-    iKinLinIneqConstr          *mLIC;
-    iKinLinIneqConstr          *sLIC;
-    int                         nJoints;
-    int                         nVars;
-    iCubDoubleTouch_Variables   guess;
-
-    std::string        getType()    { return limb.getType(); }
-    int                getNVars()   { return nVars; }
-    iKinLinIneqConstr* getMLIC()    { return mLIC; }
-    iKinLinIneqConstr* getSLIC()    { return sLIC; }
-    iKinChainMod*      asChainMod() { return limb.asChainMod(); }
-    iCubCustomLimb*    getLimb()    { return &limb; }
-
-    iCubDoubleTouch_SubProblem(string _type, string _indextype);
-    iCubDoubleTouch_SubProblem & operator=(const iCubDoubleTouch_SubProblem &sp);
+    void clone (const doubleTouch_Variables &v);
 };
 
 /**
@@ -127,25 +99,34 @@ struct iCubDoubleTouch_SubProblem
 * reconfiguring the solver over and over again.
 *  
 */
-struct iCubDoubleTouch_Problem
+struct doubleTouch_Problem
 {
-    iCubDoubleTouch_SubProblem *R2L;
-    iCubDoubleTouch_SubProblem *L2R;
+    iCubCustomLimb              limb;
+    iCubFinger                  index;
+    iKinLinIneqConstr          *mLIC;
+    iKinLinIneqConstr          *sLIC;
+    int                         nJoints;
+    int                         nVars;
+    doubleTouch_Variables   guess;
 
-    // iCubDoubleTouch_Problem(const iCubDoubleTouch_SubProblem &_R2L): R2L(*_R2L) {}
-    // iCubDoubleTouch_Problem(const iCubDoubleTouch_SubProblem &_R2L,
-    //                         const iCubDoubleTouch_SubProblem &_L2R): R2L(*_R2L), L2R(*_L2R) {}
+    std::string        getType()    { return limb.getType(); }
+    int                getNVars()   { return nVars; }
+    iKinLinIneqConstr* getMLIC()    { return mLIC; }
+    iKinLinIneqConstr* getSLIC()    { return sLIC; }
+    iKinChainMod*      asChainMod() { return limb.asChainMod(); }
+    iCubCustomLimb*    getLimb()    { return &limb; }
+
     /**
     * Constructor. 
-    * @param type is the type of subproblem that has to be instantiated. Right now, it can be
-    *             either "R2L" or "L2R" or "both"
+    * @param _type is the type of subproblem that has to be instantiated. Right now, it can be
+    *              'RtoL','LtoR','RHtoL','LHtoR'
     */
-    iCubDoubleTouch_Problem(std::string _type);
+    doubleTouch_Problem(string _type, string _indextype);
 
     /**
-    * Destructor.
-    */
-    ~iCubDoubleTouch_Problem();
+     * Copy operator.
+     */
+    doubleTouch_Problem & operator=(const doubleTouch_Problem &sp);
 };
 
 /**
@@ -155,48 +136,27 @@ struct iCubDoubleTouch_Problem
 * problem, a pointer to the subproblem, a way to detect the problem under investigation.
 *  
 */
-class iCubDoubleTouch_Solver
+class doubleTouch_Solver
 {
-    protected:
-        iCubDoubleTouch_Problem     problem;
-        iCubDoubleTouch_SubProblem *current_subproblem;
-        string current_subproblem_type;
-
     public:
+        doubleTouch_Problem *probl;
+
         /**
         * Constructor. 
         * @param type is the type of subproblem that has to be instantiated. Right now, it can be
-        *             either "R2L" or "L2R" or "both"
+        *             either 'RtoL','LtoR','RHtoL', or 'LHtoR'
         */
-        iCubDoubleTouch_Solver(string _type);
-
-        /**
-        * Constructor. 
-        * @param problem is a problem already instantiated somewhere else.
-        */
-        iCubDoubleTouch_Solver(iCubDoubleTouch_Problem &_problem);
-
-        /**
-        * Gets the a subproblem among the possible choices.
-        * @param type is the type of subproblem that has to be retrieved.
-        */
-        iCubDoubleTouch_SubProblem* getSubProblem(string _type);
-
-        /**
-        * Sets a specific subproblem among the possible choices.
-        * @param type is the type of subproblem that has to be set.
-        */
-        bool setSubProblem (string _type);
+        doubleTouch_Solver(string _type);
 
         /**
         * Sets the initial parameters from which starting the optimization.
         */
-        void setInitialGuess(const iCubDoubleTouch_Variables &g);
+        void setInitialGuess(const doubleTouch_Variables &g);
 
         /**
         * Solves the Inverse Kinematics task associated with the double touch.
         */
-        bool solve(iCubDoubleTouch_Variables &solution);
+        bool solve(doubleTouch_Variables &solution);
 };
 
 // empty line to make gcc happy

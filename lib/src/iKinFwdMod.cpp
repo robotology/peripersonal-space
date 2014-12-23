@@ -1570,112 +1570,166 @@ using namespace iCub::ctrl;
     {
         iKinLimbMod::allocate(_type);
 
+        // Set origin of the chain (eye by default)
         Matrix H0 = eye(4);
         setH0(H0);
 
-        Matrix L2R = eye(4);
-        L2R(0,0) =  -0.866;                         L2R(0,2) =    0.5;    L2R(0,3) = -0.0031303;
-                                L2R(1,1) =      -1;   
-        L2R(2,0) =     0.5;                         L2R(2,2) =  0.866;    L2R(2,3) = -0.0116823;
-
-        Matrix R2L = SE3inv(L2R);
-
-        if (getType() == "R2L")
+        // Push links
+        if (getType() == "LtoR")
         {
-            pushLink(new iKinInvertedLink(     0.0,  -0.1373, -M_PI/2.0,           M_PI/2.0,  -90.0*CTRL_DEG2RAD,  90.0*CTRL_DEG2RAD));
+            // Left arm joints are "read" from upside down: DH parameters are the same, only remember to switch q_min and q_max!
+            append("left_arm_reversed_5DOF");
+
+            // Fixed RT Matrix from left shoulder to right shoulder
+            append("left_shoulder_to_right_shoulder");
+            
+            // Right arm joints are "read" correctly
+            append("right_arm_direct");
+        }
+        else if (getType() == "RtoL")
+        {
+            // Right arm joints are "read" from upside down: DH parameters are the same, only remember to switch q_min and q_max!
+            append("right_arm_reversed_5DOF");
+
+            // Fixed RT Matrix from right shoulder to left shoulder
+            append("right_shoulder_to_left_shoulder");
+
+            // Left arm joints are "read" correctly
+            append("left_arm_direct");
+        }
+        if (getType() == "LHtoR")
+        {
+            // Left arm joints are "read" from upside down: DH parameters are the same, only remember to switch q_min and q_max!
+            append("left_arm_reversed_7DOF");
+
+            // Fixed RT Matrix from left shoulder to right shoulder
+            append("left_shoulder_to_right_shoulder");
+            
+            // Right arm joints are "read" correctly
+            append("right_arm_direct");
+        }
+        else if (getType() == "RHtoL")
+        {
+            // Right arm joints are "read" from upside down: DH parameters are the same, only remember to switch q_min and q_max!
+            append("right_arm_reversed_7DOF");
+
+            // Fixed RT Matrix from right shoulder to left shoulder
+            append("right_shoulder_to_left_shoulder");
+
+            // Left arm joints are "read" correctly
+            append("left_arm_direct");
+        }
+    }
+
+    /************************************************************************/    
+    void iCubCustomLimb::append(const std::string _part)
+    {
+        // Determine the version of the limb (default 1.0) - Currently not used
+        string limb;
+        double version;
+        size_t underscore=getType().find('_');
+        if (underscore!=string::npos)
+        {
+            limb=getType().substr(0,underscore);
+            version=strtod(getType().substr(underscore+2).c_str(),NULL);
+        }
+        else
+        {
+            limb=getType();
+            version=1.0;
+        }
+
+        if (_part == "left_arm_reversed_5DOF")
+        {
+            if (version<1.7)
+            pushLink(new iKinInvertedLink(     0.0,  -0.1373, -M_PI/2.0,           M_PI/2.0, -50.0*CTRL_DEG2RAD,  50.0*CTRL_DEG2RAD));
+            else
+            pushLink(new iKinInvertedLink(     0.0,  -0.1413, -M_PI/2.0,           M_PI/2.0, -50.0*CTRL_DEG2RAD,  50.0*CTRL_DEG2RAD));
             pushLink(new iKinInvertedLink(   0.015,      0.0, -M_PI/2.0,                0.0, -106.0*CTRL_DEG2RAD,  -5.5*CTRL_DEG2RAD));
-            pushLink(new iKinInvertedLink(  -0.015, -0.15228,  M_PI/2.0, -75.0*CTRL_DEG2RAD,  -90.0*CTRL_DEG2RAD,  37.0*CTRL_DEG2RAD));
+            pushLink(new iKinInvertedLink(  -0.015, -0.15228,  M_PI/2.0, -75.0*CTRL_DEG2RAD, -100.0*CTRL_DEG2RAD,  37.0*CTRL_DEG2RAD));
             pushLink(new iKinInvertedLink(     0.0,      0.0, -M_PI/2.0,           M_PI/2.0, -160.8*CTRL_DEG2RAD,   0.0*CTRL_DEG2RAD));
             pushLink(new iKinInvertedLink(     0.0, -0.10774,  M_PI/2.0,          -M_PI/2.0,   -5.0*CTRL_DEG2RAD,  95.5*CTRL_DEG2RAD));
-
-            pushLink(new iKinFixedRTLink(L2R));         // Fixed RT Matrix from left shoulder to right shoulder
-
-            pushLink(new iKinDirectLink(       0.0, -0.10774,  M_PI/2.0,           -M_PI/2.0, -95.5*CTRL_DEG2RAD,   5.0*CTRL_DEG2RAD));
-            pushLink(new iKinDirectLink(       0.0,      0.0, -M_PI/2.0,           -M_PI/2.0,                0.0, 160.8*CTRL_DEG2RAD));
-            pushLink(new iKinDirectLink(    -0.015, -0.15228, -M_PI/2.0, -105.0*CTRL_DEG2RAD, -37.0*CTRL_DEG2RAD,  90.0*CTRL_DEG2RAD));
-            pushLink(new iKinDirectLink(     0.015,      0.0,  M_PI/2.0,                 0.0,   5.5*CTRL_DEG2RAD, 106.0*CTRL_DEG2RAD));
-            pushLink(new iKinDirectLink(       0.0,  -0.1373,  M_PI/2.0,           -M_PI/2.0, -90.0*CTRL_DEG2RAD,  90.0*CTRL_DEG2RAD));
-            pushLink(new iKinDirectLink(       0.0,      0.0,  M_PI/2.0,            M_PI/2.0, -90.0*CTRL_DEG2RAD,   0.0*CTRL_DEG2RAD));
-            pushLink(new iKinDirectLink(    0.0625,    0.016,       0.0,                M_PI, -20.0*CTRL_DEG2RAD,  40.0*CTRL_DEG2RAD));
-
-			// FIRST ATTEMPT
-			// -0.000000   -0.137300   -1.567953    1.567994  
-			//  0.014943   -0.000031   -1.567953   -0.000078  
-			// -0.015005,   -0.152047,    1.568191,   -1.306805  
-			// -0.000031,   -0.000031,   -1.567953,    1.567994  
-			// -0.000031,   -0.107584,   1.568191,   -1.568151  
-			// -0.000031,   -0.107584,    1.568191,   -1.568151  
-			// -0.000031,   -0.000031,   -1.567953,   -1.568151  
-			// -0.015005,   -0.152047,   -1.568173,   -1.829496   
-			// 0.014943,   -0.000031,    1.568250,   -0.000992   
-			// 0.000405,  -0.137093,    1.568191,   -1.568151  
-			// -0.000031,   -0.000031,    1.568191,    1.567994   
-			// 0.062361,    0.015942,    0.000119,    3.136066
-
-             // pushLink(new iKinInvertedLink(       0.0,   -0.1373, -1.567953,    1.567994,  -90.0*CTRL_DEG2RAD,  90.0*CTRL_DEG2RAD));
-             // pushLink(new iKinInvertedLink(  0.014943, -0.000031, -1.567953,   -0.000078, -106.0*CTRL_DEG2RAD,  -5.5*CTRL_DEG2RAD));
-             // pushLink(new iKinInvertedLink( -0.015005, -0.152047,  1.568191,   -1.306805,  -90.0*CTRL_DEG2RAD,  37.0*CTRL_DEG2RAD));
-             // pushLink(new iKinInvertedLink( -0.000031, -0.000031, -1.567953,    1.567994, -160.8*CTRL_DEG2RAD,   0.0*CTRL_DEG2RAD));
-             // pushLink(new iKinInvertedLink( -0.000031, -0.107584,  1.568191,   -1.568151,   -5.0*CTRL_DEG2RAD,  95.5*CTRL_DEG2RAD));
-
-             // pushLink(new iKinFixedRTLink(L2R));         // Fixed RT Matrix from left shoulder to right shoulder
-
-             // pushLink(new iKinDirectLink( -0.000031,   -0.107584,    1.568191,   -1.568151, -95.5*CTRL_DEG2RAD,   5.0*CTRL_DEG2RAD));
-             // pushLink(new iKinDirectLink( -0.000031,   -0.000031,   -1.567953,   -1.568151,                0.0, 160.8*CTRL_DEG2RAD));
-             // pushLink(new iKinDirectLink( -0.015005,   -0.152047,   -1.568173,   -1.829496, -37.0*CTRL_DEG2RAD,  90.0*CTRL_DEG2RAD));
-             // pushLink(new iKinDirectLink(  0.014943,   -0.000031,    1.568250,   -0.000992,   5.5*CTRL_DEG2RAD, 106.0*CTRL_DEG2RAD));
-             // pushLink(new iKinDirectLink(  0.000405,   -0.137093,    1.568191,   -1.568151, -90.0*CTRL_DEG2RAD,  90.0*CTRL_DEG2RAD));
-             // pushLink(new iKinDirectLink( -0.000031,   -0.000031,    1.568191,    1.567994, -90.0*CTRL_DEG2RAD,   0.0*CTRL_DEG2RAD));
-             // pushLink(new iKinDirectLink(  0.062361,    0.015942,    0.000119,    3.136066, -20.0*CTRL_DEG2RAD,  40.0*CTRL_DEG2RAD));
-
-			
-			// SECOND ATTEMPT
-			// 0.000000    -0.137300   -1.596824    1.588732   
-			// 0.012567   -0.002643   -1.601436   -0.004046  
-			// -0.017853   -0.160418    1.588732   -1.335975  
-			// -0.006367   -0.006032   -1.548692   1.584101   
-			// 0.021564   -0.115262    1.584101   -1.601436  
-			// -0.006032   -0.111869    1.583937   -1.602399  
-			// -0.006933   -0.003038   -1.596339   -1.596339 
-			// -0.017121  -0.160472   -1.583072   -1.861800   
-			// 0.013298   -0.002643    1.589071   -0.004046  
-			// -0.001917   -0.141144    1.591528   -1.593718   
-			//  0.000808   -0.001098    1.591824   1.591528   
-			// 0.062279    0.015127   -0.001201    3.184197
-
-            // pushLink(new iKinInvertedLink(     0.0,  -0.1373, -M_PI/2.0,           M_PI/2.0,  -90.0*CTRL_DEG2RAD,  90.0*CTRL_DEG2RAD));
-            // pushLink(new iKinInvertedLink(   0.015,      0.0, -M_PI/2.0,                0.0, -106.0*CTRL_DEG2RAD,  -5.5*CTRL_DEG2RAD));
-            // pushLink(new iKinInvertedLink(  -0.015, -0.15228,  M_PI/2.0, -75.0*CTRL_DEG2RAD,  -90.0*CTRL_DEG2RAD,  37.0*CTRL_DEG2RAD));
-            // pushLink(new iKinInvertedLink(     0.0,      0.0, -M_PI/2.0,           M_PI/2.0, -160.8*CTRL_DEG2RAD,   0.0*CTRL_DEG2RAD));
-            // pushLink(new iKinInvertedLink(     0.0, -0.10774,  M_PI/2.0,          -M_PI/2.0,   -5.0*CTRL_DEG2RAD,  95.5*CTRL_DEG2RAD));
-
-            // pushLink(new iKinFixedRTLink(L2R));         // Fixed RT Matrix from left shoulder to right shoulder
-
-            // pushLink(new iKinDirectLink(       0.0, -0.10774,  M_PI/2.0,           -M_PI/2.0, -95.5*CTRL_DEG2RAD,   5.0*CTRL_DEG2RAD));
-            // pushLink(new iKinDirectLink(       0.0,      0.0, -M_PI/2.0,           -M_PI/2.0,                0.0, 160.8*CTRL_DEG2RAD));
-            // pushLink(new iKinDirectLink(    -0.015, -0.15228, -M_PI/2.0, -105.0*CTRL_DEG2RAD, -37.0*CTRL_DEG2RAD,  90.0*CTRL_DEG2RAD));
-            // pushLink(new iKinDirectLink(     0.015,      0.0,  M_PI/2.0,                 0.0,   5.5*CTRL_DEG2RAD, 106.0*CTRL_DEG2RAD));
-            // pushLink(new iKinDirectLink(       0.0,  -0.1373,  M_PI/2.0,           -M_PI/2.0, -90.0*CTRL_DEG2RAD,  90.0*CTRL_DEG2RAD));
-            // pushLink(new iKinDirectLink(       0.0,      0.0,  M_PI/2.0,            M_PI/2.0, -90.0*CTRL_DEG2RAD,   0.0*CTRL_DEG2RAD));
-            // pushLink(new iKinDirectLink(    0.0625,    0.016,       0.0,                M_PI, -20.0*CTRL_DEG2RAD,  40.0*CTRL_DEG2RAD));
         }
-        else if (getType() == "L2R")
+        else if (_part == "left_arm_reversed_7DOF")
         {
-            pushLink(new iKinInvertedLink(     0.0,   0.1373, -M_PI/2.0,            M_PI/2.0,  -90.0*CTRL_DEG2RAD, 90.0*CTRL_DEG2RAD));
+            if (version<2.0)
+            pushLink(new iKinInvertedLink( -0.0625,    0.016,       0.0,                0.0, -25.0*CTRL_DEG2RAD,   25.0*CTRL_DEG2RAD));
+            else
+            pushLink(new iKinInvertedLink( -0.0625,  0.02598,       0.0,                0.0, -25.0*CTRL_DEG2RAD,   25.0*CTRL_DEG2RAD));
+            pushLink(new iKinInvertedLink(     0.0,      0.0, -M_PI/2.0,          -M_PI/2.0, -10.0*CTRL_DEG2RAD,   65.0*CTRL_DEG2RAD));
+            
+            append("left_arm_reversed_5DOF");
+        }
+        else if (_part == "right_arm_reversed_5DOF")
+        {
+            if (version<1.7)
+            pushLink(new iKinInvertedLink(     0.0,   0.1373, -M_PI/2.0,            M_PI/2.0,  -50.0*CTRL_DEG2RAD, 50.0*CTRL_DEG2RAD));
+            else
+            pushLink(new iKinInvertedLink(     0.0,   0.1413, -M_PI/2.0,            M_PI/2.0,  -50.0*CTRL_DEG2RAD, 50.0*CTRL_DEG2RAD));
             pushLink(new iKinInvertedLink(  -0.015,      0.0, -M_PI/2.0,                 0.0, -106.0*CTRL_DEG2RAD, -5.5*CTRL_DEG2RAD));
-            pushLink(new iKinInvertedLink(   0.015,  0.15228,  M_PI/2.0,  105.0*CTRL_DEG2RAD,  -90.0*CTRL_DEG2RAD, 37.0*CTRL_DEG2RAD));
+            pushLink(new iKinInvertedLink(   0.015,  0.15228,  M_PI/2.0,  105.0*CTRL_DEG2RAD, -100.0*CTRL_DEG2RAD, 37.0*CTRL_DEG2RAD));
             pushLink(new iKinInvertedLink(     0.0,      0.0,  M_PI/2.0,            M_PI/2.0, -160.8*CTRL_DEG2RAD,  0.0*CTRL_DEG2RAD));
             pushLink(new iKinInvertedLink(     0.0,  0.10774, -M_PI/2.0,            M_PI/2.0,   -5.0*CTRL_DEG2RAD, 95.5*CTRL_DEG2RAD));
+        }
+        else if (_part == "right_arm_reversed_7DOF")
+        {
+            if (version<2.0)
+            pushLink(new iKinInvertedLink(  -0.0625,   -0.016,       0.0,              -M_PI,  -25.0*CTRL_DEG2RAD,  25.0*CTRL_DEG2RAD));
+            else
+            pushLink(new iKinInvertedLink(  -0.0625, -0.02598,       0.0,              -M_PI,  -25.0*CTRL_DEG2RAD,  25.0*CTRL_DEG2RAD));
+            pushLink(new iKinInvertedLink(      0.0,      0.0, -M_PI/2.0,          -M_PI/2.0,  -10.0*CTRL_DEG2RAD,  65.0*CTRL_DEG2RAD));
 
-            pushLink(new iKinFixedRTLink(R2L));         // Fixed RT Matrix from right shoulder to left shoulder
-
+            append("right_arm_reversed_5DOF");
+        }
+        else if (_part == "left_shoulder_to_right_shoulder" || 
+                 _part == "right_shoulder_to_left_shoulder")
+        {
+            Matrix L2R = eye(4);
+            L2R(0,0) =  -0.866;
+            L2R(0,2) =    0.5;
+            L2R(0,3) = -0.0031303;
+            L2R(1,1) =      -1;   
+            L2R(2,0) =     0.5;
+            L2R(2,2) =  0.866;
+            L2R(2,3) = -0.0116823;
+            Matrix R2L = SE3inv(L2R);
+            
+            if (_part == "left_shoulder_to_right_shoulder")
+                pushLink(new iKinFixedRTLink(L2R));
+            else
+                pushLink(new iKinFixedRTLink(R2L));
+        }
+        else if (_part == "left_arm_direct")
+        {
             pushLink(new iKinDirectLink(       0.0,  0.10774, -M_PI/2.0,            M_PI/2.0, -95.5*CTRL_DEG2RAD,   5.0*CTRL_DEG2RAD));
             pushLink(new iKinDirectLink(       0.0,      0.0,  M_PI/2.0,           -M_PI/2.0,   0.0*CTRL_DEG2RAD, 160.8*CTRL_DEG2RAD));
-            pushLink(new iKinDirectLink(     0.015,  0.15228, -M_PI/2.0,   75.0*CTRL_DEG2RAD, -37.0*CTRL_DEG2RAD,  90.0*CTRL_DEG2RAD));
+            pushLink(new iKinDirectLink(     0.015,  0.15228, -M_PI/2.0,   75.0*CTRL_DEG2RAD, -37.0*CTRL_DEG2RAD, 100.0*CTRL_DEG2RAD));
             pushLink(new iKinDirectLink(    -0.015,      0.0,  M_PI/2.0,                 0.0,   5.5*CTRL_DEG2RAD, 106.0*CTRL_DEG2RAD));
-            pushLink(new iKinDirectLink(       0.0,   0.1373,  M_PI/2.0,           -M_PI/2.0, -90.0*CTRL_DEG2RAD,  90.0*CTRL_DEG2RAD));
-            pushLink(new iKinDirectLink(       0.0,      0.0,  M_PI/2.0,            M_PI/2.0, -90.0*CTRL_DEG2RAD,   0.0*CTRL_DEG2RAD));
-            pushLink(new iKinDirectLink(    0.0625,   -0.016,         0,                 0.0, -20.0*CTRL_DEG2RAD,  40.0*CTRL_DEG2RAD));
+            if (version<1.7)
+            pushLink(new iKinDirectLink(       0.0,   0.1373,  M_PI/2.0,           -M_PI/2.0, -50.0*CTRL_DEG2RAD,  50.0*CTRL_DEG2RAD));
+            else
+            pushLink(new iKinDirectLink(       0.0,   0.1413,  M_PI/2.0,           -M_PI/2.0, -50.0*CTRL_DEG2RAD,  50.0*CTRL_DEG2RAD));
+            pushLink(new iKinDirectLink(       0.0,      0.0,  M_PI/2.0,            M_PI/2.0, -65.0*CTRL_DEG2RAD,  10.0*CTRL_DEG2RAD));
+            if (version<2.0)
+            pushLink(new iKinDirectLink(    0.0625,   -0.016,       0.0,                 0.0, -25.0*CTRL_DEG2RAD,  25.0*CTRL_DEG2RAD));
+            else
+            pushLink(new iKinDirectLink(    0.0625, -0.02598,       0.0,                 0.0, -25.0*CTRL_DEG2RAD,  25.0*CTRL_DEG2RAD));
+        }
+        else if (_part == "right_arm_direct")
+        {
+            pushLink(new iKinDirectLink(       0.0, -0.10774,  M_PI/2.0,           -M_PI/2.0, -95.5*CTRL_DEG2RAD,   5.0*CTRL_DEG2RAD));
+            pushLink(new iKinDirectLink(       0.0,      0.0, -M_PI/2.0,           -M_PI/2.0,   0.0*CTRL_DEG2RAD, 160.8*CTRL_DEG2RAD));
+            pushLink(new iKinDirectLink(    -0.015, -0.15228, -M_PI/2.0, -105.0*CTRL_DEG2RAD, -37.0*CTRL_DEG2RAD, 100.0*CTRL_DEG2RAD));
+            pushLink(new iKinDirectLink(     0.015,      0.0,  M_PI/2.0,                 0.0,   5.5*CTRL_DEG2RAD, 106.0*CTRL_DEG2RAD));
+            if (version<1.7)
+            pushLink(new iKinDirectLink(       0.0,  -0.1373,  M_PI/2.0,           -M_PI/2.0, -50.0*CTRL_DEG2RAD,  50.0*CTRL_DEG2RAD));
+            else
+            pushLink(new iKinDirectLink(       0.0,  -0.1413,  M_PI/2.0,           -M_PI/2.0, -50.0*CTRL_DEG2RAD,  50.0*CTRL_DEG2RAD));
+            pushLink(new iKinDirectLink(       0.0,      0.0,  M_PI/2.0,            M_PI/2.0, -65.0*CTRL_DEG2RAD,  10.0*CTRL_DEG2RAD));
+            if (version<2.0)
+            pushLink(new iKinDirectLink(    0.0625,    0.016,       0.0,                M_PI, -25.0*CTRL_DEG2RAD,  25.0*CTRL_DEG2RAD));
+            else
+            pushLink(new iKinDirectLink(    0.0625,  0.02598,       0.0,                M_PI, -25.0*CTRL_DEG2RAD,  25.0*CTRL_DEG2RAD));
         }
     }
 
@@ -1690,7 +1744,7 @@ using namespace iCub::ctrl;
     Vector iCubCustomLimb::setAng(const Vector &qs, const Vector &qm)
     {
         Vector q(getDOF(),0.0);
-        if (getType() == "R2L" || getType() == "L2R")
+        if (getType() == "LtoR" || getType() == "RtoL")
         {
             q[4]  = -qs[0];
             q[3]  = -qs[1];
@@ -1709,12 +1763,32 @@ using namespace iCub::ctrl;
             Vector nq = iKinLimbMod::setAng(q);
             return nq;
         }
+        else if (getType() == "LHtoR" || getType() == "RHtoL")
+        {
+            q[6]  = -qs[0];
+            q[5]  = -qs[1];
+            q[4]  = -qs[2];
+            q[3]  = -qs[3];
+            q[2]  = -qs[4];
+            q[1]  = -qs[5];
+            q[0]  = -qs[6];
+           
+            q[7]  = qm[0];
+            q[8]  = qm[1];
+            q[9]  = qm[2];
+            q[10] = qm[3];
+            q[11] = qm[4];
+            q[12] = qm[5];
+            q[13] = qm[6];
+
+            Vector nq = iKinLimbMod::setAng(q);
+            return nq;   
+        }
         else
         {
             printf("ERROR in using iCubCustomLimb::setAng(qs,qm)!!\n");
             return q;
         }
-
     }
 
     /************************************************************************/
@@ -1723,22 +1797,31 @@ using namespace iCub::ctrl;
         if (lim.size()<2)
             return false;
 
-        IControlLimits &limLeft =*lim[0];
-        IControlLimits &limRight=*lim[1];
-
         unsigned int iLeft;
         unsigned int iRight;
         double min, max;
 
-        if (getType() == "R2L")
+        double slaveDOF=-1;
+        if (getType() == "LtoR" || getType() == "RtoL")
         {
-            for (iLeft=0; iLeft<5; iLeft++)
+            slaveDOF = 5;
+        }
+        else if (getType() == "LHtoR" || getType() == "RHtoL")
+        {
+            slaveDOF = 7;
+        }
+
+        if (getType() == "LtoR" || getType() == "LHtoR")
+        {
+            IControlLimits &limLeft =*lim[0];
+            IControlLimits &limRight=*lim[1];
+            for (iLeft=0; iLeft<slaveDOF; iLeft++)
             {   
                 if (!limLeft.getLimits(iLeft,&min,&max))
                     return false;
                 // printf("old lims %g %g \t", (*this)[4-iLeft].getMin()*CTRL_RAD2DEG, (*this)[4-iLeft].getMax()*CTRL_RAD2DEG);
-                (*this)[4-iLeft].setMin(-CTRL_DEG2RAD*max);
-                (*this)[4-iLeft].setMax(-CTRL_DEG2RAD*min);
+                (*this)[slaveDOF-1-iLeft].setMin(-CTRL_DEG2RAD*max);
+                (*this)[slaveDOF-1-iLeft].setMax(-CTRL_DEG2RAD*min);
                 // printf("new lims %g %g \n", (*this)[4-iLeft].getMin()*CTRL_RAD2DEG, (*this)[4-iLeft].getMax()*CTRL_RAD2DEG);
             }
 
@@ -1753,15 +1836,17 @@ using namespace iCub::ctrl;
                 // printf("old lims %g %g \n", (*this)[iLeft+1+iRight].getMin()*CTRL_RAD2DEG, (*this)[iLeft+1+iRight].getMax()*CTRL_RAD2DEG);
             }
         }
-        else if (getType() == "L2R")
+        else if (getType() == "RtoL" || getType() == "RHtoL")
         {
-            for (iRight=0; iRight<5; iRight++)
+            IControlLimits &limLeft =*lim[1];
+            IControlLimits &limRight=*lim[0];
+            for (iRight=0; iRight<slaveDOF; iRight++)
             {   
                 if (!limRight.getLimits(iRight,&min,&max))
                     return false;
                 // printf("old lims %g %g \t", (*this)[4-iLeft].getMin()*CTRL_RAD2DEG, (*this)[4-iLeft].getMax()*CTRL_RAD2DEG);
-                (*this)[4-iRight].setMin(-CTRL_DEG2RAD*max);
-                (*this)[4-iRight].setMax(-CTRL_DEG2RAD*min);
+                (*this)[slaveDOF-1-iRight].setMin(-CTRL_DEG2RAD*max);
+                (*this)[slaveDOF-1-iRight].setMax(-CTRL_DEG2RAD*min);
                 // printf("new lims %g %g \n", (*this)[4-iLeft].getMin()*CTRL_RAD2DEG, (*this)[4-iLeft].getMax()*CTRL_RAD2DEG);
             }
 
@@ -1775,6 +1860,10 @@ using namespace iCub::ctrl;
                 (*this)[iRight+1+iLeft].setMax(CTRL_DEG2RAD*max);
                 // printf("old lims %g %g \n", (*this)[iLeft+1+iRight].getMin()*CTRL_RAD2DEG, (*this)[iLeft+1+iRight].getMax()*CTRL_RAD2DEG);
             }
+        }
+        else
+        {
+            printf("ERROR in alignJointsBounds! Type: %s\n\n", getType().c_str());
         }
 
         return true;
