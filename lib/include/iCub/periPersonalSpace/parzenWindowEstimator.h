@@ -75,7 +75,7 @@ using namespace std;
 **/
 class parzenWindowEstimator1D
 {
-private:
+  private:
     double ext;    // the maximum extension of the Receptive Field
     int    binsNum;  // the number of partitions of the input space
     double binWidth;   // the extension of the single sampling unit
@@ -84,7 +84,7 @@ private:
     Vector hist;   // histogram of the 
 
 
-public:
+  public:
     /**
     * Constructors
     **/
@@ -137,7 +137,7 @@ public:
 **/
 class parzenWindowEstimator2D
 {
-private:
+  private:
     std::vector<double> extX;   // the extension of the Receptive Field in the x dimension
     std::vector<double> extY;   // the extension of the Receptive Field in the y dimension
 
@@ -155,7 +155,7 @@ private:
 
     Matrix posHist; // histogram for the parzening - positive examples 
     Matrix negHist; //negative examples 
-public:
+  public:
     /**
     * Constructors
     **/

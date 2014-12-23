@@ -259,22 +259,22 @@ class Taxel
     /**
     * Print Method
     **/
-    virtual void print(int verbosity=0);
+    virtual void print(int verbosity=0) {};
 
     /**
     * toString Method
     **/
-    virtual string toString(int precision=0);
+    virtual string toString(int precision=0) {};
 
     /**
     * Resets the parzen window estimator
     **/
-    virtual bool resetParzenWindow();
+    virtual bool resetParzenWindow() {};
 
     /**
     * Computes the response of the taxel.
     **/
-    virtual bool computeResponse();
+    virtual bool computeResponse() {};
 };
 
 class Taxel1D : private Taxel
@@ -283,9 +283,8 @@ class Taxel1D : private Taxel
     double W1;
     double W2;
 
-    IncomingEvent Evnt;        // IncomingEvent as seen from the taxel's RF
-    parzenWindowEstimator1D pwe; // taxel's response by means of a parzen window estimator
-    parzenWindowEstimator1D buf; // buffer for storing temporary events
+    IncomingEvent Evnt;          // IncomingEvent as seen from the taxel's RF
+    parzenWindowEstimator1D pwe; // Parzen Window Estimator to compute the response
 
     /**
     * Print Method

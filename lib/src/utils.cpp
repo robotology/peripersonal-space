@@ -175,6 +175,58 @@ unsigned int factorial(unsigned int n)
     }
 
 /****************************************************************/
+/* INCOMING EVENT 4 TAXEL WRAPPER
+*****************************************************************/
+    IncomingEvent4Taxel2D::IncomingEvent4Taxel2D() : IncomingEvent()
+    {
+        NRM = 0;
+        TTC = 0;
+    }
+
+    IncomingEvent4Taxel2D::IncomingEvent4Taxel2D(const Vector &p, const Vector &v,
+                                             const double r, const string &s):
+                                            IncomingEvent(p,v,r,s)
+    {
+        NRM = 0;
+        TTC = 0;
+    }
+
+    IncomingEvent4Taxel2D::IncomingEvent4Taxel2D(const IncomingEvent4Taxel2D &e)
+    {
+        *this = e;   
+    }
+
+    IncomingEvent4Taxel2D::IncomingEvent4Taxel2D(const IncomingEvent &e)
+    {
+        *this = e;   
+    }
+
+    IncomingEvent4Taxel2D & IncomingEvent4Taxel2D::operator=(const IncomingEvent4Taxel2D &e)
+    {
+        IncomingEvent::operator=(e);
+        TTC    = e.TTC;
+        NRM    = e.NRM;
+        return *this;
+    }
+
+    IncomingEvent4Taxel2D & IncomingEvent4Taxel2D::operator=(const IncomingEvent &e)
+    {
+        Pos    = e.Pos;
+        Vel    = e.Vel;
+        Src    = e.Src;
+        Radius = e.Radius;
+        TTC    = 0;
+        NRM    = 0;
+        return *this;
+    }
+
+    void IncomingEvent4Taxel2D::print()
+    {
+        yInfo("NRM: %g\t TTC: %g \t", NRM, TTC);
+        IncomingEvent::print();
+    }
+
+/****************************************************************/
 /* TAXEL WRAPPER
 *****************************************************************/
     void Taxel::init()
