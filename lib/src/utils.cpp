@@ -402,7 +402,7 @@ unsigned int factorial(unsigned int n)
         X.push_back(ie.NRM);
         X.push_back(ie.TTC);
 
-        return pwe2D.addSample(X);
+        return pwe.addSample(X);
     }
 
     bool Taxel2D::removeSample(const IncomingEvent4Taxel2D ie)
@@ -414,7 +414,7 @@ unsigned int factorial(unsigned int n)
         X.push_back(ie.NRM);
         X.push_back(ie.TTC);
 
-        return pwe2D.removeSample(X);
+        return pwe.removeSample(X);
     }
 
     void Taxel2D::print(int verbosity)
@@ -422,8 +422,8 @@ unsigned int factorial(unsigned int n)
         if (verbosity > 4)
             printf("ID %i \tPos %s \tNorm %s \n\tPosHst \n%s\n\n\tNegHst \n%s\n", ID,
                     Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str(),
-                    pwe2D.getPosHist().toString(3,3).c_str(),
-                    pwe2D.getNegHist().toString(3,3).c_str());
+                    pwe.getPosHist().toString(3,3).c_str(),
+                    pwe.getNegHist().toString(3,3).c_str());
         else 
             printf("ID %i \tPos %s \tNorm %s\n", ID,
                     Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str());
@@ -439,15 +439,15 @@ unsigned int factorial(unsigned int n)
 
         if (precision)
         {
-            res << "\n Hst:\n"<< pwe2D.getPosHist().toString(3,3);
-            res << "\n Hst:\n"<< pwe2D.getNegHist().toString(3,3) << endl;
+            res << "\n Hst:\n"<< pwe.getPosHist().toString(3,3);
+            res << "\n Hst:\n"<< pwe.getNegHist().toString(3,3) << endl;
         }
         return res.str();
     }
 
     bool Taxel2D::resetParzenWindow()
     {
-        pwe2D.resetAllHist();
+        pwe.resetAllHist();
         return true;
     }
 
@@ -459,14 +459,14 @@ unsigned int factorial(unsigned int n)
         std::vector<double> In;
         In.push_back(Evnt.NRM);
         In.push_back(Evnt.TTC);
-        Resp = pwe2D.computeResponse(In);
+        Resp = pwe.computeResponse(In);
 
         return true;
     }
 
     bool Taxel2D::insideRFCheck(const IncomingEvent4Taxel2D ie)
     {
-        std::vector<double> binWidth = pwe2D.getBinWidth();
+        std::vector<double> binWidth = pwe.getBinWidth();
         double binLimit = 2*binWidth[0];
 
         // the x,y limit of the receptive field at the incoming event's Z
@@ -477,7 +477,7 @@ unsigned int factorial(unsigned int n)
 
         // printf("binLimit: %g RFlimit_cyl: %g rfAngle: %g \n", binLimit, RFlimit_cyl, rfAngle);
         // printf("ie.Pos\t%s\n", ie.Pos.toString(3,3).c_str());
-        // printf("Hist:\n%s\n", pwe2D.getHist().toString(3,3).c_str());
+        // printf("Hist:\n%s\n", pwe.getHist().toString(3,3).c_str());
 
         if (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit*RFlimit )
         {
@@ -501,7 +501,10 @@ unsigned int factorial(unsigned int n)
         size= 0;
     }
 
-    skinPart & skinPart::operator=(const skinPart &spw)
+/****************************************************************/
+/* SKINPART WRAPPER 1D
+*****************************************************************/
+    skinPart1D & skinPart1D::operator=(const skinPart1D &spw)
     {
         name =spw.name;
         taxel=spw.taxel;
@@ -509,7 +512,38 @@ unsigned int factorial(unsigned int n)
         return *this;
     }
 
-    void skinPart::print(int verbosity)
+    void skinPart1D::print(int verbosity)
+    {
+        printf("**********\n");
+        printf("name: %s\t", name.c_str());
+        printf("size: %i\n", size);
+        for (size_t i = 0; i < taxel.size(); i++)
+            taxel[i].print(verbosity);
+        printf("**********\n");
+    }
+
+    string skinPart1D::toString(int precision)
+    {
+        stringstream res;
+        res << "**********\n" << "Name: " << name << "\tSize: "<< size << endl;
+        for (size_t i = 0; i < taxel.size(); i++)
+            res << taxel[i].toString(precision);
+        res << "**********\n";
+        return res.str();
+    }
+
+/****************************************************************/
+/* SKINPART WRAPPER 2D
+*****************************************************************/
+    skinPart2D & skinPart2D::operator=(const skinPart2D &spw)
+    {
+        name =spw.name;
+        taxel=spw.taxel;
+        size =spw.size;
+        return *this;
+    }
+
+    void skinPart2D::print(int verbosity)
     {
         printf("**********\n");
         printf("name: %s\t", name.c_str());
@@ -549,7 +583,7 @@ unsigned int factorial(unsigned int n)
         printf("**********\n");
     }
 
-    string skinPart::toString(int precision)
+    string skinPart2D::toString(int precision)
     {
         stringstream res;
         res << "**********\n" << "Name: " << name << "\tSize: "<< size << endl;

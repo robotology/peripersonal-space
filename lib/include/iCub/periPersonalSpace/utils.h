@@ -277,14 +277,31 @@ class Taxel
     virtual bool computeResponse() {};
 };
 
-class Taxel1D : private Taxel
+class Taxel1D : public Taxel
 {
   public:
-    double W1;
-    double W2;
+    IncomingEvent           Evnt; // IncomingEvent as seen from the taxel's RF
+    parzenWindowEstimator1D pwe;  // Parzen Window Estimator to compute the response
 
-    IncomingEvent Evnt;          // IncomingEvent as seen from the taxel's RF
-    parzenWindowEstimator1D pwe; // Parzen Window Estimator to compute the response
+    /**
+    * Default constructor
+    **/    
+    Taxel1D() : Taxel() {};
+
+    /**
+    * Constructor with Pos and Norm
+    **/    
+    Taxel1D(const Vector &p, const Vector &n) : Taxel(p,n) {};
+
+    /**
+    * Constructor with Pos, Norm and ID
+    **/    
+    Taxel1D(const Vector &p, const Vector &n, const int &i) : Taxel(p,n,i) {};
+
+    /**
+    * init function
+    **/
+    void init();
 
     /**
     * Print Method
@@ -307,13 +324,13 @@ class Taxel1D : private Taxel
     bool computeResponse();
 };
 
-class Taxel2D : private Taxel
+class Taxel2D : public Taxel
 {
   public:
     double rfAngle;            // angle of the receptive field [rad]
     
-    IncomingEvent4Taxel2D Evnt;  // IncomingEvent as seen from the taxel's RF
-    parzenWindowEstimator2D pwe2D; // taxel's response by means of a 2D parzen window estimator
+    IncomingEvent4Taxel2D   Evnt;  // IncomingEvent as seen from the taxel's RF
+    parzenWindowEstimator2D pwe;   // taxel's response by means of a 2D parzen window estimator
 
 
     /**
@@ -380,7 +397,6 @@ class skinPart
 {
   public:
     string name;
-    vector<Taxel> taxel;
     int size;   // size of the skinPart if the patches were full - it differs from taxel.size()
              
     /**
@@ -394,6 +410,7 @@ class skinPart
     * Indexed by representative taxel IDs, it stores lists of the taxels being represented - e.g. all taxels of a triangle
     **/
     map<unsigned int, list<unsigned int> > Repr2TaxelList;
+
     /**
     * Constructor
     **/    
@@ -402,7 +419,49 @@ class skinPart
     /**
     * Copy Operator
     **/
-    skinPart &operator=(const skinPart &spw);
+    virtual skinPart &operator=(const skinPart &spw) {};
+
+    /**
+    * Print Method
+    **/
+    virtual void print(int verbosity=0) {};
+
+    /**
+    * toString Method
+    **/
+    virtual string toString(int precision=0) {};
+};
+
+class skinPart1D : public skinPart
+{
+  public:
+    vector<Taxel1D> taxel;
+    
+    /**
+    * Copy Operator
+    **/
+    virtual skinPart1D &operator=(const skinPart1D &spw);
+
+    /**
+    * Print Method
+    **/
+    void print(int verbosity=0);
+
+    /**
+    * toString Method
+    **/
+    string toString(int precision=0);    
+};
+
+class skinPart2D : public skinPart
+{
+  public:
+    vector<Taxel2D> taxel;
+
+    /**
+    * Copy Operator
+    **/
+    virtual skinPart2D &operator=(const skinPart2D &spw);
 
     /**
     * Print Method

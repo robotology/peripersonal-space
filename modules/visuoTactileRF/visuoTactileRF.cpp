@@ -52,7 +52,7 @@ YARP, ICUB libraries and OPENCV
 
 --taxelsFile    \e file
 - The name of the file the receptive fields are gonna be saved in (and loaded from).
-  Default 'taxels.ini'.
+  Default 'taxels1D.ini' if modality is 1D, otherwise 'taxels2D.ini'.
 
 \section portsc_sec Ports Created
 - <i> /<name>/contacts:i </i> it reads the skinContacts from the skinManager.
@@ -67,7 +67,7 @@ None.
 None. 
  
 \section tested_os_sec Tested OS
-Linux (Ubuntu 12.04, Debian Squeeze).
+Linux (Ubuntu 12.04, Ubuntu 14.04, Debian Squeeze, Debian Wheezy).
 
 \author: Alessandro Roncone
 */ 
@@ -107,7 +107,7 @@ private:
     RpcClient             rpcClnt;
     RpcServer             rpcSrvr;
 
-    string robot,name;
+    string robot,name,modality;
     int verbosity,rate;
 
 public:
@@ -125,38 +125,50 @@ public:
         {
             switch (command.get(0).asVocab())
             {
-                //-----------------
-                // case VOCAB4('b','u','f','f'):
-                // {
-                //     vtRFThrd -> bufferizeEvents();
-                //     reply.addVocab(ack); return true;
-                // }
                 case VOCAB4('s','a','v','e'):
                 {
-                    vtRFThrd -> save();
-                    reply.addVocab(ack); return true;
+                    int res=Vocab::encode("saved");
+                    if (vtRFThrd -> save())
+                    {
+                        reply.addVocab(ack);
+                    }
+                    else
+                        reply.addVocab(nack);
+                    
+                    reply.addVocab(res);
+                    return true;
                 }
                 case VOCAB4('l','o','a','d'):
                 {
-
-                    vtRFThrd -> load();
-                    reply.addVocab(ack); return true;
+                    int res=Vocab::encode("loaded");
+                    if (vtRFThrd -> load())
+                    {
+                        reply.addVocab(ack);
+                    }
+                    else
+                        reply.addVocab(nack);
+                    
+                    reply.addVocab(res);
+                    return true;
                 }
                 case VOCAB4('r','e','s','e'):
                 {
                     vtRFThrd -> resetParzenWindows();
-                    reply.addVocab(ack); return true;
+                    reply.addVocab(ack);
+                    return true;
                 }
                 case VOCAB4('s','t','o','p'):
                 {
                     vtRFThrd -> stopLearning();
-                    reply.addVocab(ack); return true;
+                    reply.addVocab(ack);
+                    return true;
                 }
                case VOCAB4('r','e','s','t'):
                 {
                     vtRFThrd -> restoreLearning();
-                    reply.addVocab(ack); return true;
-                }                
+                    reply.addVocab(ack);
+                    return true;
+                }     
                 //-----------------
                 default:
                     return RFModule::respond(command,reply);
@@ -169,10 +181,11 @@ public:
 
     bool configure(ResourceFinder &rf)
     {
-        name  = "visuoTactileRF";
-        robot = "icub";
+        name     = "visuoTactileRF";
+        robot    = "icub";
+        modality = "1D";
 
-        verbosity  = 0;      // verbosity
+        verbosity  = 0;     // verbosity
         rate       = 50;    // rate of the vtRFThread
 
         //******************************************************
@@ -191,10 +204,19 @@ public:
             if (rf.check("robot"))
             {
                 robot = rf.find("robot").asString();
-                cout << "Robot is: " << robot << endl;
+                cout << "Robot is " << robot << endl;
             }
             else cout << "Could not find robot option in the config file; using "
                       << robot << " as default\n";
+
+        //***************** MODALITY *****************
+            if (rf.check("modality"))
+            {
+                modality = rf.find("modality").asString();
+                cout << "modality is " << modality << endl;
+            }
+            else cout << "Could not find modality option in the config file; using "
+                      << modality << " as default\n";
 
         //******************* VERBOSE ******************
             if (rf.check("verbosity"))
@@ -209,7 +231,7 @@ public:
             if (rf.check("rate"))
             {
                 rate = rf.find("rate").asInt();
-                cout << "vtRFThread rateThread working at " << rate << " ms\n";
+                cout << "vtRFThread working at " << rate << " ms\n";
             }
             else cout << "Could not find rate in the config file; using "
                       << rate << " ms as default\n";
@@ -225,15 +247,18 @@ public:
             int partNum=4;
 
             Bottle &skinEventsConf = skinRF.findGroup("SKIN_EVENTS");
-            if(!skinEventsConf.isNull()){
+            if(!skinEventsConf.isNull())
+            {
                 printf("SKIN_EVENTS section found\n");
 
-                if(skinEventsConf.check("skinParts")){
+                if(skinEventsConf.check("skinParts"))
+                {
                     Bottle* skinPartList = skinEventsConf.find("skinParts").asList();
                     partNum=skinPartList->size();
                 }
 
-                if(skinEventsConf.check("taxelPositionFiles")){
+                if(skinEventsConf.check("taxelPositionFiles"))
+                {
                     Bottle *taxelPosFiles = skinEventsConf.find("taxelPositionFiles").asList();
 
                     if (rf.check("leftHand") || rf.check("leftForeArm") || rf.check("rightHand") || rf.check("rightForeArm"))
@@ -324,7 +349,7 @@ public:
         //*********************** THREAD **********************
             if( filenames.size() > 0 )
             {
-                vtRFThrd = new vtRFThread(rate, name, robot, verbosity, rf,
+                vtRFThrd = new vtRFThread(rate, name, robot, modality, verbosity, rf,
                                           filenames, head_version, eyeAlignRF);
                 if (!vtRFThrd -> start())
                 {
@@ -352,7 +377,7 @@ public:
 
     bool close()
     {
-        cout << "VISUO TACTILE RECEPTIVE FIELDS: Stopping threads.." << endl;
+        cout << "VISUO TACTILE RECEPTIVE FIELDS: Stopping thread.." << endl;
         if (vtRFThrd)
         {
             vtRFThrd->stop();
@@ -378,6 +403,8 @@ public:
 */
 int main(int argc, char * argv[])
 {
+    Network yarp;
+
     YARP_REGISTER_DEVICES(icubmod)
 
     ResourceFinder moduleRF;
@@ -395,12 +422,14 @@ int main(int argc, char * argv[])
         cout << "   --robot      robot:  the name of the robot. Default icub." << endl;
         cout << "   --rate       rate:   the period used by the thread. Default 50ms." << endl;
         cout << "   --verbosity  int:    verbosity level (default 0)." << endl;
-        cout << "   --taxelsFile string: the file from which load and save taxels (default taxels.ini)." << endl;
+        cout << "   --modality   string: which modality to use (either 1D or 2D, default 1D)." << endl;
+        cout << "   --taxelsFile string: the file from which load and save taxels. Defaults:" << endl;
+        cout << "                        'taxels1D.ini' if modality==1D" << endl;
+        cout << "                        'taxels2D.ini' if modality==2D" << endl;
         cout << endl;
         return 0;
     }
-
-    Network yarp;
+    
     if (!yarp.checkNetwork())
     {
         printf("No Network!!!\n");
