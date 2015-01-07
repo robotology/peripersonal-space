@@ -237,7 +237,7 @@ bool vtRFThread::threadInit()
             }
             load();
 
-            printMessage(0,"iCubSkin1D correctly instantiated. Size: %i\n",iCubSkin1D.size());
+            yInfo("iCubSkin1D correctly instantiated. Size: %i",iCubSkin1D.size()));
             if (verbosity>= 2)
             {
                 for (size_t i = 0; i < iCubSkin1D.size(); i++)
@@ -259,7 +259,7 @@ bool vtRFThread::threadInit()
             }
             load();
 
-            printMessage(0,"iCubSkin2D correctly instantiated. Size: %i\n",iCubSkin2D.size());
+            yInfo("iCubSkin2D correctly instantiated. Size: %i\n",iCubSkin2D.size()));
             if (verbosity>= 2)
             {
                 for (size_t i = 0; i < iCubSkin2D.size(); i++)
@@ -669,6 +669,12 @@ bool vtRFThread::load()
     rf->setVerbose(true);
     string fileName=rf->findFile("taxelsFile").c_str();
     rf->setVerbose(false);
+    if (fileName=="")
+    {
+        yWarning("[vtRF::load] No filename has been found. Skipping..");
+        return false;
+    }
+
     yInfo("File loaded: %s", fileName.c_str());
     Property data; data.fromConfigFile(fileName.c_str());
     Bottle b; b.read(data);
