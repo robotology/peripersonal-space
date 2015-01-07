@@ -28,15 +28,15 @@ double gauss2D(const double x_0, const double y_0,
         resize(0.2,10);
     }
 
-    parzenWindowEstimator1D::parzenWindowEstimator1D(const double e, const int hS)
+    parzenWindowEstimator1D::parzenWindowEstimator1D(const double e, const int bN)
     {
-        resize(e,hS);
+        resize(e,bN);
     }
 
-    bool parzenWindowEstimator1D::resize(const double e, const int hS)
+    bool parzenWindowEstimator1D::resize(const double e, const int bN)
     {
         ext    =  e;
-        binsNum  = hS;
+        binsNum  = bN;
         binWidth   = ext/binsNum;
 
         hist.resize(binsNum,0.0);
@@ -121,30 +121,30 @@ double gauss2D(const double x_0, const double y_0,
     {
         std::vector<double> eX; eX.push_back(-0.1); eX.push_back(0.2);
         std::vector<double> eY;  eY.push_back(0.0); eY.push_back(1.2);
-        // std::vector<int>    hS;    hS.push_back(8);   hS.push_back(8);
+        // std::vector<int>    bN;    bN.push_back(8);   bN.push_back(8);
 
         // Let's reduce the resolution in TTC domain
-        std::vector<int>    hS;    hS.push_back(8);   hS.push_back(4);
+        std::vector<int>    bN;    bN.push_back(8);   bN.push_back(4);
 
-        resize(eX,eY,hS);
+        resize(eX,eY,bN);
     }
 
-    parzenWindowEstimator2D::parzenWindowEstimator2D(const std::vector<double> eX, const std::vector<double> eY, const std::vector<int> hS)
+    parzenWindowEstimator2D::parzenWindowEstimator2D(const std::vector<double> eX, const std::vector<double> eY, const std::vector<int> bN)
     {
-        resize(eX,eY,hS);
+        resize(eX,eY,bN);
     }    
 
-    bool parzenWindowEstimator2D::resize(const std::vector<double> eX, const std::vector<double> eY, const std::vector<int> hS)
+    bool parzenWindowEstimator2D::resize(const std::vector<double> eX, const std::vector<double> eY, const std::vector<int> bN)
     {
-        if (eX.size()!=2 || eY.size()!=2 || hS.size()!=2)
+        if (eX.size()!=2 || eY.size()!=2 || bN.size()!=2)
         {
-            printf("ERROR! Resize failed. eX size: %lu eY size: %lu hS size: %lu\n",eX.size(), eY.size(), hS.size());
+            printf("ERROR! Resize failed. eX size: %lu eY size: %lu bN size: %lu\n",eX.size(), eY.size(), bN.size());
             return false;
         }
 
         extX   = eX;
         extY   = eY;
-        binsNum  = hS;
+        binsNum  = bN;
 
         binWidth.clear();
         binWidth.push_back((extX[1]-extX[0])/binsNum[0]);

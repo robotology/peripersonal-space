@@ -89,13 +89,13 @@ class parzenWindowEstimator1D
     * Constructors
     **/
     parzenWindowEstimator1D();
-    parzenWindowEstimator1D(const double e, const int hs);
+    parzenWindowEstimator1D(const double e, const int bN);
 
     /**
     * Resize the estimator to a given extension and number of samples
     * The histogram changes accordingly (and it's cleared as well).
     **/
-    bool resize(const double e, const int hs);
+    bool resize(const double e, const int bN);
 
     /**
     * Add or remove a sample from the histogram
@@ -160,13 +160,13 @@ class parzenWindowEstimator2D
     * Constructors
     **/
     parzenWindowEstimator2D();
-    parzenWindowEstimator2D(const std::vector<double> eX, const std::vector<double> eY, const std::vector<int> hS);
+    parzenWindowEstimator2D(const std::vector<double> eX, const std::vector<double> eY, const std::vector<int> bN);
 
     /**
     * Resize the estimator to a given extension and number of samples
     * The histogram changes accordingly (and it's cleared as well).
     **/
-    bool resize(const std::vector<double> eX, const std::vector<double> eY, const std::vector<int> hS);
+    bool resize(const std::vector<double> eX, const std::vector<double> eY, const std::vector<int> bN);
 
     /**
     * Add or remove a sample from the histogram

@@ -191,7 +191,8 @@ protected:
     *             either rightEye, or leftEye
     * @return true/false for success/failure
     **/
-    bool projectIntoImagePlane(vector <skinPart> &sP, const string &_eye);
+    bool projectIntoImagePlane(vector <skinPart1D> &sP, const string &_eye);
+    bool projectIntoImagePlane(vector <skinPart2D> &sP, const string &_eye);
     
     /**
     * Projects a generic 3D point from its position in the WRF
@@ -316,8 +317,9 @@ public:
 
     /**
     * Trains the taxels according to the incoming event.
-    * @param IDv is the transform matrix to push
-    * @param IDx is the eye to push the matrix into
+    * @param IDv  is a vector of IDs of the taxels activated
+    * @param IDx  is the index of the iCubSkin affected by the contact
+    *             (basically, the index of the skinPart that has been touched)
     **/
     bool trainTaxels(const std::vector<unsigned int> IDv, const int IDx);
 

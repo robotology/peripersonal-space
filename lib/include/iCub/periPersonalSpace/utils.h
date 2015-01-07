@@ -398,18 +398,6 @@ class skinPart
   public:
     string name;
     int size;   // size of the skinPart if the patches were full - it differs from taxel.size()
-             
-    /**
-    * Indexing variable used in the case of reducing the resolution - e.g. taking only triangle centers
-    * The index into the vector is the taxel ID, the value stored is its representative
-    **/
-    vector<int> Taxel2Repr; 
-
-    /**
-    * Mapping in the opposite direction
-    * Indexed by representative taxel IDs, it stores lists of the taxels being represented - e.g. all taxels of a triangle
-    **/
-    map<unsigned int, list<unsigned int> > Repr2TaxelList;
 
     /**
     * Constructor
@@ -457,7 +445,19 @@ class skinPart2D : public skinPart
 {
   public:
     vector<Taxel2D> taxel;
+             
+    /**
+    * Indexing variable used in the case of reducing the resolution - e.g. taking only triangle centers
+    * The index into the vector is the taxel ID, the value stored is its representative
+    **/
+    vector<int> Taxel2Repr; 
 
+    /**
+    * Mapping in the opposite direction
+    * Indexed by representative taxel IDs, it stores lists of the taxels being represented - e.g. all taxels of a triangle
+    **/
+    map<unsigned int, list<unsigned int> > Repr2TaxelList;
+    
     /**
     * Copy Operator
     **/
