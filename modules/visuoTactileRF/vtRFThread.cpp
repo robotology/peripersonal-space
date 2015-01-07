@@ -675,16 +675,27 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
                     }
                     else
                     {
+                        cout << endl;
                         for (size_t j = 0; j < iCubSkin2D[i].taxel.size(); j++)
                         {
-                            for (size_t w = 0; w < txlList.size(); w++)
-                            {
-                                if (iCubSkin2D[i].taxel[j].ID == txlList[w])
-                                {
-                                    itHasBeenTouched = true;
-                                    idv.push_back(txlList[w]);
-                                }
-                            }
+                            cout << iCubSkin2D[i].taxel[j].ID << " ";
+                        }
+                        cout << endl;
+                        for (size_t w = 0; w < txlList.size(); w++)
+                        {
+                            cout << txlList[w] << " ";
+                        }
+                        cout << endl;
+                        for (size_t w = 0; w < idv.size(); w++)
+                        {
+                            cout << idv[w] << " ";
+                        }
+                        cout << endl;
+
+                        getRepresentativeTaxels(txlList, idx, idv);
+                        if (idv.size()>0)
+                        {
+                            itHasBeenTouched == true;
                         }
                     }
 
@@ -698,9 +709,9 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
 
                             printf("\n");
                         }
-                    }
 
-                    return true;
+                        return true;
+                    }
                 }
             }
         }
@@ -751,7 +762,6 @@ bool vtRFThread::load()
                     
                     iCubSkin1D[i].taxel[j].pwe.setHist(vectorFromBottle(*bbb->get(1).asList(),0,bNum));
                 }
-                printf("Debug\n");
             }
         }
         else
@@ -806,7 +816,7 @@ bool vtRFThread::load()
             }
         }
     }
-    printf("Debug\n");
+
     return true;
 }
 
@@ -903,15 +913,17 @@ bool vtRFThread::save()
 
 bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
 {
-    std::vector<unsigned int> v = IDv;
+    std::vector<unsigned int> v;
     string iCubSkinName = "";
     if (modality=="1D")
     {
         iCubSkinName=iCubSkin1D[IDx].name;
+        v = IDv;
     }
     else
     {
         iCubSkinName=iCubSkin2D[IDx].name;
+        getRepresentativeTaxels(IDv, IDx, v);
     }
 
     Matrix T_a = eye(4);                     // transform matrix relative to the arm
@@ -2024,7 +2036,7 @@ void vtRFThread::initRepresentativeTaxels(skinPart2D &sP)
     }
 }
 
-bool vtRFThread::getRepresentativeTaxelsToTrain(const std::vector<unsigned int> IDv, const int IDx, std::vector<unsigned int> &v)
+bool vtRFThread::getRepresentativeTaxels(const std::vector<unsigned int> IDv, const int IDx, std::vector<unsigned int> &v)
 {
     //unordered_set would be better, but that is only experimentally supported by some compilers.
     std::set<unsigned int> rep_taxel_IDs_set;
@@ -2040,12 +2052,11 @@ bool vtRFThread::getRepresentativeTaxelsToTrain(const std::vector<unsigned int> 
         {
             if (iCubSkin2D[IDx].Taxel2Repr[*it] == -1)
             {
-                printMessage(0,"ERROR: [%s] taxel %u activated, but representative taxel undefined - ignoring.\n",iCubSkin2D[IDx].name.c_str(),*it);
+                yError("[%s] taxel %u activated, but representative taxel undefined - ignoring.",iCubSkin2D[IDx].name.c_str(),*it);
             }
             else
             {
-                //add all the representatives that were activated to the set
-                rep_taxel_IDs_set.insert(iCubSkin2D[IDx].Taxel2Repr[*it]);
+                rep_taxel_IDs_set.insert(iCubSkin2D[IDx].Taxel2Repr[*it]); //add all the representatives that were activated to the set
             }
         }
 
@@ -2056,13 +2067,13 @@ bool vtRFThread::getRepresentativeTaxelsToTrain(const std::vector<unsigned int> 
 
         if (v.empty())
         {
-            printMessage(0,"ERROR! Representative taxels' vector is empty! Skipping\n");
+            yError("Representative taxels' vector is empty! Skipping.");
             return false;
         }
         
         if (verbosity>=4)
         {
-            printMessage(4,"Representative taxels 'touched' on skin part %d: \n",IDx);
+            printMessage(4,"Representative taxels on skin part %d: \n",IDx);
             for(std::vector<unsigned int>::const_iterator it = v.begin() ; it != v.end(); ++it)
             {
                 printf("%d ",*it);

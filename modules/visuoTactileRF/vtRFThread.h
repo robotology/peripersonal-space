@@ -246,7 +246,7 @@ protected:
                   (basically, the index of the skinPart that has been touched)
     * @param v    is a vector of IDs of the representative taxels activated
     **/
-    bool getRepresentativeTaxelsToTrain(const std::vector<unsigned int> IDv, const int IDx, std::vector<unsigned int> &v);
+    bool getRepresentativeTaxels(const std::vector<unsigned int> IDv, const int IDx, std::vector<unsigned int> &v);
         
     /**
     *
