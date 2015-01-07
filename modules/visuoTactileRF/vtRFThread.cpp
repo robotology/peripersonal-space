@@ -225,6 +225,7 @@ bool vtRFThread::threadInit()
 
     /**************************/
         printMessage(1,"Setting up iCubSkin...\n");
+        iCubSkinSize=filenames.size();
         if (modality=="1D")
         {
             for(unsigned int i=0;i<filenames.size();i++)
@@ -317,8 +318,11 @@ void vtRFThread::run()
         for (size_t i = 0; i < event->size(); i++)
         {
             incomingEvents.push_back(IncomingEvent(*(event -> get(i).asList())));
-            if (verbosity>=3)   
+            if (verbosity>=3)
+            {
+                printf("[EVENT]");
                 incomingEvents.back().print();
+            }   
         }
 
         // manage the buffer
@@ -678,6 +682,7 @@ bool vtRFThread::load()
     yInfo("File loaded: %s", fileName.c_str());
     Property data; data.fromConfigFile(fileName.c_str());
     Bottle b; b.read(data);
+    yDebug("iCubSkinSize %i",iCubSkinSize);
 
     for (size_t i = 0; i < iCubSkinSize; i++)
     {
@@ -693,18 +698,20 @@ bool vtRFThread::load()
                 double ext  = bb.find("ext").asDouble();
                 int bNum    = bb.find("binsNum").asInt();
 
-                printMessage(6,"size %i\tnTaxels %i\text %g\tbinsNum %i\n",size,nTaxels,ext,bNum);
+                printMessage(0,"size %i\tnTaxels %i\text %g\tbinsNum %i\n",size,nTaxels,ext,bNum);
 
                 iCubSkin1D[i].size = size;
 
                 for (size_t j = 0; j < nTaxels; j++)
                 {
-                    bbb = bb.get(j+7).asList();
+                    bbb = bb.get(j+5).asList();
+                    yDebug("Reading taxel %s",bbb->toString().c_str());
                     iCubSkin1D[i].taxel[j].ID = bbb->get(0).asInt();
                     iCubSkin1D[i].taxel[j].pwe.resize(ext,bNum);
                     
                     iCubSkin1D[i].taxel[j].pwe.setHist(vectorFromBottle(*bbb->get(1).asList(),0,bNum));
                 }
+                printf("Debug\n");
             }
         }
         else
@@ -759,7 +766,7 @@ bool vtRFThread::load()
             }
         }
     }
-
+    printf("Debug\n");
     return true;
 }
 
@@ -781,7 +788,7 @@ bool vtRFThread::save()
                 myfile << "[" << iCubSkin1D[i].name << "]" << endl;
                 myfile << "size\t"    << iCubSkin1D[i].size << endl;    
                 myfile << "nTaxels\t" << iCubSkin1D[i].taxel.size() << endl;
-                myfile << "ext\t "    << ext << endl;
+                myfile << "ext \t"    << ext << endl;
                 myfile << "binsNum\t" << bNum << endl;
 
                 for (size_t j = 0; j < iCubSkin1D[i].taxel.size(); j++)

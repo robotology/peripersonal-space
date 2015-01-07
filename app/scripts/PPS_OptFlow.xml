@@ -107,6 +107,11 @@
     </module>
 
     <connection>
+        <from>/skinManager/skin_events:o</from>
+        <to>/visuoTactileRF/skin_events:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
         <from>/icub/camcalib/left/out</from>
         <to>/pf3dTracker/video:i</to>
         <protocol>udp</protocol>
