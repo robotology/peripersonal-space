@@ -264,15 +264,21 @@ protected:
     void sendContactsToSkinGui();
 
     /**
-    * Detects a contact onto the skin:
+    * Detects a contact onto the skin.
+    * A suitable contact has this requirements:
+    *   1. it has to be higher than SKIN_THRES
+    *   2. more than two taxels should be active for that contact (in order to avoid spikes)
+    *   3. it should be in the proper skinpart (forearms and hands)
+    *   4. it should activate one of the taxels used by the module
+    *      (e.g. the fingers will not be considered)
     * @param _sCL is the skinContactList from which sorting out the events
     *             (usually provided by the skinManager)
     * @param _IDx is the index of the iCubSkin affected by the contact
                   (basically, the index of the skinPart that has been touched)
     * @param _IDv is a vector of IDs of the taxels activated
     **/
-    bool detectContact(iCub::skinDynLib::skinContactList *_sCL, int &_IDx,
-                       std::vector <unsigned int> &_IDv);
+    bool detectContact(iCub::skinDynLib::skinContactList *_sCL, int &IDx,
+                       std::vector <unsigned int> &IDv);
 
     /**
     *

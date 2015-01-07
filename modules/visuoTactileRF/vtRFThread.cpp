@@ -628,11 +628,17 @@ void vtRFThread::sendContactsToSkinGui()
 }
 
 bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx,
-                               std::vector <unsigned int> &v)
+                               std::vector <unsigned int> &idv)
 {
-    // Search for a suitable contact:
+    // Search for a suitable contact. It has this requirements:
+    //   1. it has to be higher than SKIN_THRES
+    //   2. more than two taxels should be active for that contact (in order to avoid spikes)
+    //   3. it should be in the proper skinpart (forearms and hands)
+    //   4. it should activate one of the taxels used by the module
+    //      (e.g. the fingers will not be considered)
     for(iCub::skinDynLib::skinContactList::iterator it=_sCL->begin(); it!=_sCL->end(); it++)
     {
+        idv.clear();
         if( it -> getPressure() > SKIN_THRES && (it -> getTaxelList()).size() > 2 )
         {
             for (size_t i = 0; i < iCubSkinSize; i++)
@@ -649,15 +655,49 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
                     (it -> getSkinPart() ==     HAND_LEFT && iCubSkinName == "left_hand"    )    )
                 {
                     idx = i;
-                    v = it -> getTaxelList();
+                    std::vector <unsigned int> txlList = it -> getTaxelList();
 
-                    printMessage(1,"Contact! Skin part: %s`\tTaxels' ID:",iCubSkinName.c_str());
-                    if (verbosity>=1)
+                    bool itHasBeenTouched = false;
+
+                    if (modality=="1D")
                     {
-                        for (size_t i = 0; i < v.size(); i++)
-                            printf("\t%i",v[i]);
+                        for (size_t j = 0; j < iCubSkin1D[i].taxel.size(); j++)
+                        {
+                            for (size_t w = 0; w < txlList.size(); w++)
+                            {
+                                if (iCubSkin1D[i].taxel[j].ID == txlList[w])
+                                {
+                                    itHasBeenTouched = true;
+                                    idv.push_back(txlList[w]);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (size_t j = 0; j < iCubSkin2D[i].taxel.size(); j++)
+                        {
+                            for (size_t w = 0; w < txlList.size(); w++)
+                            {
+                                if (iCubSkin2D[i].taxel[j].ID == txlList[w])
+                                {
+                                    itHasBeenTouched = true;
+                                    idv.push_back(txlList[w]);
+                                }
+                            }
+                        }
+                    }
 
-                        printf("\n");
+                    if (itHasBeenTouched)
+                    {
+                        printMessage(1,"Contact! Skin part: %s`\tTaxels' ID:",iCubSkinName.c_str());
+                        if (verbosity>=1)
+                        {
+                            for (size_t i = 0; i < idv.size(); i++)
+                                printf("\t%i",idv[i]);
+
+                            printf("\n");
+                        }
                     }
 
                     return true;
@@ -958,14 +998,8 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
                 IncomingEvent4Taxel2D projection = projectIntoTaxelRF(iCubSkin2D[IDx].taxel[j].RF,T_a,eventsBuffer[k]);
                 printMessage(4,"Training Taxels: skinPart %d ID %i k %i NORM %g TTC %g\n",IDx,iCubSkin2D[IDx].taxel[j].ID,k,projection.NRM,projection.TTC);
 
-                if (itHasBeenTouched == true)
-                {
-                    iCubSkin2D[IDx].taxel[j].addSample(projection);
-                }
-                else
-                {
-                    iCubSkin2D[IDx].taxel[j].removeSample(projection);
-                }
+                if (itHasBeenTouched == true)   iCubSkin2D[IDx].taxel[j].addSample(projection);
+                else                            iCubSkin2D[IDx].taxel[j].removeSample(projection);
             }
 
             if (itHasBeenTouched == true)   dumpedVector.push_back(1.0);
