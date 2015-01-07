@@ -136,6 +136,7 @@ void vtWThread::run()
     {
         if (optFlowBottle->size()>=3)
         {
+            yDebug("Computing data from the optFlowTracker %g\n",getEstUsed());
             optFlowPos.zero();
             
             optFlowPos[0]=optFlowBottle->get(0).asDouble();
@@ -196,6 +197,7 @@ void vtWThread::run()
             {
                 if (doubleTouchBottle->get(3).asString() != "" && fgtTrackerBottle->get(0).asInt() != 0)
                 {
+                    yDebug("Computing data from the fingertipTracker %g\n",getEstUsed());
                     doubleTouchStep = doubleTouchBottle->get(0).asInt();
                     fgtTrackerPos[0] = fgtTrackerBottle->get(1).asDouble();
                     fgtTrackerPos[1] = fgtTrackerBottle->get(2).asDouble();
@@ -266,9 +268,10 @@ void vtWThread::run()
                     } 
                     else
                     {
-                        yError(" vtWThread::run(): Unknown task received from double touch thread!");
+                        yError(" [vtWThread] Unknown task received from the double touch thread!");
                     }
-                                   
+                    
+                    yDebug("Computing data from the doubleTouch %g\n",getEstUsed());
                     AWPolyElement el2(doubleTouchPos,Time::now());
                     doubleTouchVelEstimate=linEst_doubleTouch->estimate(el2);
                     events.push_back(IncomingEvent(doubleTouchPos,doubleTouchVelEstimate,-1.0,"doubleTouch"));

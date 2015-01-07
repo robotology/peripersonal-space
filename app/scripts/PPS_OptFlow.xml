@@ -29,12 +29,6 @@
         <stdio></stdio>
     </module>
     <module>
-        <name>visuoTactileRF</name>
-        <parameters></parameters>
-        <node>icub15</node>
-        <stdio></stdio>
-    </module>
-    <module>
         <name>visuoTactileWrapper</name>
         <parameters></parameters>
         <node>icub15</node>
@@ -42,6 +36,12 @@
     </module>
     <module>
         <name>ultimateTracker</name>
+        <parameters></parameters>
+        <node>icub15</node>
+        <stdio></stdio>
+    </module>
+    <module>
+        <name>visuoTactileRF</name>
         <parameters></parameters>
         <node>icub15</node>
         <stdio></stdio>
