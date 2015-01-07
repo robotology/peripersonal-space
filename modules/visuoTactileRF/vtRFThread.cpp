@@ -237,7 +237,7 @@ bool vtRFThread::threadInit()
             }
             load();
 
-            yInfo("iCubSkin1D correctly instantiated. Size: %i",iCubSkin1D.size()));
+            yInfo("iCubSkin1D correctly instantiated. Size: %i",iCubSkin1D.size());
             if (verbosity>= 2)
             {
                 for (size_t i = 0; i < iCubSkin1D.size(); i++)
@@ -259,7 +259,7 @@ bool vtRFThread::threadInit()
             }
             load();
 
-            yInfo("iCubSkin2D correctly instantiated. Size: %i\n",iCubSkin2D.size()));
+            yInfo("iCubSkin2D correctly instantiated. Size: %i\n",iCubSkin2D.size());
             if (verbosity>= 2)
             {
                 for (size_t i = 0; i < iCubSkin2D.size(); i++)
