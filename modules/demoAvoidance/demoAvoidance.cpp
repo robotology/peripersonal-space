@@ -144,6 +144,16 @@ public:
         {
             motionGain = 1.0;
         }
+        if (motionGain!=-1.0)
+        {
+            yWarning("motionGain set to catching");
+        }
+
+        bool autoConnect=rf.check("autoConnect");
+        if (autoConnect)
+        {
+            yWarning("Autoconnect mode set to ON");
+        }
 
         Property optionCartL;
         optionCartL.put("device","cartesiancontrollerclient");
@@ -218,6 +228,11 @@ public:
 
         dataPort.open(("/"+name+"/data:i").c_str());
         dataPort.setReader(*this);
+
+        if (autoConnect)
+        {
+            Network::connect("/visuoTactileRF/skin_events:o",("/"+name+"/data:i").c_str());
+        }
         return true; 
     }
 
@@ -281,23 +296,39 @@ public:
 };
 
 
-
 //********************************************
 int main(int argc, char * argv[])
 {
     Network yarp;
+    YARP_REGISTER_DEVICES(icubmod)
+
+    ResourceFinder moduleRF;
+    moduleRF.setVerbose(false);
+    moduleRF.setDefaultContext("periPersonalSpace");
+    moduleRF.setDefaultConfigFile("demoAvoidance.ini");
+    moduleRF.configure(argc,argv);
+
+    if (moduleRF.check("help"))
+    {    
+        yInfo("");
+        yInfo("Options:");
+        yInfo("   --context     path:  where to find the called resource (default periPersonalSpace).");
+        yInfo("   --from        from:  the name of the .ini file (default demoAvoidance.ini).");
+        yInfo("   --name        name:  the name of the module (default avoidance).");
+        yInfo("   --autoConnect flag:  if to auto connect the ports or not. Default no.");
+        yInfo("   --catching    flag:  if enabled, the robot will catch the target instead of avoiding it.");
+        yInfo("");
+        return 0;
+    }
+
     if (!yarp.checkNetwork())
     {
-        printf("No Network!!!\n");
+        yError("No Network!!!");
         return -1;
     }
 
-    YARP_REGISTER_DEVICES(icubmod)
-
-    ResourceFinder rf;
-    rf.configure(argc,argv);
     Avoidance module;
-    return module.runModule(rf);
+    return module.runModule(moduleRF);
 }
 
 
