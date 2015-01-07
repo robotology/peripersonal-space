@@ -651,7 +651,7 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
                     idx = i;
                     v = it -> getTaxelList();
 
-                    printMessage(1,"Contact! Taxels' ID:");
+                    printMessage(1,"Contact! Skin part: %s`\tTaxels' ID:",iCubSkinName.c_str());
                     if (verbosity>=1)
                     {
                         for (size_t i = 0; i < v.size(); i++)
