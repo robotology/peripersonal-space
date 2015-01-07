@@ -195,46 +195,42 @@ public:
             if (rf.check("name"))
             {
                 name = rf.find("name").asString();
-                cout << "Module name set to "<<name<<endl;  
+                yInfo("Module name set to %s", name.c_str());
             }
-            else cout << "Module name set to default, i.e. " << name << endl;
+            else yInfo("Module name set to default, i.e. %s", name.c_str());
             setName(name.c_str());
 
         //******************* ROBOT ******************
             if (rf.check("robot"))
             {
                 robot = rf.find("robot").asString();
-                cout << "Robot is " << robot << endl;
+                yInfo("Robot is %s", robot.c_str());
             }
-            else cout << "Could not find robot option in the config file; using "
-                      << robot << " as default\n";
+            else yInfo("Could not find robot option in the config file; using %s as default",robot.c_str());
 
         //***************** MODALITY *****************
             if (rf.check("modality"))
             {
                 modality = rf.find("modality").asString();
-                cout << "modality is " << modality << endl;
+                yInfo("modality is  %s", modality.c_str());
             }
-            else cout << "Could not find modality option in the config file; using "
-                      << modality << " as default\n";
+            else yInfo("Could not find modality option in the config file; using %s as default",modality.c_str());
 
         //******************* VERBOSE ******************
             if (rf.check("verbosity"))
             {
                 verbosity = rf.find("verbosity").asInt();
-                cout << "vtRFThread verbosity set to " << verbosity << endl;
+                yInfo("vtRFThread verbosity set to %i", verbosity);
             }
-            else cout << "Could not find verbosity option in " <<
-                         "config file; using "<< verbosity <<" as default\n";
+            else yInfo("Could not find verbosity option in config file; using %i as default",verbosity);
 
         //****************** rate ******************
             if (rf.check("rate"))
             {
                 rate = rf.find("rate").asInt();
-                cout << "vtRFThread working at " << rate << " ms\n";
+                yInfo("vtRFThread working at  %i ms", rate);
             }
-            else cout << "Could not find rate in the config file; using "
-                      << rate << " ms as default\n";
+            else yInfo("Could not find rate in the config file; using %i ms as default",rate);
 
         //************* skinTaxels' Resource finder **************
             ResourceFinder skinRF;
@@ -321,7 +317,7 @@ public:
             }
             else
             {
-                printf("ERROR! No skin's configuration files found.\n");
+                yError(" No skin's configuration files found.");
                 return 0;
             }
 
@@ -355,14 +351,14 @@ public:
                 {
                     delete vtRFThrd;
                     vtRFThrd = 0;
-                    cout << "\nERROR!!! vtRFThread wasn't instantiated!!\n";
+                    yError("vtRFThread wasn't instantiated!!");
                     return false;
                 }
-                cout << "VISUO TACTILE RECEPTIVE FIELDS: vtRFThread istantiated...\n";
+                yInfo("VISUO TACTILE RECEPTIVE FIELDS: vtRFThread istantiated...");
             }
             else {
                 vtRFThrd = 0;
-                cout << "\nERROR!!! vtRFThread wasn't instantiated. No filenames have been given!\n";
+                yError("vtRFThread wasn't instantiated. No filenames have been given!");
                 return false;
             }
 
@@ -377,7 +373,7 @@ public:
 
     bool close()
     {
-        cout << "VISUO TACTILE RECEPTIVE FIELDS: Stopping thread.." << endl;
+        yInfo("VISUO TACTILE RECEPTIVE FIELDS: Stopping thread..");
         if (vtRFThrd)
         {
             vtRFThrd->stop();
@@ -415,18 +411,19 @@ int main(int argc, char * argv[])
 
     if (moduleRF.check("help"))
     {    
-        cout << endl << "Options:" << endl;
-        cout << "   --context    path:   where to find the called resource (default periPersonalSpace)." << endl;
-        cout << "   --from       from:   the name of the .ini file (default visuoTactileRF.ini)." << endl;
-        cout << "   --name       name:   the name of the module (default visuoTactileRF)." << endl;
-        cout << "   --robot      robot:  the name of the robot. Default icub." << endl;
-        cout << "   --rate       rate:   the period used by the thread. Default 50ms." << endl;
-        cout << "   --verbosity  int:    verbosity level (default 0)." << endl;
-        cout << "   --modality   string: which modality to use (either 1D or 2D, default 1D)." << endl;
-        cout << "   --taxelsFile string: the file from which load and save taxels. Defaults:" << endl;
-        cout << "                        'taxels1D.ini' if modality==1D" << endl;
-        cout << "                        'taxels2D.ini' if modality==2D" << endl;
-        cout << endl;
+        yInfo("");
+        yInfo("Options:");
+        yInfo("   --context    path:   where to find the called resource (default periPersonalSpace).");
+        yInfo("   --from       from:   the name of the .ini file (default visuoTactileRF.ini).");
+        yInfo("   --name       name:   the name of the module (default visuoTactileRF).");
+        yInfo("   --robot      robot:  the name of the robot. Default icub.");
+        yInfo("   --rate       rate:   the period used by the thread. Default 50ms.");
+        yInfo("   --verbosity  int:    verbosity level (default 0).");
+        yInfo("   --modality   string: which modality to use (either 1D or 2D, default 1D).");
+        yInfo("   --taxelsFile string: the file from which load and save taxels. Defaults:");
+        yInfo("                        'taxels1D.ini' if modality==1D");
+        yInfo("                        'taxels2D.ini' if modality==2D");
+        yInfo("");
         return 0;
     }
     
