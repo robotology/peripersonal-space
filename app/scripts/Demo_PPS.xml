@@ -1,5 +1,5 @@
 <application>
-    <name>periPersonalSpace Demo</name>
+    <name>PPS with Optical Flow</name>
 
     <dependencies>
     </dependencies>
@@ -11,39 +11,58 @@
         <tag>PF3DTracker</tag>
     </module>
     <module>
+        <name>motionCUT</name>
+        <parameters>--recogThres 0.015 --blobMinSizeThres 20 --framesPersistence 3 --cropSize</parameters>
+        <node>icub-b1</node>
+        <stdio></stdio>
+    </module>
+    <module>
+        <name>templatePFTracker</name>
+        <parameters></parameters>
+        <node>icub-b2</node>
+        <stdio></stdio>
+    </module>
+    <module>
+        <name>SFM</name>
+        <parameters></parameters>
+        <node>icub13</node>
+        <stdio></stdio>
+    </module>
+    <module>
         <name>visuoTactileRF</name>
         <parameters></parameters>
         <node>icub15</node>
         <stdio></stdio>
-        <tag>visuoTactileRF</tag>
     </module>
     <module>
         <name>visuoTactileWrapper</name>
         <parameters></parameters>
         <node>icub15</node>
         <stdio></stdio>
-        <tag>visuoTactileWrapper</tag>
+    </module>
+    <module>
+        <name>ultimateTracker</name>
+        <parameters></parameters>
+        <node>icub15</node>
+        <stdio></stdio>
     </module>
     <module>
         <name>demoAvoidance</name>
         <parameters></parameters>
         <node>icub15</node>
         <stdio></stdio>
-        <tag>demoAvoidance</tag>
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /vtRF/left --RefreshTime 33 --x 1470 --y 0 --w 400 --h 400 --compact</parameters>
+        <parameters>--name /vtRF/left --RefreshTime 33 --x 0 --y 0 --w 400 --h 400</parameters>
         <node>icub15</node>
         <stdio></stdio>
-        <tag>yarpview</tag>
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /vtRF/right --RefreshTime 33 --x 1470 --y 400 --w 400 --h 400 --compact</parameters>
+        <parameters>--name /vtRF/right --RefreshTime 33 --x 420 --y 0 --w 400 --h 400</parameters>
         <node>icub15</node>
         <stdio></stdio>
-        <tag>yarpview</tag>
     </module>
     <module>
         <name>yarpview</name>
@@ -52,40 +71,41 @@
         <tag>PF3DTracker_viewer</tag>
     </module>
     <module>
-        <name>iCubSkinGui</name>
-        <parameters> --context periPersonalSpace --from left_forearm_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 0 --ypos 640 --width 350 --height 350</parameters>
+        <name>yarpview</name>
+        <parameters>--name /motionCUT_viewer --RefreshTime 33 --x 960 --y 380 --w 320 --h 240 --compact</parameters>
         <node>icub13</node>
-        <tag>iCubSkinGui_left_forearm</tag>
+    </module>
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /templatePFTracker_viewer --RefreshTime 33 --x 1280 --y 80 --w 320 --h 240 --compact</parameters>
+        <node>icub13</node>
+    </module>
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /dispViewer --RefreshTime 33 --x 1600 --y 80 --w 320 --h 240 --compact</parameters>
+        <node>icub13</node>
     </module>
     <module>
         <name>iCubSkinGui</name>
-        <parameters> --context periPersonalSpace --from left_hand_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 370 --ypos 640 --width 350 --height 350</parameters>
+        <parameters> --context periPersonalSpace --from left_forearm_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 0 --ypos 690 --width 300 --height 300</parameters>
         <node>icub13</node>
-        <tag>iCubSkinGui_left_hand</tag>
     </module>
     <module>
         <name>iCubSkinGui</name>
-        <parameters> --context periPersonalSpace --from right_forearm_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 740 --ypos 640 --width 350 --height 350</parameters>
+        <parameters> --context periPersonalSpace --from left_hand_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 320 --ypos 690 --width 300 --height 300</parameters>
         <node>icub13</node>
-        <tag>iCubSkinGui_right_forearm</tag>
     </module>
     <module>
         <name>iCubSkinGui</name>
-        <parameters> --context periPersonalSpace --from right_hand_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 1110 --ypos 640 --width 350 --height 350</parameters>
+        <parameters> --context periPersonalSpace --from right_forearm_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 640 --ypos 690 --width 300 --height 300</parameters>
         <node>icub13</node>
-        <tag>iCubSkinGui_right_hand</tag>
+    </module>
+    <module>
+        <name>iCubSkinGui</name>
+        <parameters> --context periPersonalSpace --from right_hand_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 960 --ypos 690 --width 300 --height 300</parameters>
+        <node>icub13</node>
     </module>
 
-    <connection>
-        <from>/icub/camcalib/left/out</from>
-        <to>/visuoTactileRF/imageL:i</to>
-        <protocol>udp</protocol>
-    </connection>
-    <connection>
-        <from>/icub/camcalib/right/out</from>
-        <to>/visuoTactileRF/imageR:i</to>
-        <protocol>udp</protocol>
-    </connection>
     <connection>
         <from>/icub/camcalib/left/out</from>
         <to>/pf3dTracker/video:i</to>
@@ -100,6 +120,56 @@
         <from>/pf3dTracker/data:o</from>
         <to>/visuoTactileWrapper/pf3dTracker:i</to>
         <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/camcalib/right/out</from>
+        <to>/SFM/right:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/camcalib/left/out</from>
+        <to>/SFM/left:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/SFM/disp:o</from>
+        <to>/dispViewer</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/ultimateTracker/Manager/gui:o</from>
+        <to>/iCubGui/objects</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/camcalib/left/out</from>
+        <to>/templatePFTracker/left/image:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/templatePFTracker/left/image:o</from>
+        <to>/templatePFTracker_viewer</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/camcalib/left/out</from>
+        <to>/visuoTactileRF/imageL:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/camcalib/right/out</from>
+        <to>/visuoTactileRF/imageR:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/camcalib/left/out</from>
+        <to>/motionCUT/img:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/motionCUT/img:o</from>
+        <to>/motionCUT_viewer</to>
+        <protocol>udp</protocol>
     </connection>
     <connection>
         <from>/visuoTactileWrapper/events:o</from>
