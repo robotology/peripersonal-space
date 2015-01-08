@@ -142,7 +142,7 @@
         <protocol>tcp</protocol>
     </connection>
     <connection>
-        <from>/ultimateTracker/Manager/gui:o</from>
+        <from>/visuoTactileWrapper/gui:o</from>
         <to>/iCubGui/objects</to>
         <protocol>tcp</protocol>
     </connection>
