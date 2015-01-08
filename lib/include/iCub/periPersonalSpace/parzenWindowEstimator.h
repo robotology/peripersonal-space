@@ -76,9 +76,9 @@ using namespace std;
 class parzenWindowEstimator1D
 {
   private:
-    double ext;    // the maximum extension of the Receptive Field
+    double ext;      // the maximum extension of the Receptive Field
     int    binsNum;  // the number of partitions of the input space
-    double binWidth;   // the extension of the single sampling unit
+    double binWidth; // the extension of the single sampling unit
 
     Vector sigm;   // sigma of the gaussians (by default they're all equal)
     Vector hist;   // histogram of the 
@@ -138,17 +138,17 @@ class parzenWindowEstimator1D
 class parzenWindowEstimator2D
 {
   private:
-    std::vector<double> extX;   // the extension of the Receptive Field in the x dimension
-    std::vector<double> extY;   // the extension of the Receptive Field in the y dimension
+    std::vector<double> extX;     // the extension of the Receptive Field in the x dimension
+    std::vector<double> extY;     // the extension of the Receptive Field in the y dimension
 
     std::vector<int>    binsNum;  // the number of partitions of the input space (x and y dimensions)
-    std::vector<double> binWidth;   // the extension of the single sampling unit (x and y dimensions)
+    std::vector<double> binWidth; // the extension of the single sampling unit (x and y dimensions)
 
-    std::vector<int>    firstPosBin; // the first bin for which we have positive values
-    std::vector<double> firstPosBinShift; // the shift from zero to the start value of the firstPosBin
+    std::vector<int>    firstPosBin;      // the first bin for which we have positive values (x and y dimensions)
+    std::vector<double> firstPosBinShift; // the shift from zero to the start value of the firstPosBin (x and y dimensions)
 
-    std::vector<double> binStartsX; //these are initialed at startup to contain the star, midpoint and end of each bin in the x dim.
-    std::vector<double> binStartsY; //these are initialed at startup to contain the star, midpoint and end of each bin in the y dim.
+    std::vector<double> binStartsX; //these are initialized at startup to contain the start, midpoint and end of each bin in the x dim.
+    std::vector<double> binStartsY; //these are initialized at startup to contain the start, midpoint and end of each bin in the y dim.
     
     double sigmX;   // sigma of the gaussians in the x dimension (by default they're all equal)
     double sigmY;   // sigma of the gaussians in the y dimension (by default they're all equal)

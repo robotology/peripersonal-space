@@ -35,9 +35,9 @@ double gauss2D(const double x_0, const double y_0,
 
     bool parzenWindowEstimator1D::resize(const double e, const int bN)
     {
-        ext    =  e;
+        ext      =  e;
         binsNum  = bN;
-        binWidth   = ext/binsNum;
+        binWidth = ext/binsNum;
 
         hist.resize(binsNum,0.0);
         sigm.resize(binsNum,0.75*binWidth);
@@ -87,19 +87,17 @@ double gauss2D(const double x_0, const double y_0,
 
     double parzenWindowEstimator1D::getF_X_scaled(const double x)
     {
-        double max   =   0;
-        // double sum   =   0;
-        double where = ext;
+        double max      =  0;
         int granularity = 10;
+        // double sum   =   0;
+        
 
         for (size_t i = 0; i < binsNum*granularity; i++)
         {
             double func = getF_X(i*binWidth/granularity);
-            where = func>max?(i*binWidth/granularity):where;
             max   = func>max?func:max;
             // sum  += func;
         }
-        // printf("max is %g at %g\t avg is %g \n",max,where,avg);
         // double avg = sum/(binsNum*granularity);
         // double scalingfactor_avg = 100/avg;
         double scalingfactor_max = 255/max;
@@ -121,9 +119,6 @@ double gauss2D(const double x_0, const double y_0,
     {
         std::vector<double> eX; eX.push_back(-0.1); eX.push_back(0.2);
         std::vector<double> eY;  eY.push_back(0.0); eY.push_back(1.2);
-        // std::vector<int>    bN;    bN.push_back(8);   bN.push_back(8);
-
-        // Let's reduce the resolution in TTC domain
         std::vector<int>    bN;    bN.push_back(8);   bN.push_back(4);
 
         resize(eX,eY,bN);
@@ -296,24 +291,19 @@ double gauss2D(const double x_0, const double y_0,
     
     double parzenWindowEstimator2D::getF_X_scaled(const std::vector<double> x)
     {
-        int b0=-1;
-        int b1=-1;
-        if (!getIndexes(x,b0,b1))
-            return 0;
-
-        double max  =   0;
+        double max      = 0;
+        int granularity = 2;
         // double sum  =   0;
-        // int granularity = 2;
         // int cnt     = 0;
 
         // the granularity has been introduced to increase the precision of the process.
-        for (size_t i = 0; i < binsNum[0]/**granularity*/; i++)
+        for (size_t i = 0; i < binsNum[0]*granularity; i++)
         {
-            for (size_t j = 0; j < binsNum[1]/**granularity*/; j++)
+            for (size_t j = 0; j < binsNum[1]*granularity; j++)
             {
                 std::vector<double> xx;
-                xx.push_back(extX[0]+i*binWidth[0]/*/granularity*/);
-                xx.push_back(extY[0]+j*binWidth[1]/*/granularity*/);
+                xx.push_back(extX[0]+i*binWidth[0]*granularity);
+                xx.push_back(extY[0]+j*binWidth[1]*granularity);
                 double func = getF_X(xx);
 
                 max  = func>max?func:max;
