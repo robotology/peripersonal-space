@@ -675,6 +675,7 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
                     }
                     else
                     {
+                        getRepresentativeTaxels(txlList, idx, idv);
                         cout << endl;
                         for (size_t j = 0; j < iCubSkin2D[i].taxel.size(); j++)
                         {
@@ -691,8 +692,7 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
                             cout << idv[w] << " ";
                         }
                         cout << endl;
-
-                        getRepresentativeTaxels(txlList, idx, idv);
+                        
                         if (idv.size()>0)
                         {
                             itHasBeenTouched == true;
@@ -2043,8 +2043,8 @@ bool vtRFThread::getRepresentativeTaxels(const std::vector<unsigned int> IDv, co
     
     if (iCubSkin2D[IDx].Taxel2Repr.empty())
     {
-            v = IDv; //we simply copy the activated taxels
-            return false;
+        v = IDv; //we simply copy the activated taxels
+        return false;
     }
     else
     {
@@ -2052,7 +2052,7 @@ bool vtRFThread::getRepresentativeTaxels(const std::vector<unsigned int> IDv, co
         {
             if (iCubSkin2D[IDx].Taxel2Repr[*it] == -1)
             {
-                yError("[%s] taxel %u activated, but representative taxel undefined - ignoring.",iCubSkin2D[IDx].name.c_str(),*it);
+                yWarning("[%s] taxel %u activated, but representative taxel undefined - ignoring.",iCubSkin2D[IDx].name.c_str(),*it);
             }
             else
             {
