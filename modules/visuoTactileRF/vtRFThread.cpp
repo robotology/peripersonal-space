@@ -338,15 +338,15 @@ void vtRFThread::run()
             yDebug("I'm bufferizing! Size %i",eventsBuffer.size());
         }
 
-        // limit the size of the buffer to 60, i.e. 3 seconds of acquisition
-        if (eventsBuffer.size() >= 60)
+        // limit the size of the buffer to 80, i.e. 4 seconds of acquisition
+        if (eventsBuffer.size() >= 80)
         {
             eventsBuffer.erase(eventsBuffer.begin());
             yTrace("Too many samples: removing the older element from the buffer..");
         }
 
         // detect contacts and train the taxels
-        if (skinContacts && eventsBuffer.size()>10)
+        if (skinContacts && eventsBuffer.size()>20)
         {
             std::vector<unsigned int> IDv; IDv.clear();
             int IDx = -1;
@@ -676,32 +676,33 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
                     else
                     {
                         getRepresentativeTaxels(txlList, idx, idv);
-                        cout << endl;
-                        for (size_t j = 0; j < iCubSkin2D[i].taxel.size(); j++)
-                        {
-                            cout << iCubSkin2D[i].taxel[j].ID << " ";
-                        }
-                        cout << endl;
-                        for (size_t w = 0; w < txlList.size(); w++)
-                        {
-                            cout << txlList[w] << " ";
-                        }
-                        cout << endl;
-                        for (size_t w = 0; w < idv.size(); w++)
-                        {
-                            cout << idv[w] << " ";
-                        }
-                        cout << endl;
+                        
+                        // for (size_t j = 0; j < iCubSkin2D[i].taxel.size(); j++)
+                        // {
+                        //     cout << iCubSkin2D[i].taxel[j].ID << " ";
+                        // }
+                        // cout << endl;
+                        // for (size_t w = 0; w < txlList.size(); w++)
+                        // {
+                        //     cout << txlList[w] << " ";
+                        // }
+                        // cout << endl;
+                        // for (size_t w = 0; w < idv.size(); w++)
+                        // {
+                        //     cout << idv[w] << " ";
+                        // }
+                        // cout << endl;
                         
                         if (idv.size()>0)
                         {
-                            itHasBeenTouched == true;
+                            // printf("I have been touched!!!!!!\n");
+                            itHasBeenTouched = true;
                         }
                     }
 
                     if (itHasBeenTouched)
                     {
-                        printMessage(1,"Contact! Skin part: %s`\tTaxels' ID:",iCubSkinName.c_str());
+                        yInfo("[vtRF] Contact! Skin part: %s`\tTaxels' ID:",iCubSkinName.c_str());
                         if (verbosity>=1)
                         {
                             for (size_t i = 0; i < idv.size(); i++)
@@ -2068,7 +2069,7 @@ bool vtRFThread::getRepresentativeTaxels(const std::vector<unsigned int> IDv, co
 
         if (v.empty())
         {
-            yError("Representative taxels' vector is empty! Skipping.");
+            yWarning("Representative taxels' vector is empty! Skipping.");
             return false;
         }
         
