@@ -70,7 +70,7 @@ vtRFThread::vtRFThread(int _rate, const string &_name, const string &_robot, con
         {
             taxelsFile = rf->check("taxelsFile", Value("taxels2D.ini")).asString().c_str();
         }
-        printMessage(0,"Storing file set to: %s\n", (path+taxelsFile).c_str());
+        yInfo("Storing file set to: %s", (path+taxelsFile).c_str());
 }
 
 bool vtRFThread::threadInit()
@@ -181,7 +181,7 @@ bool vtRFThread::threadInit()
 
         if (!ddT.open(OptT))
         {
-            printMessage(0,"ERROR: could not open torso PolyDriver!\n");
+            yError("Could not open torso PolyDriver!");
             return false;
         }
         ok = 1;
@@ -191,7 +191,7 @@ bool vtRFThread::threadInit()
         }
         if (!ok)
         {
-            printMessage(0,"\nERROR: Problems acquiring head interfaces!!!!\n");
+            yError("Problems acquiring head interfaces!!!!");
             return false;
         }
         iencsT->getAxes(&jntsT);
@@ -207,7 +207,7 @@ bool vtRFThread::threadInit()
 
         if (!ddH.open(OptH))
         {
-            printMessage(0,"ERROR: could not open head PolyDriver!\n");
+            yError("ERROR: could not open head PolyDriver!");
             return false;
         }
         ok = 1;
@@ -217,21 +217,21 @@ bool vtRFThread::threadInit()
         }
         if (!ok)
         {
-            printMessage(0,"\nERROR: Problems acquiring head interfaces!!!!\n");
+            yError("Problems acquiring head interfaces!!!!");
             return false;
         }
         iencsH->getAxes(&jntsH);
         encsH = new yarp::sig::Vector(jntsH,0.0);
 
     /**************************/
-        printMessage(1,"Setting up iCubSkin...\n");
+        yDebug("Setting up iCubSkin...");
         iCubSkinSize=filenames.size();
         if (modality=="1D")
         {
             for(unsigned int i=0;i<filenames.size();i++)
             {
                 string filePath = filenames[i];
-                printMessage(1,"i: %i filePath: %s\n",i,filePath.c_str());
+                yDebug("i: %i filePath: %s",i,filePath.c_str());
                 skinPart1D sP;
                 if ( setTaxelPosesFromFile1D(filePath,sP) )
                     iCubSkin1D.push_back(sP);
@@ -253,14 +253,14 @@ bool vtRFThread::threadInit()
             for(unsigned int i=0;i<filenames.size();i++)
             {
                 string filePath = filenames[i];
-                printMessage(1,"i: %i filePath: %s\n",i,filePath.c_str());
+                yDebug("i: %i filePath: %s",i,filePath.c_str());
                 skinPart2D sP;
                 if ( setTaxelPosesFromFile2D(filePath,sP) )
                     iCubSkin2D.push_back(sP);
             }
             load();
 
-            yInfo("iCubSkin2D correctly instantiated. Size: %i\n",iCubSkin2D.size());
+            yInfo("iCubSkin2D correctly instantiated. Size: %i",iCubSkin2D.size());
             if (verbosity>= 2)
             {
                 for (size_t i = 0; i < iCubSkin2D.size(); i++)
@@ -749,14 +749,14 @@ bool vtRFThread::load()
                 double ext  = bb.find("ext").asDouble();
                 int bNum    = bb.find("binsNum").asInt();
 
-                printMessage(0,"size %i\tnTaxels %i\text %g\tbinsNum %i\n",size,nTaxels,ext,bNum);
+                yDebug("    [%s] size %i\tnTaxels %i\text %g\tbinsNum %i\n",iCubSkin1D[i].name.c_str(),size,nTaxels,ext,bNum);
 
                 iCubSkin1D[i].size = size;
 
                 for (size_t j = 0; j < nTaxels; j++)
                 {
                     bbb = bb.get(j+5).asList();
-                    yDebug("Reading taxel %s",bbb->toString().c_str());
+                    printMessage(6,"Reading taxel %s\n",bbb->toString().c_str());
                     iCubSkin1D[i].taxel[j].ID = bbb->get(0).asInt();
                     iCubSkin1D[i].taxel[j].pwe.resize(ext,bNum);
                     
@@ -789,8 +789,8 @@ bool vtRFThread::load()
                 bNum.push_back(bbb->get(1).asInt());
                 bbb = bb.find("Mapping").asList();
 
-                printMessage(6,"size %i\tnTaxels %i\textX %g  %g\n",size,nTaxels,extX[0],extX[1]);
-                printMessage(6,"extY %g  %g\tbNum %i  %i\t\n",extY[0],extY[1],bNum[0],bNum[1]);
+                yDebug("    [%s] size %i\tnTaxels %i\textX %g  %g\n",iCubSkin1D[i].name.c_str(),size,nTaxels,extX[0],extX[1]);
+                yDebug("    extY %g  %g\tbinsNum %i  %i\n",extY[0],extY[1],bNum[0],bNum[1]);
                 printMessage(6,"mapp\n");
                 for (size_t j = 0; j < size; j++)
                 {
@@ -807,6 +807,7 @@ bool vtRFThread::load()
                 for (size_t j = 0; j < nTaxels; j++)
                 {
                     bbb = bb.get(j+7).asList();
+                    printMessage(6,"Reading taxel %s\n",bbb->toString().c_str());
                     iCubSkin2D[i].taxel[j].ID = bbb->get(0).asInt();
                     iCubSkin2D[i].taxel[j].pwe.resize(extX,extY,bNum);
                     
