@@ -141,6 +141,19 @@ protected:
 
     double timeNow;
 
+    Port outPortGui;
+    Port outPortEvents;
+
+    /**
+    * Handles the iCubGui, by drawing the tracked object on the screen.
+    **/
+    void sendGuiTarget();
+
+    /**
+    * Deletes the object from the gui if it is not tracked any more.
+    **/
+    void deleteGuiTarget();
+
     /**
     * Prints a message according to the verbosity level:
     * @param l is the level of verbosity: if level > verbosity, something is printed

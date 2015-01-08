@@ -29,7 +29,7 @@ bool utManagerThread::threadInit()
     Network::connect("/motionCUT/blobs:o",("/"+name+"/mCUT:i").c_str());
     Network::connect("/templatePFTracker/target:o",("/"+name+"/pfTracker:i").c_str());
     Network::connect(("/"+name+"/SFM:o").c_str(),"/SFM/rpc");
-    Network::connect(("/"+name+"/gui:o").c_str(),"/iCubGui/objects");
+    // Network::connect(("/"+name+"/gui:o").c_str(),"/iCubGui/objects");
     Network::connect(("/"+name+"/events:o").c_str(),"/visuoTactileWrapper/optFlow:i");    
 
     return true;

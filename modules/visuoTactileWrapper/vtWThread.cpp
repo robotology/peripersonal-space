@@ -34,6 +34,7 @@ bool vtWThread::threadInit()
     pf3dTrackerPort.open(("/"+name+"/pf3dTracker:i").c_str());
     doubleTouchPort.open(("/"+name+"/doubleTouch:i").c_str());
     fgtTrackerPort.open(("/"+name+"/fingertipTracker:i").c_str());
+    outPortGui.open(("/"+name+"/gui:o").c_str());
     eventsPort.open(("/"+name+"/events:o").c_str());
     depth2kinPort.open(("/"+name+"/depth2kin:o").c_str());
     
@@ -42,6 +43,7 @@ bool vtWThread::threadInit()
     Network::connect("/doubleTouch/status:o",("/"+name+"/doubleTouch:i").c_str());
     Network::connect("/fingertipTracker/out:o",("/"+name+"/fingertipTracker:i").c_str());
     Network::connect(("/"+name+"/events:o").c_str(),"/visuoTactileRF/events:i");
+    Network::connect(("/"+name+"/gui:o").c_str(),"/iCubGui/objects");
 
     Property OptGaze;
     OptGaze.put("device","gazecontrollerclient");
@@ -298,6 +300,7 @@ void vtWThread::run()
         }
         eventsPort.write();
         timeNow = yarp::os::Time::now();
+        sendGuiTarget();
     }
     else if (yarp::os::Time::now() - timeNow > 1.0)
     {
@@ -308,6 +311,53 @@ void vtWThread::run()
         linEst_pf3dTracker -> reset();
         linEst_doubleTouch -> reset();
         linEst_fgtTracker  -> reset();
+        deleteGuiTarget();
+    }
+}
+
+void vtWThread::sendGuiTarget()
+{
+    if (outPortGui.getOutputCount()>0)
+    {
+        Bottle obj;
+        obj.addString("object");
+        obj.addString("Target");
+     
+        // size 
+        obj.addDouble(50.0);
+        obj.addDouble(50.0);
+        obj.addDouble(50.0);
+    
+        // positions
+        obj.addDouble(1000.0*events[0].Pos[0]);
+        obj.addDouble(1000.0*events[0].Pos[1]);
+        obj.addDouble(1000.0*events[0].Pos[2]);
+    
+        // orientation
+        obj.addDouble(0.0);
+        obj.addDouble(0.0);
+        obj.addDouble(0.0);
+    
+        // color
+        obj.addInt(255);
+        obj.addInt(125);
+        obj.addInt(125);
+    
+        // transparency
+        obj.addDouble(0.9);
+    
+        outPortGui.write(obj);
+    }
+}
+
+void vtWThread::deleteGuiTarget()
+{
+    if (outPortGui.getOutputCount()>0)
+    {
+        Bottle obj;
+        obj.addString("delete");
+        obj.addString("Target");
+        outPortGui.write(obj);
     }
 }
 
@@ -330,6 +380,9 @@ int vtWThread::printMessage(const int l, const char *f, ...) const
 
 void vtWThread::threadRelease()
 {
+    printMessage(0,"Deleting target from the iCubGui..\n");
+        deleteGuiTarget();
+
     yDebug("Closing gaze controller..");
         Vector ang(3,0.0);
         igaze -> lookAtAbsAngles(ang);
