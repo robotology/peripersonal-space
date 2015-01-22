@@ -337,7 +337,7 @@ public:
     /**
     * Loading function. It saves the skinParts as well as their receptive fields.
     **/
-    bool load();
+    string load();
 
     /**
     * Resets the learning

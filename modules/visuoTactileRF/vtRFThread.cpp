@@ -720,7 +720,7 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
     return false;
 }
 
-bool vtRFThread::load()
+string vtRFThread::load()
 {
     rf->setVerbose(true);
     string fileName=rf->findFile("taxelsFile").c_str();
@@ -728,7 +728,8 @@ bool vtRFThread::load()
     if (fileName=="")
     {
         yWarning("[vtRF::load] No filename has been found. Skipping..");
-        return false;
+        string ret="";
+        return ret;
     }
 
     yInfo("File loaded: %s", fileName.c_str());
@@ -819,7 +820,7 @@ bool vtRFThread::load()
         }
     }
 
-    return true;
+    return fileName;
 }
 
 bool vtRFThread::save()

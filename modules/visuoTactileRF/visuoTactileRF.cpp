@@ -141,12 +141,17 @@ public:
                 case VOCAB4('l','o','a','d'):
                 {
                     int res=Vocab::encode("loaded");
-                    if (vtRFThrd -> load())
+                    string fileName=vtRFThrd -> load();
+
+                    if (fileName=="")
                     {
-                        reply.addVocab(ack);
+                        reply.addVocab(nack);
                     }
                     else
-                        reply.addVocab(nack);
+                    {
+                        reply.addVocab(ack);
+                        reply.addString(fileName.c_str());
+                    }
                     
                     reply.addVocab(res);
                     return true;
