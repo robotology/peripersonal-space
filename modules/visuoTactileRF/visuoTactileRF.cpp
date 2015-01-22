@@ -128,12 +128,17 @@ public:
                 case VOCAB4('s','a','v','e'):
                 {
                     int res=Vocab::encode("saved");
-                    if (vtRFThrd -> save())
+                    string fileName = vtRFThrd -> save();
+
+                    if (fileName=="")
                     {
-                        reply.addVocab(ack);
+                        reply.addVocab(nack);
                     }
                     else
-                        reply.addVocab(nack);
+                    {
+                        reply.addVocab(ack);
+                        reply.addString(fileName.c_str());
+                    }
                     
                     reply.addVocab(res);
                     return true;

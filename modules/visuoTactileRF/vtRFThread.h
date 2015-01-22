@@ -332,7 +332,7 @@ public:
     /**
     * Saving function. It saves the skinParts as well as their receptive fields.
     **/
-    bool save();
+    string save();
 
     /**
     * Loading function. It saves the skinParts as well as their receptive fields.

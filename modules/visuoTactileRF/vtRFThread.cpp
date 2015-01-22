@@ -823,7 +823,7 @@ string vtRFThread::load()
     return fileName;
 }
 
-bool vtRFThread::save()
+string vtRFThread::save()
 {
     string fnm=path+taxelsFile;
     ofstream myfile;
@@ -911,7 +911,7 @@ bool vtRFThread::save()
         }
     }
     myfile.close();
-    return true;
+    return fnm;
 }
 
 bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
