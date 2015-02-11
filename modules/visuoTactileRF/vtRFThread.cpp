@@ -62,13 +62,14 @@ vtRFThread::vtRFThread(int _rate, const string &_name, const string &_robot, con
     //******************* PATH ******************
         path = rf->getHomeContextPath().c_str();
         path = path+"/";
-        if (modality=="1D")
+        if (rf->check("taxelsFile"))
         {
-            taxelsFile = rf->check("taxelsFile", Value("taxels1D.ini")).asString().c_str();
+            taxelsFile = rf -> find("taxelsFile").asString();
         }
-        else if (modality=="2D")
+        else
         {
-            taxelsFile = rf->check("taxelsFile", Value("taxels2D.ini")).asString().c_str();
+            taxelsFile = "taxels"+modality+".ini";
+            rf -> setDefault("taxelsFile",taxelsFile.c_str());
         }
         yInfo("Storing file set to: %s", (path+taxelsFile).c_str());
 }
