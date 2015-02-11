@@ -205,7 +205,7 @@ public:
                 yError(" fgtThread wasn't instantiated!!");
                 return false;
             }
-            yInfo("ULTIMATE TRACKER: fgtThread istantiated...");
+            yInfo("FINGERTIP TRACKER: fgtThread istantiated...");
 
         //******************************************************
         //************************ PORTS ***********************
@@ -218,7 +218,7 @@ public:
 
     bool close()
     {
-        yInfo("ULTIMATE TRACKER: Stopping threads..");
+        yInfo("FINGERTIP TRACKER: Stopping threads..");
         if (fgtThrd)
         {
             fgtThrd -> stop();

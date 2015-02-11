@@ -92,7 +92,7 @@ void fgtThread::run()
     //             {
                         if (imageInL!=NULL && imageInR!=NULL)
                         {
-                            yTrace("Processing images..");
+                            yDebug("Processing images..");
 
                             bool fgt = 0;
                             if (fgt=processImages(imageOutL,imageOutR))
@@ -189,7 +189,7 @@ bool fgtThread::processImages(ImageOf<PixelRgb> &_oL, ImageOf<PixelRgb> &_oR)
             fingerL[0] = fgtL.x;
             fingerL[1] = fgtL.y;
 
-            cv::ellipse(imgL, rect, cv::Scalar(40,50,50), 2);
+            cv::ellipse(imgL, rect, cv::Scalar(40,50,50), -2);
             cv::circle(imgL, fgtL, 3, cv::Scalar(175,125,0), -1);
             resultL = true;
         }
