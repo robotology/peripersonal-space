@@ -608,8 +608,8 @@ void vtRFThread::sendContactsToSkinGui()
 
         Bottle colorBottle;
         colorBottle.addInt(0);
-        colorBottle.addInt(255);
-        colorBottle.addInt(0);
+        colorBottle.addInt(200);
+        colorBottle.addInt(100);
 
         // Bottle outputBottle=
 
