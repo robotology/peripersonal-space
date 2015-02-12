@@ -85,26 +85,6 @@
         <parameters>--name /dispViewer --RefreshTime 33 --x 1600 --y 80 --w 320 --h 240 --compact</parameters>
         <node>icub13</node>
     </module>
-    <module>
-        <name>iCubSkinGui</name>
-        <parameters> --context periPersonalSpace --from left_forearm_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 0 --ypos 690 --width 300 --height 300</parameters>
-        <node>icub13</node>
-    </module>
-    <module>
-        <name>iCubSkinGui</name>
-        <parameters> --context periPersonalSpace --from left_hand_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 320 --ypos 690 --width 300 --height 300</parameters>
-        <node>icub13</node>
-    </module>
-    <module>
-        <name>iCubSkinGui</name>
-        <parameters> --context periPersonalSpace --from right_forearm_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 640 --ypos 690 --width 300 --height 300</parameters>
-        <node>icub13</node>
-    </module>
-    <module>
-        <name>iCubSkinGui</name>
-        <parameters> --context periPersonalSpace --from right_hand_vtRF.ini --name /vtRFSkinGui --useCalibration --xpos 960 --ypos 690 --width 300 --height 300</parameters>
-        <node>icub13</node>
-    </module>
 
     <connection>
         <from>/skinManager/skin_events:o</from>
@@ -188,22 +168,22 @@
     </connection>
     <connection>
     <from>/visuoTactileRF/skinGuiForearmL:o</from>
-        <to>/vtRFSkinGui/left_forearm:i</to>
+        <to>/skinGui/left_forearm_virtual:i</to>
         <protocol>tcp</protocol>
     </connection>
     <connection>
     <from>/visuoTactileRF/skinGuiForearmR:o</from>
-        <to>/vtRFSkinGui/right_forearm:i</to>
+        <to>/skinGui/right_forearm_virtual:i</to>
         <protocol>tcp</protocol>
     </connection>
     <connection>
     <from>/visuoTactileRF/skinGuiHandL:o</from>
-        <to>/vtRFSkinGui/left_hand:i</to>
+        <to>/skinGui/left_hand_virtual:i</to>
         <protocol>tcp</protocol>
     </connection>
     <connection>
     <from>/visuoTactileRF/skinGuiHandR:o</from>
-        <to>/vtRFSkinGui/right_hand:i</to>
+        <to>/skinGui/right_hand_virtual:i</to>
         <protocol>tcp</protocol>
     </connection>
     <connection>
