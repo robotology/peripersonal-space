@@ -604,27 +604,54 @@ void vtRFThread::sendContactsToSkinGui()
                 }
             }
         }
-        
+
+
+        Bottle colorBottle;
+        colorBottle.addInt(0);
+        colorBottle.addInt(255);
+        colorBottle.addInt(0);
+
+        // Bottle outputBottle=
+
+        // Bottle colorBottle,compensatedDataBottle;
+        // colorBottle.addList().read(color);
+        // compensatedDataBottle.addList().read(compensatedData2Send);
+
+        // Property& outputData = compensatedTactileDataPort.prepare();
+        // outputData.put("color",colorBottle.get(0));
+        // outputData.put("data",compensatedDataBottle.get(0));
+
+        // compensatedTactileDataPort.write();
+
+        BufferedPort<Bottle> *outPort;
         if(iCubSkinName == "left_forearm")
         {
-            skinGuiPortForearmL.setEnvelope(ts);
-            skinGuiPortForearmL.write(respToSkin); 
+            outPort = &skinGuiPortForearmL; 
         }
         else if(iCubSkinName == "right_forearm")
         {
-            skinGuiPortForearmR.setEnvelope(ts);
-            skinGuiPortForearmR.write(respToSkin); 
+            outPort = &skinGuiPortForearmR; 
         }
         else if(iCubSkinName == "left_hand")
         {
-            skinGuiPortHandL.setEnvelope(ts);
-            skinGuiPortHandL.write(respToSkin); 
+            outPort = &skinGuiPortHandL; 
         }
         else if(iCubSkinName == "right_hand")
         {
-            skinGuiPortHandR.setEnvelope(ts);
-            skinGuiPortHandR.write(respToSkin); 
+            outPort = &skinGuiPortHandR;
         }
+
+        Bottle dataBottle;
+        dataBottle.addList().read(respToSkin);
+
+        Bottle& outputBottle=outPort->prepare();
+        outputBottle.clear();
+
+        outputBottle.addList() = *(dataBottle.get(0).asList());
+        outputBottle.addList() = colorBottle;
+
+        outPort->setEnvelope(ts);
+        outPort->write();
     }
 }
 

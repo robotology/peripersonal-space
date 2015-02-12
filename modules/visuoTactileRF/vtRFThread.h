@@ -98,10 +98,10 @@ protected:
     Bottle                 *event;
     vector <IncomingEvent>  incomingEvents;
 
-    Port skinGuiPortForearmL;     // output to the skinGui
-    Port skinGuiPortForearmR;    
-    Port skinGuiPortHandL;     
-    Port skinGuiPortHandR;    
+    BufferedPort<Bottle> skinGuiPortForearmL;     // output to the skinGui
+    BufferedPort<Bottle> skinGuiPortForearmR;    
+    BufferedPort<Bottle> skinGuiPortHandL;     
+    BufferedPort<Bottle> skinGuiPortHandR;    
 
     BufferedPort<iCub::skinDynLib::skinContactList> *skinPortIn;  // input from the skinManager
     Port skinPortOut;                                             // output for the events
