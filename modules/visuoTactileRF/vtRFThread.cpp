@@ -570,7 +570,30 @@ void vtRFThread::sendContactsToSkinGui()
             {
                 for (size_t j = 0; j < iCubSkin1D[i].taxel.size(); j++)
                 {
-                    respToSkin[iCubSkin1D[i].taxel[j].ID] = iCubSkin1D[i].taxel[j].Resp*100/255;
+                    if(iCubSkin1D[i].Repr2TaxelList.empty())
+                    {  
+                        //we simply light up the taxels themselves
+                        respToSkin[iCubSkin1D[i].taxel[j].ID] = iCubSkin1D[i].taxel[j].Resp;
+                    }
+                    else
+                    { 
+                        //we light up all the taxels represented by the particular taxel
+                        list<unsigned int> l = iCubSkin1D[i].Repr2TaxelList[iCubSkin1D[i].taxel[j].ID];
+
+                        if (l.empty())
+                        {
+                            yWarning("skinPart %d Taxel %d : no list of represented taxels is available, even if Repr2TaxelList is not empty",i,iCubSkin1D[i].taxel[j].ID);
+                            respToSkin[iCubSkin1D[i].taxel[j].ID] = iCubSkin1D[i].taxel[j].Resp;
+                        }
+                        else
+                        {
+                            for(list<unsigned int>::const_iterator iter_list = l.begin(); iter_list != l.end(); iter_list++)
+                            {
+                                //for all the represented taxels, we assign the activation of the super-taxel
+                                respToSkin[*iter_list] =  iCubSkin1D[i].taxel[j].Resp;
+                            } 
+                        }
+                    }
                 }
             }
             else
