@@ -110,10 +110,10 @@ bool vtRFThread::threadInit()
         Network::connect("/doubleTouch/status:o",("/"+name+"/input:i").c_str());
         Network::connect("/visuoTactileWrapper/events:o",("/"+name+"/events:i").c_str());
 
-        Network::connect(("/"+name+"/skinGuiForearmL:o").c_str(),"/vtRFSkinGui/left_forearm:i");
-        Network::connect(("/"+name+"/skinGuiForearmR:o").c_str(),"/vtRFSkinGui/right_forearm:i");
-        Network::connect(("/"+name+"/skinGuiHandL:o").c_str(),"/vtRFSkinGui/left_hand:i");
-        Network::connect(("/"+name+"/skinGuiHandR:o").c_str(),"/vtRFSkinGui/right_hand:i");
+        Network::connect(("/"+name+"/skinGuiForearmL:o").c_str(),"/skinGui/left_forearm_virtual:i");
+        Network::connect(("/"+name+"/skinGuiForearmR:o").c_str(),"/skinGui/right_forearm_virtual:i");
+        Network::connect(("/"+name+"/skinGuiHandL:o").c_str(),"/skinGui/left_hand_virtual:i");
+        Network::connect(("/"+name+"/skinGuiHandR:o").c_str(),"/skinGui/right_hand_virtual:i");
            
         Network::connect("/skinManager/skin_events:o",("/"+name+"/skin_events:i").c_str());
 
@@ -911,8 +911,6 @@ string vtRFThread::save()
                     representatives.addInt(iCubSkin1D[i].Taxel2Repr[q]);
                 } 
                 myfile << "Mapping\t" << data.toString() << endl;
-
-                printf("devug\n");
 
                 for (size_t j = 0; j < iCubSkin1D[i].taxel.size(); j++)
                 {
