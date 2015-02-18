@@ -789,28 +789,33 @@ string vtRFThread::load()
                 bbb = bb.find("Mapping").asList();
 
                 yDebug("    [%s] size %i\tnTaxels %i\textX %g  %g\tbinsNum %i",iCubSkin1D[i].name.c_str(),size,nTaxels,extX[0],extX[1],bNum[0]);
-                printMessage(5,"mapp\n");
+                printMessage(3,"mapp\n");
                 for (size_t j = 0; j < size; j++)
                 {
                     mapp.push_back(bbb->get(j).asInt());
-                    if (verbosity>=6)
+                    if (verbosity>=3)
                     {
                         printf("%i ",mapp[j]);
                     }
                 }
-                printMessage(5,"\n");
+                printMessage(3,"\n");
                 iCubSkin1D[i].size = size;
                 iCubSkin1D[i].Taxel2Repr = mapp;
 
                 for (size_t j = 0; j < nTaxels; j++)
                 {
-                    bbb = bb.get(j+7).asList();
-                    printMessage(5,"Reading taxel %s\n",bbb->toString().c_str());
-                    iCubSkin1D[i].taxel[j].ID = bbb->get(0).asInt();
-                    iCubSkin1D[i].taxel[j].pwe.resize(extX,bNum);
-                    
-                    iCubSkin1D[i].taxel[j].pwe.setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],1));
-                    iCubSkin1D[i].taxel[j].pwe.setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],1));
+                    bbb = bb.get(j+6).asList();
+                    printMessage(3,"Reading taxel %s\n",bbb->toString().c_str());
+
+                    for (int k = 0; k < iCubSkin1D[i].taxel.size(); k++)
+                    {
+                        if (iCubSkin1D[i].taxel[k].ID == bbb->get(0).asInt())
+                        {
+                            iCubSkin1D[i].taxel[k].pwe.resize(extX,bNum);
+                            iCubSkin1D[i].taxel[k].pwe.setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],1));
+                            iCubSkin1D[i].taxel[k].pwe.setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],1));
+                        }
+                    }
                 }
             }
         }
@@ -858,11 +863,16 @@ string vtRFThread::load()
                 {
                     bbb = bb.get(j+7).asList();
                     printMessage(5,"Reading taxel %s\n",bbb->toString().c_str());
-                    iCubSkin2D[i].taxel[j].ID = bbb->get(0).asInt();
-                    iCubSkin2D[i].taxel[j].pwe.resize(extX,extY,bNum);
-                    
-                    iCubSkin2D[i].taxel[j].pwe.setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],bNum[1]));
-                    iCubSkin2D[i].taxel[j].pwe.setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],bNum[1]));
+
+                    for (int k = 0; k < iCubSkin1D[i].taxel.size(); k++)
+                    {
+                        if (iCubSkin2D[i].taxel[k].ID == bbb->get(0).asInt())
+                        {
+                            iCubSkin2D[i].taxel[k].pwe.resize(extX,extY,bNum);
+                            iCubSkin2D[i].taxel[k].pwe.setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],bNum[1]));
+                            iCubSkin2D[i].taxel[k].pwe.setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],bNum[1]));
+                        }
+                    }
                 }
             }
         }
@@ -875,6 +885,7 @@ string vtRFThread::save()
 {
     string fnm=path+taxelsFile;
     ofstream myfile;
+    yInfo("Saving to: %s", fnm.c_str());
     myfile.open(fnm.c_str(),ios::trunc);
 
     if (myfile.is_open())
@@ -884,7 +895,7 @@ string vtRFThread::save()
             if (modality=="1D")
             {
                 std::vector<double> extX = iCubSkin1D[i].taxel[0].pwe.getExtX();
-                std::vector<int>    bNum = iCubSkin2D[i].taxel[0].pwe.getHistSize();
+                std::vector<int>    bNum = iCubSkin1D[i].taxel[0].pwe.getHistSize();
 
                 myfile << "[" << iCubSkin1D[i].name << "]" << endl;
                 myfile << "size\t"    << iCubSkin1D[i].size << endl;    
@@ -900,6 +911,8 @@ string vtRFThread::save()
                     representatives.addInt(iCubSkin1D[i].Taxel2Repr[q]);
                 } 
                 myfile << "Mapping\t" << data.toString() << endl;
+
+                printf("devug\n");
 
                 for (size_t j = 0; j < iCubSkin1D[i].taxel.size(); j++)
                 {
@@ -1474,14 +1487,14 @@ yarp::sig::Vector vtRFThread::locateTaxel(const yarp::sig::Vector &_pos, const s
     }
     else
     {
-        printMessage(0,"ERROR! locateTaxel() failed!\n");
+        yError(" locateTaxel() failed!\n");
     }
 
     if      (part == "left_forearm" ) { T = armL -> getH(3+4, true); } // torso + up to elbow
     else if (part == "right_forearm") { T = armR -> getH(3+4, true); } // torso + up to elbow
     else if (part == "left_hand")     { T = armL -> getH(3+6, true); } // torso + up to wrist
     else if (part == "right_hand")    { T = armR -> getH(3+6, true); } // torso + up to wrist
-    else    {  printMessage(0,"ERROR! locateTaxel() failed!\n"); }
+    else    {  yError(" locateTaxel() failed!\n"); }
 
     pos.push_back(1);
     WRFpos = T * pos;
@@ -1511,7 +1524,7 @@ bool vtRFThread::setTaxelPosesFromFile1D(const string filePath, skinPart1D &sP)
     else if (sP.name == "right_hand_V2_1.txt")      { sP.name = "right_hand"; }
     else
     {
-        printMessage(0,"ERROR! Unexpected skin part file name: %s.\n",sP.name.c_str());
+        yError(" Unexpected skin part file name: %s.\n",sP.name.c_str());
         return false;
     }
     //sP.name = sP.name.substr(0, sP.name.find_last_of("_"));
@@ -1540,17 +1553,62 @@ bool vtRFThread::setTaxelPosesFromFile1D(const string filePath, skinPart1D &sP)
                 taxelNorm[j-3] = strtod(number.c_str(),NULL);
         }
 
-        // the NULL taxels will be automatically discarded - most skin patches are not full and padded with 0s
-        if (norm(taxelNorm) != 0 || norm(taxelPos) != 0)
+        if (sP.name == "left_forearm" || sP.name == "right_forearm")
         {
-            sP.size++;
-            sP.taxel.push_back(Taxel1D(taxelPos,taxelNorm,i));
+            // the taxels at the centers of respective triangles [note that i == taxelID == (line in the .txt file +1)]
+            // e.g. first triangle of upper arm is at lines 1-12, center at line 4, thus i=2 
+            // if(  (i==3) || (i==15)  ||  (i==27) ||  (i==39) ||  (i==51) ||  (i==63) ||  (i==75) ||  (i==87) ||
+            //     (i==99) || (i==111) || (i==123) || (i==135) || (i==147) || (i==159) || (i==171) || (i==183) ||
+            //    (i==207) || (i==255) || (i==291) || (i==303) || (i==315) || (i==339) || (i==351) )
+
+            // if(  (i==3) ||  (i==39) || (i==207) || (i==255) || (i==291)) // Taxels that are evenly distributed throughout the forearm
+                                                                         // in order to cover it as much as we can
+            // if(  (i==3) ||  (i==15) ||  (i==27) || (i==183)) // taxels that are in the big patch but closest to the little patch (internally)
+                                                                // 27 is proximal, 15 next, 3 next, 183 most distal
+            // if((i==135) || (i==147) || (i==159) || (i==171))  // this is the second column, farther away from the stitch
+                                                                 // 159 is most proximal, 147 is next, 135 next,  171 most distal
+            // if((i==87) || (i==75)  || (i==39)|| (i==51)) // taxels that are in the big patch and closest to the little patch (externally)
+            //                                              // 87 most proximal, 75 then, 39 then, 51 distal
+
+            if((i==27) || (i==15) || (i==3) || (i==183) ||              // taxels used for the experimentations on the pps paper
+               (i==147) || (i==135) || (i==75) || (i==39) || (i==51))
+            {
+                sP.size++;
+                sP.taxel.push_back(Taxel1D(taxelPos,taxelNorm,i));
+            }
+            else
+            {
+                sP.size++;
+            }
         }
-        else
-        {
-            sP.size++;
+        else if (sP.name == "left_hand")
+        { //we want to represent the 48 taxels of the palm (ignoring fingertips) with 5 taxels -
+         // manually marking 5 regions of the palm and selecting their "centroids" as the representatives
+            if((i==99) || (i==101) || (i==109) || (i==122) || (i==134)) 
+            {
+                sP.size++;
+                sP.taxel.push_back(Taxel1D(taxelPos,taxelNorm,i));
+            }
+            else
+            {
+                sP.size++;
+            }
+        }
+        else if (sP.name == "right_hand")
+        { //right hand has different taxel nr.s than left hand 
+            // if((i==101) || (i==103) || (i==118) || (i==137)) // || (i==124)) remove one taxel
+            if((i==101) || (i==103) || (i==118) || (i==137)) // || (i==124)) remove one taxel
+            {
+                sP.size++;
+                sP.taxel.push_back(Taxel1D(taxelPos,taxelNorm,i));
+            }
+            else
+            {
+                sP.size++;
+            }
         }
     }
+    initRepresentativeTaxels(sP);
 
     return true;
 }
@@ -1576,7 +1634,7 @@ bool vtRFThread::setTaxelPosesFromFile2D(const string filePath, skinPart2D &sP)
     else if (sP.name == "right_hand_V2_1.txt")      { sP.name = "right_hand"; }
     else
     {
-        printMessage(0,"ERROR! Unexpected skin part file name: %s.\n",sP.name.c_str());
+        yError(" Unexpected skin part file name: %s.\n",sP.name.c_str());
         return false;
     }
     //sP.name = sP.name.substr(0, sP.name.find_last_of("_"));
@@ -1665,7 +1723,7 @@ bool vtRFThread::setTaxelPosesFromFile2D(const string filePath, skinPart2D &sP)
     return true;
 }
 
-void vtRFThread::initRepresentativeTaxels(skinPart2D &sP)
+void vtRFThread::initRepresentativeTaxels(skinPart &sP)
 {
     int i=0;
     list<unsigned int> taxels_list;
@@ -2145,7 +2203,7 @@ int vtRFThread::printMessage(const int l, const char *f, ...) const
 {
     if (verbosity>=l)
     {
-        fprintf(stdout,"*** %s: ",name.c_str());
+        fprintf(stdout,"[%s] ",name.c_str());
 
         va_list ap;
         va_start(ap,f);

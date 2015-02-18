@@ -235,7 +235,7 @@ protected:
     * If it is defined for the respective skin part, it fills the taxelIDtoRepresentativeTaxelID vector that is indexed by taxel IDs
     * and returns taxel IDs of their representatives - e.g. triangle centers.
     **/
-    void initRepresentativeTaxels(skinPart2D &sP);
+    void initRepresentativeTaxels(skinPart &sP);
    
     
     /**
