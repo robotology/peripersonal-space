@@ -130,7 +130,7 @@ bool vtRFThread::threadInit()
 
         if (!ddR.open(OptR))
         {
-            printMessage(0,"ERROR: could not open right_arm PolyDriver!\n");
+            yError(": could not open right_arm PolyDriver!\n");
             return false;
         }
         bool ok = 1;
@@ -156,7 +156,7 @@ bool vtRFThread::threadInit()
 
         if (!ddL.open(OptL))
         {
-            printMessage(0,"ERROR: could not open left_arm PolyDriver!\n");
+            yError(": could not open left_arm PolyDriver!\n");
             return false;
         }
         ok = 1;
@@ -1053,7 +1053,7 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
     }
     else
     {
-        printMessage(0,"ERROR in trainTaxels!\n");
+        yError(" in trainTaxels!\n");
         return false;
     }
 
@@ -1145,26 +1145,25 @@ bool vtRFThread::projectIncomingEvent()
                 T_a = armR -> getH(3+6, true);
         }
         else
-            printMessage(0,"ERROR in projectIncomingEvent!\n");
+            yError(" in projectIncomingEvent!\n");
+
+        yInfo("T_A:\n%s",T_a.toString().c_str());
 
         if (modality=="1D")
         {
             for (size_t j = 0; j < iCubSkin1D[i].taxel.size(); j++)
             {
                 iCubSkin1D[i].taxel[j].Evnt=projectIntoTaxelRF1D(iCubSkin1D[i].taxel[j].RF,T_a,
-                                                             incomingEvents[incomingEvents.size()-1]);
+                                                                 incomingEvents[incomingEvents.size()-1]);
 
                 // There's a reason behind this choice
                 dumpedVector.push_back(iCubSkin1D[i].taxel[j].Evnt.Pos[0]);
                 dumpedVector.push_back(iCubSkin1D[i].taxel[j].Evnt.Pos[1]);
                 dumpedVector.push_back(iCubSkin1D[i].taxel[j].Evnt.Pos[2]);
 
-                // if (j==100)
-                // {
-                    printMessage(4,"Projection -> i: %i\tID %i\tEvent: ",i,j);
-                    if (verbosity>=4)
-                        iCubSkin1D[i].taxel[j].Evnt.print();
-                // }
+                printMessage(4,"Projection -> i: %i\tID %i\tEvent:\n",i,j);
+                if (verbosity>=4)
+                    iCubSkin1D[i].taxel[j].Evnt.print();
             }
         }
         else
@@ -1179,12 +1178,9 @@ bool vtRFThread::projectIncomingEvent()
                 dumpedVector.push_back(iCubSkin2D[i].taxel[j].Evnt.Pos[1]);
                 dumpedVector.push_back(iCubSkin2D[i].taxel[j].Evnt.Pos[2]);
 
-                // if (j==100)
-                // {
-                    printMessage(4,"Projection -> i: %i\tID %i\tEvent: ",i,j);
-                    if (verbosity>=4)
-                        iCubSkin2D[i].taxel[j].Evnt.print();
-                // }
+                printMessage(4,"Projection -> i: %i\tID %i\tEvent:\n",i,j);
+                if (verbosity>=4)
+                    iCubSkin2D[i].taxel[j].Evnt.print();
             }
         }
     }
@@ -1198,10 +1194,8 @@ IncomingEvent4Taxel1D vtRFThread::projectIntoTaxelRF1D(const Matrix &RF,const Ma
     Matrix T_a_proj = T_a * RF;
 
     Vector p=e.Pos; p.push_back(1);
-    Vector v=e.Vel; v.push_back(1);
 
     Event_projected.Pos = SE3inv(T_a_proj)*p;        Event_projected.Pos.pop_back();
-    Event_projected.Vel = SE3inv(T_a_proj)*v;        Event_projected.Vel.pop_back();
 
     if (e.Radius != -1.0)
     {

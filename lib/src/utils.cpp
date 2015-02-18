@@ -163,7 +163,7 @@ unsigned int factorial(unsigned int n)
 
     void IncomingEvent::print()
     {
-        yDebug("Pos: %s\t Vel: %s\t Radius %g\t Src %s\n",Pos.toString().c_str(),Vel.toString().c_str(),Radius,Src.c_str());
+        yDebug("\tPos: %s\t Vel: %s\t Radius %g\t Src %s\n",Pos.toString().c_str(),Vel.toString().c_str(),Radius,Src.c_str());
     }
 
     string IncomingEvent::toString(int precision) const
@@ -218,7 +218,7 @@ unsigned int factorial(unsigned int n)
 
     void IncomingEvent4Taxel1D::print()
     {
-        yInfo("NRM: %g", NRM);
+        yDebug("\tNRM: %g", NRM);
         IncomingEvent::print();
     }
 
@@ -270,7 +270,7 @@ unsigned int factorial(unsigned int n)
 
     void IncomingEvent4Taxel2D::print()
     {
-        yInfo("NRM: %g\t TTC: %g \t", NRM, TTC);
+        yInfo("\tNRM: %g\t TTC: %g \t", NRM, TTC);
         IncomingEvent::print();
     }
 
