@@ -25,81 +25,173 @@ double gauss2D(const double x_0, const double y_0,
 
     parzenWindowEstimator1D::parzenWindowEstimator1D()
     {
-        resize(0.2,10);
+        std::vector<double> eX; eX.push_back(-0.1); eX.push_back(0.2);
+        std::vector<int>    bN; bN.push_back(20);
+
+        resize(eX,bN);
     }
 
-    parzenWindowEstimator1D::parzenWindowEstimator1D(const double e, const int bN)
+    parzenWindowEstimator1D::parzenWindowEstimator1D(const std::vector<double> eX, const std::vector<int> bN)
     {
-        resize(e,bN);
+        resize(eX,bN);
     }
 
-    bool parzenWindowEstimator1D::resize(const double e, const int bN)
+    bool parzenWindowEstimator1D::resize(const std::vector<double> eX, const std::vector<int> bN)
     {
-        ext      =  e;
-        binsNum  = bN;
-        binWidth = ext/binsNum;
+        if (eX.size()!=2 || bN.size()!=1)
+        {
+            yError("Resize failed! eX size: %lu bN size: %lu\n",eX.size(), bN.size());
+            return false;
+        }
 
-        hist.resize(binsNum,0.0);
-        sigm.resize(binsNum,0.75*binWidth);
+        extX    = eX;
+        binsNum = bN;
+
+        binWidth.clear();
+        binWidth.push_back((extX[1]-extX[0])/binsNum[0]);
+
+        // Let's find the first bin for which we have positive values.
+        // The 0 value should not be inside it
+        // and its shift from zero to the start value of the firstPosBin
+        firstPosBin.clear();
+        firstPosBinShift.clear();
+
+        std::vector<double> binStart;
+        binStart.clear();
+        binStart.push_back(eX[0]);
+
+        for (size_t i = 0; i < binStart.size(); i++)
+        {
+            int idx=0;
+            while (binStart[i]<0)
+            {
+                idx++;
+                binStart[i]+=binWidth[i];
+            }
+            firstPosBin.push_back(idx);
+            firstPosBinShift.push_back(binStart[i]);
+        }
+
+        int j=0;
+        for(j=0; j<binsNum[X_DIM];j++)
+        {  
+            binStartsX.push_back(extX[START]+(j*binWidth[X_DIM]));
+        }
+                      
+        posHist.resize(binsNum[0],1); posHist.zero();
+        negHist.resize(binsNum[0],1); negHist.zero();
+       
+        sigmX = binWidth[0];
 
         return true;
     }
 
-    bool parzenWindowEstimator1D::addSample(const double x)
+    yarp::sig::Matrix parzenWindowEstimator1D::getHist()
     {
-        if (x <= ext)
+        yarp::sig::Matrix Hist(binsNum[0],1);
+        Hist.zero();
+
+        for (int i = 0; i < binsNum[0]; i++)
         {
-            hist[int(x/binWidth)] += 2; // positive samples get a bonus because they're less than the negative
-            return true;
+            Hist(i,1)=getHist(i);
         }
-        else
-            return false;
+
+        return Hist;
     }
 
-    bool parzenWindowEstimator1D::removeSample(const double x)
+    double parzenWindowEstimator1D::getHist(const int i)
     {
-        if (x <= ext)
-        {     
-            if (hist[int(x/binWidth)] > -10) // negative values cannot go under the -10 mark
-            {
-                //printf("I'm removing a sample\n");
-                hist[int(x/binWidth)] -= 1;
-            }
+        if ( posHist(i,1)+negHist(i,1) < 5 )
+            return 0;
 
+        return posHist(i,1)/(posHist(i,1)+negHist(i,1));
+    }
+
+
+    bool parzenWindowEstimator1D::addSample(const std::vector<double> x)
+    {
+        int b0=-1;
+        
+        if (getIndexes(x,b0))
+        {
+            posHist(b0,1) += 1;
             return true;
         }
         else
             return false;
     }
 
-    double parzenWindowEstimator1D::getF_X(const double x)
+    bool parzenWindowEstimator1D::removeSample(const std::vector<double> x)
+    {
+        int b0=-1;
+
+        if (getIndexes(x,b0))
+        {
+            negHist(b0,1) += 1;
+            return true;
+        }
+        else
+            return false;
+    }
+
+    int parzenWindowEstimator1D::computeResponse(const std::vector<double> x)
+    {
+        int b0=-1;
+
+        if (getIndexes(x,b0))
+        {
+            return int(getF_X_scaled(x));
+        }
+        else
+            return 0;
+    }
+        
+    bool parzenWindowEstimator1D::getIndexes(const std::vector<double> x, int &b0)
+    {
+        // yInfo("x\t%g\t%g\t",x[0],x[1]);
+        if (x[0] >= extX[0] && x[0] <= extX[1])
+        {
+            b0 = int((x[0]-firstPosBinShift[0])/binWidth[0]+firstPosBin[0]);
+            // yInfo("b0\t%i\tb1\t%i\t\n", b0, b1);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    double parzenWindowEstimator1D::getF_X(const std::vector<double> x)
     {
         double f_x = 0;
 
-        for (size_t i = 0; i < hist.size(); i++)
+        for (size_t i = 0; i < posHist.rows(); i++)
         {
-            int multiplier = hist[i]>=0?int(hist[i]):0;
-            f_x += multiplier * gauss(i*binWidth,sigm[i],x);
+            if ( posHist(i,1)>=0 )
+            {
+                double factor=(posHist(i,1)+negHist(i,1))>0?posHist(i,1)/(posHist(i,1)+negHist(i,1)):0;
+                f_x += factor * gauss(extX[0]+i*binWidth[0],sigmX,x[0]);
+            }
         }
 
         return f_x;
     }
 
-    double parzenWindowEstimator1D::getF_X_scaled(const double x)
+    double parzenWindowEstimator1D::getF_X_scaled(const std::vector<double> x)
     {
         double max      =  0;
-        int granularity = 10;
-        // double sum   =   0;
-        
+        int granularity = 10;        
 
-        for (size_t i = 0; i < binsNum*granularity; i++)
+        // the granularity has been introduced to increase the precision of the process.
+        for (size_t i = 0; i < binsNum[0]*granularity; i++)
         {
-            double func = getF_X(i*binWidth/granularity);
-            max   = func>max?func:max;
-            // sum  += func;
+            std::vector<double> xx;
+            xx.push_back(extX[0]+i*binWidth[0]*granularity);
+            double func = getF_X(xx);
+
+            max  = func>max?func:max;
         }
-        // double avg = sum/(binsNum*granularity);
-        // double scalingfactor_avg = 100/avg;
+
         double scalingfactor_max = 255/max;
 
         return getF_X(x)*scalingfactor_max;
@@ -107,8 +199,13 @@ double gauss2D(const double x_0, const double y_0,
 
     void parzenWindowEstimator1D::print()
     {
-        printf("Extension: %g binsNum %i binWidth %g sigma %g\tHistogram:\n",ext,binsNum,binWidth,sigm[0]);
-        printf("%s\n",hist.toString().c_str());
+        yInfo("Extension (X1 X2): %g %g",extX[0],extX[1]);
+        yInfo("binsNum(X) %i\t binWidth(X) %i",binsNum[0],binWidth[0]);
+        yInfo("sigma(X) %g\n",sigmX);
+        yInfo("Positive histogram:\n");
+        yInfo("%s\n",posHist.toString().c_str());
+        yInfo("Negative histogram:\n");
+        yInfo("%s\n",negHist.toString().c_str());
     }
 
 /****************************************************************/
@@ -118,8 +215,8 @@ double gauss2D(const double x_0, const double y_0,
     parzenWindowEstimator2D::parzenWindowEstimator2D()
     {
         std::vector<double> eX; eX.push_back(-0.1); eX.push_back(0.2);
-        std::vector<double> eY;  eY.push_back(0.0); eY.push_back(1.2);
-        std::vector<int>    bN;    bN.push_back(8);   bN.push_back(4);
+        std::vector<double> eY; eY.push_back(0.0);  eY.push_back(1.2);
+        std::vector<int>    bN; bN.push_back(8);    bN.push_back(4);
 
         resize(eX,eY,bN);
     }
@@ -133,7 +230,7 @@ double gauss2D(const double x_0, const double y_0,
     {
         if (eX.size()!=2 || eY.size()!=2 || bN.size()!=2)
         {
-            printf("ERROR! Resize failed. eX size: %lu eY size: %lu bN size: %lu\n",eX.size(), eY.size(), bN.size());
+            yInfo("ERROR! Resize failed. eX size: %lu eY size: %lu bN size: %lu\n",eX.size(), eY.size(), bN.size());
             return false;
         }
 
@@ -182,8 +279,8 @@ double gauss2D(const double x_0, const double y_0,
         posHist.resize(binsNum[0],binsNum[1]); posHist.zero();
         negHist.resize(binsNum[0],binsNum[1]); negHist.zero();
        
-        sigmX = 0.75*binWidth[0];
-        sigmY = 0.75*binWidth[1];
+        sigmX = binWidth[0];
+        sigmY = binWidth[1];
 
         return true;
     }
@@ -255,12 +352,12 @@ double gauss2D(const double x_0, const double y_0,
         
     bool parzenWindowEstimator2D::getIndexes(const std::vector<double> x, int &b0, int &b1)
     {
-        // printf("x\t%g\t%g\t",x[0],x[1]);
+        // yInfo("x\t%g\t%g\t",x[0],x[1]);
         if (x[0] >= extX[0] && x[0] <= extX[1] && x[1] >= extY[0] && x[1] <= extY[1])
         {
             b0 = int((x[0]-firstPosBinShift[0])/binWidth[0]+firstPosBin[0]);
             b1 = int((x[1]-firstPosBinShift[1])/binWidth[1]+firstPosBin[1]);
-            // printf("b0\t%i\tb1\t%i\t\n", b0, b1);
+            // yInfo("b0\t%i\tb1\t%i\t\n", b0, b1);
 
             return true;
         }
@@ -321,13 +418,13 @@ double gauss2D(const double x_0, const double y_0,
         
     void parzenWindowEstimator2D::print()
     {
-        printf("Extension (X1 X2 Y1 Y2): %g %g %g %g",extX[0],extX[1],extY[0],extY[1]);
-        printf("binsNum(X Y) %i %i\nbinWidth(X Y) %g %g",binsNum[0],binsNum[1],binWidth[0],binWidth[1]);
-        printf("sigma(X Y) %g %g\n",sigmX,sigmY);
-        printf("Positive histogram:\n");
-        printf("%s\n",posHist.toString().c_str());
-        printf("Negative histogram:\n");
-        printf("%s\n",negHist.toString().c_str());
+        yInfo("Extension (X1 X2 Y1 Y2): %g %g %g %g",extX[0],extX[1],extY[0],extY[1]);
+        yInfo("binsNum(X Y) %i %i\nbinWidth(X Y) %g %g",binsNum[0],binsNum[1],binWidth[0],binWidth[1]);
+        yInfo("sigma(X Y) %g %g\n",sigmX,sigmY);
+        yInfo("Positive histogram:\n");
+        yInfo("%s\n",posHist.toString().c_str());
+        yInfo("Negative histogram:\n");
+        yInfo("%s\n",negHist.toString().c_str());
     }
     // pp = pp + (1/(2*M_PI*sigm))*exp(-0.5*(xxb -px(b)).^2/(sigm^2));
 

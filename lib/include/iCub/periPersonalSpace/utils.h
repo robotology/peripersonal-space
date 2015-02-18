@@ -173,6 +173,45 @@ struct IncomingEvent
 };
 
 /**
+* It has only one more member 
+**/
+struct IncomingEvent4Taxel1D : public IncomingEvent
+{
+    double NRM;
+
+    /**
+    * Constructor
+    **/    
+    IncomingEvent4Taxel1D();
+
+    /**
+    * Constructor with Pos and Vel
+    **/    
+    IncomingEvent4Taxel1D(const Vector &p, const Vector &v, const double r, const string &s);
+
+    /**
+    * Copy constructor
+    **/
+    IncomingEvent4Taxel1D(const IncomingEvent &e);
+    IncomingEvent4Taxel1D(const IncomingEvent4Taxel1D &e);
+
+    /**
+    * Copy Operator
+    **/
+    IncomingEvent4Taxel1D &operator=(const IncomingEvent &e);
+
+    /**
+    * Copy Operator
+    **/
+    IncomingEvent4Taxel1D &operator=(const IncomingEvent4Taxel1D &e);
+
+    /**
+    * Print Method
+    **/
+    void print();    
+};
+
+/**
 * It has only two more members
 **/
 struct IncomingEvent4Taxel2D : public IncomingEvent
@@ -225,6 +264,8 @@ class Taxel
     yarp::sig::Vector WRFPos;  // taxel's position w.r.t. the root RF
     yarp::sig::Vector Norm;    // taxel's normal   w.r.t. the limb
     yarp::sig::Matrix RF;      // taxel's reference Frame (computed from Pos and Norm)
+
+    double rfAngle;            // angle of the receptive field [rad]
 
     /**
     * Default constructor
@@ -280,8 +321,8 @@ class Taxel
 class Taxel1D : public Taxel
 {
   public:
-    IncomingEvent           Evnt; // IncomingEvent as seen from the taxel's RF
-    parzenWindowEstimator1D pwe;  // Parzen Window Estimator to compute the response
+    IncomingEvent4Taxel1D   Evnt; // IncomingEvent as seen from the taxel's RF
+    parzenWindowEstimator1D  pwe; // Parzen Window Estimator to compute the response
 
     /**
     * Default constructor
@@ -301,7 +342,18 @@ class Taxel1D : public Taxel
     /**
     * init function
     **/
-    void init();
+    void init() { Taxel::init(); };
+
+    /**
+    * Add or remove a sample from the pwe's histogram
+    **/
+    bool addSample(const IncomingEvent4Taxel1D ie);
+    bool removeSample(const IncomingEvent4Taxel1D ie);
+
+    /**
+    * Check if the input sample is inside the Receptive field (i.e. the cone)
+    **/
+    bool insideRFCheck(const IncomingEvent4Taxel1D ie);
 
     /**
     * Print Method
@@ -327,8 +379,6 @@ class Taxel1D : public Taxel
 class Taxel2D : public Taxel
 {
   public:
-    double rfAngle;            // angle of the receptive field [rad]
-    
     IncomingEvent4Taxel2D   Evnt;  // IncomingEvent as seen from the taxel's RF
     parzenWindowEstimator2D pwe;   // taxel's response by means of a 2D parzen window estimator
 
@@ -336,27 +386,22 @@ class Taxel2D : public Taxel
     /**
     * Default constructor
     **/    
-    Taxel2D();
+    Taxel2D() : Taxel() {};
 
     /**
     * Constructor with Pos and Norm
     **/    
-    Taxel2D(const Vector &p, const Vector &n);
+    Taxel2D(const Vector &p, const Vector &n) : Taxel(p,n) {};
 
     /**
     * Constructor with Pos, Norm and ID
     **/    
-    Taxel2D(const Vector &p, const Vector &n, const int &i);
-
-    /**
-    * Copy Operator
-    **/
-    Taxel2D &operator=(const Taxel2D &t);
+    Taxel2D(const Vector &p, const Vector &n, const int &i) : Taxel(p,n,i) {};
 
     /**
     * init function
     **/
-    void init();
+    void init() { Taxel::init(); };
 
     /**
     * Add or remove a sample from the pwe's histogram
@@ -398,6 +443,18 @@ class skinPart
   public:
     string name;
     int size;   // size of the skinPart if the patches were full - it differs from taxel.size()
+             
+    /**
+    * Indexing variable used in the case of reducing the resolution - e.g. taking only triangle centers
+    * The index into the vector is the taxel ID, the value stored is its representative
+    **/
+    vector<int> Taxel2Repr; 
+
+    /**
+    * Mapping in the opposite direction
+    * Indexed by representative taxel IDs, it stores lists of the taxels being represented - e.g. all taxels of a triangle
+    **/
+    map<unsigned int, list<unsigned int> > Repr2TaxelList;
 
     /**
     * Constructor
@@ -445,18 +502,6 @@ class skinPart2D : public skinPart
 {
   public:
     vector<Taxel2D> taxel;
-             
-    /**
-    * Indexing variable used in the case of reducing the resolution - e.g. taking only triangle centers
-    * The index into the vector is the taxel ID, the value stored is its representative
-    **/
-    vector<int> Taxel2Repr; 
-
-    /**
-    * Mapping in the opposite direction
-    * Indexed by representative taxel IDs, it stores lists of the taxels being represented - e.g. all taxels of a triangle
-    **/
-    map<unsigned int, list<unsigned int> > Repr2TaxelList;
     
     /**
     * Copy Operator

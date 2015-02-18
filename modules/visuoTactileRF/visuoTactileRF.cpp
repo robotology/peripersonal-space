@@ -1,6 +1,6 @@
 /* VISUO TACTILE RECEPTIVE FIELDS v. 1.0
  * Copyright (C) 2013 RobotCub Consortium
- * Author:  Alessandro Roncone
+ * Author:  Alessandro Roncone & Matej Hoffmann
  * email:   alessandro.roncone@iit.it
  * website: www.robotcub.org
  * Permission is granted to copy, distribute, and/or modify this program

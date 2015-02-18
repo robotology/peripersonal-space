@@ -40,6 +40,7 @@
 #include <yarp/os/RateThread.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/RFModule.h>
+#include <yarp/os/Log.h>
 
 #include <yarp/sig/Vector.h>
 #include <yarp/sig/Matrix.h>
@@ -54,8 +55,8 @@
 #include <cmath>
 
 // These are basically some semi-useless constants. I can remove them but
-// I've preserved them in order for me to ease the process of future improvements
-// to the library
+// I've preserved them in order for me to ease the process of future
+// improvements to the library
 #define X_DIM 0
 #define Y_DIM 1
 #define START 0
@@ -76,12 +77,21 @@ using namespace std;
 class parzenWindowEstimator1D
 {
   private:
-    double ext;      // the maximum extension of the Receptive Field
-    int    binsNum;  // the number of partitions of the input space
-    double binWidth; // the extension of the single sampling unit
+    std::vector<double> extX;     // the extension of the Receptive Field in the x dimension
+    std::vector<double> extY;     // the extension of the Receptive Field in the y dimension
 
-    Vector sigm;   // sigma of the gaussians (by default they're all equal)
-    Vector hist;   // histogram of the 
+    std::vector<int>    binsNum;  // the number of partitions of the input space (x and y dimensions)
+    std::vector<double> binWidth; // the extension of the single sampling unit (x and y dimensions)
+
+    std::vector<int>    firstPosBin;      // the first bin for which we have positive values (x and y dimensions)
+    std::vector<double> firstPosBinShift; // the shift from zero to the start value of the firstPosBin (x and y dimensions)
+
+    std::vector<double> binStartsX; //these are initialized at startup to contain the start, midpoint and end of each bin in the x dim.
+    
+    double sigmX;   // sigma of the gaussians in the x dimension (by default they're all equal)
+
+    Matrix posHist; // histogram for the parzening - positive examples 
+    Matrix negHist; //negative examples 
 
 
   public:
@@ -89,31 +99,42 @@ class parzenWindowEstimator1D
     * Constructors
     **/
     parzenWindowEstimator1D();
-    parzenWindowEstimator1D(const double e, const int bN);
+    parzenWindowEstimator1D(const std::vector<double> eX, const std::vector<int> bN);
 
     /**
     * Resize the estimator to a given extension and number of samples
     * The histogram changes accordingly (and it's cleared as well).
     **/
-    bool resize(const double e, const int bN);
+    bool resize(const std::vector<double> eX, const std::vector<int> bN);
 
     /**
     * Add or remove a sample from the histogram
     **/
-    bool addSample(const double x);
-    bool removeSample(const double x);
+    bool addSample(const std::vector<double> x);
+    bool removeSample(const std::vector<double> x);
+
+    /**
+    * Compute the response for a specific input sample
+    **/
+    int computeResponse(const std::vector<double> x);
+        
+    /**
+    * Check an input is inside the receptive fields, and if so assigns
+    * the proper histogram indexes that belong to that input vector.
+    **/
+    bool getIndexes(const std::vector<double> x, int &b0);
 
     /**
     * Get the value of the receptive field at a certain x
     **/
-    double getF_X(const double x);
-
+    double getF_X(const std::vector<double> x);
+    
     /**
     * Get the value of the receptive field at a certain x.
     * It differs from the previous because it's scaled
     * (i.e. its max is set to 255, the other values accordingly)
     **/
-    double getF_X_scaled(const double x);
+    double getF_X_scaled(const std::vector<double> x);
 
     /**
     * Print Function
@@ -123,13 +144,24 @@ class parzenWindowEstimator1D
     /**
     * Self-explaining functions
     **/
-    int  getHistSize()                       { return binsNum; };
-    int  getHist(const int i)                { return int(hist[i]); };
-    yarp::sig::Vector getHist()              { return hist; };
-    void setHist(const int i, const int val) { hist[i] = val; };
-    void setHist(const yarp::sig::Vector &v) { hist = v; }
-    double getExt()                          { return ext; };
-    void resetHist()                         { hist.zero(); };
+    std::vector<int>    getHistSize()              { return binsNum; };
+    std::vector<double> getBinWidth()              { return binWidth; };
+    std::vector<double> getExtX()                  { return extX; };
+
+    double getHist(const int i);
+    int    getPosHist(const int i)                 { return int(posHist(i,1)); };
+    int    getNegHist(const int i)                 { return int(negHist(i,1)); };
+
+    yarp::sig::Matrix getPosHist()                 { return posHist; };
+    yarp::sig::Matrix getNegHist()                 { return negHist; };
+    yarp::sig::Matrix getHist();
+
+    void setPosHist(const int i, const int val)    { posHist(i,1) = val; };
+    void setNegHist(const int i, const int val)    { negHist(i,1) = val; };
+    void setPosHist(const yarp::sig::Matrix &v)    { posHist = v; };
+    void setNegHist(const yarp::sig::Matrix &v)    { negHist = v; };
+
+    void resetAllHist()                            { posHist.zero(); negHist.zero(); };
 };
 
 /**
@@ -179,7 +211,6 @@ class parzenWindowEstimator2D
     **/
     int computeResponse(const std::vector<double> x);
 
-    
     /**
     * Check an input is inside the receptive fields, and if so assigns
     * the proper histogram indexes that belong to that input vector.
