@@ -194,22 +194,56 @@ void vtWThread::run()
         }
     }
 
-    // process the fingertipTracker
-    if(fgtTrackerBottle = fgtTrackerPort.read(false))
+    if (!rf->check("noDoubleTouch"))
     {
-        if (doubleTouchBottle = doubleTouchPort.read(false))
-        {           
-            if(fgtTrackerBottle != NULL && doubleTouchBottle != NULL)
-            {
-                if (doubleTouchBottle->get(3).asString() != "" && fgtTrackerBottle->get(0).asInt() != 0)
+        // processes the fingertipTracker
+        if(fgtTrackerBottle = fgtTrackerPort.read(false))
+        {
+            if (doubleTouchBottle = doubleTouchPort.read(false))
+            {           
+                if(fgtTrackerBottle != NULL && doubleTouchBottle != NULL)
                 {
-                    yDebug("Computing data from the fingertipTracker %g\n",getEstUsed());
+                    if (doubleTouchBottle->get(3).asString() != "" && fgtTrackerBottle->get(0).asInt() != 0)
+                    {
+                        yDebug("Computing data from the fingertipTracker %g\n",getEstUsed());
+                        doubleTouchStep = doubleTouchBottle->get(0).asInt();
+                        fgtTrackerPos[0] = fgtTrackerBottle->get(1).asDouble();
+                        fgtTrackerPos[1] = fgtTrackerBottle->get(2).asDouble();
+                        fgtTrackerPos[2] = fgtTrackerBottle->get(3).asDouble();
+                        AWPolyElement el2(fgtTrackerPos,Time::now());
+                        fgtTrackerVelEstimate=linEst_fgtTracker->estimate(el2);
+
+                        if(doubleTouchStep<=1)
+                        {
+                            Vector ang(3,0.0);
+                            igaze -> lookAtAbsAngles(ang);
+                        }
+                        else if(doubleTouchStep>1 && doubleTouchStep<8)
+                        {
+                            events.clear();
+                            events.push_back(IncomingEvent(fgtTrackerPos,fgtTrackerVelEstimate,-1.0,"fingertipTracker"));
+                            isTarget=true;
+                        }
+                    }
+                }
+            }
+        }
+
+        // processes the doubleTouch !rf->check("noDoubleTouch")
+        if(doubleTouchBottle = doubleTouchPort.read(false))
+        {
+            if(doubleTouchBottle != NULL)
+            {
+                if (doubleTouchBottle->get(3).asString() != "")
+                {
+                    Matrix T = eye(4);
+                    Vector fingertipPos(4,0.0);
+                    doubleTouchPos.resize(4,0.0);
+                    
+                    currentTask = doubleTouchBottle->get(3).asString();
                     doubleTouchStep = doubleTouchBottle->get(0).asInt();
-                    fgtTrackerPos[0] = fgtTrackerBottle->get(1).asDouble();
-                    fgtTrackerPos[1] = fgtTrackerBottle->get(2).asDouble();
-                    fgtTrackerPos[2] = fgtTrackerBottle->get(3).asDouble();
-                    AWPolyElement el2(fgtTrackerPos,Time::now());
-                    fgtTrackerVelEstimate=linEst_fgtTracker->estimate(el2);
+                    fingertipPos = matrixFromBottle(*doubleTouchBottle,20,4,4).subcol(0,3,3); // fixed translation from the palm
+                    fingertipPos.push_back(1.0);
 
                     if(doubleTouchStep<=1)
                     {
@@ -218,70 +252,39 @@ void vtWThread::run()
                     }
                     else if(doubleTouchStep>1 && doubleTouchStep<8)
                     {
-                        events.clear();
-                        events.push_back(IncomingEvent(fgtTrackerPos,fgtTrackerVelEstimate,-1.0,"fingertipTracker"));
+                        if(currentTask=="LtoR" || currentTask=="LHtoR") //right to left -> the right index finger will be generating events
+                        { 
+                            iencsR->getEncoders(encsR->data());
+                            Vector qR=encsR->subVector(0,6);
+                            armR -> setAng(qR*CTRL_DEG2RAD);                        
+                            T = armR -> getH(3+6, true);  // torso + up to wrist
+                            doubleTouchPos = T * fingertipPos; 
+                            //optionally, get the finger encoders and get the fingertip position using iKin Finger based on the current joint values 
+                            //http://wiki.icub.org/iCub/main/dox/html/icub_cartesian_interface.html#sec_cart_tipframe
+                            doubleTouchPos.pop_back(); //take out the last dummy value from homogenous form
+                        }
+                        else if(currentTask=="RtoL" || currentTask=="RHtoL") //left to right -> the left index finger will be generating events
+                        {   
+                            iencsL->getEncoders(encsL->data());
+                            Vector qL=encsL->subVector(0,6);
+                            armL -> setAng(qL*CTRL_DEG2RAD);                        
+                            T = armL -> getH(3+6, true);  // torso + up to wrist
+                            doubleTouchPos = T * fingertipPos; 
+                            //optionally, get the finger encoders and get the fingertip position using iKin Finger based on the current joint values 
+                            //http://wiki.icub.org/iCub/main/dox/html/icub_cartesian_interface.html#sec_cart_tipframe
+                            doubleTouchPos.pop_back(); //take out the last dummy value from homogenous form
+                        } 
+                        else
+                        {
+                            yError(" [vtWThread] Unknown task received from the double touch thread!");
+                        }
+                        
+                        yDebug("Computing data from the doubleTouch %g\n",getEstUsed());
+                        AWPolyElement el2(doubleTouchPos,Time::now());
+                        doubleTouchVelEstimate=linEst_doubleTouch->estimate(el2);
+                        events.push_back(IncomingEvent(doubleTouchPos,doubleTouchVelEstimate,-1.0,"doubleTouch"));
                         isTarget=true;
                     }
-                }
-            }
-        }
-    }
-
-    // process the doubleTouch
-    if(doubleTouchBottle = doubleTouchPort.read(false))
-    {
-        if(doubleTouchBottle != NULL)
-        {
-            if (doubleTouchBottle->get(3).asString() != "")
-            {
-                Matrix T = eye(4);
-                Vector fingertipPos(4,0.0);
-                doubleTouchPos.resize(4,0.0);
-                
-                currentTask = doubleTouchBottle->get(3).asString();
-                doubleTouchStep = doubleTouchBottle->get(0).asInt();
-                fingertipPos = matrixFromBottle(*doubleTouchBottle,20,4,4).subcol(0,3,3); // fixed translation from the palm
-                fingertipPos.push_back(1.0);
-
-                if(doubleTouchStep<=1)
-                {
-                    Vector ang(3,0.0);
-                    igaze -> lookAtAbsAngles(ang);
-                }
-                else if(doubleTouchStep>1 && doubleTouchStep<8)
-                {
-                    if(currentTask=="LtoR" || currentTask=="LHtoR") //right to left -> the right index finger will be generating events
-                    { 
-                        iencsR->getEncoders(encsR->data());
-                        Vector qR=encsR->subVector(0,6);
-                        armR -> setAng(qR*CTRL_DEG2RAD);                        
-                        T = armR -> getH(3+6, true);  // torso + up to wrist
-                        doubleTouchPos = T * fingertipPos; 
-                        //optionally, get the finger encoders and get the fingertip position using iKin Finger based on the current joint values 
-                        //http://wiki.icub.org/iCub/main/dox/html/icub_cartesian_interface.html#sec_cart_tipframe
-                        doubleTouchPos.pop_back(); //take out the last dummy value from homogenous form
-                    }
-                    else if(currentTask=="RtoL" || currentTask=="RHtoL") //left to right -> the left index finger will be generating events
-                    {   
-                        iencsL->getEncoders(encsL->data());
-                        Vector qL=encsL->subVector(0,6);
-                        armL -> setAng(qL*CTRL_DEG2RAD);                        
-                        T = armL -> getH(3+6, true);  // torso + up to wrist
-                        doubleTouchPos = T * fingertipPos; 
-                        //optionally, get the finger encoders and get the fingertip position using iKin Finger based on the current joint values 
-                        //http://wiki.icub.org/iCub/main/dox/html/icub_cartesian_interface.html#sec_cart_tipframe
-                        doubleTouchPos.pop_back(); //take out the last dummy value from homogenous form
-                    } 
-                    else
-                    {
-                        yError(" [vtWThread] Unknown task received from the double touch thread!");
-                    }
-                    
-                    yDebug("Computing data from the doubleTouch %g\n",getEstUsed());
-                    AWPolyElement el2(doubleTouchPos,Time::now());
-                    doubleTouchVelEstimate=linEst_doubleTouch->estimate(el2);
-                    events.push_back(IncomingEvent(doubleTouchPos,doubleTouchVelEstimate,-1.0,"doubleTouch"));
-                    isTarget=true;
                 }
             }
         }
