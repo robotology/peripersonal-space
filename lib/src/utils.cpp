@@ -442,8 +442,8 @@ unsigned int factorial(unsigned int n)
 
         if (precision)
         {
-            res << "\n Hst:\n"<< pwe.getPosHist().toString(3,3);
-            res << "\n Hst:\n"<< pwe.getNegHist().toString(3,3) << endl;
+            res << "\n PosHst:\n"<< pwe.getPosHist().toString(3,3);
+            res << "\n NegHst:\n"<< pwe.getNegHist().toString(3,3) << endl;
         }
         return res.str();
     }
@@ -457,7 +457,10 @@ unsigned int factorial(unsigned int n)
     bool Taxel1D::computeResponse()
     {
         if (!insideRFCheck(Evnt))
+        {
+            Resp = 0;
             return false;
+        }
 
         std::vector<double> In;
         In.push_back(Evnt.NRM);
@@ -543,8 +546,8 @@ unsigned int factorial(unsigned int n)
 
         if (precision)
         {
-            res << "\n Hst:\n"<< pwe.getPosHist().toString(3,3);
-            res << "\n Hst:\n"<< pwe.getNegHist().toString(3,3) << endl;
+            res << "\n PosHst:\n"<< pwe.getPosHist().toString(3,3);
+            res << "\n NegHst:\n"<< pwe.getNegHist().toString(3,3) << endl;
         }
         return res.str();
     }

@@ -119,9 +119,9 @@ bool vtRFThread::threadInit()
 
         ts.update();
 
-
     /**************************/
-        if (rf->check("rightHand") || rf->check("rightForeArm"))
+        if (rf->check("rightHand") || rf->check("rightForeArm") ||
+            (!rf->check("rightHand") && !rf->check("rightForeArm") && !rf->check("leftHand") && !rf->check("leftForeArm")))
         {
             Property OptR;
             OptR.put("robot",  robot.c_str());
@@ -150,7 +150,8 @@ bool vtRFThread::threadInit()
         }
 
     /**************************/
-        if (rf->check("leftHand") || rf->check("leftForeArm"))
+        if (rf->check("leftHand") || rf->check("leftForeArm") ||
+            (!rf->check("rightHand") && !rf->check("rightForeArm") && !rf->check("leftHand") && !rf->check("leftForeArm")))
         {
             Property OptL;
             OptL.put("robot",  robot.c_str());
@@ -707,6 +708,7 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
                     (it -> getSkinPart() ==    HAND_RIGHT && iCubSkinName == "right_hand"   ) ||
                     (it -> getSkinPart() ==     HAND_LEFT && iCubSkinName == "left_hand"    )    )
                 {
+                    printf("caznd\n");
                     idx = i;
                     std::vector <unsigned int> txlList = it -> getTaxelList();
 
@@ -714,51 +716,24 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
 
                     if (modality=="1D")
                     {
-                        for (size_t j = 0; j < iCubSkin1D[i].taxel.size(); j++)
-                        {
-                            for (size_t w = 0; w < txlList.size(); w++)
-                            {
-                                if (iCubSkin1D[i].taxel[j].ID == txlList[w])
-                                {
-                                    itHasBeenTouched = true;
-                                    idv.push_back(txlList[w]);
-                                }
-                            }
-                        }
+                        getRepresentativeTaxels1D(txlList, idx, idv);
                     }
                     else
                     {
-                        getRepresentativeTaxels(txlList, idx, idv);
-                        
-                        // for (size_t j = 0; j < iCubSkin2D[i].taxel.size(); j++)
-                        // {
-                        //     cout << iCubSkin2D[i].taxel[j].ID << " ";
-                        // }
-                        // cout << endl;
-                        // for (size_t w = 0; w < txlList.size(); w++)
-                        // {
-                        //     cout << txlList[w] << " ";
-                        // }
-                        // cout << endl;
-                        // for (size_t w = 0; w < idv.size(); w++)
-                        // {
-                        //     cout << idv[w] << " ";
-                        // }
-                        // cout << endl;
-                        
-                        if (idv.size()>0)
-                        {
-                            // printf("I have been touched!!!!!!\n");
-                            itHasBeenTouched = true;
-                        }
+                        getRepresentativeTaxels2D(txlList, idx, idv);
+                    }
+
+                    if (idv.size()>0)
+                    {
+                        // printf("I have been touched!!!!!!\n");
+                        itHasBeenTouched = true;
                     }
 
                     if (itHasBeenTouched)
                     {
-                        yInfo("[vtRF] Contact! Skin part: %s`",iCubSkinName.c_str());
                         if (verbosity>=1)
                         {
-                            printMessage(1,"Taxels' ID: ");
+                            printMessage(1,"Contact! Skin part: %s\tTaxels' ID: ",iCubSkinName.c_str());
                             for (size_t i = 0; i < idv.size(); i++)
                                 printf("\t%i",idv[i]);
 
@@ -823,7 +798,7 @@ string vtRFThread::load()
                         printf("%i ",mapp[j]);
                     }
                 }
-                printMessage(3,"\n");
+                printf("\n");
                 iCubSkin1D[i].size = size;
                 iCubSkin1D[i].Taxel2Repr = mapp;
 
@@ -880,7 +855,7 @@ string vtRFThread::load()
                         printf("%i ",mapp[j]);
                     }
                 }
-                printMessage(5,"\n");
+                printf("\n");
                 iCubSkin2D[i].size = size;
                 iCubSkin2D[i].Taxel2Repr = mapp;
 
@@ -947,11 +922,9 @@ string vtRFThread::save()
                     data.clear();
                     Bottle &valuesPos = data.addList();
 
-                    printf("%s\n", iCubSkin1D[i].taxel[j].pwe.getPosHist().toString(3,3).c_str());
                     for (size_t k = 0; k < bNum[0]; k++)
                     {
                         valuesPos.addInt(iCubSkin1D[i].taxel[j].pwe.getPosHist(k));
-                        printf("%i\n",iCubSkin1D[i].taxel[j].pwe.getPosHist(k));
                     }
                     myfile << iCubSkin1D[i].taxel[j].ID << "\t\t" << data.toString() << "\t";
 
@@ -1029,12 +1002,12 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
     if (modality=="1D")
     {
         iCubSkinName=iCubSkin1D[IDx].name;
-        v = IDv;
+        getRepresentativeTaxels1D(IDv, IDx, v);
     }
     else
     {
         iCubSkinName=iCubSkin2D[IDx].name;
-        getRepresentativeTaxels(IDv, IDx, v);
+        getRepresentativeTaxels2D(IDv, IDx, v);
     }
 
     Matrix T_a = eye(4);                     // transform matrix relative to the arm
@@ -1168,7 +1141,7 @@ bool vtRFThread::projectIncomingEvent()
                 dumpedVector.push_back(iCubSkin1D[i].taxel[j].Evnt.Pos[1]);
                 dumpedVector.push_back(iCubSkin1D[i].taxel[j].Evnt.Pos[2]);
 
-                printMessage(4,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,iCubSkin1D[i].taxel[j].Evnt.toString().c_str());
+                printMessage(5,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,iCubSkin1D[i].taxel[j].Evnt.toString().c_str());
             }
         }
         else
@@ -1183,7 +1156,7 @@ bool vtRFThread::projectIncomingEvent()
                 dumpedVector.push_back(iCubSkin2D[i].taxel[j].Evnt.Pos[1]);
                 dumpedVector.push_back(iCubSkin2D[i].taxel[j].Evnt.Pos[2]);
 
-                printMessage(4,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,iCubSkin2D[i].taxel[j].Evnt.toString().c_str());
+                printMessage(5,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,iCubSkin2D[i].taxel[j].Evnt.toString().c_str());
             }
         }
     }
@@ -1289,7 +1262,7 @@ bool vtRFThread::computeResponse()
             for (size_t j = 0; j < iCubSkin1D[i].taxel.size(); j++)
             {
                 iCubSkin1D[i].taxel[j].computeResponse();
-                printMessage(5,"\t\t\t\tID %i Response %g\n",j,iCubSkin1D[i].taxel[j].Resp);
+                printMessage(4,"\t\t\tID %i\tResponse %i\n",j,iCubSkin1D[i].taxel[j].Resp);
             }
         }
         else
@@ -2201,7 +2174,55 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
     }
 }
 
-bool vtRFThread::getRepresentativeTaxels(const std::vector<unsigned int> IDv, const int IDx, std::vector<unsigned int> &v)
+bool vtRFThread::getRepresentativeTaxels1D(const std::vector<unsigned int> IDv, const int IDx, std::vector<unsigned int> &v)
+{
+    //unordered_set would be better, but that is only experimentally supported by some compilers.
+    std::set<unsigned int> rep_taxel_IDs_set;
+    
+    if (iCubSkin1D[IDx].Taxel2Repr.empty())
+    {
+        v = IDv; //we simply copy the activated taxels
+        return false;
+    }
+    else
+    {
+        for (std::vector<unsigned int>::const_iterator it = IDv.begin() ; it != IDv.end(); ++it)
+        {
+            if (iCubSkin1D[IDx].Taxel2Repr[*it] == -1)
+            {
+                yWarning("[%s] taxel %u activated, but representative taxel undefined - ignoring.",iCubSkin1D[IDx].name.c_str(),*it);
+            }
+            else
+            {
+                rep_taxel_IDs_set.insert(iCubSkin1D[IDx].Taxel2Repr[*it]); //add all the representatives that were activated to the set
+            }
+        }
+
+        for (std::set<unsigned int>::const_iterator itr = rep_taxel_IDs_set.begin(); itr != rep_taxel_IDs_set.end(); ++itr)
+        {
+            v.push_back(*itr); //add the representative taxels that were activated to the output taxel ID vector    
+        }
+
+        if (v.empty())
+        {
+            yWarning("Representative taxels' vector is empty! Skipping.");
+            return false;
+        }
+        
+        if (verbosity>=4)
+        {
+            printMessage(4,"Representative taxels on skin part %d: \n",IDx);
+            for(std::vector<unsigned int>::const_iterator it = v.begin() ; it != v.end(); ++it)
+            {
+                printf("%d ",*it);
+            }
+        }
+    }
+
+    return true;
+}
+
+bool vtRFThread::getRepresentativeTaxels2D(const std::vector<unsigned int> IDv, const int IDx, std::vector<unsigned int> &v)
 {
     //unordered_set would be better, but that is only experimentally supported by some compilers.
     std::set<unsigned int> rep_taxel_IDs_set;
