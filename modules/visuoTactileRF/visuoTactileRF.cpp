@@ -422,16 +422,19 @@ int main(int argc, char * argv[])
     {    
         yInfo("");
         yInfo("Options:");
-        yInfo("   --context    path:   where to find the called resource (default periPersonalSpace).");
-        yInfo("   --from       from:   the name of the .ini file (default visuoTactileRF.ini).");
-        yInfo("   --name       name:   the name of the module (default visuoTactileRF).");
-        yInfo("   --robot      robot:  the name of the robot. Default icub.");
-        yInfo("   --rate       rate:   the period used by the thread. Default 50ms.");
-        yInfo("   --verbosity  int:    verbosity level (default 0).");
-        yInfo("   --modality   string: which modality to use (either 1D or 2D, default 1D).");
-        yInfo("   --taxelsFile string: the file from which load and save taxels. Defaults:");
-        yInfo("                        'taxels1D.ini' if modality==1D");
-        yInfo("                        'taxels2D.ini' if modality==2D");
+        yInfo("  --context    path:   where to find the called resource (default periPersonalSpace).");
+        yInfo("  --from       from:   the name of the .ini file (default visuoTactileRF.ini).");
+        yInfo("  --name       name:   the name of the module (default visuoTactileRF).");
+        yInfo("  --robot      robot:  the name of the robot. Default icub.");
+        yInfo("  --rate       rate:   the period used by the thread. Default 50ms.");
+        yInfo("  --verbosity  int:    verbosity level (default 0).");
+        yInfo("  --modality   string: which modality to use (either 1D or 2D, default 1D).");
+        yInfo("  --taxelsFile string: the file from which load and save taxels. Defaults:");
+        yInfo("                       'taxels1D.ini' if modality==1D");
+        yInfo("                       'taxels2D.ini' if modality==2D");
+        yInfo("  --rightForeArm, --rightHand, --leftForeArm, --leftHand     flag: flag(s) to call if the module");
+        yInfo("                       has to be run with either one of the 4 skin parts available.");
+        yInfo("                       Not using any of them is equal to call all of them at the same time.");
         yInfo("");
         return 0;
     }

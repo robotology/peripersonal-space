@@ -325,11 +325,7 @@ void vtRFThread::run()
         for (size_t i = 0; i < event->size(); i++)
         {
             incomingEvents.push_back(IncomingEvent(*(event -> get(i).asList())));
-            if (verbosity>=3)
-            {
-                printf("[EVENT]");
-                incomingEvents.back().print();
-            }   
+            printMessage(3,"[EVENT] %s", incomingEvents.back().toString().c_str());
         }
 
         // manage the buffer
