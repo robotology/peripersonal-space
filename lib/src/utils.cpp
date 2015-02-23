@@ -166,7 +166,7 @@ unsigned int factorial(unsigned int n)
         yDebug("\tPos: %s\t Vel: %s\t Radius %g\t Src %s\n",Pos.toString().c_str(),Vel.toString().c_str(),Radius,Src.c_str());
     }
 
-    string IncomingEvent::toString(int precision) const
+    string IncomingEvent::toString() const
     {
         stringstream res;
         res << "Pos: "<< Pos.toString(3,3) << "\t Vel: "<< Vel.toString(3,3)
@@ -218,8 +218,14 @@ unsigned int factorial(unsigned int n)
 
     void IncomingEvent4Taxel1D::print()
     {
-        yDebug("\tNRM: %g", NRM);
-        IncomingEvent::print();
+        yDebug("\tNRM: %g \t %s", NRM, IncomingEvent::toString().c_str());
+    }
+
+    string IncomingEvent4Taxel1D::toString() const
+    {
+        stringstream res;
+        res << "NRM: "<< NRM << "\t "<< IncomingEvent::toString();
+        return res.str();
     }
 
 /****************************************************************/
@@ -270,8 +276,14 @@ unsigned int factorial(unsigned int n)
 
     void IncomingEvent4Taxel2D::print()
     {
-        yInfo("\tNRM: %g\t TTC: %g \t", NRM, TTC);
-        IncomingEvent::print();
+        yDebug("\tNRM: %g\t TTC: %g \t %s", NRM, TTC, IncomingEvent::toString().c_str());
+    }
+
+    string IncomingEvent4Taxel2D::toString() const
+    {
+        stringstream res;
+        res << "NRM: "<< NRM << "\t TTC: " << TTC << "\t "<< IncomingEvent::toString();
+        return res.str();
     }
 
 /****************************************************************/

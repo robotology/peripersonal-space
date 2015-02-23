@@ -54,13 +54,13 @@
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /vtRF/left --RefreshTime 33 --x 0 --y 0 --w 400 --h 400</parameters>
+        <parameters>--name /vtRF/left --RefreshTime 33 --x 0 --y 0 --w 400 --h 400 --compact</parameters>
         <node>icub15</node>
         <stdio></stdio>
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /vtRF/right --RefreshTime 33 --x 420 --y 0 --w 400 --h 400</parameters>
+        <parameters>--name /vtRF/right --RefreshTime 33 --x 420 --y 0 --w 400 --h 400 --compact</parameters>
         <node>icub15</node>
         <stdio></stdio>
     </module>

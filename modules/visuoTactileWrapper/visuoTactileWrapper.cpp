@@ -260,8 +260,9 @@ int main(int argc, char * argv[])
         yInfo("   --from       from:  the name of the .ini file (default visuoTactileWrapper.ini).");
         yInfo("   --name       name:  the name of the module (default visuoTactileWrapper).");
         yInfo("   --robot      robot: the name of the robot. Default icub.");
-        yInfo("   --rate       rate:  the period used by the thread. Default 50ms.");
-        yInfo("   --verbosity  int:   verbosity level (default 0).");
+        yInfo("   --rate          rate: the period used by the thread. Default 50ms.");
+        yInfo("   --verbosity     int:  verbosity level (default 0).");
+        yInfo("   --noDoubleTouch flag: disables the doubleTouch from ");
         yInfo("");
         return 0;
     }

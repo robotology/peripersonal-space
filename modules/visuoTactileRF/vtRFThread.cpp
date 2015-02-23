@@ -1153,7 +1153,7 @@ bool vtRFThread::projectIncomingEvent()
         else
             yError(" in projectIncomingEvent!\n");
 
-        yInfo("T_A:\n%s",T_a.toString().c_str());
+        // yInfo("T_A:\n%s",T_a.toString().c_str());
 
         if (modality=="1D")
         {
@@ -1167,9 +1167,7 @@ bool vtRFThread::projectIncomingEvent()
                 dumpedVector.push_back(iCubSkin1D[i].taxel[j].Evnt.Pos[1]);
                 dumpedVector.push_back(iCubSkin1D[i].taxel[j].Evnt.Pos[2]);
 
-                printMessage(4,"Projection -> i: %i\tID %i\tEvent:\n",i,j);
-                if (verbosity>=4)
-                    iCubSkin1D[i].taxel[j].Evnt.print();
+                printMessage(4,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,iCubSkin1D[i].taxel[j].Evnt.toString().c_str());
             }
         }
         else
@@ -1184,9 +1182,7 @@ bool vtRFThread::projectIncomingEvent()
                 dumpedVector.push_back(iCubSkin2D[i].taxel[j].Evnt.Pos[1]);
                 dumpedVector.push_back(iCubSkin2D[i].taxel[j].Evnt.Pos[2]);
 
-                printMessage(4,"Projection -> i: %i\tID %i\tEvent:\n",i,j);
-                if (verbosity>=4)
-                    iCubSkin2D[i].taxel[j].Evnt.print();
+                printMessage(4,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,iCubSkin2D[i].taxel[j].Evnt.toString().c_str());
             }
         }
     }
@@ -1362,7 +1358,7 @@ void vtRFThread::drawTaxels(string _eye)
             for (size_t j = 0; j < iCubSkin1D[i].taxel.size(); j++)
             {
                 drawTaxel(imgOut,iCubSkin1D[i].taxel[j].px,iCubSkin1D[i].name,iCubSkin1D[i].taxel[j].Resp);
-                printMessage(5,"iCubSkin1D[%i].taxel[%i].px %s\n",i,j,iCubSkin1D[i].taxel[j].px.toString().c_str());
+                printMessage(6,"iCubSkin1D[%i].taxel[%i].px %s\n",i,j,iCubSkin1D[i].taxel[j].px.toString().c_str());
             }
         }
         else
@@ -1370,7 +1366,7 @@ void vtRFThread::drawTaxels(string _eye)
             for (size_t j = 0; j < iCubSkin2D[i].taxel.size(); j++)
             {
                 drawTaxel(imgOut,iCubSkin2D[i].taxel[j].px,iCubSkin2D[i].name,iCubSkin2D[i].taxel[j].Resp);
-                printMessage(5,"iCubSkin2D[%i].taxel[%i].px %s\n",i,j,iCubSkin2D[i].taxel[j].px.toString().c_str());
+                printMessage(6,"iCubSkin2D[%i].taxel[%i].px %s\n",i,j,iCubSkin2D[i].taxel[j].px.toString().c_str());
             }
         }
     }

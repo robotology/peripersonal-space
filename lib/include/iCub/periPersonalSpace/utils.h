@@ -169,7 +169,7 @@ struct IncomingEvent
     /**
     * toString Method
     **/
-    string toString(int precision) const;
+    string toString() const;
 };
 
 /**
@@ -208,7 +208,12 @@ struct IncomingEvent4Taxel1D : public IncomingEvent
     /**
     * Print Method
     **/
-    void print();    
+    void print();
+
+    /**
+    * toString Method
+    **/
+    string toString() const;
 };
 
 /**
@@ -249,6 +254,11 @@ struct IncomingEvent4Taxel2D : public IncomingEvent
     * Print Method
     **/
     void print();
+
+    /**
+    * toString Method
+    **/
+    string toString() const;
 };
 
 /**
