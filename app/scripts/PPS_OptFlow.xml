@@ -42,7 +42,7 @@
     </module>
     <module>
         <name>visuoTactileRF</name>
-        <parameters></parameters>
+        <parameters>--taxelsFile taxels1D_noFAR.ini</parameters>
         <node>icub15</node>
         <stdio></stdio>
     </module>
@@ -66,13 +66,13 @@
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /PF3DT_viewer --RefreshTime 33 --x 980 --y 340 --w 320 --h 240 --compact</parameters>
+        <parameters>--name /PF3DT_viewer --RefreshTime 33 --x 980 --y 340 --w 630 --h 240 --compact</parameters>
         <node>icub13</node>
         <tag>PF3DTracker_viewer</tag>
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /motionCUT_viewer --RefreshTime 33 --x 980 --y 520 --w 320 --h 240 --compact</parameters>
+        <parameters>--name /motionCUT_viewer --RefreshTime 33 --x 980 --y 340 --w 320 --h 240 --compact</parameters>
         <node>icub13</node>
     </module>
     <module>
