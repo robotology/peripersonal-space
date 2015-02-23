@@ -255,7 +255,7 @@ public:
             Bottle &skinEventsConf = skinRF.findGroup("SKIN_EVENTS");
             if(!skinEventsConf.isNull())
             {
-                printf("SKIN_EVENTS section found\n");
+                yInfo("SKIN_EVENTS section found\n");
 
                 if(skinEventsConf.check("skinParts"))
                 {
@@ -275,7 +275,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                printf("*** VisuoTactileRF: filePath [%i] %s\n",0,filePath.c_str());
+                                yInfo("[skin_event] filePath [%i] %s\n",0,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
@@ -285,7 +285,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                printf("*** VisuoTactileRF: filePath [%i] %s\n",1,filePath.c_str());
+                                yInfo("[skin_event] filePath [%i] %s\n",1,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
@@ -295,7 +295,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                printf("*** VisuoTactileRF: filePath [%i] %s\n",2,filePath.c_str());
+                                yInfo("[skin_event] filePath [%i] %s\n",2,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
@@ -305,7 +305,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                printf("*** VisuoTactileRF: filePath [%i] %s\n",3,filePath.c_str());
+                                yInfo("[skin_event] filePath [%i] %s\n",3,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
@@ -318,7 +318,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                printf("*** VisuoTactileRF: filePath [%i] %s\n",i,filePath.c_str());
+                                yInfo("[skin_event] filePath [%i] %s\n",i,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }

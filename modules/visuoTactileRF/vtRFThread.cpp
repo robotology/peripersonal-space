@@ -121,56 +121,62 @@ bool vtRFThread::threadInit()
 
 
     /**************************/
-        Property OptR;
-        OptR.put("robot",  robot.c_str());
-        OptR.put("part",   "right_arm");
-        OptR.put("device", "remote_controlboard");
-        OptR.put("remote",("/"+robot+"/right_arm").c_str());
-        OptR.put("local", ("/"+name +"/right_arm").c_str());
+        if (rf->check("rightHand") || rf->check("rightForeArm"))
+        {
+            Property OptR;
+            OptR.put("robot",  robot.c_str());
+            OptR.put("part",   "right_arm");
+            OptR.put("device", "remote_controlboard");
+            OptR.put("remote",("/"+robot+"/right_arm").c_str());
+            OptR.put("local", ("/"+name +"/right_arm").c_str());
 
-        if (!ddR.open(OptR))
-        {
-            yError(": could not open right_arm PolyDriver!\n");
-            return false;
+            if (!ddR.open(OptR))
+            {
+                yError(": could not open right_arm PolyDriver!\n");
+                return false;
+            }
+            bool ok = 1;
+            if (ddR.isValid())
+            {
+                ok = ok && ddR.view(iencsR);
+            }
+            if (!ok)
+            {
+                yError("[vtRFThread] Problems acquiring right_arm interfaces!!!!\n");
+                return false;
+            }
+            iencsR->getAxes(&jntsR);
+            encsR = new yarp::sig::Vector(jntsR,0.0);
         }
-        bool ok = 1;
-        if (ddR.isValid())
-        {
-            ok = ok && ddR.view(iencsR);
-        }
-        if (!ok)
-        {
-            printMessage(0,"\nERROR: Problems acquiring right_arm interfaces!!!!\n");
-            return false;
-        }
-        iencsR->getAxes(&jntsR);
-        encsR = new yarp::sig::Vector(jntsR,0.0);
 
     /**************************/
-        Property OptL;
-        OptL.put("robot",  robot.c_str());
-        OptL.put("part",   "left_arm");
-        OptL.put("device", "remote_controlboard");
-        OptL.put("remote",("/"+robot+"/left_arm").c_str());
-        OptL.put("local", ("/"+name +"/left_arm").c_str());
+        if (rf->check("leftHand") || rf->check("leftForeArm"))
+        {
+            Property OptL;
+            OptL.put("robot",  robot.c_str());
+            OptL.put("part",   "left_arm");
+            OptL.put("device", "remote_controlboard");
+            OptL.put("remote",("/"+robot+"/left_arm").c_str());
+            OptL.put("local", ("/"+name +"/left_arm").c_str());
 
-        if (!ddL.open(OptL))
-        {
-            yError(": could not open left_arm PolyDriver!\n");
-            return false;
+            if (!ddL.open(OptL))
+            {
+                yError(": could not open left_arm PolyDriver!\n");
+                return false;
+            }
+            bool ok = 1;
+            if (ddL.isValid())
+            {
+                ok = ok && ddL.view(iencsL);
+            }
+            if (!ok)
+            {
+                yError("[vtRFThread] Problems acquiring left_arm interfaces!!!!\n");
+                return false;
+            }
+            iencsL->getAxes(&jntsL);
+            encsL = new yarp::sig::Vector(jntsL,0.0);
         }
-        ok = 1;
-        if (ddL.isValid())
-        {
-            ok = ok && ddL.view(iencsL);
-        }
-        if (!ok)
-        {
-            printMessage(0,"\nERROR: Problems acquiring left_arm interfaces!!!!\n");
-            return false;
-        }
-        iencsL->getAxes(&jntsL);
-        encsL = new yarp::sig::Vector(jntsL,0.0);
 
     /**************************/
         Property OptT;
@@ -185,7 +191,7 @@ bool vtRFThread::threadInit()
             yError("Could not open torso PolyDriver!");
             return false;
         }
-        ok = 1;
+        bool ok = 1;
         if (ddT.isValid())
         {
             ok = ok && ddT.view(iencsT);
