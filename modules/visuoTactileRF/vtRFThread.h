@@ -79,7 +79,7 @@ protected:
     string name;
     // Name of the robot (to address the module toward icub or icubSim):
     string robot;
-    // Name of the robot (to address the module toward icub or icubSim):
+    // Resource finder used to find for files and configurations:
     ResourceFinder* rf;
 
     /***************************************************************************/

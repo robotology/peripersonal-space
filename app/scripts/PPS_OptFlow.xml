@@ -30,7 +30,7 @@
     </module>
     <module>
         <name>visuoTactileWrapper</name>
-        <parameters></parameters>
+        <parameters>--noDoubleTouch</parameters>
         <node>icub15</node>
         <stdio></stdio>
     </module>
@@ -66,23 +66,23 @@
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /PF3DT_viewer --RefreshTime 33 --x 980 --y 340 --w 630 --h 240 --compact</parameters>
+        <parameters>--name /PF3DT_viewer --RefreshTime 33 --x 980 --y 620 --w 320 --h 260 --compact</parameters>
         <node>icub13</node>
         <tag>PF3DTracker_viewer</tag>
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /motionCUT_viewer --RefreshTime 33 --x 980 --y 340 --w 320 --h 240 --compact</parameters>
+        <parameters>--name /motionCUT_viewer --RefreshTime 33 --x 980 --y 340 --w 320 --h 260 --compact</parameters>
         <node>icub13</node>
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /templatePFTracker_viewer --RefreshTime 33 --x 1280 --y 80 --w 320 --h 240 --compact</parameters>
+        <parameters>--name /templatePFTracker_viewer --RefreshTime 33 --x 1280 --y 60 --w 320 --h 260 --compact</parameters>
         <node>icub13</node>
     </module>
     <module>
         <name>yarpview</name>
-        <parameters>--name /dispViewer --RefreshTime 33 --x 1600 --y 80 --w 320 --h 240 --compact</parameters>
+        <parameters>--name /dispViewer --RefreshTime 33 --x 1600 --y 60 --w 320 --h 260 --compact</parameters>
         <node>icub13</node>
     </module>
 

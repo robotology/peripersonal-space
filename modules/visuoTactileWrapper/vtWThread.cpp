@@ -7,7 +7,7 @@
 
 #include "vtWThread.h"
 
-vtWThread::vtWThread(int _rate, const string &_name, const string &_robot, int _v) :
+vtWThread::vtWThread(int _rate, const string &_name, const string &_robot, int _v, const ResourceFinder &_moduleRF) :
                        RateThread(_rate), name(_name), robot(_robot), verbosity(_v)
 {
     optFlowPos.resize(3,0.0);
@@ -24,6 +24,8 @@ vtWThread::vtWThread(int _rate, const string &_name, const string &_robot, int _
     
     armR = new iCubArm("right");
     armL = new iCubArm("left");
+
+    rf = const_cast<ResourceFinder*>(&_moduleRF);
 
     doubleTouchStep =   -1;
 }
@@ -61,6 +63,8 @@ bool vtWThread::threadInit()
     igaze -> setEyesTrajTime(0.5);
     
     /**************************/
+    if (!rf->check("noDoubleTouch"))
+    {
         Property OptR;
         OptR.put("robot",  robot.c_str());
         OptR.put("part",   "right_arm");
@@ -86,7 +90,6 @@ bool vtWThread::threadInit()
         iencsR->getAxes(&jntsR);
         encsR = new yarp::sig::Vector(jntsR,0.0);
 
-    /**************************/
         Property OptL;
         OptL.put("robot",  robot.c_str());
         OptL.put("part",   "left_arm");
@@ -111,6 +114,7 @@ bool vtWThread::threadInit()
         }
         iencsL->getAxes(&jntsL);
         encsL = new yarp::sig::Vector(jntsL,0.0);
+    }
 
     linEst_optFlow     = new AWLinEstimator(16,0.05);
     linEst_pf3dTracker = new AWLinEstimator(16,0.05);

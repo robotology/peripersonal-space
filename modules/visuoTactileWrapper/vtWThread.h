@@ -77,6 +77,8 @@ protected:
     string name;
     // Name of the robot (to address the module toward icub or icubSim):
     string robot;
+    // Resource finder used to find for files and configurations
+    ResourceFinder* rf;
 
     /***************************************************************************/
     // INTERNAL VARIABLES:
@@ -163,7 +165,7 @@ protected:
 
 public:
     // CONSTRUCTOR
-    vtWThread(int _rate, const string &_name, const string &_robot, int _v);
+    vtWThread(int _rate, const string &_name, const string &_robot, int _v, const ResourceFinder &_moduleRF);
     // INIT
     virtual bool threadInit();
     // RUN

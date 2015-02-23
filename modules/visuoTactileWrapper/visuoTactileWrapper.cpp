@@ -179,7 +179,7 @@ public:
 
         //******************************************************
         //*********************** THREAD **********************
-            vtWThrd = new vtWThread(rate, name, robot, verbosity);
+            vtWThrd = new vtWThread(rate, name, robot, verbosity, rf);
             if (!vtWThrd -> start())
             {
                 delete vtWThrd;
