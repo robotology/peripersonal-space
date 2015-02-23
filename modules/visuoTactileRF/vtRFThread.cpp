@@ -908,7 +908,10 @@ string vtRFThread::load()
 
 string vtRFThread::save()
 {
-    string fnm=path+taxelsFile;
+    int    lastindex     = taxelsFile.find_last_of("."); 
+    string taxelsFileRaw = taxelsFile.substr(0, lastindex);
+
+    string fnm=path+taxelsFileRaw+"_out.ini";
     ofstream myfile;
     yInfo("Saving to: %s", fnm.c_str());
     myfile.open(fnm.c_str(),ios::trunc);
@@ -944,9 +947,11 @@ string vtRFThread::save()
                     data.clear();
                     Bottle &valuesPos = data.addList();
 
+                    printf("%s\n", iCubSkin1D[i].taxel[j].pwe.getPosHist().toString(3,3).c_str());
                     for (size_t k = 0; k < bNum[0]; k++)
                     {
                         valuesPos.addInt(iCubSkin1D[i].taxel[j].pwe.getPosHist(k));
+                        printf("%i\n",iCubSkin1D[i].taxel[j].pwe.getPosHist(k));
                     }
                     myfile << iCubSkin1D[i].taxel[j].ID << "\t\t" << data.toString() << "\t";
 
@@ -1284,6 +1289,7 @@ bool vtRFThread::computeResponse()
             for (size_t j = 0; j < iCubSkin1D[i].taxel.size(); j++)
             {
                 iCubSkin1D[i].taxel[j].computeResponse();
+                printMessage(5,"\t\t\t\tID %i Response %g\n",j,iCubSkin1D[i].taxel[j].Resp);
             }
         }
         else
@@ -1612,8 +1618,9 @@ bool vtRFThread::setTaxelPosesFromFile1D(const string filePath, skinPart1D &sP)
             // if((i==87) || (i==75)  || (i==39)|| (i==51)) // taxels that are in the big patch and closest to the little patch (externally)
             //                                              // 87 most proximal, 75 then, 39 then, 51 distal
 
-            if((i==27) || (i==15) || (i==3) || (i==183) ||              // taxels used for the experimentations on the pps paper
-               (i==147) || (i==135) || (i==75) || (i==39) || (i==51))
+            if((i==27)  || (i==15)  || (i==3)   || (i==183) ||              // taxels used for the experimentations on the pps paper
+               (i==135) || (i==147) || (i==159) || (i==171) ||
+               (i==87)  || (i==75)  || (i==39)  || (i==51))
             {
                 sP.size++;
                 sP.taxel.push_back(Taxel1D(taxelPos,taxelNorm,i));
@@ -1722,8 +1729,9 @@ bool vtRFThread::setTaxelPosesFromFile2D(const string filePath, skinPart2D &sP)
             // if((i==87) || (i==75)  || (i==39)|| (i==51)) // taxels that are in the big patch and closest to the little patch (externally)
             //                                              // 87 most proximal, 75 then, 39 then, 51 distal
 
-            if((i==27) || (i==15) || (i==3) || (i==183) ||              // taxels used for the experimentations on the pps paper
-               (i==147) || (i==135) || (i==75) || (i==39) || (i==51))
+            if((i==27)  || (i==15)  || (i==3)   || (i==183) ||              // taxels used for the experimentations on the pps paper
+               (i==135) || (i==147) || (i==159) || (i==171) ||
+               (i==87)  || (i==75)  || (i==39)  || (i==51))
             {
                 sP.size++;
                 sP.taxel.push_back(Taxel2D(taxelPos,taxelNorm,i));

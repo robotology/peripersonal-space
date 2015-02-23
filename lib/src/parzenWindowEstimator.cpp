@@ -101,10 +101,10 @@ double gauss2D(const double x_0, const double y_0,
 
     double parzenWindowEstimator1D::getHist(const int i)
     {
-        if ( posHist(i,1)+negHist(i,1) < 5 )
+        if ( posHist(i,0)+negHist(i,0) < 5 )
             return 0;
 
-        return posHist(i,1)/(posHist(i,1)+negHist(i,1));
+        return posHist(i,0)/(posHist(i,0)+negHist(i,0));
     }
 
 
@@ -114,7 +114,7 @@ double gauss2D(const double x_0, const double y_0,
         
         if (getIndexes(x,b0))
         {
-            posHist(b0,1) += 1;
+            posHist(b0,0) += 1;
             return true;
         }
         else
@@ -167,9 +167,9 @@ double gauss2D(const double x_0, const double y_0,
 
         for (size_t i = 0; i < posHist.rows(); i++)
         {
-            if ( posHist(i,1)>=0 )
+            if ( posHist(i,0)>=0 )
             {
-                double factor=(posHist(i,1)+negHist(i,1))>0?posHist(i,1)/(posHist(i,1)+negHist(i,1)):0;
+                double factor=(posHist(i,0)+negHist(i,0))>0?posHist(i,0)/(posHist(i,0)+negHist(i,0)):0;
                 f_x += factor * gauss(extX[0]+i*binWidth[0],sigmX,x[0]);
             }
         }
