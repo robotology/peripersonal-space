@@ -285,8 +285,7 @@ protected:
     /**
     *
     **/
-    IncomingEvent4Taxel projectIntoTaxelRF1D(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e);
-    IncomingEvent4Taxel projectIntoTaxelRF2D(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e);
+    IncomingEvent4Taxel projectIntoTaxelRF(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e);
 
     /**
     *

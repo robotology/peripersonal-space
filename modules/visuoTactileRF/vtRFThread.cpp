@@ -1051,7 +1051,7 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
 
             for (size_t k = 0; k < eventsBuffer.size(); k++)
             {
-                IncomingEvent4Taxel projection = projectIntoTaxelRF1D(iCubSkin1D[IDx].taxel[j].RF,T_a,eventsBuffer[k]);
+                IncomingEvent4Taxel projection = projectIntoTaxelRF(iCubSkin1D[IDx].taxel[j].RF,T_a,eventsBuffer[k]);
                 printMessage(4,"Training Taxels: skinPart %d ID %i k %i NORM %g\n",IDx,iCubSkin1D[IDx].taxel[j].ID,k,projection.NRM);
 
                 if (itHasBeenTouched == true)   iCubSkin1D[IDx].taxel[j].addSample(projection);
@@ -1077,7 +1077,7 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
 
             for (size_t k = 0; k < eventsBuffer.size(); k++)
             {
-                IncomingEvent4Taxel projection = projectIntoTaxelRF2D(iCubSkin2D[IDx].taxel[j].RF,T_a,eventsBuffer[k]);
+                IncomingEvent4Taxel projection = projectIntoTaxelRF(iCubSkin2D[IDx].taxel[j].RF,T_a,eventsBuffer[k]);
                 printMessage(4,"Training Taxels: skinPart %d ID %i k %i NORM %g TTC %g\n",IDx,iCubSkin2D[IDx].taxel[j].ID,k,projection.NRM,projection.TTC);
 
                 if (itHasBeenTouched == true)   iCubSkin2D[IDx].taxel[j].addSample(projection);
@@ -1132,7 +1132,7 @@ bool vtRFThread::projectIncomingEvent()
         {
             for (size_t j = 0; j < iCubSkin1D[i].taxel.size(); j++)
             {
-                iCubSkin1D[i].taxel[j].Evnt=projectIntoTaxelRF1D(iCubSkin1D[i].taxel[j].RF,T_a,
+                iCubSkin1D[i].taxel[j].Evnt=projectIntoTaxelRF(iCubSkin1D[i].taxel[j].RF,T_a,
                                                                  incomingEvents[incomingEvents.size()-1]);
 
                 // There's a reason behind this choice
@@ -1147,7 +1147,7 @@ bool vtRFThread::projectIncomingEvent()
         {
             for (size_t j = 0; j < iCubSkin2D[i].taxel.size(); j++)
             {
-                iCubSkin2D[i].taxel[j].Evnt=projectIntoTaxelRF2D(iCubSkin2D[i].taxel[j].RF,T_a,
+                iCubSkin2D[i].taxel[j].Evnt=projectIntoTaxelRF(iCubSkin2D[i].taxel[j].RF,T_a,
                                                              incomingEvents[incomingEvents.size()-1]);
 
                 // There's a reason behind this choice
@@ -1162,37 +1162,20 @@ bool vtRFThread::projectIncomingEvent()
     return true;
 }
 
-IncomingEvent4Taxel vtRFThread::projectIntoTaxelRF1D(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e)
+IncomingEvent4Taxel vtRFThread::projectIntoTaxelRF(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e)
 {
     IncomingEvent4Taxel Event_projected = e;
 
     Matrix T_a_proj = T_a * RF;
 
     Vector p=e.Pos; p.push_back(1);
-
     Event_projected.Pos = SE3inv(T_a_proj)*p;        Event_projected.Pos.pop_back();
 
-    if (e.Radius != -1.0)
+    if (modality=="2D")
     {
-        Event_projected.Pos(2) -= Event_projected.Radius;
+        Vector v=e.Vel; v.push_back(1);
+        Event_projected.Vel = SE3inv(T_a_proj)*v;        Event_projected.Vel.pop_back();
     }
-
-    computeX(Event_projected);
-
-    return Event_projected;
-}
-
-IncomingEvent4Taxel vtRFThread::projectIntoTaxelRF2D(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e)
-{
-    IncomingEvent4Taxel Event_projected = e;
-
-    Matrix T_a_proj = T_a * RF;
-
-    Vector p=e.Pos; p.push_back(1);
-    Vector v=e.Vel; v.push_back(1);
-
-    Event_projected.Pos = SE3inv(T_a_proj)*p;        Event_projected.Pos.pop_back();
-    Event_projected.Vel = SE3inv(T_a_proj)*v;        Event_projected.Vel.pop_back();
 
     if (e.Radius != -1.0)
     {
