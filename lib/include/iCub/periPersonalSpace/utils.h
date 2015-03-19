@@ -175,7 +175,51 @@ struct IncomingEvent
 /**
 * It has only one more member 
 **/
-struct IncomingEvent4Taxel : public IncomingEvent
+struct IncomingEvent4Taxel1D : public IncomingEvent
+{
+    double NRM;
+
+    /**
+    * Constructor
+    **/    
+    IncomingEvent4Taxel1D();
+
+    /**
+    * Constructor with Pos and Vel
+    **/    
+    IncomingEvent4Taxel1D(const Vector &p, const Vector &v, const double r, const string &s);
+
+    /**
+    * Copy constructor
+    **/
+    IncomingEvent4Taxel1D(const IncomingEvent &e);
+    IncomingEvent4Taxel1D(const IncomingEvent4Taxel1D &e);
+
+    /**
+    * Copy Operator
+    **/
+    IncomingEvent4Taxel1D &operator=(const IncomingEvent &e);
+
+    /**
+    * Copy Operator
+    **/
+    IncomingEvent4Taxel1D &operator=(const IncomingEvent4Taxel1D &e);
+
+    /**
+    * Print Method
+    **/
+    void print();
+
+    /**
+    * toString Method
+    **/
+    string toString() const;
+};
+
+/**
+* It has only two more members
+**/
+struct IncomingEvent4Taxel2D : public IncomingEvent
 {
     double NRM;
     double TTC;
@@ -183,28 +227,28 @@ struct IncomingEvent4Taxel : public IncomingEvent
     /**
     * Constructor
     **/    
-    IncomingEvent4Taxel();
+    IncomingEvent4Taxel2D();
 
     /**
     * Constructor with Pos and Vel
     **/    
-    IncomingEvent4Taxel(const Vector &p, const Vector &v, const double r, const string &s);
+    IncomingEvent4Taxel2D(const Vector &p, const Vector &v, const double r, const string &s);
 
     /**
     * Copy constructor
     **/
-    IncomingEvent4Taxel(const IncomingEvent &e);
-    IncomingEvent4Taxel(const IncomingEvent4Taxel &e);
+    IncomingEvent4Taxel2D(const IncomingEvent &e);
+    IncomingEvent4Taxel2D(const IncomingEvent4Taxel2D &e);
 
     /**
     * Copy Operator
     **/
-    IncomingEvent4Taxel &operator=(const IncomingEvent &e);
+    IncomingEvent4Taxel2D &operator=(const IncomingEvent &e);
 
     /**
     * Copy Operator
     **/
-    IncomingEvent4Taxel &operator=(const IncomingEvent4Taxel &e);
+    IncomingEvent4Taxel2D &operator=(const IncomingEvent4Taxel2D &e);
 
     /**
     * Print Method
@@ -232,8 +276,6 @@ class Taxel
     yarp::sig::Matrix RF;      // taxel's reference Frame (computed from Pos and Norm)
 
     double rfAngle;            // angle of the receptive field [rad]
-
-    IncomingEvent4Taxel   Evnt; // IncomingEvent as seen from the taxel's RF
 
     /**
     * Default constructor
@@ -289,6 +331,7 @@ class Taxel
 class Taxel1D : public Taxel
 {
   public:
+    IncomingEvent4Taxel1D   Evnt; // IncomingEvent as seen from the taxel's RF
     parzenWindowEstimator1D  pwe; // Parzen Window Estimator to compute the response
 
     /**
@@ -314,13 +357,13 @@ class Taxel1D : public Taxel
     /**
     * Add or remove a sample from the pwe's histogram
     **/
-    bool addSample(const IncomingEvent4Taxel ie);
-    bool removeSample(const IncomingEvent4Taxel ie);
+    bool addSample(const IncomingEvent4Taxel1D ie);
+    bool removeSample(const IncomingEvent4Taxel1D ie);
 
     /**
     * Check if the input sample is inside the Receptive field (i.e. the cone)
     **/
-    bool insideRFCheck(const IncomingEvent4Taxel ie);
+    bool insideRFCheck(const IncomingEvent4Taxel1D ie);
 
     /**
     * Print Method
@@ -346,7 +389,9 @@ class Taxel1D : public Taxel
 class Taxel2D : public Taxel
 {
   public:
+    IncomingEvent4Taxel2D   Evnt;  // IncomingEvent as seen from the taxel's RF
     parzenWindowEstimator2D pwe;   // taxel's response by means of a 2D parzen window estimator
+
 
     /**
     * Default constructor
@@ -371,13 +416,13 @@ class Taxel2D : public Taxel
     /**
     * Add or remove a sample from the pwe's histogram
     **/
-    bool addSample(const IncomingEvent4Taxel ie);
-    bool removeSample(const IncomingEvent4Taxel ie);
+    bool addSample(const IncomingEvent4Taxel2D ie);
+    bool removeSample(const IncomingEvent4Taxel2D ie);
 
     /**
     * Check if the input sample is inside the Receptive field (i.e. the cone)
     **/
-    bool insideRFCheck(const IncomingEvent4Taxel ie);
+    bool insideRFCheck(const IncomingEvent4Taxel2D ie);
 
     /**
     * Print Method
@@ -393,6 +438,7 @@ class Taxel2D : public Taxel
     * Resets the parzen window estimator
     **/
     bool resetParzenWindow();
+
     /**
     * Computes the response of the taxel.
     **/

@@ -47,6 +47,8 @@
 
 #include <yarp/math/Math.h>
 
+#include <iCub/iKin/iKinFwd.h>
+
 #include <vector>
 #include <sstream>
 
@@ -62,7 +64,10 @@
 
 using namespace yarp;
 using namespace yarp::os;
+using namespace yarp::sig;
 using namespace yarp::math;
+
+using namespace iCub::iKin;
 
 using namespace std;
 
@@ -71,8 +76,9 @@ using namespace std;
 **/
 class parzenWindowEstimator1D
 {
-  protected:
+  private:
     std::vector<double> extX;     // the extension of the Receptive Field in the x dimension
+    std::vector<double> extY;     // the extension of the Receptive Field in the y dimension
 
     std::vector<int>    binsNum;  // the number of partitions of the input space (x and y dimensions)
     std::vector<double> binWidth; // the extension of the single sampling unit (x and y dimensions)
@@ -84,8 +90,9 @@ class parzenWindowEstimator1D
     
     double sigmX;   // sigma of the gaussians in the x dimension (by default they're all equal)
 
-    yarp::sig::Matrix posHist; // histogram for the parzening - positive examples 
-    yarp::sig::Matrix negHist; //negative examples 
+    Matrix posHist; // histogram for the parzening - positive examples 
+    Matrix negHist; //negative examples 
+
 
   public:
     /**
@@ -142,15 +149,15 @@ class parzenWindowEstimator1D
     std::vector<double> getExtX()                  { return extX; };
 
     double getHist(const int i);
-    int    getPosHist(const int i)                 { return int(posHist(0,i)); };
-    int    getNegHist(const int i)                 { return int(negHist(0,i)); };
+    int    getPosHist(const int i)                 { return int(posHist(i,0)); };
+    int    getNegHist(const int i)                 { return int(negHist(i,0)); };
 
     yarp::sig::Matrix getPosHist()                 { return posHist; };
     yarp::sig::Matrix getNegHist()                 { return negHist; };
     yarp::sig::Matrix getHist();
 
-    void setPosHist(const int i, const int val)    { posHist(0,i) = val; };
-    void setNegHist(const int i, const int val)    { negHist(0,i) = val; };
+    void setPosHist(const int i, const int val)    { posHist(i,0) = val; };
+    void setNegHist(const int i, const int val)    { negHist(i,0) = val; };
     void setPosHist(const yarp::sig::Matrix &v)    { posHist = v; };
     void setNegHist(const yarp::sig::Matrix &v)    { negHist = v; };
 
@@ -160,9 +167,10 @@ class parzenWindowEstimator1D
 /**
 * class for defining a 2-D parzen window with a custom range (even negative)
 **/
-class parzenWindowEstimator2D : public parzenWindowEstimator1D
+class parzenWindowEstimator2D
 {
   private:
+    std::vector<double> extX;     // the extension of the Receptive Field in the x dimension
     std::vector<double> extY;     // the extension of the Receptive Field in the y dimension
 
     std::vector<int>    binsNum;  // the number of partitions of the input space (x and y dimensions)
@@ -171,10 +179,14 @@ class parzenWindowEstimator2D : public parzenWindowEstimator1D
     std::vector<int>    firstPosBin;      // the first bin for which we have positive values (x and y dimensions)
     std::vector<double> firstPosBinShift; // the shift from zero to the start value of the firstPosBin (x and y dimensions)
 
+    std::vector<double> binStartsX; //these are initialized at startup to contain the start, midpoint and end of each bin in the x dim.
     std::vector<double> binStartsY; //these are initialized at startup to contain the start, midpoint and end of each bin in the y dim.
     
+    double sigmX;   // sigma of the gaussians in the x dimension (by default they're all equal)
     double sigmY;   // sigma of the gaussians in the y dimension (by default they're all equal)
 
+    Matrix posHist; // histogram for the parzening - positive examples 
+    Matrix negHist; //negative examples 
   public:
     /**
     * Constructors
@@ -226,20 +238,25 @@ class parzenWindowEstimator2D : public parzenWindowEstimator1D
     /**
     * Self-explaining functions
     **/
+    std::vector<int>    getHistSize()                           { return binsNum; };
+    std::vector<double> getBinWidth()                           { return binWidth; };
+    std::vector<double> getExtX()                               { return extX; };
     std::vector<double> getExtY()                               { return extY; };
 
     double getHist(const int i, const int j);
     int    getPosHist(const int i, const int j)                 { return int(posHist(i,j)); };
     int    getNegHist(const int i, const int j)                 { return int(negHist(i,j)); };
 
-    using parzenWindowEstimator1D::getPosHist;
-    using parzenWindowEstimator1D::getNegHist;
+    yarp::sig::Matrix getPosHist()                              { return posHist; };
+    yarp::sig::Matrix getNegHist()                              { return negHist; };
     yarp::sig::Matrix getHist();
 
-    using parzenWindowEstimator1D::setPosHist;
-    using parzenWindowEstimator1D::setNegHist;
     void setPosHist(const int i, const int j, const int val)    { posHist(i,j) = val; };
     void setNegHist(const int i, const int j, const int val)    { negHist(i,j) = val; };
+    void setPosHist(const yarp::sig::Matrix &v)                 { posHist = v; };
+    void setNegHist(const yarp::sig::Matrix &v)                 { negHist = v; };
+
+    void resetAllHist()                                         { posHist.zero(); negHist.zero(); };
 };
 
 #endif

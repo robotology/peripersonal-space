@@ -40,7 +40,7 @@ double gauss2D(const double x_0, const double y_0,
     {
         if (eX.size()!=2 || bN.size()!=1)
         {
-            yError("Resize failed. eX size: %lu bN size: %lu\n",eX.size(), bN.size());
+            yError("Resize failed! eX size: %lu bN size: %lu\n",eX.size(), bN.size());
             return false;
         }
 
@@ -78,8 +78,8 @@ double gauss2D(const double x_0, const double y_0,
             binStartsX.push_back(extX[START]+(j*binWidth[X_DIM]));
         }
                       
-        posHist.resize(1,binsNum[0]); posHist.zero();
-        negHist.resize(1,binsNum[0]); negHist.zero();
+        posHist.resize(binsNum[0],1); posHist.zero();
+        negHist.resize(binsNum[0],1); negHist.zero();
        
         sigmX = binWidth[0];
 
@@ -88,12 +88,12 @@ double gauss2D(const double x_0, const double y_0,
 
     yarp::sig::Matrix parzenWindowEstimator1D::getHist()
     {
-        yarp::sig::Matrix Hist(1,binsNum[0]);
+        yarp::sig::Matrix Hist(binsNum[0],1);
         Hist.zero();
 
         for (int i = 0; i < binsNum[0]; i++)
         {
-            Hist(0,i)=getHist(i);
+            Hist(i,1)=getHist(i);
         }
 
         return Hist;
@@ -101,10 +101,10 @@ double gauss2D(const double x_0, const double y_0,
 
     double parzenWindowEstimator1D::getHist(const int i)
     {
-        if ( posHist(0,i)+negHist(0,i) < 5 )
+        if ( posHist(i,0)+negHist(i,0) < 5 )
             return 0;
 
-        return posHist(0,i)/(posHist(0,i)+negHist(0,i));
+        return posHist(i,0)/(posHist(i,0)+negHist(i,0));
     }
 
 
@@ -114,7 +114,7 @@ double gauss2D(const double x_0, const double y_0,
         
         if (getIndexes(x,b0))
         {
-            posHist(0,b0) += 1;
+            posHist(b0,0) += 1;
             return true;
         }
         else
@@ -127,7 +127,7 @@ double gauss2D(const double x_0, const double y_0,
 
         if (getIndexes(x,b0))
         {
-            negHist(0,b0) += 1;
+            negHist(b0,1) += 1;
             return true;
         }
         else
@@ -148,10 +148,11 @@ double gauss2D(const double x_0, const double y_0,
         
     bool parzenWindowEstimator1D::getIndexes(const std::vector<double> x, int &b0)
     {
+        // yInfo("[pwe1D] x\t%g\t",x[0]);
         if (x[0] >= extX[0] && x[0] <= extX[1])
         {
             b0 = int((x[0]-firstPosBinShift[0])/binWidth[0]+firstPosBin[0]);
-
+            // yInfo("b0\t%i\t\n", b0);
             return true;
         }
 
@@ -164,9 +165,9 @@ double gauss2D(const double x_0, const double y_0,
 
         for (size_t i = 0; i < posHist.rows(); i++)
         {
-            if ( posHist(0,i)>=0 )
+            if ( posHist(i,0)>=0 )
             {
-                double factor=(posHist(0,i)+negHist(0,i))>0?posHist(0,i)/(posHist(0,i)+negHist(0,i)):0;
+                double factor=(posHist(i,0)+negHist(i,0))>0?posHist(i,0)/(posHist(i,0)+negHist(i,0)):0;
                 f_x += factor * gauss(extX[0]+i*binWidth[0],sigmX,x[0]);
             }
         }
@@ -227,14 +228,14 @@ double gauss2D(const double x_0, const double y_0,
     {
         if (eX.size()!=2 || eY.size()!=2 || bN.size()!=2)
         {
-            yError(" Resize failed. eX size: %lu eY size: %lu bN size: %lu\n",eX.size(), eY.size(), bN.size());
+            yInfo("ERROR! Resize failed. eX size: %lu eY size: %lu bN size: %lu\n",eX.size(), eY.size(), bN.size());
             return false;
         }
 
         extX   = eX;
         extY   = eY;
         binsNum  = bN;
- 
+
         binWidth.clear();
         binWidth.push_back((extX[1]-extX[0])/binsNum[0]);
         binWidth.push_back((extY[1]-extY[0])/binsNum[1]);
