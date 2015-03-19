@@ -1,5 +1,7 @@
 #include "iCub/periPersonalSpace/iCubDblTchSlv.h"
+#define HAVE_CSTDDEF
 #include <IpTNLP.hpp>
+#undef HAVE_CSTDDEF
 #include <IpIpoptApplication.hpp>
 #include <iCub/iKin/iKinFwd.h>
 
