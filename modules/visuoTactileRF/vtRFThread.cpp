@@ -708,7 +708,6 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
                     (it -> getSkinPart() ==    HAND_RIGHT && iCubSkinName == "right_hand"   ) ||
                     (it -> getSkinPart() ==     HAND_LEFT && iCubSkinName == "left_hand"    )    )
                 {
-                    printf("caznd\n");
                     idx = i;
                     std::vector <unsigned int> txlList = it -> getTaxelList();
 
@@ -1593,6 +1592,9 @@ bool vtRFThread::setTaxelPosesFromFile1D(const string filePath, skinPart1D &sP)
 
             // if((i==27)  || (i==15)  || (i==3)   || (i==183) ||              // taxels used for the experimentations on the pps paper
             //    (i==135) || (i==147) || (i==159) || (i==171) ||
+            //    (i==87)  || (i==75)  || (i==39)  || (i==51))
+
+            // if((i==27)  || (i==15)  || (i==3)   || (i==183) ||              // taxels used for the experimentations on the IROS paper
             //    (i==87)  || (i==75)  || (i==39)  || (i==51))
             {
                 sP.size++;
