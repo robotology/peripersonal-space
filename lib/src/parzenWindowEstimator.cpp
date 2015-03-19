@@ -40,7 +40,7 @@ double gauss2D(const double x_0, const double y_0,
     {
         if (eX.size()!=2 || bN.size()!=1)
         {
-            yError("Resize failed! eX size: %lu bN size: %lu\n",eX.size(), bN.size());
+            yError("Resize failed. eX size: %lu bN size: %lu\n",eX.size(), bN.size());
             return false;
         }
 
@@ -226,18 +226,19 @@ double gauss2D(const double x_0, const double y_0,
 
     bool parzenWindowEstimator2D::resize(const std::vector<double> eX, const std::vector<double> eY, const std::vector<int> bN)
     {
-        if (eX.size()!=2 || eY.size()!=2 || bN.size()!=2)
+        if (!parzenWindowEstimator1D::resize(eX,bN))
         {
-            yInfo("ERROR! Resize failed. eX size: %lu eY size: %lu bN size: %lu\n",eX.size(), eY.size(), bN.size());
             return false;
         }
 
-        extX   = eX;
-        extY   = eY;
-        binsNum  = bN;
+        if (eY.size()!=2)
+        {
+            yError(" Resize failed. eY size: %lu\n", eY.size());
+            return false;
+        }
 
-        binWidth.clear();
-        binWidth.push_back((extX[1]-extX[0])/binsNum[0]);
+        extY   = eY;
+
         binWidth.push_back((extY[1]-extY[0])/binsNum[1]);
 
         // Let's find the first bin for which we have positive values.
