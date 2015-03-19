@@ -898,7 +898,7 @@ using namespace iCub::ctrl;
             if (axisRep)
             {
                 v.resize(7);
-                Vector r=dcm2axis(H,verbose);
+                Vector r=dcm2axis(H);
                 v[0]=H(0,3);
                 v[1]=H(1,3);
                 v[2]=H(2,3);
@@ -950,7 +950,7 @@ using namespace iCub::ctrl;
         if (axisRep)
         {
             v.resize(7);
-            Vector r=dcm2axis(H,verbose);
+            Vector r=dcm2axis(H);
             v[0]=H(0,3);
             v[1]=H(1,3);
             v[2]=H(2,3);
