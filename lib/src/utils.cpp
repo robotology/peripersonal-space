@@ -436,6 +436,66 @@ unsigned int factorial(unsigned int n)
         return pwe.removeSample(X);
     }
 
+    bool Taxel2D::insideRFCheck(const IncomingEvent4Taxel ie)
+    {
+        std::vector<double> binWidth = pwe.getBinWidth();
+        double binLimit = 2*binWidth[0];
+     
+        // the x,y limit of the receptive field at the incoming event's Z
+        double RFlimit = ie.Pos(2)/tan(rfAngle);
+
+        // the x,y limit of the receptive field in the first bin
+        double RFlimit_cyl = binLimit/tan(rfAngle);
+
+        // yDebug("binLimit: %g RFlimit_cyl: %g rfAngle: %g \n", binLimit, RFlimit_cyl, rfAngle);
+        // yDebug("ie.Pos\t%s\n", ie.Pos.toString(3,3).c_str());
+        // yDebug("Hist:\n%s\n", pwe.getHist().toString(3,3).c_str());
+
+        if (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit*RFlimit )
+        {
+            return true;
+        }
+        // There are two ifs only to let me debug things
+        if ( (abs(ie.Pos(2))<=binLimit) && (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit_cyl*RFlimit_cyl) )
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    void Taxel2D::print(int verbosity)
+    {
+        if (verbosity > 4)
+            yDebug("ID %i \tPos %s \tNorm %s \n\tPosHst \n%s\n\n\tNegHst \n%s\n", ID,
+                    Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str(),
+                    pwe.getPosHist().toString(3,3).c_str(),
+                    pwe.getNegHist().toString(3,3).c_str());
+        else
+        yDebug("ID %i \tPos %s \tNorm %s\n", ID,
+                    Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str());
+    }
+
+    string Taxel2D::toString(int precision)
+    {
+        stringstream res;
+        res << "ID: " << ID << "\tPos: "<< Pos.toString(3,3) << "\t Norm: "<< Norm.toString(3,3);
+
+        if (precision)
+        {
+            res << "\n PosHst:\n"<< pwe.getPosHist().toString(3,3);
+            res << "\n NegHst:\n"<< pwe.getNegHist().toString(3,3) << endl;
+        }
+        return res.str();
+    }
+
+    bool Taxel2D::resetParzenWindow()
+    {
+        pwe.resetAllHist();
+        return true;
+    }
+
+
     bool Taxel2D::computeResponse()
     {
         if (!insideRFCheck(Evnt))
@@ -569,6 +629,7 @@ unsigned int factorial(unsigned int n)
         yDebug("**********\n");
     }
 
+
     string skinPart2D::toString(int precision)
     {
         stringstream res;
@@ -578,7 +639,6 @@ unsigned int factorial(unsigned int n)
         res << "**********\n";
         return res.str();
     }
-
 /****************************************************************/
 /* EYE WRAPPER
 *****************************************************************/

@@ -233,11 +233,21 @@ class Taxel
 
     double rfAngle;            // angle of the receptive field [rad]
 
+    IncomingEvent4Taxel   Evnt; // IncomingEvent as seen from the taxel's RF
+
     /**
-    * Constructors: default, with Pos and Norm, with Pos and Norm and ID
+    * Default constructor
     **/    
     Taxel();
+
+    /**
+    * Constructor with Pos and Norm
+    **/    
     Taxel(const Vector &p, const Vector &n);
+
+    /**
+    * Constructor with Pos, Norm and ID
+    **/    
     Taxel(const Vector &p, const Vector &n, const int &i);
 
     /**
@@ -279,14 +289,21 @@ class Taxel
 class Taxel1D : public Taxel
 {
   public:
-    IncomingEvent4Taxel     Evnt; // IncomingEvent as seen from the taxel's RF
     parzenWindowEstimator1D  pwe; // Parzen Window Estimator to compute the response
 
     /**
-    * Constructors: default, with Pos and Norm, with Pos and Norm and ID
+    * Default constructor
     **/    
-    Taxel1D() : Taxel(), Evnt(), pwe() {};
+    Taxel1D() : Taxel() {};
+
+    /**
+    * Constructor with Pos and Norm
+    **/    
     Taxel1D(const Vector &p, const Vector &n) : Taxel(p,n) {};
+
+    /**
+    * Constructor with Pos, Norm and ID
+    **/    
     Taxel1D(const Vector &p, const Vector &n, const int &i) : Taxel(p,n,i) {};
 
     /**
@@ -326,22 +343,30 @@ class Taxel1D : public Taxel
     bool computeResponse();
 };
 
-class Taxel2D : public Taxel1D
+class Taxel2D : public Taxel
 {
   public:
     parzenWindowEstimator2D pwe;   // taxel's response by means of a 2D parzen window estimator
 
     /**
-    * Constructors: default, with Pos and Norm, with Pos and Norm and ID
-    **/
-    Taxel2D() : Taxel1D(), pwe() {};
-    Taxel2D(const Vector &p, const Vector &n) : Taxel1D(p,n) {};
-    Taxel2D(const Vector &p, const Vector &n, const int &i) : Taxel1D(p,n,i) {};
+    * Default constructor
+    **/    
+    Taxel2D() : Taxel() {};
+
+    /**
+    * Constructor with Pos and Norm
+    **/    
+    Taxel2D(const Vector &p, const Vector &n) : Taxel(p,n) {};
+
+    /**
+    * Constructor with Pos, Norm and ID
+    **/    
+    Taxel2D(const Vector &p, const Vector &n, const int &i) : Taxel(p,n,i) {};
 
     /**
     * init function
     **/
-    void init() { Taxel1D::init(); };
+    void init() { Taxel::init(); };
 
     /**
     * Add or remove a sample from the pwe's histogram
@@ -349,6 +374,25 @@ class Taxel2D : public Taxel1D
     bool addSample(const IncomingEvent4Taxel ie);
     bool removeSample(const IncomingEvent4Taxel ie);
 
+    /**
+    * Check if the input sample is inside the Receptive field (i.e. the cone)
+    **/
+    bool insideRFCheck(const IncomingEvent4Taxel ie);
+
+    /**
+    * Print Method
+    **/
+    void print(int verbosity=0);
+
+    /**
+    * toString Method
+    **/
+    string toString(int precision=0);
+
+    /**
+    * Resets the parzen window estimator
+    **/
+    bool resetParzenWindow();
     /**
     * Computes the response of the taxel.
     **/
