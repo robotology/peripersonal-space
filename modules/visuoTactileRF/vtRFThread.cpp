@@ -1051,7 +1051,7 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
 
             for (size_t k = 0; k < eventsBuffer.size(); k++)
             {
-                IncomingEvent4Taxel1D projection = projectIntoTaxelRF1D(iCubSkin1D[IDx].taxel[j].RF,T_a,eventsBuffer[k]);
+                IncomingEvent4Taxel projection = projectIntoTaxelRF1D(iCubSkin1D[IDx].taxel[j].RF,T_a,eventsBuffer[k]);
                 printMessage(4,"Training Taxels: skinPart %d ID %i k %i NORM %g\n",IDx,iCubSkin1D[IDx].taxel[j].ID,k,projection.NRM);
 
                 if (itHasBeenTouched == true)   iCubSkin1D[IDx].taxel[j].addSample(projection);
@@ -1077,7 +1077,7 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
 
             for (size_t k = 0; k < eventsBuffer.size(); k++)
             {
-                IncomingEvent4Taxel2D projection = projectIntoTaxelRF2D(iCubSkin2D[IDx].taxel[j].RF,T_a,eventsBuffer[k]);
+                IncomingEvent4Taxel projection = projectIntoTaxelRF2D(iCubSkin2D[IDx].taxel[j].RF,T_a,eventsBuffer[k]);
                 printMessage(4,"Training Taxels: skinPart %d ID %i k %i NORM %g TTC %g\n",IDx,iCubSkin2D[IDx].taxel[j].ID,k,projection.NRM,projection.TTC);
 
                 if (itHasBeenTouched == true)   iCubSkin2D[IDx].taxel[j].addSample(projection);
@@ -1162,9 +1162,9 @@ bool vtRFThread::projectIncomingEvent()
     return true;
 }
 
-IncomingEvent4Taxel1D vtRFThread::projectIntoTaxelRF1D(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e)
+IncomingEvent4Taxel vtRFThread::projectIntoTaxelRF1D(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e)
 {
-    IncomingEvent4Taxel1D Event_projected = e;
+    IncomingEvent4Taxel Event_projected = e;
 
     Matrix T_a_proj = T_a * RF;
 
@@ -1182,9 +1182,9 @@ IncomingEvent4Taxel1D vtRFThread::projectIntoTaxelRF1D(const Matrix &RF,const Ma
     return Event_projected;
 }
 
-IncomingEvent4Taxel2D vtRFThread::projectIntoTaxelRF2D(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e)
+IncomingEvent4Taxel vtRFThread::projectIntoTaxelRF2D(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e)
 {
-    IncomingEvent4Taxel2D Event_projected = e;
+    IncomingEvent4Taxel Event_projected = e;
 
     Matrix T_a_proj = T_a * RF;
 
@@ -1204,15 +1204,7 @@ IncomingEvent4Taxel2D vtRFThread::projectIntoTaxelRF2D(const Matrix &RF,const Ma
     return Event_projected;
 }
 
-bool vtRFThread::computeX(IncomingEvent4Taxel1D &ie)
-{
-    int sgn = ie.Pos[2]>=0?1:-1;
-    ie.NRM = sgn * norm(ie.Pos);
-
-    return true;
-}
-
-bool vtRFThread::computeX(IncomingEvent4Taxel2D &ie)
+bool vtRFThread::computeX(IncomingEvent4Taxel &ie)
 {
     int sgn = ie.Pos[2]>=0?1:-1;
     ie.NRM = sgn * norm(ie.Pos);

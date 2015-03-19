@@ -285,8 +285,8 @@ protected:
     /**
     *
     **/
-    IncomingEvent4Taxel1D projectIntoTaxelRF1D(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e);
-    IncomingEvent4Taxel2D projectIntoTaxelRF2D(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e);
+    IncomingEvent4Taxel projectIntoTaxelRF1D(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e);
+    IncomingEvent4Taxel projectIntoTaxelRF2D(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e);
 
     /**
     *
@@ -296,8 +296,7 @@ protected:
     /**
     * Compute the NRM and TTC for a specific event
     **/
-    bool computeX(IncomingEvent4Taxel1D &ie);
-    bool computeX(IncomingEvent4Taxel2D &ie);
+    bool computeX(IncomingEvent4Taxel &ie);
 
     /**
     * Prints a message according to the verbosity level:
