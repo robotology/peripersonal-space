@@ -194,7 +194,7 @@ bool tactileServoThread::threadInit()
     printMessage(1,"HIndexR:\n%s\n", HIndexR.toString(3,3).c_str());
 
     Vector indexPR = HIndexR.subcol(0,3,3);
-    Vector indexOR = iCub::ctrl::dcm2axis(HIndexR);
+    Vector indexOR = dcm2axis(HIndexR);
     icartR -> attachTipFrame(indexPR,indexOR);
 
 
@@ -206,7 +206,7 @@ bool tactileServoThread::threadInit()
 
     initPose        = currPose;
     position_0_g    = initPose.subcol(0,3,3);
-    orientation_0_g = iCub::ctrl::dcm2axis(initPose);
+    orientation_0_g = dcm2axis(initPose);
     
     Desf[0] =  0.0;
     Desf[1] =  0.0;
