@@ -142,15 +142,15 @@ class parzenWindowEstimator1D
     std::vector<double> getExtX()                  { return extX; };
 
     double getHist(const int i);
-    int    getPosHist(const int i)                 { return int(posHist(i,0)); };
-    int    getNegHist(const int i)                 { return int(negHist(i,0)); };
+    int    getPosHist(const int i)                 { return int(posHist(0,i)); };
+    int    getNegHist(const int i)                 { return int(negHist(0,i)); };
 
     yarp::sig::Matrix getPosHist()                 { return posHist; };
     yarp::sig::Matrix getNegHist()                 { return negHist; };
     yarp::sig::Matrix getHist();
 
-    void setPosHist(const int i, const int val)    { posHist(i,0) = val; };
-    void setNegHist(const int i, const int val)    { negHist(i,0) = val; };
+    void setPosHist(const int i, const int val)    { posHist(0,i) = val; };
+    void setNegHist(const int i, const int val)    { negHist(0,i) = val; };
     void setPosHist(const yarp::sig::Matrix &v)    { posHist = v; };
     void setNegHist(const yarp::sig::Matrix &v)    { negHist = v; };
 

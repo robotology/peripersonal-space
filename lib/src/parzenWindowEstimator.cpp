@@ -78,8 +78,8 @@ double gauss2D(const double x_0, const double y_0,
             binStartsX.push_back(extX[START]+(j*binWidth[X_DIM]));
         }
                       
-        posHist.resize(binsNum[0],1); posHist.zero();
-        negHist.resize(binsNum[0],1); negHist.zero();
+        posHist.resize(1,binsNum[0]); posHist.zero();
+        negHist.resize(1,binsNum[0]); negHist.zero();
        
         sigmX = binWidth[0];
 
@@ -88,12 +88,12 @@ double gauss2D(const double x_0, const double y_0,
 
     yarp::sig::Matrix parzenWindowEstimator1D::getHist()
     {
-        yarp::sig::Matrix Hist(binsNum[0],1);
+        yarp::sig::Matrix Hist(1,binsNum[0]);
         Hist.zero();
 
         for (int i = 0; i < binsNum[0]; i++)
         {
-            Hist(i,1)=getHist(i);
+            Hist(0,i)=getHist(i);
         }
 
         return Hist;
@@ -101,10 +101,10 @@ double gauss2D(const double x_0, const double y_0,
 
     double parzenWindowEstimator1D::getHist(const int i)
     {
-        if ( posHist(i,0)+negHist(i,0) < 5 )
+        if ( posHist(0,i)+negHist(0,i) < 5 )
             return 0;
 
-        return posHist(i,0)/(posHist(i,0)+negHist(i,0));
+        return posHist(0,i)/(posHist(0,i)+negHist(0,i));
     }
 
 
@@ -114,7 +114,7 @@ double gauss2D(const double x_0, const double y_0,
         
         if (getIndexes(x,b0))
         {
-            posHist(b0,0) += 1;
+            posHist(0,b0) += 1;
             return true;
         }
         else
@@ -127,7 +127,7 @@ double gauss2D(const double x_0, const double y_0,
 
         if (getIndexes(x,b0))
         {
-            negHist(b0,1) += 1;
+            negHist(0,b0) += 1;
             return true;
         }
         else
@@ -165,9 +165,9 @@ double gauss2D(const double x_0, const double y_0,
 
         for (size_t i = 0; i < posHist.rows(); i++)
         {
-            if ( posHist(i,0)>=0 )
+            if ( posHist(0,i)>=0 )
             {
-                double factor=(posHist(i,0)+negHist(i,0))>0?posHist(i,0)/(posHist(i,0)+negHist(i,0)):0;
+                double factor=(posHist(0,i)+negHist(0,i))>0?posHist(0,i)/(posHist(0,i)+negHist(0,i)):0;
                 f_x += factor * gauss(extX[0]+i*binWidth[0],sigmX,x[0]);
             }
         }
