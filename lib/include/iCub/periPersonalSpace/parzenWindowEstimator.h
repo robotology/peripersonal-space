@@ -36,22 +36,12 @@
 #ifndef __PARZENWINDOWESTIMATOR_H__
 #define __PARZENWINDOWESTIMATOR_H__
 
-#include <yarp/os/Time.h>
-#include <yarp/os/RateThread.h>
-#include <yarp/os/BufferedPort.h>
-#include <yarp/os/RFModule.h>
 #include <yarp/os/Log.h>
-
 #include <yarp/sig/Vector.h>
 #include <yarp/sig/Matrix.h>
 
-#include <yarp/math/Math.h>
-
-#include <iCub/iKin/iKinFwd.h>
-
 #include <vector>
 #include <sstream>
-
 #include <cmath>
 
 // These are basically some semi-useless constants. I can remove them but
@@ -64,10 +54,6 @@
 
 using namespace yarp;
 using namespace yarp::os;
-using namespace yarp::sig;
-using namespace yarp::math;
-
-using namespace iCub::iKin;
 
 using namespace std;
 
@@ -90,9 +76,8 @@ class parzenWindowEstimator1D
     
     double sigmX;   // sigma of the gaussians in the x dimension (by default they're all equal)
 
-    Matrix posHist; // histogram for the parzening - positive examples 
-    Matrix negHist; //negative examples 
-
+    yarp::sig::Matrix posHist; // histogram for the parzening - positive examples 
+    yarp::sig::Matrix negHist; //negative examples 
 
   public:
     /**
@@ -185,8 +170,8 @@ class parzenWindowEstimator2D
     double sigmX;   // sigma of the gaussians in the x dimension (by default they're all equal)
     double sigmY;   // sigma of the gaussians in the y dimension (by default they're all equal)
 
-    Matrix posHist; // histogram for the parzening - positive examples 
-    Matrix negHist; //negative examples 
+    yarp::sig::Matrix posHist; // histogram for the parzening - positive examples 
+    yarp::sig::Matrix negHist; //negative examples 
   public:
     /**
     * Constructors
