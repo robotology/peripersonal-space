@@ -148,11 +148,10 @@ double gauss2D(const double x_0, const double y_0,
         
     bool parzenWindowEstimator1D::getIndexes(const std::vector<double> x, int &b0)
     {
-        // yInfo("[pwe1D] x\t%g\t",x[0]);
         if (x[0] >= extX[0] && x[0] <= extX[1])
         {
             b0 = int((x[0]-firstPosBinShift[0])/binWidth[0]+firstPosBin[0]);
-            // yInfo("b0\t%i\t\n", b0);
+
             return true;
         }
 
