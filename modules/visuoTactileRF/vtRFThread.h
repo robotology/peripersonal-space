@@ -109,9 +109,8 @@ protected:
     yarp::sig::Vector dumpedVector;
     
     // iCubSkin
-    vector <string>   filenames;
-    vector <skinPart1D> iCubSkin1D;
-    vector <skinPart2D> iCubSkin2D;
+    vector <string>     filenames;
+    vector <skinPartPWE> iCubSkin;
     int iCubSkinSize;
 
     vector <IncomingEvent> eventsBuffer; // the events to be buffered for the learning
@@ -191,8 +190,7 @@ protected:
     *             either rightEye, or leftEye
     * @return true/false for success/failure
     **/
-    bool projectIntoImagePlane(vector <skinPart1D> &sP, const string &_eye);
-    bool projectIntoImagePlane(vector <skinPart2D> &sP, const string &_eye);
+    bool projectIntoImagePlane(vector <skinPartPWE> &sP, const string &_eye);
     
     /**
     * Projects a generic 3D point from its position in the WRF
@@ -228,8 +226,7 @@ protected:
     /**
     * Finds out the positions of the taxels w.r.t. their respective limbs
     **/
-    bool setTaxelPosesFromFile1D(const string filePath,skinPart1D &spw);
-    bool setTaxelPosesFromFile2D(const string filePath,skinPart2D &spw);
+    bool setTaxelPosesFromFile(const string filePath, skinPartPWE &spw);
 
     /**
     * If it is defined for the respective skin part, it fills the taxelIDtoRepresentativeTaxelID vector that is indexed by taxel IDs
@@ -246,8 +243,7 @@ protected:
                   (basically, the index of the skinPart that has been touched)
     * @param v    is a vector of IDs of the representative taxels activated
     **/
-    bool getRepresentativeTaxels1D(const std::vector<unsigned int> IDv, const int IDx, std::vector<unsigned int> &v);
-    bool getRepresentativeTaxels2D(const std::vector<unsigned int> IDv, const int IDx, std::vector<unsigned int> &v);
+    bool getRepresentativeTaxels(const std::vector<unsigned int> IDv, const int IDx, std::vector<unsigned int> &v);
         
     /**
     *
@@ -285,19 +281,12 @@ protected:
     /**
     *
     **/
-    IncomingEvent4Taxel1D projectIntoTaxelRF1D(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e);
-    IncomingEvent4Taxel2D projectIntoTaxelRF2D(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e);
+    IncomingEvent4TaxelPWE projectIntoTaxelRF(const Matrix &RF,const Matrix &T_a,const IncomingEvent &e);
 
     /**
     *
     **/
     bool computeResponse();
-
-    /**
-    * Compute the NRM and TTC for a specific event
-    **/
-    bool computeX(IncomingEvent4Taxel1D &ie);
-    bool computeX(IncomingEvent4Taxel2D &ie);
 
     /**
     * Prints a message according to the verbosity level:

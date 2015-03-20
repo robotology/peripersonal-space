@@ -198,7 +198,7 @@ struct IncomingEvent4TaxelPWE : public IncomingEvent
     IncomingEvent4TaxelPWE &operator=(const IncomingEvent4TaxelPWE &e);
 
     /**
-     * Compute NRM and TTC
+    * Compute the NRM and TTC from Pos and Vel
     */
     void computeNRMTTC();
 
@@ -277,7 +277,7 @@ class Taxel
 class TaxelPWE : public Taxel
 {
   public:
-    int Resp;                       // taxels' activation level (0-255)
+    int       Resp;                 // taxels' activation level (0-255)
     double RFangle;                 // angle of the receptive field [rad]
 
     IncomingEvent4TaxelPWE Evnt;    // 
@@ -369,8 +369,6 @@ class skinPart
   public:
     string name;
     int size;   // size of the skinPart if the patches were full - it differs from taxel.size()
-
-    vector<Taxel*> txls;
              
     /**
     * Indexing variable used in the case of reducing the resolution - e.g. taking only triangle centers
@@ -403,6 +401,22 @@ class skinPart
     * toString Method
     **/
     string toString(int precision=0);
+};
+
+class skinPartTaxel : public skinPart
+{
+  public:
+    vector<Taxel*> txls;
+};
+
+class skinPartPWE : public skinPart
+{
+  public:
+    string modality;
+
+    vector<TaxelPWE*> txls;
+
+    skinPartPWE(const string &_modality) : skinPart(), modality(_modality) {};
 };
 
 /**
