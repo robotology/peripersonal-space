@@ -11,7 +11,20 @@ RateThread(_rate),name(_name), robot(_robot), verbosity(_v), type(_type), active
 
 bool virtContactGenerationThread::threadInit()
 {
+    SkinPart skin_part; 
+    
     skinEventsOutPort->open(("/"+name+"/virtualContacts:i").c_str());
+    
+     /* initialize random seed: */
+    srand (time(NULL));
+    
+    //go through skin parts and initialize them
+    for (std::vector<SkinPart>::const_iterator it = activeSkinParts.begin() ; it != activeSkinParts.end(); ++it){
+        skin_part = *it;
+        //TODO initialize the skinPart - create a skin part object and then add it to a vector of the skin parts
+        //init will include adding the valid taxels (again, object from utils), analogous to vtRFThread::setTaxelPosesFromFile
+        // I guess I will add only real taxel (not thermal pads) and only those for which I have positions 
+    }
     
     return true;
 }
@@ -19,7 +32,11 @@ bool virtContactGenerationThread::threadInit()
 void virtContactGenerationThread::run()
 {
 
-    ;
+    if (type == "random"){
+        int skinPartIndexInVector = rand() % activeSkinParts.size(); //so e.g. for size 3, this should give 0, 1, or 2, which is right
+        skinPartPicked = activeSkinParts[skinPartIndexInVector];
+    }
+    
 }
 
 int virtContactGenerationThread::printMessage(const int l, const char *f, ...) const

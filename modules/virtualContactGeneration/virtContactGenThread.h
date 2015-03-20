@@ -18,6 +18,8 @@
 #ifndef __VIRTCONTACTGENTHREAD_H__
 #define __VIRTCONTACTGENTHREAD_H__
 
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
 #include <stdarg.h>
 
 #include <yarp/os/Time.h>
@@ -54,12 +56,19 @@ protected:
     int threadPeriod; 
     // type of selection of contacts - e.g. random
     string type;
+    
+    
     //based on .ini file, contains a list of skin parts that will be part of the virtual contact generation
     vector<SkinPart> activeSkinParts;
-      /***************************************************************************/
+    
+    /***************************************************************************/
     // INTERNAL VARIABLES
     // Port with the fake contacts:
     BufferedPort<skinContactList> *skinEventsOutPort;
+    
+    //TODO will need also a vector with the initialized activeSkinParts as the skinParts or 1D or 2D or custom child from the utils.h
+    
+    SkinPart skinPartPicked;
   
      /**
     * Prints a message according to the verbosity level:

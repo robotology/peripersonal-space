@@ -239,7 +239,7 @@ public:
             else yInfo("Could not find [skin_parts] SKIN_RIGHT_UPPER_ARM option in the config file; set to default, i.e. off"); 
           }
           else{ //bSkinParts.isNull()
-              yInfo("Could not find [skin_parts] group in the config file; set all to to default, i.e. off"); 
+              yInfo("Could not find [skin_parts] group in the config file; set all to default, i.e. off"); 
           }
            
            
