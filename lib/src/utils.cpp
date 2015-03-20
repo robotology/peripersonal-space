@@ -454,24 +454,21 @@ unsigned int factorial(unsigned int n)
         size=  0;
     }
 
-/****************************************************************/
-/* SKINPART WRAPPER 1D
-*****************************************************************/
-    skinPart1D & skinPart1D::operator=(const skinPart1D &spw)
+    skinPart & skinPart::operator=(const skinPart &spw)
     {
-        name =spw.name;
-        taxel=spw.taxel;
-        size =spw.size;
+        name = spw.name;
+        size = spw.size;
+        txls = spw.txls;
         return *this;
     }
 
-    void skinPart1D::print(int verbosity)
+    void skinPart::print(int verbosity)
     {
         yDebug("**********\n");
         yDebug("name: %s\t", name.c_str());
         yDebug("size: %i\n", size);
-        for (size_t i = 0; i < taxel.size(); i++)
-            taxel[i].print(verbosity);
+        for (size_t i = 0; i < txls.size(); i++)
+            txls[i]->print(verbosity);
         yDebug("**********\n");
         
         if (verbosity>=4)
@@ -504,73 +501,12 @@ unsigned int factorial(unsigned int n)
         yDebug("**********\n");
     }
 
-    string skinPart1D::toString(int precision)
+    string skinPart::toString(int precision)
     {
         stringstream res;
         res << "**********\n" << "Name: " << name << "\tSize: "<< size << endl;
-        for (size_t i = 0; i < taxel.size(); i++)
-            res << taxel[i].toString(precision);
-        res << "**********\n";
-        return res.str();
-    }
-
-/****************************************************************/
-/* SKINPART WRAPPER 2D
-*****************************************************************/
-    skinPart2D & skinPart2D::operator=(const skinPart2D &spw)
-    {
-        name =spw.name;
-        taxel=spw.taxel;
-        size =spw.size;
-        return *this;
-    }
-
-    void skinPart2D::print(int verbosity)
-    {
-        yDebug("**********\n");
-        yDebug("name: %s\t", name.c_str());
-        yDebug("size: %i\t", size);
-        yDebug("taxel's size: %lu\n", taxel.size());
-        
-        for (size_t i = 0; i < taxel.size(); i++)
-            taxel[i].print(verbosity);
-        
-        if (verbosity>=4)
-        {
-            yDebug("\nTaxel ID -> representative ID:\n");
-
-            for (size_t i=0; i<size; i++)
-            {
-                yDebug("[ %lu -> %d ]\t",i,Taxel2Repr[i]);
-                if (i % 8 == 7)
-                {
-                    yDebug("\n");
-                }
-            }
-            yDebug("\n");
-            
-            yDebug("Representative ID -> Taxel IDs:\n");
-            for(map<unsigned int, list<unsigned int> >::const_iterator iter_map = Repr2TaxelList.begin(); iter_map != Repr2TaxelList.end(); ++iter_map)
-            {
-                list<unsigned int> l = iter_map->second;
-                yDebug("%d -> {",iter_map->first);
-                for(list<unsigned int>::const_iterator iter_list = l.begin(); iter_list != l.end(); iter_list++)
-                {
-                    yDebug("%u, ",*iter_list);
-                }
-                yDebug("}\n");
-            }    
-            yDebug("\n");
-        }
-        yDebug("**********\n");
-    }
-
-    string skinPart2D::toString(int precision)
-    {
-        stringstream res;
-        res << "**********\n" << "Name: " << name << "\tSize: "<< size << endl;
-        for (size_t i = 0; i < taxel.size(); i++)
-            res << taxel[i].toString(precision);
+        for (size_t i = 0; i < txls.size(); i++)
+            res << txls[i]->toString(precision);
         res << "**********\n";
         return res.str();
     }

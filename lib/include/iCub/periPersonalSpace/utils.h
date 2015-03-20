@@ -369,6 +369,8 @@ class skinPart
   public:
     string name;
     int size;   // size of the skinPart if the patches were full - it differs from taxel.size()
+
+    vector<Taxel*> txls;
              
     /**
     * Indexing variable used in the case of reducing the resolution - e.g. taking only triangle centers
@@ -390,49 +392,7 @@ class skinPart
     /**
     * Copy Operator
     **/
-    virtual skinPart &operator=(const skinPart &spw) {};
-
-    /**
-    * Print Method
-    **/
-    virtual void print(int verbosity=0) {};
-
-    /**
-    * toString Method
-    **/
-    virtual string toString(int precision=0) {};
-};
-
-class skinPart1D : public skinPart
-{
-  public:
-    vector<TaxelPWE1D> taxel;
-    
-    /**
-    * Copy Operator
-    **/
-    virtual skinPart1D &operator=(const skinPart1D &spw);
-
-    /**
-    * Print Method
-    **/
-    void print(int verbosity=0);
-
-    /**
-    * toString Method
-    **/
-    string toString(int precision=0);    
-};
-
-class skinPart2D : public skinPart
-{
-  public:
-    vector<TaxelPWE2D> taxel;
-    
-    /**
-    * Copy Operator
-    **/
-    virtual skinPart2D &operator=(const skinPart2D &spw);
+    skinPart &operator=(const skinPart &spw);
 
     /**
     * Print Method
@@ -444,7 +404,6 @@ class skinPart2D : public skinPart
     **/
     string toString(int precision=0);
 };
-
 
 /**
 * Struct that encloses all the information related to the eyes.
