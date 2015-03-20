@@ -53,7 +53,7 @@ YARP, ICUB libraries
   information is printed out.
 
 --type \e type
-- Type of selection of contacts - e.g. randon.
+- Type of selection of contacts - e.g. random.
 
 
 \section portsc_sec Ports Created
@@ -84,6 +84,8 @@ using namespace yarp;
 using namespace yarp::os;
 using namespace std;
 
+using namespace iCub::skinDynLib;
+
 /**
 * \ingroup virtualContactGenerationModule
 *
@@ -93,15 +95,15 @@ using namespace std;
 class virtualContactGeneration: public RFModule 
 {
 private:
-    virtContactGenThread *virtContactGenThrd;
+    virtContactGenerationThread *virtContactGenThrd;
   
     string robot;
     string name;
     int verbosity;
     int threadPeriod;
-    string type;
-    
-    vector<iCub::skinDynLib::SkinPart> activeSkinParts;
+    string type;    
+       
+    vector<SkinPart> activeSkinPartsVector;
  
 
 public:
@@ -118,7 +120,8 @@ public:
         threadPeriod = 100; //period of the virtContactGenThread in ms
         verbosity = 0;
         type = "random"; //selection of the 
-
+        
+        SkinPart partOfSkin;
         //******************************************************
         //********************** CONFIGS ***********************
 
@@ -146,7 +149,7 @@ public:
             //****************** rate ******************
             if (bGeneral.check("rate"))
             {
-                rate = bGeneral.find("rate").asInt();
+                threadPeriod = bGeneral.find("rate").asInt();
                 yInfo("virtContactGenThread rateThread working at %i ms.",threadPeriod);
             }
             else yInfo("Could not find rate in the config file; using %i ms as default period",threadPeriod);
@@ -171,34 +174,103 @@ public:
           Bottle &bSkinParts=rf.findGroup("skin_parts");
           bSkinParts.setMonitor(rf.getMonitor());
 
-       
-        
-
+           if (bSkinParts.check("SKIN_LEFT_HAND"))
+           {
+                if(bSkinParts.find("SKIN_LEFT_HAND").asString()=="on"){
+                    partOfSkin = SKIN_LEFT_HAND;
+                    activeSkinPartsVector.push_back(partOfSkin);
+                    yInfo("Adding SKIN_LEFT_HAND to active skin parts.");
+                }
+               
+           }
+           else yInfo("SKIN_LEFT_HAND set to default, i.e. off");
+           
+           if (bSkinParts.check("SKIN_LEFT_FOREARM"))
+           {
+                if(bSkinParts.find("SKIN_LEFT_FOREARM").asString()=="on"){
+                    partOfSkin = SKIN_LEFT_FOREARM;
+                    activeSkinPartsVector.push_back(partOfSkin);
+                    yInfo("Adding SKIN_LEFT_FOREARM to active skin parts.");
+                }
+               
+           }
+           else yInfo("SKIN_LEFT_FOREARM set to default, i.e. off"); 
+            
+           if (bSkinParts.check("SKIN_LEFT_UPPER_ARM"))
+           {
+                if(bSkinParts.find("SKIN_LEFT_UPPER_ARM").asString()=="on"){
+                    partOfSkin = SKIN_LEFT_UPPER_ARM;
+                    activeSkinPartsVector.push_back(partOfSkin);
+                    yInfo("Adding SKIN_LEFT_UPPER_ARM to active skin parts.");
+                }
+               
+           }
+           else yInfo("SKIN_LEFT_UPPER_ARM set to default, i.e. off"); 
+           
+           if (bSkinParts.check("SKIN_RIGHT_HAND"))
+           {
+                if(bSkinParts.find("SKIN_RIGHT_HAND").asString()=="on"){
+                    partOfSkin = SKIN_RIGHT_HAND;
+                    activeSkinPartsVector.push_back(partOfSkin);
+                    yInfo("Adding SKIN_RIGHT_HAND to active skin parts.");
+                }
+               
+           }
+           else yInfo("SKIN_RIGHT_HAND set to default, i.e. off");
+           
+           if (bSkinParts.check("SKIN_RIGHT_FOREARM"))
+           {
+                if(bSkinParts.find("SKIN_RIGHT_FOREARM").asString()=="on"){
+                    partOfSkin = SKIN_RIGHT_FOREARM;
+                    activeSkinPartsVector.push_back(partOfSkin);
+                    yInfo("Adding SKIN_RIGHT_FOREARM to active skin parts.");
+                }
+               
+           }
+           else yInfo("SKIN_RIGHT_FOREARM set to default, i.e. off"); 
+            
+           if (bSkinParts.check("SKIN_RIGHT_UPPER_ARM"))
+           {
+                if(bSkinParts.find("SKIN_RIGHT_UPPER_ARM").asString()=="on"){
+                    partOfSkin = SKIN_RIGHT_UPPER_ARM;
+                    activeSkinPartsVector.push_back(partOfSkin);
+                    yInfo("Adding SKIN_RIGHT_UPPER_ARM to active skin parts.");
+                }
+               
+           }
+           else yInfo("SKIN_RIGHT_UPPER_ARM set to default, i.e. off"); 
+           
+           
+        //******************************************************
+        //*********************** THREAD **********************
+        virtContactGenThrd = new virtContactGenerationThread(threadPeriod,name,robot,verbosity,type,activeSkinPartsVector);
+        if (!virtContactGenThrd -> start())
+        {
+              delete virtContactGenThrd;
+              virtContactGenThrd = 0;
+              yError("virtContactGenThrd wasn't instantiated!!");
+                    return false;
+        }
+        yInfo("virtContactGenThrd instantiated...");
         return true;
     }
 
     bool close()
     {
-        cout << "ULTIMATE TRACKER: Stopping threads.." << endl;
-        if (utMngrThrd)
+        cout << "virtContactGeneration: Stopping thread.." << endl;
+        if (virtContactGenThrd)
         {
-            utMngrThrd -> stop();
-            delete utMngrThrd;
-            utMngrThrd =  0;
+            virtContactGenThrd -> stop();
+            delete virtContactGenThrd;
+            virtContactGenThrd =  0;
         }
-
-        if (kalThrd)
-        {
-            kalThrd -> stop();
-            delete kalThrd;
-            kalThrd =  0;
-        }
+      
         return true;
     }
 
     double getPeriod()
     {
-        return 0.05;
+        return 1.0;
     }
 
     bool updateModule()
@@ -206,3 +278,45 @@ public:
         return true;
     }
 };
+
+
+/**
+* Main function.
+*/
+int main(int argc, char * argv[])
+{
+    Network yarp;
+
+    ResourceFinder rf;
+    rf.setVerbose(true);
+    rf.setDefaultContext("periPersonalSpace");
+    rf.setDefaultConfigFile("virtualContactGeneration.ini");
+    rf.configure(argc,argv);
+
+    if (rf.check("help"))
+    {   
+        yInfo(""); 
+        yInfo("Options:");
+        yInfo("");
+        yInfo("   --context    path:  where to find the called resource");
+        yInfo("   --from       from:  the name of the .ini file.");
+        yInfo("   --name       name:  the name of the module (default virtualContactGeneration).");
+        yInfo("   --robot      robot: the name of the robot. Default icubSim.");
+        yInfo("   --rate       rate:  the period used by the thread. Default 100ms.");
+        yInfo("   --verbosity  int:   verbosity level (default 0).");
+        yInfo("   --type       type:  selection of fake contacts - e.g. 'random'.");
+     
+        yInfo("");
+        return 0;
+    }
+    
+    if (!yarp.checkNetwork())
+    {
+        printf("No Network!!!\n");
+        return -1;
+    }
+
+    virtualContactGeneration vCG;
+    return vCG.runModule(rf);
+}
+// empty line to make gcc happy
