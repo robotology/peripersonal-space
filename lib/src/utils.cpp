@@ -177,85 +177,31 @@ unsigned int factorial(unsigned int n)
 /****************************************************************/
 /* INCOMING EVENT 4 TAXEL WRAPPER
 *****************************************************************/
-    IncomingEvent4Taxel1D::IncomingEvent4Taxel1D() : IncomingEvent()
-    {
-        NRM = 0;
-    }
-
-    IncomingEvent4Taxel1D::IncomingEvent4Taxel1D(const Vector &p, const Vector &v,
-                                                 const double r, const string &s) :
-                                                 IncomingEvent(p,v,r,s)
-    {
-        NRM = 0;
-    }
-
-    IncomingEvent4Taxel1D::IncomingEvent4Taxel1D(const IncomingEvent4Taxel1D &e)
-    {
-        *this = e;   
-    }
-
-    IncomingEvent4Taxel1D::IncomingEvent4Taxel1D(const IncomingEvent &e)
-    {
-        *this = e;   
-    }
-
-    IncomingEvent4Taxel1D & IncomingEvent4Taxel1D::operator=(const IncomingEvent4Taxel1D &e)
-    {
-        IncomingEvent::operator=(e);
-        NRM    = e.NRM;
-        return *this;
-    }
-
-    IncomingEvent4Taxel1D & IncomingEvent4Taxel1D::operator=(const IncomingEvent &e)
-    {
-        Pos    = e.Pos;
-        Vel    = e.Vel;
-        Src    = e.Src;
-        Radius = e.Radius;
-        NRM    = 0;
-        return *this;
-    }
-
-    void IncomingEvent4Taxel1D::print()
-    {
-        yDebug("\tNRM: %g \t %s", NRM, IncomingEvent::toString().c_str());
-    }
-
-    string IncomingEvent4Taxel1D::toString() const
-    {
-        stringstream res;
-        res << "NRM: "<< NRM << "\t "<< IncomingEvent::toString();
-        return res.str();
-    }
-
-/****************************************************************/
-/* INCOMING EVENT 4 TAXEL WRAPPER
-*****************************************************************/
-    IncomingEvent4Taxel2D::IncomingEvent4Taxel2D() : IncomingEvent()
+    IncomingEvent4TaxelPWE::IncomingEvent4TaxelPWE() : IncomingEvent()
     {
         NRM = 0;
         TTC = 0;
     }
 
-    IncomingEvent4Taxel2D::IncomingEvent4Taxel2D(const Vector &p, const Vector &v,
+    IncomingEvent4TaxelPWE::IncomingEvent4TaxelPWE(const Vector &p, const Vector &v,
                                                  const double r, const string &s) :
                                                  IncomingEvent(p,v,r,s)
     {
-        NRM = 0;
-        TTC = 0;
+        computeNRMTTC();
     }
 
-    IncomingEvent4Taxel2D::IncomingEvent4Taxel2D(const IncomingEvent4Taxel2D &e)
+    IncomingEvent4TaxelPWE::IncomingEvent4TaxelPWE(const IncomingEvent4TaxelPWE &e)
+    {
+        *this = e;
+        computeNRMTTC();
+    }
+
+    IncomingEvent4TaxelPWE::IncomingEvent4TaxelPWE(const IncomingEvent &e)
     {
         *this = e;   
     }
 
-    IncomingEvent4Taxel2D::IncomingEvent4Taxel2D(const IncomingEvent &e)
-    {
-        *this = e;   
-    }
-
-    IncomingEvent4Taxel2D & IncomingEvent4Taxel2D::operator=(const IncomingEvent4Taxel2D &e)
+    IncomingEvent4TaxelPWE & IncomingEvent4TaxelPWE::operator=(const IncomingEvent4TaxelPWE &e)
     {
         IncomingEvent::operator=(e);
         TTC    = e.TTC;
@@ -263,23 +209,34 @@ unsigned int factorial(unsigned int n)
         return *this;
     }
 
-    IncomingEvent4Taxel2D & IncomingEvent4Taxel2D::operator=(const IncomingEvent &e)
+    IncomingEvent4TaxelPWE & IncomingEvent4TaxelPWE::operator=(const IncomingEvent &e)
     {
-        Pos    = e.Pos;
-        Vel    = e.Vel;
-        Src    = e.Src;
-        Radius = e.Radius;
-        TTC    = 0;
-        NRM    = 0;
+        IncomingEvent::operator=(e);
+        computeNRMTTC();
         return *this;
     }
 
-    void IncomingEvent4Taxel2D::print()
+    void IncomingEvent4TaxelPWE::computeNRMTTC()
+    {
+        int sgn = Pos[2]>=0?1:-1;
+        NRM = sgn * norm(Pos);
+
+        // if (norm(Vel) < 0.38 && norm(Vel) > 0.34)
+        // {
+        //     TTC = 10000.0;
+        // }
+        // else
+        // 
+        if (dot(Pos,Vel)==0) TTC = 0;
+        else                 TTC = -norm(Pos)*norm(Pos)/dot(Pos,Vel);
+    }
+
+    void IncomingEvent4TaxelPWE::print()
     {
         yDebug("\tNRM: %g\t TTC: %g \t %s", NRM, TTC, IncomingEvent::toString().c_str());
     }
 
-    string IncomingEvent4Taxel2D::toString() const
+    string IncomingEvent4TaxelPWE::toString() const
     {
         stringstream res;
         res << "NRM: "<< NRM << "\t TTC: " << TTC << "\t "<< IncomingEvent::toString();
@@ -293,12 +250,12 @@ unsigned int factorial(unsigned int n)
     {
         ID      = 0;
         Resp    = 0;
-        rfAngle = 40*M_PI/180;
+        RFangle = 40*M_PI/180;
         Pos.resize(3,0.0);
         WRFPos.resize(3,0.0);
         Norm.resize(3,0.0);
         px.resize(2,0.0);
-        RF = eye(4);
+        FoR = eye(4);
     }
 
     Taxel::Taxel()
@@ -311,7 +268,7 @@ unsigned int factorial(unsigned int n)
         init();
         Pos  = p;
         Norm = n;
-        setRF();
+        setFoR();
     }
 
     Taxel::Taxel(const Vector &p, const Vector &n, const int &i)
@@ -320,7 +277,7 @@ unsigned int factorial(unsigned int n)
         ID   = i;
         Pos  = p;
         Norm = n;
-        setRF();
+        setFoR();
     }
 
     Taxel & Taxel::operator=(const Taxel &t)
@@ -331,16 +288,16 @@ unsigned int factorial(unsigned int n)
         WRFPos  = t.WRFPos;
         Norm    = t.Norm;
         px      = t.px;
-        RF      = t.RF;
-        rfAngle = t.rfAngle;
+        FoR      = t.FoR;
+        RFangle = t.RFangle;
         return *this;
     }
 
-    void Taxel::setRF()
+    void Taxel::setFoR()
     {
         if (Norm == zeros(3))
         {
-            RF=eye(4);
+            FoR=eye(4);
             return;
         }
         
@@ -360,19 +317,19 @@ unsigned int factorial(unsigned int n)
         y = y / norm(y);
         z = z / norm(z);
 
-        RF=eye(4);
-        RF.setSubcol(x,0,0);
-        RF.setSubcol(y,0,1);
-        RF.setSubcol(z,0,2);
-        RF.setSubcol(Pos,0,3);
+        FoR=eye(4);
+        FoR.setSubcol(x,0,0);
+        FoR.setSubcol(y,0,1);
+        FoR.setSubcol(z,0,2);
+        FoR.setSubcol(Pos,0,3);
     }
 
 /****************************************************************/
 /* TAXEL WRAPPER 1D
 *****************************************************************/
-    bool Taxel1D::addSample(const IncomingEvent4Taxel1D ie)
+    bool Taxel1D::addSample(const IncomingEvent4TaxelPWE ie)
     {
-        if (!insideRFCheck(ie))
+        if (!insideFoRCheck(ie))
             return false;
 
         std::vector <double> X;
@@ -381,9 +338,9 @@ unsigned int factorial(unsigned int n)
         return pwe.addSample(X);
     }
 
-    bool Taxel1D::removeSample(const IncomingEvent4Taxel1D ie)
+    bool Taxel1D::removeSample(const IncomingEvent4TaxelPWE ie)
     {
-        if (!insideRFCheck(ie))
+        if (!insideFoRCheck(ie))
             return false;
 
         std::vector <double> X;
@@ -392,18 +349,18 @@ unsigned int factorial(unsigned int n)
         return pwe.removeSample(X);
     }
 
-    bool Taxel1D::insideRFCheck(const IncomingEvent4Taxel1D ie)
+    bool Taxel1D::insideFoRCheck(const IncomingEvent4TaxelPWE ie)
     {
         std::vector<double> binWidth = pwe.getBinWidth();
         double binLimit = 2*binWidth[0];
 
         // the x,y limit of the receptive field at the incoming event's Z
-        double RFlimit = ie.Pos(2)/tan(rfAngle);
+        double RFlimit = ie.Pos(2)/tan(RFangle);
 
         // the x,y limit of the receptive field in the first bin
-        double RFlimit_cyl = binLimit/tan(rfAngle);
+        double RFlimit_cyl = binLimit/tan(RFangle);
 
-        // yDebug("binLimit: %g RFlimit_cyl: %g rfAngle: %g \n", binLimit, RFlimit_cyl, rfAngle);
+        // yDebug("binLimit: %g RFlimit_cyl: %g RFangle: %g \n", binLimit, RFlimit_cyl, RFangle);
         // yDebug("ie.Pos\t%s\n", ie.Pos.toString(3,3).c_str());
         // yDebug("Hist:\n%s\n", pwe.getHist().toString(3,3).c_str());
 
@@ -456,7 +413,7 @@ unsigned int factorial(unsigned int n)
 
     bool Taxel1D::computeResponse()
     {
-        if (!insideRFCheck(Evnt))
+        if (!insideFoRCheck(Evnt))
         {
             Resp = 0;
             return false;
@@ -472,9 +429,9 @@ unsigned int factorial(unsigned int n)
 /****************************************************************/
 /* TAXEL WRAPPER 2D
 *****************************************************************/
-    bool Taxel2D::addSample(const IncomingEvent4Taxel2D ie)
+    bool Taxel2D::addSample(const IncomingEvent4TaxelPWE ie)
     {
-        if (!insideRFCheck(ie))
+        if (!insideFoRCheck(ie))
             return false;
 
         std::vector <double> X;
@@ -484,9 +441,9 @@ unsigned int factorial(unsigned int n)
         return pwe.addSample(X);
     }
 
-    bool Taxel2D::removeSample(const IncomingEvent4Taxel2D ie)
+    bool Taxel2D::removeSample(const IncomingEvent4TaxelPWE ie)
     {
-        if (!insideRFCheck(ie))
+        if (!insideFoRCheck(ie))
             return false;
 
         std::vector <double> X;
@@ -496,18 +453,18 @@ unsigned int factorial(unsigned int n)
         return pwe.removeSample(X);
     }
 
-    bool Taxel2D::insideRFCheck(const IncomingEvent4Taxel2D ie)
+    bool Taxel2D::insideFoRCheck(const IncomingEvent4TaxelPWE ie)
     {
         std::vector<double> binWidth = pwe.getBinWidth();
         double binLimit = 2*binWidth[0];
 
         // the x,y limit of the receptive field at the incoming event's Z
-        double RFlimit = ie.Pos(2)/tan(rfAngle);
+        double RFlimit = ie.Pos(2)/tan(RFangle);
 
         // the x,y limit of the receptive field in the first bin
-        double RFlimit_cyl = binLimit/tan(rfAngle);
+        double RFlimit_cyl = binLimit/tan(RFangle);
 
-        // yDebug("binLimit: %g RFlimit_cyl: %g rfAngle: %g \n", binLimit, RFlimit_cyl, rfAngle);
+        // yDebug("binLimit: %g RFlimit_cyl: %g RFangle: %g \n", binLimit, RFlimit_cyl, RFangle);
         // yDebug("ie.Pos\t%s\n", ie.Pos.toString(3,3).c_str());
         // yDebug("Hist:\n%s\n", pwe.getHist().toString(3,3).c_str());
 
@@ -560,7 +517,7 @@ unsigned int factorial(unsigned int n)
 
     bool Taxel2D::computeResponse()
     {
-        if (!insideRFCheck(Evnt))
+        if (!insideFoRCheck(Evnt))
             return false;
 
         std::vector<double> In;
