@@ -172,73 +172,75 @@ public:
 
           //*************** ACTIVE SKIN PARTS GROUP ****************
           Bottle &bSkinParts=rf.findGroup("skin_parts");
-          bSkinParts.setMonitor(rf.getMonitor());
-
-           if (bSkinParts.check("SKIN_LEFT_HAND"))
-           {
+          if (!bSkinParts.isNull()){
+            bSkinParts.setMonitor(rf.getMonitor());
+            
+            if (bSkinParts.check("SKIN_LEFT_HAND"))
+            {
                 if(bSkinParts.find("SKIN_LEFT_HAND").asString()=="on"){
                     partOfSkin = SKIN_LEFT_HAND;
                     activeSkinPartsVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_LEFT_HAND to active skin parts.");
                 }
-               
-           }
-           else yInfo("SKIN_LEFT_HAND set to default, i.e. off");
-           
-           if (bSkinParts.check("SKIN_LEFT_FOREARM"))
-           {
+                
+            }
+            else yInfo("Could not find [skin_parts] SKIN_LEFT_HAND option in the config file; set to default, i.e. off");
+            
+            if (bSkinParts.check("SKIN_LEFT_FOREARM"))
+            {
                 if(bSkinParts.find("SKIN_LEFT_FOREARM").asString()=="on"){
                     partOfSkin = SKIN_LEFT_FOREARM;
                     activeSkinPartsVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_LEFT_FOREARM to active skin parts.");
                 }
-               
-           }
-           else yInfo("SKIN_LEFT_FOREARM set to default, i.e. off"); 
-            
-           if (bSkinParts.check("SKIN_LEFT_UPPER_ARM"))
-           {
+            }
+            else yInfo("Could not find [skin_parts] SKIN_LEFT_FOREARM option in the config file; set to default, i.e. off"); 
+                
+            if (bSkinParts.check("SKIN_LEFT_UPPER_ARM"))
+            {
                 if(bSkinParts.find("SKIN_LEFT_UPPER_ARM").asString()=="on"){
                     partOfSkin = SKIN_LEFT_UPPER_ARM;
                     activeSkinPartsVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_LEFT_UPPER_ARM to active skin parts.");
                 }
-               
-           }
-           else yInfo("SKIN_LEFT_UPPER_ARM set to default, i.e. off"); 
-           
-           if (bSkinParts.check("SKIN_RIGHT_HAND"))
-           {
+            }
+            else yInfo("Could not find [skin_parts] SKIN_LEFT_UPPER_ARM option in the config file; set to default, i.e. off"); 
+            
+            if (bSkinParts.check("SKIN_RIGHT_HAND"))
+            {
                 if(bSkinParts.find("SKIN_RIGHT_HAND").asString()=="on"){
                     partOfSkin = SKIN_RIGHT_HAND;
                     activeSkinPartsVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_RIGHT_HAND to active skin parts.");
                 }
-               
-           }
-           else yInfo("SKIN_RIGHT_HAND set to default, i.e. off");
-           
-           if (bSkinParts.check("SKIN_RIGHT_FOREARM"))
-           {
+                
+            }
+            else yInfo("Could not find [skin_parts] SKIN_RIGHT_HAND option in the config file; set to default, i.e. off");
+            
+            if (bSkinParts.check("SKIN_RIGHT_FOREARM"))
+            {
                 if(bSkinParts.find("SKIN_RIGHT_FOREARM").asString()=="on"){
                     partOfSkin = SKIN_RIGHT_FOREARM;
                     activeSkinPartsVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_RIGHT_FOREARM to active skin parts.");
                 }
-               
-           }
-           else yInfo("SKIN_RIGHT_FOREARM set to default, i.e. off"); 
-            
-           if (bSkinParts.check("SKIN_RIGHT_UPPER_ARM"))
-           {
+                
+            }
+            else yInfo("Could not find [skin_parts] SKIN_RIGHT_FOREARM option in the config file; set to default, i.e. off"); 
+                
+            if (bSkinParts.check("SKIN_RIGHT_UPPER_ARM"))
+            {
                 if(bSkinParts.find("SKIN_RIGHT_UPPER_ARM").asString()=="on"){
                     partOfSkin = SKIN_RIGHT_UPPER_ARM;
                     activeSkinPartsVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_RIGHT_UPPER_ARM to active skin parts.");
                 }
-               
-           }
-           else yInfo("SKIN_RIGHT_UPPER_ARM set to default, i.e. off"); 
+            }
+            else yInfo("Could not find [skin_parts] SKIN_RIGHT_UPPER_ARM option in the config file; set to default, i.e. off"); 
+          }
+          else{ //bSkinParts.isNull()
+              yInfo("Could not find [skin_parts] group in the config file; set all to to default, i.e. off"); 
+          }
            
            
         //******************************************************
