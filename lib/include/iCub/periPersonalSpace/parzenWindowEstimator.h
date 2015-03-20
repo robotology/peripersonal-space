@@ -127,8 +127,8 @@ class parzenWindowEstimator
     **/
     std::vector<int>    getHistSize()              { return binsNum; };
     std::vector<double> getBinWidth()              { return binWidth; };
-    std::vector<double> getExtX();
-    std::vector<double> getExtY();
+    
+    Matrix getExt()                                { return ext; };
 
     int    getPosHist(int i, int j=0) { return int(posHist(i,j)); };
     Matrix getPosHist()               { return posHist; };

@@ -757,116 +757,60 @@ string vtRFThread::load()
 
 string vtRFThread::save()
 {
-    // int    lastindex     = taxelsFile.find_last_of("."); 
-    // string taxelsFileRaw = taxelsFile.substr(0, lastindex);
+    int    lastindex     = taxelsFile.find_last_of("."); 
+    string taxelsFileRaw = taxelsFile.substr(0, lastindex);
 
-    // string fnm=path+taxelsFileRaw+"_out.ini";
-    // ofstream myfile;
-    // yInfo("Saving to: %s", fnm.c_str());
-    // myfile.open(fnm.c_str(),ios::trunc);
+    string fnm=path+taxelsFileRaw+"_out.ini";
+    ofstream myfile;
+    yInfo("Saving to: %s", fnm.c_str());
+    myfile.open(fnm.c_str(),ios::trunc);
 
-    // if (myfile.is_open())
-    // {
-    //     for (size_t i = 0; i < iCubSkinSize; i++)
-    //     {
-    //         if (modality=="1D")
-    //         {
-    //             std::vector<double> extX = iCubSkin1D[i].txls[0]->pwe.getExtX();
-    //             std::vector<int>    bNum = iCubSkin1D[i].txls[0]->pwe.getHistSize();
+    if (myfile.is_open())
+    {
+        for (size_t i = 0; i < iCubSkinSize; i++)
+        {
+            myfile << "modality\t" << iCubSkin[i].modality << endl;
 
-    //             myfile << "[" << iCubSkin1D[i].name << "]" << endl;
-    //             myfile << "size\t"    << iCubSkin1D[i].size << endl;    
-    //             myfile << "nTaxels\t" << iCubSkin1D[i].txls.size() << endl;
-    //             myfile << "extX\t( "  << extX[0] << "\t" << extX[1] << " )\n";
-    //             myfile << "binsNum\t( " << bNum[0] << " )\n";
+            Bottle data;
+            data.clear();
 
-    //             Bottle data;
-    //             data.clear();
-    //             Bottle &representatives = data.addList();
-    //             for (size_t q = 0; q < iCubSkin1D[i].Taxel2Repr.size(); q++)
-    //             {
-    //                 representatives.addInt(iCubSkin1D[i].Taxel2Repr[q]);
-    //             } 
-    //             myfile << "Mapping\t" << data.toString() << endl;
+            Matrix           getExt = iCubSkin[i].txls[0]->pwe->getExt();
+            matrixIntoBottle(getExt,data);
 
-    //             for (size_t j = 0; j < iCubSkin1D[i].txls.size(); j++)
-    //             {
-    //                 std::vector<int>    bNum = iCubSkin1D[i].txls[j]->pwe.getHistSize();
+            std::vector<int> hSize  = iCubSkin[i].txls[0]->pwe->getHistSize();
 
-    //                 data.clear();
-    //                 Bottle &valuesPos = data.addList();
+            myfile << "[" << iCubSkin[i].name << "]" << endl;
+            myfile << "size\t"    << iCubSkin[i].size << endl;    
+            myfile << "nTaxels\t" << iCubSkin[i].txls.size() << endl;
+            myfile << "ext\t"     << data.toString() << "\n";
+            myfile << "hSize\t( " << hSize[0] << hSize[1] << " )\n";
 
-    //                 for (size_t k = 0; k < bNum[0]; k++)
-    //                 {
-    //                     valuesPos.addInt(iCubSkin1D[i].txls[j]->pwe.getPosHist(k));
-    //                 }
-    //                 myfile << iCubSkin1D[i].txls[j]->ID << "\t\t" << data.toString() << "\t";
+            data.clear();
+            Bottle &representatives = data.addList();
+            for (size_t q = 0; q < iCubSkin[i].Taxel2Repr.size(); q++)
+            {
+                representatives.addInt(iCubSkin[i].Taxel2Repr[q]);
+            } 
+            myfile << "Mapping\t" << data.toString() << endl;
 
-    //                 data.clear();
-    //                 Bottle &valuesNeg = data.addList();
+            for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
+            {
+                std::vector<int> bNum  = iCubSkin[i].txls[j]->pwe->getHistSize();
+                Matrix           pHist = iCubSkin[i].txls[j]->pwe->getPosHist();
+                Matrix           nHist = iCubSkin[i].txls[j]->pwe->getNegHist();
 
-    //                 for (size_t k = 0; k < bNum[0]; k++)
-    //                 {
-    //                     valuesNeg.addInt(iCubSkin1D[i].txls[j]->pwe.getNegHist(k));
-    //                 }
-    //                 myfile << data.toString() << endl;
-    //             }
-    //         }
-    //         else
-    //         {
-    //             std::vector<double> extX = iCubSkin[i].txls[0]->pwe.getExtX();
-    //             std::vector<double> extY = iCubSkin[i].txls[0]->pwe.getExtY();
-    //             std::vector<int>    bNum = iCubSkin[i].txls[0]->pwe.getHistSize();
+                data.clear();
+                matrixIntoBottle(pHist,data);
+                myfile << iCubSkin[i].txls[j]->ID << "\t\t" << data.toString() << "\t";
 
-    //             myfile << "[" << iCubSkin[i].name << "]" << endl;
-    //             myfile << "size\t"    << iCubSkin[i].size << endl;    
-    //             myfile << "nTaxels\t" << iCubSkin[i].txls.size() << endl;
-    //             myfile << "extX\t( "  << extX[0] << "\t" << extX[1] << " )\n";
-    //             myfile << "extY\t( "  << extY[0] << "\t" << extY[1] << " )\n";
-    //             myfile << "binsNum\t( " << bNum[0] << "\t" << bNum[1] << " )\n";
-
-    //             Bottle data;
-    //             data.clear();
-    //             Bottle &representatives = data.addList();
-    //             for (size_t q = 0; q < iCubSkin[i].Taxel2Repr.size(); q++)
-    //             {
-    //                 representatives.addInt(iCubSkin[i].Taxel2Repr[q]);
-    //             } 
-    //             myfile << "Mapping\t" << data.toString() << endl;
-
-    //             for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
-    //             {
-    //                 std::vector<int>    bNum = iCubSkin[i].txls[j]->pwe.getHistSize();
-
-    //                 data.clear();
-    //                 Bottle &valuesPos = data.addList();
-
-    //                 for (size_t k = 0; k < bNum[0]; k++)
-    //                 {
-    //                     for (size_t kk = 0; kk < bNum[1]; kk++)
-    //                     {
-    //                         valuesPos.addInt(iCubSkin[i].txls[j]->pwe.getPosHist(k,kk));
-    //                     }
-    //                 }
-    //                 myfile << iCubSkin[i].txls[j]->ID << "\t\t" << data.toString() << "\t";
-
-    //                 data.clear();
-    //                 Bottle &valuesNeg = data.addList();
-
-    //                 for (size_t k = 0; k < bNum[0]; k++)
-    //                 {
-    //                     for (size_t kk = 0; kk < bNum[1]; kk++)
-    //                     {
-    //                         valuesNeg.addInt(iCubSkin[i].txls[j]->pwe.getNegHist(k,kk));
-    //                     }
-    //                 }
-    //                 myfile << data.toString() << endl;
-    //             }
-    //         }
-    //     }
-    // }
-    // myfile.close();
-    // return fnm;
+                data.clear();
+                matrixIntoBottle(nHist,data);
+                myfile << data.toString() << endl;
+            }
+        }
+    }
+    myfile.close();
+    return fnm;
 }
 
 bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
