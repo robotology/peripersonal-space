@@ -231,6 +231,15 @@ unsigned int factorial(unsigned int n)
         else                 TTC = -norm(Pos)*norm(Pos)/dot(Pos,Vel);
     }
 
+    std::vector<double> IncomingEvent4TaxelPWE::getNRMTTC()
+    {
+        std::vector<double> x;
+        x.push_back(NRM);
+        x.push_back(TTC);
+
+        return x;
+    }
+
     void IncomingEvent4TaxelPWE::print()
     {
         yDebug("\tNRM: %g\t TTC: %g \t %s", NRM, TTC, IncomingEvent::toString().c_str());
@@ -249,8 +258,6 @@ unsigned int factorial(unsigned int n)
     void Taxel::init()
     {
         ID      = 0;
-        Resp    = 0;
-        RFangle = 40*M_PI/180;
         Pos.resize(3,0.0);
         WRFPos.resize(3,0.0);
         Norm.resize(3,0.0);
@@ -283,13 +290,11 @@ unsigned int factorial(unsigned int n)
     Taxel & Taxel::operator=(const Taxel &t)
     {
         ID      = t.ID;
-        Resp    = t.Resp;
         Pos     = t.Pos;
         WRFPos  = t.WRFPos;
         Norm    = t.Norm;
         px      = t.px;
-        FoR      = t.FoR;
-        RFangle = t.RFangle;
+        FoR     = t.FoR;
         return *this;
     }
 
@@ -325,33 +330,48 @@ unsigned int factorial(unsigned int n)
     }
 
 /****************************************************************/
-/* TAXEL WRAPPER 1D
+/* TAXEL WRAPPER FOR PWE
 *****************************************************************/
-    bool Taxel1D::addSample(const IncomingEvent4TaxelPWE ie)
+
+    TaxelPWE::TaxelPWE() : Taxel(), Evnt()
+    {
+        Resp    = 0;
+        RFangle = 40*M_PI/180;
+    }
+
+    TaxelPWE::TaxelPWE(const Vector &p, const Vector &n) : Taxel(p,n)
+    {
+        Resp    = 0;
+        RFangle = 40*M_PI/180;
+    };
+
+    TaxelPWE::TaxelPWE(const Vector &p, const Vector &n, const int &i) : Taxel(p,n,i)
+    {
+        Resp    = 0;
+        RFangle = 40*M_PI/180;
+    };
+
+    bool TaxelPWE::addSample(IncomingEvent4TaxelPWE ie)
     {
         if (!insideFoRCheck(ie))
             return false;
 
-        std::vector <double> X;
-        X.push_back(ie.NRM);
-
-        return pwe.addSample(X);
+        std::vector <double> x = ie.getNRMTTC();
+        return pwe->addSample(x);
     }
 
-    bool Taxel1D::removeSample(const IncomingEvent4TaxelPWE ie)
+    bool TaxelPWE::removeSample(IncomingEvent4TaxelPWE ie)
     {
         if (!insideFoRCheck(ie))
             return false;
 
-        std::vector <double> X;
-        X.push_back(ie.NRM);
-
-        return pwe.removeSample(X);
+        std::vector <double> x = ie.getNRMTTC();
+        return pwe->removeSample(x);
     }
 
-    bool Taxel1D::insideFoRCheck(const IncomingEvent4TaxelPWE ie)
+    bool TaxelPWE::insideFoRCheck(const IncomingEvent4TaxelPWE ie)
     {
-        std::vector<double> binWidth = pwe.getBinWidth();
+        std::vector<double> binWidth = pwe->getBinWidth();
         double binLimit = 2*binWidth[0];
 
         // the x,y limit of the receptive field at the incoming event's Z
@@ -362,7 +382,7 @@ unsigned int factorial(unsigned int n)
 
         // yDebug("binLimit: %g RFlimit_cyl: %g RFangle: %g \n", binLimit, RFlimit_cyl, RFangle);
         // yDebug("ie.Pos\t%s\n", ie.Pos.toString(3,3).c_str());
-        // yDebug("Hist:\n%s\n", pwe.getHist().toString(3,3).c_str());
+        // yDebug("Hist:\n%s\n", pwe->getHist().toString(3,3).c_str());
 
         if (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit*RFlimit )
         {
@@ -377,41 +397,41 @@ unsigned int factorial(unsigned int n)
         return false;
     }
 
-    void Taxel1D::print(int verbosity)
+    void TaxelPWE::print(int verbosity)
     {
         if (verbosity > 4)
             yDebug("ID %i \tPos %s \tNorm %s \n\tPosHst \n%s\n\n\tNegHst \n%s\n", ID,
                     Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str(),
-                    pwe.getPosHist().toString(3,3).c_str(),
-                    pwe.getNegHist().toString(3,3).c_str());
+                    pwe->getPosHist().toString(3,3).c_str(),
+                    pwe->getNegHist().toString(3,3).c_str());
         else 
             yDebug("ID %i \tPos %s \tNorm %s\n", ID,
                     Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str());
             // yDebug("ID %i \tPos %s \tNorm %s \n\tHst %s\n", ID,
             //         Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str(),
-            //         pwe.getHist().toString(3,3).c_str());
+            //         pwe->getHist().toString(3,3).c_str());
     }
 
-    string Taxel1D::toString(int precision)
+    string TaxelPWE::toString(int precision)
     {
         stringstream res;
         res << "ID: " << ID << "\tPos: "<< Pos.toString(3,3) << "\t Norm: "<< Norm.toString(3,3);
 
         if (precision)
         {
-            res << "\n PosHst:\n"<< pwe.getPosHist().toString(3,3);
-            res << "\n NegHst:\n"<< pwe.getNegHist().toString(3,3) << endl;
+            res << "\n PosHst:\n"<< pwe->getPosHist().toString(3,3);
+            res << "\n NegHst:\n"<< pwe->getNegHist().toString(3,3) << endl;
         }
         return res.str();
     }
 
-    bool Taxel1D::resetParzenWindow()
+    bool TaxelPWE::resetParzenWindowEstimator()
     {
-        pwe.resetAllHist();
+        pwe->resetAllHist();
         return true;
     }
 
-    bool Taxel1D::computeResponse()
+    bool TaxelPWE::computeResponse()
     {
         if (!insideFoRCheck(Evnt))
         {
@@ -419,111 +439,8 @@ unsigned int factorial(unsigned int n)
             return false;
         }
 
-        std::vector<double> In;
-        In.push_back(Evnt.NRM);
-        Resp = pwe.computeResponse(In);
-
-        return true;
-    }
-
-/****************************************************************/
-/* TAXEL WRAPPER 2D
-*****************************************************************/
-    bool Taxel2D::addSample(const IncomingEvent4TaxelPWE ie)
-    {
-        if (!insideFoRCheck(ie))
-            return false;
-
-        std::vector <double> X;
-        X.push_back(ie.NRM);
-        X.push_back(ie.TTC);
-
-        return pwe.addSample(X);
-    }
-
-    bool Taxel2D::removeSample(const IncomingEvent4TaxelPWE ie)
-    {
-        if (!insideFoRCheck(ie))
-            return false;
-
-        std::vector <double> X;
-        X.push_back(ie.NRM);
-        X.push_back(ie.TTC);
-
-        return pwe.removeSample(X);
-    }
-
-    bool Taxel2D::insideFoRCheck(const IncomingEvent4TaxelPWE ie)
-    {
-        std::vector<double> binWidth = pwe.getBinWidth();
-        double binLimit = 2*binWidth[0];
-
-        // the x,y limit of the receptive field at the incoming event's Z
-        double RFlimit = ie.Pos(2)/tan(RFangle);
-
-        // the x,y limit of the receptive field in the first bin
-        double RFlimit_cyl = binLimit/tan(RFangle);
-
-        // yDebug("binLimit: %g RFlimit_cyl: %g RFangle: %g \n", binLimit, RFlimit_cyl, RFangle);
-        // yDebug("ie.Pos\t%s\n", ie.Pos.toString(3,3).c_str());
-        // yDebug("Hist:\n%s\n", pwe.getHist().toString(3,3).c_str());
-
-        if (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit*RFlimit )
-        {
-            return true;
-        }
-        // There are two ifs only to let me debug things
-        if ( (abs(ie.Pos(2))<=binLimit) && (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit_cyl*RFlimit_cyl) )
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    void Taxel2D::print(int verbosity)
-    {
-        if (verbosity > 4)
-            yDebug("ID %i \tPos %s \tNorm %s \n\tPosHst \n%s\n\n\tNegHst \n%s\n", ID,
-                    Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str(),
-                    pwe.getPosHist().toString(3,3).c_str(),
-                    pwe.getNegHist().toString(3,3).c_str());
-        else 
-            yDebug("ID %i \tPos %s \tNorm %s\n", ID,
-                    Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str());
-            // yDebug("ID %i \tPos %s \tNorm %s \n\tHst %s\n", ID,
-            //         Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str(),
-            //         pwe.getHist().toString(3,3).c_str());
-    }
-
-    string Taxel2D::toString(int precision)
-    {
-        stringstream res;
-        res << "ID: " << ID << "\tPos: "<< Pos.toString(3,3) << "\t Norm: "<< Norm.toString(3,3);
-
-        if (precision)
-        {
-            res << "\n PosHst:\n"<< pwe.getPosHist().toString(3,3);
-            res << "\n NegHst:\n"<< pwe.getNegHist().toString(3,3) << endl;
-        }
-        return res.str();
-    }
-
-    bool Taxel2D::resetParzenWindow()
-    {
-        pwe.resetAllHist();
-        return true;
-    }
-
-    bool Taxel2D::computeResponse()
-    {
-        if (!insideFoRCheck(Evnt))
-            return false;
-
-        std::vector<double> In;
-        In.push_back(Evnt.NRM);
-        In.push_back(Evnt.TTC);
-        Resp = pwe.computeResponse(In);
+        std::vector<double> In = Evnt.getNRMTTC();
+        Resp = pwe->computeResponse(In);
 
         return true;
     }

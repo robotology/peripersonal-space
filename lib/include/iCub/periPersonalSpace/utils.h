@@ -203,6 +203,11 @@ struct IncomingEvent4TaxelPWE : public IncomingEvent
     void computeNRMTTC();
 
     /**
+     * Return norm and TTC in a pwe-compliant way
+    */
+    std::vector<double> getNRMTTC();
+
+    /**
     * Print Method
     **/
     void print();
@@ -220,28 +225,17 @@ class Taxel
 {
   public:
     int ID;                    // taxels' ID
-    int Resp;                  // taxels' activation level (0-255)
     yarp::sig::Vector px;      // (u,v) projection in the image plane
     yarp::sig::Vector Pos;     // taxel's position w.r.t. the limb
     yarp::sig::Vector WRFPos;  // taxel's position w.r.t. the root FoR
     yarp::sig::Vector Norm;    // taxel's normal   w.r.t. the limb
-    yarp::sig::Matrix FoR;      // taxel's reference Frame (computed from Pos and Norm)
-
-    double RFangle;            // angle of the receptive field [rad]
+    yarp::sig::Matrix FoR;     // taxel's reference Frame (computed from Pos and Norm)
 
     /**
-    * Default constructor
+    * Constructors
     **/    
     Taxel();
-
-    /**
-    * Constructor with Pos and Norm
-    **/    
     Taxel(const Vector &p, const Vector &n);
-
-    /**
-    * Constructor with Pos, Norm and ID
-    **/    
     Taxel(const Vector &p, const Vector &n, const int &i);
 
     /**
@@ -272,7 +266,7 @@ class Taxel
     /**
     * Resets the parzen window estimator
     **/
-    virtual bool resetParzenWindow() {};
+    virtual bool resetParzenWindowEstimator() {};
 
     /**
     * Computes the response of the taxel.
@@ -280,26 +274,21 @@ class Taxel
     virtual bool computeResponse() {};
 };
 
-class Taxel1D : public Taxel
+class TaxelPWE : public Taxel
 {
   public:
-    IncomingEvent4TaxelPWE   Evnt; // IncomingEvent as seen from the taxel's RF
-    parzenWindowEstimator1D  pwe; // Parzen Window Estimator to compute the response
+    int Resp;                       // taxels' activation level (0-255)
+    double RFangle;                 // angle of the receptive field [rad]
+
+    IncomingEvent4TaxelPWE Evnt;    // 
+    parzenWindowEstimator *pwe;     // 
 
     /**
-    * Default constructor
+    * Constructors
     **/    
-    Taxel1D() : Taxel() {};
-
-    /**
-    * Constructor with Pos and Norm
-    **/    
-    Taxel1D(const Vector &p, const Vector &n) : Taxel(p,n) {};
-
-    /**
-    * Constructor with Pos, Norm and ID
-    **/    
-    Taxel1D(const Vector &p, const Vector &n, const int &i) : Taxel(p,n,i) {};
+    TaxelPWE();
+    TaxelPWE(const Vector &p, const Vector &n);
+    TaxelPWE(const Vector &p, const Vector &n, const int &i);
 
     /**
     * init function
@@ -309,8 +298,8 @@ class Taxel1D : public Taxel
     /**
     * Add or remove a sample from the pwe's histogram
     **/
-    bool addSample(const IncomingEvent4TaxelPWE ie);
-    bool removeSample(const IncomingEvent4TaxelPWE ie);
+    bool    addSample(IncomingEvent4TaxelPWE ie);
+    bool removeSample(IncomingEvent4TaxelPWE ie);
 
     /**
     * Check if the input sample is inside the Receptive field (i.e. the cone)
@@ -330,7 +319,7 @@ class Taxel1D : public Taxel
     /**
     * Resets the parzen window estimator
     **/
-    bool resetParzenWindow();
+    bool resetParzenWindowEstimator();
 
     /**
     * Computes the response of the taxel.
@@ -338,63 +327,38 @@ class Taxel1D : public Taxel
     bool computeResponse();
 };
 
-class Taxel2D : public Taxel
+class TaxelPWE1D : public TaxelPWE
 {
   public:
-    IncomingEvent4TaxelPWE   Evnt;  // IncomingEvent as seen from the taxel's RF
-    parzenWindowEstimator2D pwe;   // taxel's response by means of a 2D parzen window estimator
-
 
     /**
-    * Default constructor
+    * Constructors
     **/    
-    Taxel2D() : Taxel() {};
-
-    /**
-    * Constructor with Pos and Norm
-    **/    
-    Taxel2D(const Vector &p, const Vector &n) : Taxel(p,n) {};
-
-    /**
-    * Constructor with Pos, Norm and ID
-    **/    
-    Taxel2D(const Vector &p, const Vector &n, const int &i) : Taxel(p,n,i) {};
+    TaxelPWE1D() : TaxelPWE()                                                    { pwe = new parzenWindowEstimator1D();};
+    TaxelPWE1D(const Vector &p, const Vector &n) : TaxelPWE(p,n)                 { pwe = new parzenWindowEstimator1D();};
+    TaxelPWE1D(const Vector &p, const Vector &n, const int &i) : TaxelPWE(p,n,i) { pwe = new parzenWindowEstimator1D();};
 
     /**
     * init function
     **/
-    void init() { Taxel::init(); };
+    void init() { TaxelPWE::init(); };
+};
+
+class TaxelPWE2D : public TaxelPWE
+{
+  public:
 
     /**
-    * Add or remove a sample from the pwe's histogram
-    **/
-    bool addSample(const IncomingEvent4TaxelPWE ie);
-    bool removeSample(const IncomingEvent4TaxelPWE ie);
+    * Constructors
+    **/    
+    TaxelPWE2D() : TaxelPWE()                                                    { pwe = new parzenWindowEstimator2D();};
+    TaxelPWE2D(const Vector &p, const Vector &n) : TaxelPWE(p,n)                 { pwe = new parzenWindowEstimator2D();};
+    TaxelPWE2D(const Vector &p, const Vector &n, const int &i) : TaxelPWE(p,n,i) { pwe = new parzenWindowEstimator2D();};
 
     /**
-    * Check if the input sample is inside the Receptive field (i.e. the cone)
+    * init function
     **/
-    bool insideFoRCheck(const IncomingEvent4TaxelPWE ie);
-
-    /**
-    * Print Method
-    **/
-    void print(int verbosity=0);
-
-    /**
-    * toString Method
-    **/
-    string toString(int precision=0);
-
-    /**
-    * Resets the parzen window estimator
-    **/
-    bool resetParzenWindow();
-
-    /**
-    * Computes the response of the taxel.
-    **/
-    bool computeResponse();
+    void init() { TaxelPWE::init(); };
 };
 
 /**
@@ -442,7 +406,7 @@ class skinPart
 class skinPart1D : public skinPart
 {
   public:
-    vector<Taxel1D> taxel;
+    vector<TaxelPWE1D> taxel;
     
     /**
     * Copy Operator
@@ -463,7 +427,7 @@ class skinPart1D : public skinPart
 class skinPart2D : public skinPart
 {
   public:
-    vector<Taxel2D> taxel;
+    vector<TaxelPWE2D> taxel;
     
     /**
     * Copy Operator
