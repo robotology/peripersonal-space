@@ -31,7 +31,7 @@ double gauss2D(const double x_0, const double y_0,
 
         if (_ext.rows()!=dim || _ext.cols()!=2 || _binsNum.size()!=2)
         {
-            yError("Resize failed! _ext size: %i %i _binsNum size: %lu\n",_ext.rows(),_ext.cols(), _binsNum.size());
+            yError("Resize failed! dim %i _ext size: %i %i _binsNum size: %lu\n",dim,_ext.rows(),_ext.cols(), _binsNum.size());
             return false;
         }
 

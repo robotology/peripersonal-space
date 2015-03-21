@@ -625,134 +625,88 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
 
 string vtRFThread::load()
 {
-    // rf->setVerbose(true);
-    // string fileName=rf->findFile("taxelsFile").c_str();
-    // rf->setVerbose(false);
-    // if (fileName=="")
-    // {
-    //     yWarning("[vtRF::load] No filename has been found. Skipping..");
-    //     string ret="";
-    //     return ret;
-    // }
+    rf->setVerbose(true);
+    string fileName=rf->findFile("taxelsFile").c_str();
+    rf->setVerbose(false);
+    if (fileName=="")
+    {
+        yWarning("[vtRF::load] No filename has been found. Skipping..");
+        string ret="";
+        return ret;
+    }
 
-    // yInfo("File loaded: %s", fileName.c_str());
-    // Property data; data.fromConfigFile(fileName.c_str());
-    // Bottle b; b.read(data);
-    // yDebug("iCubSkinSize %i",iCubSkinSize);
+    yInfo("[vtRF::load] File loaded: %s", fileName.c_str());
+    Property data; data.fromConfigFile(fileName.c_str());
+    Bottle b; b.read(data);
+    yDebug("[vtRF::load] iCubSkinSize %i",iCubSkinSize);
 
-    // for (size_t i = 0; i < iCubSkinSize; i++)
-    // {
-    //     if (modality=="1D")
-    //     {
-    //         Bottle bb = b.findGroup(iCubSkin1D[i].name.c_str());
+    for (size_t i = 0; i < iCubSkinSize; i++)
+    {
+        Bottle bb = b.findGroup(iCubSkin[i].name.c_str());
 
-    //         if (bb.size() > 0)
-    //         {
-    //             int nTaxels = bb.find("nTaxels").asInt();
-    //             int size    = bb.find("size").asInt();
-    //             std::vector<double> extX;
-    //             std::vector<int>    bNum;
-    //             std::vector<int>    mapp;
+        if (bb.size() > 0)
+        {
+            string modality = bb.find("modality").asString();
+            int nTaxels     = bb.find("nTaxels").asInt();
+            int size        = bb.find("size").asInt();
 
-    //             Bottle *bbb;
-    //             bbb = bb.find("extX").asList();
-    //             extX.push_back(bbb->get(0).asDouble());
-    //             extX.push_back(bbb->get(1).asDouble());
-    //             bbb = bb.find("binsNum").asList();
-    //             bNum.push_back(bbb->get(0).asInt());
-    //             bbb = bb.find("Mapping").asList();
+            iCubSkin[i].size     = size;
+            iCubSkin[i].modality = modality;
 
-    //             yDebug("    [%s] size %i\tnTaxels %i\textX %g  %g\tbinsNum %i",iCubSkin1D[i].name.c_str(),size,nTaxels,extX[0],extX[1],bNum[0]);
-    //             printMessage(3,"mapp\n");
-    //             for (size_t j = 0; j < size; j++)
-    //             {
-    //                 mapp.push_back(bbb->get(j).asInt());
-    //                 if (verbosity>=3)
-    //                 {
-    //                     printf("%i ",mapp[j]);
-    //                 }
-    //             }
-    //             printf("\n");
-    //             iCubSkin1D[i].size = size;
-    //             iCubSkin1D[i].Taxel2Repr = mapp;
+            Matrix ext;
+            std::vector<int>    bNum;
+            std::vector<int>    mapp;
 
-    //             for (size_t j = 0; j < nTaxels; j++)
-    //             {
-    //                 bbb = bb.get(j+6).asList();
-    //                 printMessage(3,"Reading taxel %s\n",bbb->toString().c_str());
+            Bottle *bbb;
+            bbb = bb.find("ext").asList();
+            if (modality=="1D")
+            {
+                ext = matrixFromBottle(*bbb,0,1,2);
+            }
+            else
+            {
+                ext = matrixFromBottle(*bbb,0,2,2);
+            }
+            
+            bbb = bb.find("hSize").asList();
+            bNum.push_back(bbb->get(0).asInt());
+            bNum.push_back(bbb->get(1).asInt());
+            
+            bbb = bb.find("Mapping").asList();
+            yDebug("[vtRF::load][%s] size %i\tnTaxels %i\text %s\tbinsNum %i %i",iCubSkin[i].name.c_str(),size,
+                                                  nTaxels,toVector(ext).toString(3,3).c_str(),bNum[0],bNum[1]);
+            printMessage(3,"Mapping\n");
+            for (size_t j = 0; j < size; j++)
+            {
+                mapp.push_back(bbb->get(j).asInt());
+                if (verbosity>=3)
+                {
+                    printf("%i ",mapp[j]);
+                }
+            }
+            if (verbosity>=3) printf("\n");
+            iCubSkin[i].Taxel2Repr = mapp;
 
-    //                 for (int k = 0; k < iCubSkin1D[i].txls.size(); k++)
-    //                 {
-    //                     if (iCubSkin1D[i].txls[k]->ID == bbb->get(0).asInt())
-    //                     {
-    //                         iCubSkin1D[i].txls[k]->pwe->resize(extX,bNum);
-    //                         iCubSkin1D[i].txls[k]->pwe->setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],1));
-    //                         iCubSkin1D[i].txls[k]->pwe->setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],1));
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     else
-    //     {
-    //         Bottle bb = b.findGroup(iCubSkin[i].name.c_str());
+            for (size_t j = 0; j < nTaxels; j++)
+            {
+                // 7 are the number of lines in the skinpart group that are not taxels
+                bbb = bb.get(j+7).asList();
+                printMessage(3,"Reading taxel %s\n",bbb->toString().c_str());
 
-    //         if (bb.size() > 0)
-    //         {
-    //             int nTaxels = bb.find("nTaxels").asInt();
-    //             int size    = bb.find("size").asInt();
-    //             std::vector<double> extX;
-    //             std::vector<double> extY;
-    //             std::vector<int>    bNum;
-    //             std::vector<int>    mapp;
+                for (int k = 0; k < iCubSkin[i].txls.size(); k++)
+                {
+                    if (iCubSkin[i].txls[k]->ID == bbb->get(0).asInt())
+                    {
+                        iCubSkin[i].txls[k]->pwe->resize(ext,bNum);
+                        iCubSkin[i].txls[k]->pwe->setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],1));
+                        iCubSkin[i].txls[k]->pwe->setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],1));
+                    }
+                }
+            }
+        }
+    }
 
-    //             Bottle *bbb;
-    //             bbb = bb.find("extX").asList();
-    //             extX.push_back(bbb->get(0).asDouble());
-    //             extX.push_back(bbb->get(1).asDouble());
-    //             bbb = bb.find("extY").asList();
-    //             extY.push_back(bbb->get(0).asDouble());
-    //             extY.push_back(bbb->get(1).asDouble());
-    //             bbb = bb.find("binsNum").asList();
-    //             bNum.push_back(bbb->get(0).asInt());
-    //             bNum.push_back(bbb->get(1).asInt());
-    //             bbb = bb.find("Mapping").asList();
-
-    //             yDebug("    [%s] size %i\tnTaxels %i\textX %g  %g\n",iCubSkin[i].name.c_str(),size,nTaxels,extX[0],extX[1]);
-    //             yDebug("    extY %g  %g\tbinsNum %i  %i\n",extY[0],extY[1],bNum[0],bNum[1]);
-    //             printMessage(5,"mapp\n");
-    //             for (size_t j = 0; j < size; j++)
-    //             {
-    //                 mapp.push_back(bbb->get(j).asInt());
-    //                 if (verbosity>=6)
-    //                 {
-    //                     printf("%i ",mapp[j]);
-    //                 }
-    //             }
-    //             printf("\n");
-    //             iCubSkin[i].size = size;
-    //             iCubSkin[i].Taxel2Repr = mapp;
-
-    //             for (size_t j = 0; j < nTaxels; j++)
-    //             {
-    //                 bbb = bb.get(j+7).asList();
-    //                 printMessage(5,"Reading taxel %s\n",bbb->toString().c_str());
-
-    //                 for (int k = 0; k < iCubSkin1D[i].txls.size(); k++)
-    //                 {
-    //                     if (iCubSkin[i].txls[k]->ID == bbb->get(0).asInt())
-    //                     {
-    //                         iCubSkin[i].txls[k]->pwe->resize(extX,extY,bNum);
-    //                         iCubSkin[i].txls[k]->pwe->setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],bNum[1]));
-    //                         iCubSkin[i].txls[k]->pwe->setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],bNum[1]));
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    // return fileName;
+    return fileName;
 }
 
 string vtRFThread::save()

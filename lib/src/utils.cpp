@@ -467,8 +467,6 @@ unsigned int factorial(unsigned int n)
         Bottle &dataNH = res.addList();
         matrixOfIntIntoBottle(pwe->getNegHist(),dataNH);
 
-        printf("%s\n", res.toString().c_str());
-
         return res;
     }
 
