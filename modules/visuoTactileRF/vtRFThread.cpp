@@ -442,11 +442,11 @@ void vtRFThread::manageSkinEvents()
         Bottle b;
         b.clear();
 
-        if (part == "left_forearm" || part == "left_hand")
+        if (part == "SKIN_LEFT_FOREARM" || part == "SKIN_LEFT_HAND")
         {
             b.addString("left");
         }
-        else if (part == "right_forearm" || part == "right_hand")
+        else if (part == "SKIN_RIGHT_FOREARM" || part == "SKIN_RIGHT_HAND")
         {
             b.addString("right");
         }
@@ -535,19 +535,19 @@ void vtRFThread::sendContactsToSkinGui()
         // compensatedTactileDataPort.write();
 
         BufferedPort<Bottle> *outPort;
-        if(iCubSkinName == "left_forearm")
+        if(iCubSkinName == "SKIN_LEFT_FOREARM")
         {
             outPort = &skinGuiPortForearmL; 
         }
-        else if(iCubSkinName == "right_forearm")
+        else if(iCubSkinName == "SKIN_RIGHT_FOREARM")
         {
             outPort = &skinGuiPortForearmR; 
         }
-        else if(iCubSkinName == "left_hand")
+        else if(iCubSkinName == "SKIN_LEFT_HAND")
         {
             outPort = &skinGuiPortHandL; 
         }
-        else if(iCubSkinName == "right_hand")
+        else if(iCubSkinName == "SKIN_RIGHT_HAND")
         {
             outPort = &skinGuiPortHandR;
         }
@@ -585,10 +585,10 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
                 string iCubSkinName="";
                 iCubSkinName=iCubSkin[i].name;
 
-                if ((it -> getSkinPart() == FOREARM_RIGHT && iCubSkinName == "right_forearm") ||
-                    (it -> getSkinPart() ==  FOREARM_LEFT && iCubSkinName == "left_forearm" ) ||
-                    (it -> getSkinPart() ==    HAND_RIGHT && iCubSkinName == "right_hand"   ) ||
-                    (it -> getSkinPart() ==     HAND_LEFT && iCubSkinName == "left_hand"    )    )
+                if ((it -> getSkinPart() == FOREARM_RIGHT && iCubSkinName == "SKIN_RIGHT_FOREARM") ||
+                    (it -> getSkinPart() ==  FOREARM_LEFT && iCubSkinName == "SKIN_LEFT_FOREARM" ) ||
+                    (it -> getSkinPart() ==    HAND_RIGHT && iCubSkinName == "SKIN_RIGHT_HAND"   ) ||
+                    (it -> getSkinPart() ==     HAND_LEFT && iCubSkinName == "SKIN_LEFT_HAND"    )    )
                 {
                     idx = i;
                     std::vector <unsigned int> txlList = it -> getTaxelList();
@@ -599,7 +599,6 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
 
                     if (idv.size()>0)
                     {
-                        // printf("I have been touched!!!!!!\n");
                         itHasBeenTouched = true;
                     }
 
@@ -767,24 +766,24 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
     getRepresentativeTaxels(IDv, IDx, v);
 
     Matrix T_a = eye(4);                     // transform matrix relative to the arm
-    if ((iCubSkinName == "left_forearm") || (iCubSkinName == "left_hand"))
+    if ((iCubSkinName == "SKIN_LEFT_FOREARM") || (iCubSkinName == "SKIN_LEFT_HAND"))
     {
         iencsL->getEncoders(encsL->data());
         yarp::sig::Vector qL=encsL->subVector(0,6);
         armL -> setAng(qL*CTRL_DEG2RAD);
-        if (iCubSkinName == "left_forearm") 
+        if (iCubSkinName == "SKIN_LEFT_FOREARM") 
             T_a = armL -> getH(3+4, true);
-        else //(iCubSkin[i].name == "left_hand") 
+        else //(iCubSkin[i].name == "SKIN_LEFT_HAND") 
             T_a = armL -> getH(3+6, true);
     }
-    else if ((iCubSkinName == "right_forearm") || (iCubSkinName == "right_hand"))
+    else if ((iCubSkinName == "SKIN_RIGHT_FOREARM") || (iCubSkinName == "SKIN_RIGHT_HAND"))
     {
         iencsR->getEncoders(encsR->data());
         yarp::sig::Vector qR=encsR->subVector(0,6);
         armR -> setAng(qR*CTRL_DEG2RAD);
-        if (iCubSkinName == "right_forearm")
+        if (iCubSkinName == "SKIN_RIGHT_FOREARM")
             T_a = armR -> getH(3+4, true);
-        else //(iCubSkin[i].name == "right_hand") 
+        else //(iCubSkin[i].name == "SKIN_RIGHT_HAND") 
             T_a = armR -> getH(3+6, true);
     }
     else
@@ -828,24 +827,24 @@ bool vtRFThread::projectIncomingEvent()
         iCubSkinName=iCubSkin[i].name;
 
         Matrix T_a = eye(4);               // transform matrix relative to the arm
-        if ((iCubSkinName == "left_forearm") || (iCubSkinName == "left_hand"))
+        if ((iCubSkinName == "SKIN_LEFT_FOREARM") || (iCubSkinName == "SKIN_LEFT_HAND"))
         {
             iencsL->getEncoders(encsL->data());
             yarp::sig::Vector qL=encsL->subVector(0,6);
             armL -> setAng(qL*CTRL_DEG2RAD);
-            if (iCubSkinName == "left_forearm") 
+            if (iCubSkinName == "SKIN_LEFT_FOREARM") 
                 T_a = armL -> getH(3+4, true);
-            else //(iCubSkinName == "left_hand") 
+            else //(iCubSkinName == "SKIN_LEFT_HAND") 
                 T_a = armL -> getH(3+6, true);
         }
-        else if ((iCubSkinName == "right_forearm") || (iCubSkinName == "right_hand"))
+        else if ((iCubSkinName == "SKIN_RIGHT_FOREARM") || (iCubSkinName == "SKIN_RIGHT_HAND"))
         {
             iencsR->getEncoders(encsR->data());
             yarp::sig::Vector qR=encsR->subVector(0,6);
             armR -> setAng(qR*CTRL_DEG2RAD);
-            if (iCubSkinName == "right_forearm")
+            if (iCubSkinName == "SKIN_RIGHT_FOREARM")
                 T_a = armR -> getH(3+4, true);
-            else //(iCubSkinName == "right_hand") 
+            else //(iCubSkinName == "SKIN_RIGHT_HAND") 
                 T_a = armR -> getH(3+6, true);
         }
         else
@@ -994,8 +993,8 @@ void vtRFThread::drawTaxel(ImageOf<PixelRgb> &Im, const yarp::sig::Vector &px,
         {
             for (size_t y=0; y<2*r; y++)
             {
-                if (part=="left_forearm" || part=="right_forearm" ||
-                    part=="left_hand" || part=="right_hand")
+                if (part=="SKIN_LEFT_FOREARM" || part=="SKIN_RIGHT_FOREARM" ||
+                    part=="SKIN_LEFT_HAND"    || part=="SKIN_RIGHT_HAND")
                 {
                     if (act>0)
                     {
@@ -1109,13 +1108,13 @@ yarp::sig::Vector vtRFThread::locateTaxel(const yarp::sig::Vector &_pos, const s
     yarp::sig::Vector WRFpos(4,0.0);
     Matrix T = eye(4);
 
-    if (part=="left_forearm" || part=="left_hand")
+    if (part=="SKIN_LEFT_FOREARM" || part=="SKIN_LEFT_HAND")
     {
         iencsL->getEncoders(encsL->data());
         yarp::sig::Vector qL=encsL->subVector(0,6);
         armL -> setAng(qL*CTRL_DEG2RAD);
     }
-    else if (part=="right_forearm" || part=="right_hand")
+    else if (part=="SKIN_RIGHT_FOREARM" || part=="SKIN_RIGHT_HAND")
     {
         iencsR->getEncoders(encsR->data());
         yarp::sig::Vector qR=encsR->subVector(0,6);
@@ -1126,10 +1125,10 @@ yarp::sig::Vector vtRFThread::locateTaxel(const yarp::sig::Vector &_pos, const s
         yError(" locateTaxel() failed!\n");
     }
 
-    if      (part == "left_forearm" ) { T = armL -> getH(3+4, true); } // torso + up to elbow
-    else if (part == "right_forearm") { T = armR -> getH(3+4, true); } // torso + up to elbow
-    else if (part == "left_hand")     { T = armL -> getH(3+6, true); } // torso + up to wrist
-    else if (part == "right_hand")    { T = armR -> getH(3+6, true); } // torso + up to wrist
+    if      (part == "SKIN_LEFT_FOREARM" ) { T = armL -> getH(3+4, true); } // torso + up to elbow
+    else if (part == "SKIN_RIGHT_FOREARM") { T = armR -> getH(3+4, true); } // torso + up to elbow
+    else if (part == "SKIN_LEFT_HAND")     { T = armL -> getH(3+6, true); } // torso + up to wrist
+    else if (part == "SKIN_RIGHT_HAND")    { T = armR -> getH(3+6, true); } // torso + up to wrist
     else    {  yError(" locateTaxel() failed!\n"); }
 
     pos.push_back(1);
@@ -1152,12 +1151,12 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
     sP.name = sP.name.c_str() ? sP.name.c_str() + 1 : filePath.c_str();
 
     // Remove "_mesh.txt"
-    if      (sP.name == "left_forearm_mesh.txt")    { sP.name = "left_forearm"; }
-    else if (sP.name == "left_forearm_nomesh.txt")  { sP.name = "left_forearm"; }
-    else if (sP.name == "right_forearm_mesh.txt")   { sP.name = "right_forearm"; }
-    else if (sP.name == "right_forearm_nomesh.txt") { sP.name = "right_forearm"; }
-    else if (sP.name == "left_hand_V2_1.txt")       { sP.name = "left_hand"; }
-    else if (sP.name == "right_hand_V2_1.txt")      { sP.name = "right_hand"; }
+    if      (sP.name == "left_forearm_mesh.txt")    { sP.name = "SKIN_LEFT_FOREARM"; }
+    else if (sP.name == "left_forearm_nomesh.txt")  { sP.name = "SKIN_LEFT_FOREARM"; }
+    else if (sP.name == "right_forearm_mesh.txt")   { sP.name = "SKIN_RIGHT_FOREARM"; }
+    else if (sP.name == "right_forearm_nomesh.txt") { sP.name = "SKIN_RIGHT_FOREARM"; }
+    else if (sP.name == "left_hand_V2_1.txt")       { sP.name = "SKIN_LEFT_HAND"; }
+    else if (sP.name == "right_hand_V2_1.txt")      { sP.name = "SKIN_RIGHT_HAND"; }
     else
     {
         yError(" Unexpected skin part file name: %s.\n",sP.name.c_str());
@@ -1189,7 +1188,7 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
                 taxelNorm[j-3] = strtod(number.c_str(),NULL);
         }
 
-        if (sP.name == "left_forearm" || sP.name == "right_forearm")
+        if (sP.name == "SKIN_LEFT_FOREARM" || sP.name == "SKIN_RIGHT_FOREARM")
         {
             // the taxels at the centers of respective triangles [note that i == taxelID == (line in the .txt file +1)]
             // e.g. first triangle of upper arm is at lines 1-12, center at line 4, thus i=2 
@@ -1228,7 +1227,7 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
                 sP.size++;
             }
         }
-        else if (sP.name == "left_hand")
+        else if (sP.name == "SKIN_LEFT_HAND")
         { //we want to represent the 48 taxels of the palm (ignoring fingertips) with 5 taxels -
          // manually marking 5 regions of the palm and selecting their "centroids" as the representatives
             if((i==99) || (i==101) || (i==109) || (i==122) || (i==134)) 
@@ -1248,7 +1247,7 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
                 sP.size++;
             }
         }
-        else if (sP.name == "right_hand")
+        else if (sP.name == "SKIN_RIGHT_HAND")
         { //right hand has different taxel nr.s than left hand 
             // if((i==101) || (i==103) || (i==118) || (i==137)) // || (i==124)) remove one taxel
             if((i==101) || (i==103) || (i==118) || (i==137)) // || (i==124)) remove one taxel
@@ -1278,7 +1277,7 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
 {
     int i=0;
     list<unsigned int> taxels_list;
-    if (sP.name == "left_forearm" || sP.name == "right_forearm")
+    if (sP.name == "SKIN_LEFT_FOREARM" || sP.name == "SKIN_RIGHT_FOREARM")
     {
         for (i=0;i<sP.size;i++)
         {
@@ -1473,7 +1472,7 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         }
         sP.Repr2TaxelList[351] = taxels_list;
     }
-    else if(sP.name == "left_hand")
+    else if(sP.name == "SKIN_LEFT_HAND")
     {
         for(i=0;i<sP.size;i++)
         {
@@ -1586,7 +1585,7 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         }
         sP.Repr2TaxelList[134] = taxels_list;
     }
-    else if(sP.name == "right_hand")
+    else if(sP.name == "SKIN_RIGHT_HAND")
     {
        for(i=0;i<sP.size;i++)
        {
