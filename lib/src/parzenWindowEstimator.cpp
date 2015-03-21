@@ -38,17 +38,17 @@ double gauss2D(const double x_0, const double y_0,
         ext     = _ext;
         binsNum = _binsNum;
 
+        binWidth.clear();
+        firstPosBin.clear();
+        firstPosBinShift.clear();
+
         for (size_t i = 0; i < dim; i++)
         {
-            binWidth.clear();
             binWidth.push_back((ext(i,1)-ext(i,0))/binsNum[i]);
 
             // Let's find the first bin for which we have positive values.
             // The 0 value should not be inside it
             // and its shift from zero to the start value of the firstPosBin
-            firstPosBin.clear();
-            firstPosBinShift.clear();
-
             double binStart=ext(0,0);
             int idx=0;
 
@@ -177,7 +177,7 @@ double gauss2D(const double x_0, const double y_0,
 
     parzenWindowEstimator1D::parzenWindowEstimator1D()
     {
-        dim=1;
+        dim = 1;
 
         Matrix eX(1,2);
         eX(0,0) = -0.1;        eX(0,1) =  0.2;
