@@ -769,8 +769,6 @@ string vtRFThread::save()
     {
         for (size_t i = 0; i < iCubSkinSize; i++)
         {
-            myfile << "modality\t" << iCubSkin[i].modality << endl;
-
             Bottle data;
             data.clear();
 
@@ -780,10 +778,11 @@ string vtRFThread::save()
             std::vector<int> hSize  = iCubSkin[i].txls[0]->pwe->getHistSize();
 
             myfile << "[" << iCubSkin[i].name << "]" << endl;
-            myfile << "size\t"    << iCubSkin[i].size << endl;    
-            myfile << "nTaxels\t" << iCubSkin[i].txls.size() << endl;
-            myfile << "ext\t"     << data.toString() << "\n";
-            myfile << "hSize\t( " << hSize[0] << hSize[1] << " )\n";
+            myfile << "modality\t" << iCubSkin[i].modality << endl;
+            myfile << "size\t"     << iCubSkin[i].size << endl;    
+            myfile << "nTaxels\t"  << iCubSkin[i].txls.size() << endl;
+            myfile << "ext\t"      << data.toString() << "\n";
+            myfile << "hSize\t( "  << hSize[0] << hSize[1] << " )\n";
 
             data.clear();
             Bottle &representatives = data.addList();
@@ -1364,7 +1363,7 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
             sP.Taxel2Repr[i]=-1; //these taxels don't exist
         }
         
-        //let's set up the inverse - from every representative taxel to list of taxels it is representing
+        // Set up the inverse - from every representative taxel to list of taxels it is representing
         taxels_list.clear(); 
         for(i=0;i<=11;i++)
         {
@@ -1530,119 +1529,116 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
     }
     else if(sP.name == "left_hand")
     {
-       for(i=0;i<sP.size;i++)
-       {
-          sP.Taxel2Repr.push_back(-1); //let's fill all the 192 with -1 - half of the taxels don't exist and for fingertips, 
-          //we don't have positions either
-       }
-       //upper left area of the palm - at thumb
-       for (i=121;i<=128;i++)
-       {
+        for(i=0;i<sP.size;i++)
+        {
+            // Fill all the 192 with -1 - half of the taxels don't exist, 
+            // and for fingertips we don't have positions either
+            sP.Taxel2Repr.push_back(-1); 
+        }
+
+        // Upper left area of the palm - at thumb
+        for (i=121;i<=128;i++)
+        {
             sP.Taxel2Repr[i] = 122;
-       }
-       sP.Taxel2Repr[131] = 122; //thermal pad
-       
-       //let's set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
-       taxels_list.clear(); 
-       for(i=121;i<=128;i++)
-       {
-           taxels_list.push_back(i);
-       }
-       taxels_list.push_back(131);
-       sP.Repr2TaxelList[122] = taxels_list;
-       
-        
-       //upper center of the palm
-       for (i=96;i<=99;i++)
-       {
+        }
+        sP.Taxel2Repr[131] = 122; //thermal pad
+
+        // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
+        taxels_list.clear();
+        for(i=121;i<=128;i++)
+        {
+            taxels_list.push_back(i);
+        }
+        taxels_list.push_back(131);
+        sP.Repr2TaxelList[122] = taxels_list;
+
+        // Upper center of the palm
+        for (i=96;i<=99;i++)
+        {
             sP.Taxel2Repr[i] = 99;
-       }
-       sP.Taxel2Repr[102] = 99;
-       sP.Taxel2Repr[103] = 99;
-       sP.Taxel2Repr[120] = 99;
-       sP.Taxel2Repr[129] = 99;
-       sP.Taxel2Repr[130] = 99;
-       
-       //let's set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
-       taxels_list.clear(); 
-       for(i=96;i<=99;i++)
-       {
-           taxels_list.push_back(i);
-       }
-       taxels_list.push_back(102);
-       taxels_list.push_back(103);
-       taxels_list.push_back(120);
-       taxels_list.push_back(129);
-       taxels_list.push_back(130);
-       sP.Repr2TaxelList[99] = taxels_list;
-        
-       
-       //upper right of the palm (away from the thumb)
-       sP.Taxel2Repr[100] = 101;
-       sP.Taxel2Repr[101] = 101;
-       for (i=104;i<=107;i++)
-       {
+        }
+        sP.Taxel2Repr[102] = 99;
+        sP.Taxel2Repr[103] = 99;
+        sP.Taxel2Repr[120] = 99;
+        sP.Taxel2Repr[129] = 99;
+        sP.Taxel2Repr[130] = 99;
+
+        // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
+        taxels_list.clear(); 
+        for(i=96;i<=99;i++)
+        {
+            taxels_list.push_back(i);
+        }
+        taxels_list.push_back(102);
+        taxels_list.push_back(103);
+        taxels_list.push_back(120);
+        taxels_list.push_back(129);
+        taxels_list.push_back(130);
+        sP.Repr2TaxelList[99] = taxels_list;
+
+        // Upper right of the palm (away from the thumb)
+        sP.Taxel2Repr[100] = 101;
+        sP.Taxel2Repr[101] = 101;
+        for (i=104;i<=107;i++)
+        {
             sP.Taxel2Repr[i] = 101; //N.B. 107 is thermal pad
-       }
-       sP.Taxel2Repr[113] = 101;
-       sP.Taxel2Repr[116] = 101;
-       sP.Taxel2Repr[117] = 101;
-       
-       //let's set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
-       taxels_list.clear(); 
-       taxels_list.push_back(100);
-       taxels_list.push_back(101);
-       for(i=104;i<=107;i++)
-       {
-           taxels_list.push_back(i);
-       }
-       taxels_list.push_back(113);
-       taxels_list.push_back(116);
-       taxels_list.push_back(117);
-       sP.Repr2TaxelList[101] = taxels_list;
-       
-       
-       //center area of the palm
-       for(i=108;i<=112;i++)
-       {
-        sP.Taxel2Repr[i] = 109;
-       }
-       sP.Taxel2Repr[114] = 109;
-       sP.Taxel2Repr[115] = 109;
-       sP.Taxel2Repr[118] = 109;
-       sP.Taxel2Repr[142] = 109;
-       sP.Taxel2Repr[143] = 109;
-     
-       //let's set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
-       taxels_list.clear(); 
-       for(i=108;i<=112;i++)
-       {
-           taxels_list.push_back(i);
-       }
-       taxels_list.push_back(114);
-       taxels_list.push_back(115);
-       taxels_list.push_back(118);
-       taxels_list.push_back(142);
-       taxels_list.push_back(143);
-       sP.Repr2TaxelList[109] = taxels_list;
-       
-       
-       //lower part of the palm
-       sP.Taxel2Repr[119] = 134; // this one is thermal pad
-       for(i=132;i<=141;i++)
-       {
-        sP.Taxel2Repr[i] = 134;
-       }
-       
-       //let's set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
-       taxels_list.clear(); 
-       taxels_list.push_back(119);
-       for(i=132;i<=141;i++)
-       {
-           taxels_list.push_back(i);
-       }
-       sP.Repr2TaxelList[134] = taxels_list;
-              
+        }
+        sP.Taxel2Repr[113] = 101;
+        sP.Taxel2Repr[116] = 101;
+        sP.Taxel2Repr[117] = 101;
+
+        // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
+        taxels_list.clear(); 
+        taxels_list.push_back(100);
+        taxels_list.push_back(101);
+        for(i=104;i<=107;i++)
+        {
+            taxels_list.push_back(i);
+        }
+        taxels_list.push_back(113);
+        taxels_list.push_back(116);
+        taxels_list.push_back(117);
+        sP.Repr2TaxelList[101] = taxels_list;
+
+        // Center area of the palm
+        for(i=108;i<=112;i++)
+        {
+            sP.Taxel2Repr[i] = 109;
+        }
+        sP.Taxel2Repr[114] = 109;
+        sP.Taxel2Repr[115] = 109;
+        sP.Taxel2Repr[118] = 109;
+        sP.Taxel2Repr[142] = 109;
+        sP.Taxel2Repr[143] = 109;
+
+        // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
+        taxels_list.clear(); 
+        for(i=108;i<=112;i++)
+        {
+            taxels_list.push_back(i);
+        }
+        taxels_list.push_back(114);
+        taxels_list.push_back(115);
+        taxels_list.push_back(118);
+        taxels_list.push_back(142);
+        taxels_list.push_back(143);
+        sP.Repr2TaxelList[109] = taxels_list;
+
+        // Lower part of the palm
+        sP.Taxel2Repr[119] = 134; // this one is thermal pad
+        for(i=132;i<=141;i++)
+        {
+            sP.Taxel2Repr[i] = 134;
+        }
+
+        // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
+        taxels_list.clear(); 
+        taxels_list.push_back(119);
+        for(i=132;i<=141;i++)
+        {
+            taxels_list.push_back(i);
+        }
+        sP.Repr2TaxelList[134] = taxels_list;
     }
     else if(sP.name == "right_hand")
     {
@@ -1662,7 +1658,7 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         sP.Taxel2Repr[111] = 101;
         sP.Taxel2Repr[112] = 101;
         
-        //let's set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
+        // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
         taxels_list.clear(); 
         taxels_list.push_back(96);
         taxels_list.push_back(97);
@@ -1685,7 +1681,7 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         sP.Taxel2Repr[129] = 103;
         sP.Taxel2Repr[130] = 103;
         
-        //let's set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
+        // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
         taxels_list.clear(); 
         taxels_list.push_back(99);
         for(i=102;i<=106;i++)
@@ -1706,7 +1702,7 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         sP.Taxel2Repr[128] = 124;
         sP.Taxel2Repr[131] = 124; //thermal pad
         
-        //let's set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
+        // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
         taxels_list.clear(); 
         for(i=120;i<=126;i++)
         {
@@ -1727,7 +1723,7 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         sP.Taxel2Repr[142] = 118;
         sP.Taxel2Repr[143] = 118;
         
-        //let's set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
+        // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
         taxels_list.clear(); 
         taxels_list.push_back(108);
         taxels_list.push_back(109);
@@ -1746,7 +1742,7 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
             sP.Taxel2Repr[i] = 137; //139 is another thermal pad
         }
         
-        //let's set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
+        // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
         taxels_list.clear(); 
         taxels_list.push_back(119);
         for(i=132;i<=141;i++)

@@ -390,7 +390,31 @@ class skinPart
     /**
     * Copy Operator
     **/
-    skinPart &operator=(const skinPart &spw);
+    virtual skinPart &operator=(const skinPart &spw);
+
+    /**
+    * Print Method
+    **/
+    virtual void print(int verbosity=0);
+
+    /**
+    * toString Method
+    **/
+    virtual string toString(int precision=0);
+};
+
+class skinPartTaxel : public skinPart
+{
+  public:
+    /**
+    * List of taxels that belong to the skinPart.
+    **/
+    vector<Taxel*> txls;
+
+    /**
+    * Copy Operator
+    **/
+    skinPartTaxel &operator=(const skinPartTaxel &spw);
 
     /**
     * Print Method
@@ -403,20 +427,35 @@ class skinPart
     string toString(int precision=0);
 };
 
-class skinPartTaxel : public skinPart
-{
-  public:
-    vector<Taxel*> txls;
-};
-
 class skinPartPWE : public skinPart
 {
   public:
+    /**
+    * Modality (either 1D or 2D)
+    */
     string modality;
 
+    /*
+    * List of taxelsPWE that belong to the skinPart (either 1D or 2D)
+    */
     vector<TaxelPWE*> txls;
 
     skinPartPWE(const string &_modality) : skinPart(), modality(_modality) {};
+
+    /**
+    * Copy Operator
+    **/
+    skinPartPWE &operator=(const skinPartPWE &spw);
+
+    /**
+    * Print Method
+    **/
+    void print(int verbosity=0);
+    
+    /**
+    * toString Method
+    **/
+    string toString(int precision=0);
 };
 
 /**

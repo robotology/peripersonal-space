@@ -456,9 +456,10 @@ unsigned int factorial(unsigned int n)
 
     skinPart & skinPart::operator=(const skinPart &spw)
     {
-        name = spw.name;
-        size = spw.size;
-        txls = spw.txls;
+        name           = spw.name;
+        size           = spw.size;
+        Taxel2Repr     = spw.Taxel2Repr;
+        Repr2TaxelList = spw.Repr2TaxelList;
         return *this;
     }
 
@@ -467,8 +468,6 @@ unsigned int factorial(unsigned int n)
         yDebug("**********\n");
         yDebug("name: %s\t", name.c_str());
         yDebug("size: %i\n", size);
-        for (size_t i = 0; i < txls.size(); i++)
-            txls[i]->print(verbosity);
         yDebug("**********\n");
         
         if (verbosity>=4)
@@ -505,6 +504,58 @@ unsigned int factorial(unsigned int n)
     {
         stringstream res;
         res << "**********\n" << "Name: " << name << "\tSize: "<< size << endl;
+        return res.str();
+    }
+
+/****************************************************************/
+/* SKINPART TAXEL WRAPPER
+*****************************************************************/
+    skinPartTaxel & skinPartTaxel::operator=(const skinPartTaxel &spw)
+    {
+        skinPart::operator=(spw);
+        txls     = spw.txls;
+        return *this;
+    }
+
+    void skinPartTaxel::print(int verbosity)
+    {
+        skinPart::print(verbosity);
+        for (size_t i = 0; i < txls.size(); i++)
+            txls[i]->print(verbosity);
+        yDebug("**********\n");
+    }
+
+    string skinPartTaxel::toString(int precision)
+    {
+        stringstream res(skinPart::toString(precision));
+        for (size_t i = 0; i < txls.size(); i++)
+            res << txls[i]->toString(precision);
+        res << "**********\n";
+        return res.str();
+    }
+
+/****************************************************************/
+/* SKINPART TAXEL PWE WRAPPER
+*****************************************************************/
+    skinPartPWE & skinPartPWE::operator=(const skinPartPWE &spw)
+    {
+        skinPart::operator=(spw);
+        txls     = spw.txls;
+        modality = spw.modality;
+        return *this;
+    }
+
+    void skinPartPWE::print(int verbosity)
+    {
+        skinPart::print(verbosity);
+        for (size_t i = 0; i < txls.size(); i++)
+            txls[i]->print(verbosity);
+        yDebug("**********\n");
+    }
+
+    string skinPartPWE::toString(int precision)
+    {
+        stringstream res(skinPart::toString(precision));
         for (size_t i = 0; i < txls.size(); i++)
             res << txls[i]->toString(precision);
         res << "**********\n";
