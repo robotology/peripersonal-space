@@ -778,11 +778,11 @@ string vtRFThread::save()
             std::vector<int> hSize  = iCubSkin[i].txls[0]->pwe->getHistSize();
 
             myfile << "[" << iCubSkin[i].name << "]" << endl;
-            myfile << "modality\t" << iCubSkin[i].modality << endl;
-            myfile << "size\t"     << iCubSkin[i].size << endl;    
-            myfile << "nTaxels\t"  << iCubSkin[i].txls.size() << endl;
-            myfile << "ext\t"      << data.toString() << "\n";
-            myfile << "hSize\t( "  << hSize[0] << hSize[1] << " )\n";
+            myfile << "modality\t"  << iCubSkin[i].modality << endl;
+            myfile << "size    \t"  << iCubSkin[i].size << endl;    
+            myfile << "nTaxels \t"  << iCubSkin[i].txls.size() << endl;
+            myfile << "ext     \t(" << data.toString() << ")\n";
+            myfile << "hSize   \t(" << hSize[0] << "\t" << hSize[1] << ")\n";
 
             data.clear();
             Bottle &representatives = data.addList();
@@ -794,17 +794,12 @@ string vtRFThread::save()
 
             for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
             {
-                std::vector<int> bNum  = iCubSkin[i].txls[j]->pwe->getHistSize();
                 Matrix           pHist = iCubSkin[i].txls[j]->pwe->getPosHist();
                 Matrix           nHist = iCubSkin[i].txls[j]->pwe->getNegHist();
 
                 data.clear();
-                matrixIntoBottle(pHist,data);
-                myfile << iCubSkin[i].txls[j]->ID << "\t\t" << data.toString() << "\t";
-
-                data.clear();
-                matrixIntoBottle(nHist,data);
-                myfile << data.toString() << endl;
+                data=iCubSkin[i].txls[j]->TaxelPWEIntoBottle();
+                myfile << data.toString() << "\n";
             }
         }
     }

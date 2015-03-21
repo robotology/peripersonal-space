@@ -71,6 +71,16 @@ void matrixIntoBottle(const yarp::sig::Matrix m, Bottle &b)
     }
 }
 
+void matrixOfIntIntoBottle(const yarp::sig::Matrix m, Bottle &b)
+{
+    Vector v = toVector(m);
+    
+    for (unsigned int i = 0; i < v.size(); i++)
+    {
+        b.addInt(int(v[i]));
+    }
+}
+
 string int_to_string( const int a )
 {
     std::stringstream ss;
@@ -443,6 +453,23 @@ unsigned int factorial(unsigned int n)
         Resp = pwe->computeResponse(In);
 
         return true;
+    }
+
+    Bottle TaxelPWE::TaxelPWEIntoBottle()
+    {
+        Bottle res;
+        res.clear();
+        res.addInt(ID);
+
+        Bottle &dataPH = res.addList();
+        matrixOfIntIntoBottle(pwe->getPosHist(),dataPH);
+
+        Bottle &dataNH = res.addList();
+        matrixOfIntIntoBottle(pwe->getNegHist(),dataNH);
+
+        printf("%s\n", res.toString().c_str());
+
+        return res;
     }
 
 /****************************************************************/

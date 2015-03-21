@@ -97,7 +97,8 @@ yarp::sig::Vector vectorFromBottle(const Bottle b, int in, const int size);
  * Puts a matrix into a bottle, by cycling through its elements
  * and adding them as double
 **/
-void matrixIntoBottle(const yarp::sig::Matrix m, Bottle &b);
+void      matrixIntoBottle(const yarp::sig::Matrix m, Bottle &b);
+void matrixOfIntIntoBottle(const yarp::sig::Matrix m, Bottle &b);
 
 /**
  * Puts a vector into a bottle, by cycling through its elements
@@ -325,6 +326,11 @@ class TaxelPWE : public Taxel
     * Computes the response of the taxel.
     **/
     bool computeResponse();
+
+    /**
+    * Convert the taxel into a bottle in order to be saved on file
+    **/
+    Bottle TaxelPWEIntoBottle();
 };
 
 class TaxelPWE1D : public TaxelPWE
@@ -451,7 +457,7 @@ class skinPartPWE : public skinPart
     * Print Method
     **/
     void print(int verbosity=0);
-    
+
     /**
     * toString Method
     **/
