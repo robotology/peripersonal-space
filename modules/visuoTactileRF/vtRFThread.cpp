@@ -18,7 +18,7 @@
 #define SKIN_LEFT_FOREARM   2
 #define SKIN_RIGHT_HAND     4
 #define SKIN_RIGHT_FOREARM  5
-#define SKIN_THRES	   7 // Threshold with which a contact is detected
+#define SKIN_THRES	        7 // Threshold with which a contact is detected
 
 // enum SkinPart { 
 //     SKIN_PART_UNKNOWN=0, 
