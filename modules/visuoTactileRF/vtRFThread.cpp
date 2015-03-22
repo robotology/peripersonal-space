@@ -7,12 +7,7 @@
 
 #include "vtRFThread.h"
 
-#define RADIUS         2 // radius in px of every taxel (in the images)
-#define RFEXTXMIN   -0.1 // lower limit of the receptive field [D]   (-0.1 m)
-#define RFEXTXMAX    0.2 // upper limit of the receptive field [D]   (+0.2 m)
-#define RFEXTYMIN    0.0 // lower limit of the receptive field [TTC] (+0.0 s)
-#define RFEXTYMAX    3.0 // upper limit of the receptive field [TTC] (+3.0 s)
-#define RFEXTENSION  0.3 // extension of the receptive field in 1D   (+0.3 m)
+#define RADIUS              2 // Radius in px of every taxel (in the images)
 #define SKIN_LEFT_FOREARM   2
 #define SKIN_LEFT_HAND      1
 #define SKIN_LEFT_FOREARM   2
