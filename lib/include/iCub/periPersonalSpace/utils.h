@@ -343,7 +343,7 @@ class TaxelPWE1D : public TaxelPWE
     TaxelPWE1D() : TaxelPWE()                                                    { pwe = new parzenWindowEstimator1D();};
     TaxelPWE1D(const Vector &p, const Vector &n) : TaxelPWE(p,n)                 { pwe = new parzenWindowEstimator1D();};
     TaxelPWE1D(const Vector &p, const Vector &n, const int &i) : TaxelPWE(p,n,i) { pwe = new parzenWindowEstimator1D();};
- 
+
     /**
     * init function
     **/
