@@ -392,6 +392,7 @@ class skinPart
     * Constructor
     **/    
     skinPart();
+    skinPart(const string _name);
 
     /**
     * Copy Operator

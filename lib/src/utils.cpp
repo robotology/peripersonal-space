@@ -479,6 +479,12 @@ unsigned int factorial(unsigned int n)
         size=  0;
     }
 
+    skinPart::skinPart(const string _name)
+    {
+        name = _name;
+        size =     0;
+    }
+
     skinPart & skinPart::operator=(const skinPart &spw)
     {
         name           = spw.name;
