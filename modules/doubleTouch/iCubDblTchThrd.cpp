@@ -3,10 +3,10 @@
 #include <sstream>
 #include <iomanip>
 
-#define HAND_LEFT      1
-#define FOREARM_LEFT   2
-#define HAND_RIGHT     4
-#define FOREARM_RIGHT  5
+#define SKIN_LEFT_HAND      1
+#define SKIN_LEFT_FOREARM   2
+#define SKIN_RIGHT_HAND     4
+#define SKIN_RIGHT_FOREARM  5
 #define VEL_THRES      0.000001        // m/s?
 // VEL_THRES * getRate()
 
@@ -58,19 +58,19 @@ doubleTouchThread::doubleTouchThread(int _rate, const string &_name, const strin
 
     if (type == "LtoR")
     {
-        skinPart = FOREARM_LEFT;
+        skinPart = SKIN_LEFT_FOREARM;
     }
     else if (type == "LHtoR")
     {
-        skinPart = HAND_LEFT;
+        skinPart = SKIN_LEFT_HAND;
     }
     else if (type == "RtoL")
     {
-        skinPart = FOREARM_RIGHT;
+        skinPart = SKIN_RIGHT_FOREARM;
     }
     else if (type == "RHtoL")
     {
-        skinPart = HAND_RIGHT;
+        skinPart = SKIN_RIGHT_HAND;
     }
 
     contextGaze = -1;
@@ -715,21 +715,21 @@ void doubleTouchThread::detectContact(skinContactList *_sCL)
             cntctNormDir  = it -> getNormalDir();   // Normal direction of the contact
             cntctPressure = it -> getPressure();    // Retrieve the pressure of the contact
 
-            if      (it -> getSkinPart() == FOREARM_LEFT)
+            if      (it -> getSkinPart() == SKIN_LEFT_FOREARM)
             {
-                cntctSkinPart = "forearm_left";
+                cntctSkinPart = "SKIN_LEFT_FOREARM";
             }
-            else if (it -> getSkinPart() == FOREARM_RIGHT)
+            else if (it -> getSkinPart() == SKIN_RIGHT_FOREARM)
             {
-                cntctSkinPart = "forearm_right";
+                cntctSkinPart = "SKIN_RIGHT_FOREARM";
             }
-            else if (it -> getSkinPart() == HAND_LEFT)
+            else if (it -> getSkinPart() == SKIN_LEFT_HAND)
             {
-                cntctSkinPart = "hand_left";
+                cntctSkinPart = "SKIN_LEFT_HAND";
             }
-            else if (it -> getSkinPart() == HAND_RIGHT)
+            else if (it -> getSkinPart() == SKIN_RIGHT_HAND)
             {
-                cntctSkinPart = "hand_right";
+                cntctSkinPart = "SKIN_RIGHT_HAND";
             }
             printMessage(3,"CONTACT!!! skinContact: %s\n",cntctSkin.toString().c_str());
             cntctPosWRF = locateContact();

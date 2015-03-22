@@ -143,7 +143,7 @@ public:
 
     bool respond(const Bottle &command, Bottle &reply)
     {
-        int ack=Vocab::encode("ack");
+        int ack =Vocab::encode("ack");
         int nack=Vocab::encode("nack");
 
         if (command.size()>0)

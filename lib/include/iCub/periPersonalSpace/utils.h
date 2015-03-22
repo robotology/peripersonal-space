@@ -392,7 +392,7 @@ class skinPart
     * Constructor
     **/    
     skinPart();
-    skinPart(const string _name);
+    // skinPart(const string _name);
 
     /**
     * Copy Operator
@@ -444,9 +444,12 @@ class skinPartPWE : public skinPart
 
     /*
     * List of taxelsPWE that belong to the skinPart (either 1D or 2D)
-    */
+    **/
     vector<TaxelPWE*> txls;
 
+    /*
+    * Constructor that assigns modality member
+    **/
     skinPartPWE(const string &_modality) : skinPart(), modality(_modality) {};
 
     /**

@@ -132,7 +132,7 @@ bool vtRFThread::threadInit()
 
             if (!ddR.open(OptR))
             {
-                yError(": could not open right_arm PolyDriver!\n");
+                yError("[vtRFThread] : could not open right_arm PolyDriver!\n");
                 return false;
             }
             bool ok = 1;
@@ -162,7 +162,7 @@ bool vtRFThread::threadInit()
 
             if (!ddL.open(OptL))
             {
-                yError(": could not open left_arm PolyDriver!\n");
+                yError("[vtRFThread] : could not open left_arm PolyDriver!\n");
                 return false;
             }
             bool ok = 1;
@@ -189,7 +189,7 @@ bool vtRFThread::threadInit()
 
         if (!ddT.open(OptT))
         {
-            yError("Could not open torso PolyDriver!");
+            yError("[vtRFThread] Could not open torso PolyDriver!");
             return false;
         }
         bool ok = 1;
@@ -199,7 +199,7 @@ bool vtRFThread::threadInit()
         }
         if (!ok)
         {
-            yError("Problems acquiring head interfaces!!!!");
+            yError("[vtRFThread] Problems acquiring head interfaces!!!!");
             return false;
         }
         iencsT->getAxes(&jntsT);
@@ -215,7 +215,7 @@ bool vtRFThread::threadInit()
 
         if (!ddH.open(OptH))
         {
-            yError("ERROR: could not open head PolyDriver!");
+            yError("[vtRFThread] could not open head PolyDriver!");
             return false;
         }
         ok = 1;
@@ -225,7 +225,7 @@ bool vtRFThread::threadInit()
         }
         if (!ok)
         {
-            yError("Problems acquiring head interfaces!!!!");
+            yError("[vtRFThread] Problems acquiring head interfaces!!!!");
             return false;
         }
         iencsH->getAxes(&jntsH);
@@ -697,8 +697,8 @@ string vtRFThread::load()
                     if (iCubSkin[i].txls[k]->ID == bbb->get(0).asInt())
                     {
                         iCubSkin[i].txls[k]->pwe->resize(ext,bNum);
-                        iCubSkin[i].txls[k]->pwe->setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],1));
-                        iCubSkin[i].txls[k]->pwe->setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],1));
+                        iCubSkin[i].txls[k]->pwe->setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],bNum[1]));
+                        iCubSkin[i].txls[k]->pwe->setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],bNum[1]));
                     }
                 }
             }
@@ -788,7 +788,7 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
     }
     else
     {
-        yError(" in trainTaxels!\n");
+        yError("[vtRFThread] in trainTaxels!\n");
         return false;
     }
 
@@ -848,7 +848,7 @@ bool vtRFThread::projectIncomingEvent()
                 T_a = armR -> getH(3+6, true);
         }
         else
-            yError(" in projectIncomingEvent!\n");
+            yError("[vtRFThread] in projectIncomingEvent!\n");
 
         // yInfo("T_A:\n%s",T_a.toString().c_str());
 
@@ -959,7 +959,7 @@ void vtRFThread::drawTaxels(string _eye)
     }
     else
     {
-        yError("Error in drawTaxels! Returning..");
+        yError("[vtRFThread] Error in drawTaxels! Returning..");
         return;
     }
 
@@ -1039,7 +1039,7 @@ bool vtRFThread::projectIntoImagePlane(vector <skinPartPWE> &sP, const string &e
             }
             else
             {
-                yError("ERROR in projectIntoImagePlane!\n");
+                yError("[vtRFThread] ERROR in projectIntoImagePlane!\n");
                 return false;
             }
         }
@@ -1122,14 +1122,14 @@ yarp::sig::Vector vtRFThread::locateTaxel(const yarp::sig::Vector &_pos, const s
     }
     else
     {
-        yError(" locateTaxel() failed!\n");
+        yError("[vtRFThread] locateTaxel() failed!\n");
     }
 
     if      (part == "SKIN_LEFT_FOREARM" ) { T = armL -> getH(3+4, true); } // torso + up to elbow
     else if (part == "SKIN_RIGHT_FOREARM") { T = armR -> getH(3+4, true); } // torso + up to elbow
     else if (part == "SKIN_LEFT_HAND")     { T = armL -> getH(3+6, true); } // torso + up to wrist
     else if (part == "SKIN_RIGHT_HAND")    { T = armR -> getH(3+6, true); } // torso + up to wrist
-    else    {  yError(" locateTaxel() failed!\n"); }
+    else    {  yError("[vtRFThread] locateTaxel() failed!\n"); }
 
     pos.push_back(1);
     WRFpos = T * pos;
@@ -1159,7 +1159,7 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
     else if (sP.name == "right_hand_V2_1.txt")      { sP.name = "SKIN_RIGHT_HAND"; }
     else
     {
-        yError(" Unexpected skin part file name: %s.\n",sP.name.c_str());
+        yError("[vtRFThread] Unexpected skin part file name: %s.\n",sP.name.c_str());
         return false;
     }
     //sP.name = sP.name.substr(0, sP.name.find_last_of("_"));
