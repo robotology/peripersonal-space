@@ -470,6 +470,15 @@ unsigned int factorial(unsigned int n)
         return res;
     }
 
+    TaxelPWE::~TaxelPWE()
+    {
+        if (pwe)
+        {
+            delete pwe;
+            pwe = NULL;
+        }
+    }
+
 /****************************************************************/
 /* SKINPART WRAPPER
 *****************************************************************/
@@ -565,6 +574,18 @@ unsigned int factorial(unsigned int n)
         return res.str();
     }
 
+    skinPartTaxel::~skinPartTaxel()
+    {
+        for (size_t i = 0; i < txls.size(); i++)
+        {
+            if (txls[i])
+            {
+                delete txls[i];
+                txls[i] = NULL;
+            }
+        }
+    }
+
 /****************************************************************/
 /* SKINPART TAXEL PWE WRAPPER
 *****************************************************************/
@@ -591,6 +612,18 @@ unsigned int factorial(unsigned int n)
             res << txls[i]->toString(precision);
         res << "**********\n";
         return res.str();
+    }
+
+    skinPartPWE::~skinPartPWE()
+    {
+        for (size_t i = 0; i < txls.size(); i++)
+        {
+            if (txls[i])
+            {
+                delete txls[i];
+                txls[i] = NULL;
+            }
+        }
     }
 
 /****************************************************************/

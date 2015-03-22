@@ -291,6 +291,11 @@ class TaxelPWE : public Taxel
     TaxelPWE(const Vector &p, const Vector &n);
     TaxelPWE(const Vector &p, const Vector &n, const int &i);
 
+    /*
+    * Destructor
+    **/
+    ~TaxelPWE();
+
     /**
     * init function
     **/
@@ -419,6 +424,11 @@ class skinPartTaxel : public skinPart
     vector<Taxel*> txls;
 
     /**
+    * Destructor
+    **/
+    ~skinPartTaxel();
+
+    /**
     * Copy Operator
     **/
     skinPartTaxel &operator=(const skinPartTaxel &spw);
@@ -451,6 +461,11 @@ class skinPartPWE : public skinPart
     * Constructor that assigns modality member
     **/
     skinPartPWE(const string &_modality) : skinPart(), modality(_modality) {};
+
+    /**
+    * Destructor
+    **/
+    ~skinPartPWE();
 
     /**
     * Copy Operator
