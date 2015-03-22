@@ -13,10 +13,11 @@
 #define RFEXTYMIN    0.0 // lower limit of the receptive field [TTC] (+0.0 s)
 #define RFEXTYMAX    3.0 // upper limit of the receptive field [TTC] (+3.0 s)
 #define RFEXTENSION  0.3 // extension of the receptive field in 1D   (+0.3 m)
-#define HAND_LEFT      1
-#define FOREARM_LEFT   2
-#define HAND_RIGHT     4
-#define FOREARM_RIGHT  5
+#define SKIN_LEFT_FOREARM   2
+#define SKIN_LEFT_HAND      1
+#define SKIN_LEFT_FOREARM   2
+#define SKIN_RIGHT_HAND     4
+#define SKIN_RIGHT_FOREARM  5
 #define SKIN_THRES	   7 // Threshold with which a contact is detected
 
 // enum SkinPart { 
@@ -585,10 +586,10 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
                 string iCubSkinName="";
                 iCubSkinName=iCubSkin[i].name;
 
-                if ((it -> getSkinPart() == FOREARM_RIGHT && iCubSkinName == "SKIN_RIGHT_FOREARM") ||
-                    (it -> getSkinPart() ==  FOREARM_LEFT && iCubSkinName == "SKIN_LEFT_FOREARM" ) ||
-                    (it -> getSkinPart() ==    HAND_RIGHT && iCubSkinName == "SKIN_RIGHT_HAND"   ) ||
-                    (it -> getSkinPart() ==     HAND_LEFT && iCubSkinName == "SKIN_LEFT_HAND"    )    )
+                if ((it -> getSkinPart() == SKIN_RIGHT_FOREARM && iCubSkinName == "SKIN_RIGHT_FOREARM") ||
+                    (it -> getSkinPart() ==  SKIN_LEFT_FOREARM && iCubSkinName == "SKIN_LEFT_FOREARM" ) ||
+                    (it -> getSkinPart() ==    SKIN_RIGHT_HAND && iCubSkinName == "SKIN_RIGHT_HAND"   ) ||
+                    (it -> getSkinPart() ==     SKIN_LEFT_HAND && iCubSkinName == "SKIN_LEFT_HAND"    )    )
                 {
                     idx = i;
                     std::vector <unsigned int> txlList = it -> getTaxelList();
