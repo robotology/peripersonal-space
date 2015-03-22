@@ -261,9 +261,6 @@ bool vtRFThread::threadInit()
 
 void vtRFThread::run()
 {
-    ts.update();
-    incomingEvents.clear();
-
     // read from the input ports
     dTBottle = dTPort       -> read(false);
     event    = eventsPort   -> read(false);
@@ -283,6 +280,20 @@ void vtRFThread::run()
         }
     }
 
+    if (event == NULL)
+    {
+        // if there is nothing from the port but there was a previous event,
+        // and it did not pass more than 2.0 seconds from the last data, let's use that
+        if ((yarp::os::Time::now() - timeNow <= 2.0) && incomingEvents.size()>0)
+        {
+            Bottle &oldEventBottle = event->addList();
+            oldEventBottle = incomingEvents.back().toBottle();
+        }
+    }
+
+    ts.update();
+    incomingEvents.clear();
+
     // process the port coming from the visuoTactileWrapper
     if (event != NULL)
     {
@@ -290,7 +301,7 @@ void vtRFThread::run()
         for (size_t i = 0; i < event->size(); i++)
         {
             incomingEvents.push_back(IncomingEvent(*(event -> get(i).asList())));
-            printMessage(3,"[EVENT] %s", incomingEvents.back().toString().c_str());
+            // printMessage(3,"[EVENT] %s", incomingEvents.back().toString().c_str());
         }
 
         // manage the buffer
@@ -362,12 +373,15 @@ void vtRFThread::run()
         eventsBuffer.clear();
         timeNow = yarp::os::Time::now();
         yInfo("No significant event in the last 2 seconds. Erasing the buffer..");
-        dumpedVector.push_back(2.0);
+
+        for (size_t j = 0; j < iCubSkin[0].txls.size(); j++)
+        {
+            dumpedVector.push_back(0.0);
+        }
     }
     else
     {
-        size_t txlsize = iCubSkin[0].txls.size();
-        for (size_t j = 0; j < txlsize; j++)
+        for (size_t j = 0; j < iCubSkin[0].txls.size(); j++)
         {
             dumpedVector.push_back(0.0);
         }

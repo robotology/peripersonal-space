@@ -194,8 +194,8 @@ unsigned int factorial(unsigned int n)
     }
 
     IncomingEvent4TaxelPWE::IncomingEvent4TaxelPWE(const Vector &p, const Vector &v,
-                                                 const double r, const string &s) :
-                                                 IncomingEvent(p,v,r,s)
+                                                   const double r, const string &s) :
+                                                   IncomingEvent(p,v,r,s)
     {
         computeNRMTTC();
     }
