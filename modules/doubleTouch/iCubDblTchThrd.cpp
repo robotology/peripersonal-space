@@ -708,7 +708,8 @@ void doubleTouchThread::detectContact(skinContactList *_sCL)
     for(skinContactList::iterator it=_sCL->begin(); it!=_sCL->end(); it++)
     {
         printMessage(4,"skinContact: %s\n",it->toString().c_str());
-        if( it -> getPressure() > 25 && skinPart == it -> getSkinPart())
+        if( it -> getPressure() > 25 && skinPart == it -> getSkinPart() && 
+            norm(it-> getNormalDir()) != 0.0)
         {
             cntctSkin     = *it;                    // Store the skinContact for eventual future use
             cntctPosLink  = it -> getCoP();         // Get the position of the contact;
