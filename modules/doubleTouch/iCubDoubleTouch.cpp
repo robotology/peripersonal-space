@@ -125,6 +125,8 @@ private:
 
     int verbosity,rate,record;
 
+    bool autoconnect;
+
 public:
     doubleTouch()
     {
@@ -139,6 +141,8 @@ public:
         verbosity = 0;      // verbosity
         rate      = 100;    // rate of the doubleTouchThread
         record    = 0;      // record data
+
+        autoconnect = false;
     }
 
     bool respond(const Bottle &command, Bottle &reply)
@@ -165,7 +169,8 @@ public:
                 case VOCAB4('s','t','a','r'):
                 {
                     dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity,
-                                                       type, record, filename, color);
+                                                       type, record, filename, color,
+                                                       autoconnect);
                     bool strt = dblTchThrd -> start();
                     if (!strt)
                     {
@@ -219,6 +224,7 @@ public:
         //******************************************************
         //********************** CONFIGS ***********************
             bool alignEyes = rf.check("alignEyes");
+            autoconnect    = rf.check("autoconnect");
         //******************* NAME ******************
             if (rf.check("name"))
             {
@@ -321,13 +327,13 @@ public:
         else
         {
             dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity,
-                                               type, record, filename, color);
+                                type, record, filename, color, autoconnect);
             bool strt = dblTchThrd -> start();
             if (!strt)
             {
                 delete dblTchThrd;
                 dblTchThrd = 0;
-                yInfo("ERROR!!! doubleTouchThread wasn't instantiated!!");
+                yError("ERROR!!! doubleTouchThread wasn't instantiated!!");
                 return false;
             }
         }
@@ -362,9 +368,9 @@ int main(int argc, char * argv[])
     YARP_REGISTER_DEVICES(icubmod)
 
     ResourceFinder rf;
-    rf.setVerbose(true);
+    rf.setVerbose(false);
     rf.setDefaultContext("periPersonalSpace");
-    rf.setDefaultConfigFile("doubleTouchDemo.ini");
+    rf.setDefaultConfigFile("doubleTouch.ini");
     rf.configure(argc,argv);
 
     if (rf.check("help"))
@@ -372,24 +378,25 @@ int main(int argc, char * argv[])
         yInfo(""); 
         yInfo("Options:");
         yInfo("");
-        yInfo("   --context    path:  where to find the called resource");
-        yInfo("   --from       from:  the name of the .ini file.");
-        yInfo("   --name       name:  the name of the module (default doubleTouch).");
-        yInfo("   --robot      robot: the name of the robot. Default icubSim.");
-        yInfo("   --rate       rate:  the period used by the thread. Default 100ms.");
-        yInfo("   --verbosity  int:   verbosity level (default 0).");
-        yInfo("   --record     int:   if to record data or not.");
+        yInfo("   --context     path:  where to find the called resource");
+        yInfo("   --from        from:  the name of the .ini file.");
+        yInfo("   --name        name:  the name of the module (default doubleTouch).");
+        yInfo("   --robot       robot: the name of the robot. Default icubSim.");
+        yInfo("   --rate        rate:  the period used by the thread. Default 100ms.");
+        yInfo("   --verbosity   int:   verbosity level (default 0).");
+        yInfo("   --record      int:   if to record data or not.");
         yInfo("       record==0 -> nothing is recorded, the double touch is iterating over and");
         yInfo("                    over again. Demonstrative and testing purposes.");
         yInfo("       record==1 -> recording for visuo-tactile reference frames purposes.");
         yInfo("       record==2 -> recording for kinematic calibration purposes.");
-        yInfo("   --color      color: robot color (black or white - MANDATORY!)");
-        yInfo("   --type       type:  the type of task (default 'LtoR'). Allowed type names:");
-        yInfo("   --type              'RtoL','LtoR','RHtoL','LHtoR','both_5DOF','both_7DOF','both_LtoR','both_RtoL'");
-        yInfo("   --filename   file:  the name of the file to be saved in case of");
-        yInfo("                       a recording session. Default 'calibration.txt'.");
-        yInfo("                       A date is appended at the beginning for completeness.");
-        yInfo("   --alignEyes  flag:  if or not to use the rpc-thing and sync with alignEyes module.");
+        yInfo("   --color       color: robot color (black or white - MANDATORY!)");
+        yInfo("   --type        type:  the type of task (default 'LtoR'). Allowed type names:");
+        yInfo("   --type               'RtoL','LtoR','RHtoL','LHtoR'");
+        yInfo("   --filename    file:  the name of the file to be saved in case of");
+        yInfo("                        a recording session. Default 'calibration.txt'.");
+        yInfo("                        A date is appended at the beginning for completeness.");
+        yInfo("   --autoconnect flag: if or not to autoconnect to the skinManager");
+        yInfo("   --alignEyes   flag: if or not to use the rpc-thing and sync with alignEyes module.");
         yInfo("");
         return 0;
     }

@@ -79,6 +79,8 @@ protected:
     string filename;
     // Color of the robot (to identify which one is which)
     string color;
+    // Flag used to know if the doubleTouch should automatically connect to the skinManager
+    bool autoconnect;
 
     /***************************************************************************/
     // CONTACT-RELATED VARIABLES:
@@ -239,7 +241,8 @@ protected:
 public:
     // CONSTRUCTOR
     doubleTouchThread(int _rate, const string &_name, const string &_robot,
-                      int _v, const string _type, int _record, string _filename, string _color);
+                      int _v, const string _type, int _record, string _filename,
+                      string _color, bool _autoconnect);
     // INIT
     virtual bool threadInit();
     // RUN

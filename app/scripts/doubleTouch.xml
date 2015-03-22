@@ -6,7 +6,7 @@
 
     <module>
         <name>doubleTouch</name>
-        <parameters></parameters>
+        <parameters>--autoconnect</parameters>
         <node>icub15</node>
         <stdio></stdio>
         <tag>doubleTouch</tag>
