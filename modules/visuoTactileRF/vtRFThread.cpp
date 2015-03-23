@@ -8,10 +8,6 @@
 #include "vtRFThread.h"
 
 #define RADIUS              2 // Radius in px of every taxel (in the images)
-#define SKIN_LEFT_HAND      1
-#define SKIN_LEFT_FOREARM   2
-#define SKIN_RIGHT_HAND     4
-#define SKIN_RIGHT_FOREARM  5
 #define SKIN_THRES	        7 // Threshold with which a contact is detected
 
 // enum SkinPart { 
@@ -256,11 +252,11 @@ bool vtRFThread::threadInit()
 void vtRFThread::run()
 {
     // read from the input ports
-    dTBottle = dTPort       -> read(false);
-    event    = eventsPort   -> read(false);
-    imageInR = imagePortInR -> read(false);
-    imageInL = imagePortInL -> read(false); 
-    iCub::skinDynLib::skinContactList *skinContacts  = skinPortIn -> read(false);
+    dTBottle                       = dTPort       -> read(false);
+    event                          = eventsPort   -> read(false);
+    imageInR                       = imagePortInR -> read(false);
+    imageInL                       = imagePortInL -> read(false); 
+    skinContactList *skinContacts  = skinPortIn   -> read(false);
 
     dumpedVector.resize(0,0.0);
 
@@ -274,32 +270,39 @@ void vtRFThread::run()
         }
     }
 
+    Bottle inputEvents;
+    inputEvents.clear();
+
     if (event == NULL)
     {
         // if there is nothing from the port but there was a previous event,
-        // and it did not pass more than 2.0 seconds from the last data, let's use that
-        if ((yarp::os::Time::now() - timeNow <= 2.0) && incomingEvents.size()>0)
+        // and it did not pass more than 0.5 seconds from the last data, let's use that
+        if ((yarp::os::Time::now() - timeNow <= 0.5) && incomingEvents.size()>0)
         {
-            Bottle &oldEventBottle = event->addList();
-            oldEventBottle = incomingEvents.back().toBottle();
+            Bottle &b = inputEvents.addList();
+            b = incomingEvents.back().toBottle();
         }
+    }
+    else
+    {
+        timeNow     = yarp::os::Time::now();
+        inputEvents = *event;
     }
 
     ts.update();
     incomingEvents.clear();
 
     // process the port coming from the visuoTactileWrapper
-    if (event != NULL)
+    if (inputEvents.size() != 0)
     {
         // read the events
-        for (size_t i = 0; i < event->size(); i++)
+        for (size_t i = 0; i < inputEvents.size(); i++)
         {
-            incomingEvents.push_back(IncomingEvent(*(event -> get(i).asList())));
+            incomingEvents.push_back(IncomingEvent(*(inputEvents.get(i).asList())));
             // printMessage(3,"[EVENT] %s", incomingEvents.back().toString().c_str());
         }
 
         // manage the buffer
-        timeNow     = yarp::os::Time::now();
         if (eventsFlag)
         {
             eventsFlag  = false;
@@ -902,7 +905,7 @@ bool vtRFThread::computeResponse()
         for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
         {
             iCubSkin[i].txls[j]->computeResponse();
-            printMessage(4,"\t\t\tID %i\tResponse %i\n",j,iCubSkin[i].txls[j]->Resp);
+            printMessage(4,"\t\tID %i\tResponse %i\n",j,iCubSkin[i].txls[j]->Resp);
         }
     }
 
@@ -1133,12 +1136,12 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
     filename = filename.c_str() ? filename.c_str() + 1 : filePath.c_str();
 
     // Remove "_mesh.txt"
-    if      (filename == "left_forearm_mesh.txt")    { filename = SKIN_LEFT_FOREARM; }
-    else if (filename == "left_forearm_nomesh.txt")  { filename = SKIN_LEFT_FOREARM; }
-    else if (filename == "right_forearm_mesh.txt")   { filename = SKIN_RIGHT_FOREARM; }
-    else if (filename == "right_forearm_nomesh.txt") { filename = SKIN_RIGHT_FOREARM; }
-    else if (filename == "left_hand_V2_1.txt")       { filename = SKIN_LEFT_HAND; }
-    else if (filename == "right_hand_V2_1.txt")      { filename = SKIN_RIGHT_HAND; }
+    if      (filename == "left_forearm_mesh.txt")    { sP.name = SKIN_LEFT_FOREARM; }
+    else if (filename == "left_forearm_nomesh.txt")  { sP.name = SKIN_LEFT_FOREARM; }
+    else if (filename == "right_forearm_mesh.txt")   { sP.name = SKIN_RIGHT_FOREARM; }
+    else if (filename == "right_forearm_nomesh.txt") { sP.name = SKIN_RIGHT_FOREARM; }
+    else if (filename == "left_hand_V2_1.txt")       { sP.name = SKIN_LEFT_HAND; }
+    else if (filename == "right_hand_V2_1.txt")      { sP.name = SKIN_RIGHT_HAND; }
     else
     {
         yError("[vtRFThread] Unexpected skin part file name: %s.\n",filename.c_str());

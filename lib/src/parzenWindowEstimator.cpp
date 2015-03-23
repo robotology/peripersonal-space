@@ -226,6 +226,12 @@ double gauss2D(const double x_0, const double y_0,
 
         double scalingfactor_max = 255/max;
 
+        // if the histogram is empty, the maximum value is 0
+        if (max == 0)
+        {
+            return max;
+        }
+
         return getF_X(x)*scalingfactor_max;
     }
 
