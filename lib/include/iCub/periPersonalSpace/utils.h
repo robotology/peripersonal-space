@@ -48,6 +48,7 @@
 #include <yarp/math/Math.h>
 
 #include <iCub/iKin/iKinFwd.h>
+#include <iCub/skinDynLib/skinContact.h>
 
 #include <vector>
 #include <map>
@@ -62,6 +63,7 @@ using namespace yarp::sig;
 using namespace yarp::math;
 
 using namespace iCub::iKin;
+using namespace iCub::skinDynLib;
 
 using namespace std;
 
@@ -378,7 +380,7 @@ class TaxelPWE2D : public TaxelPWE
 class skinPart
 {
   public:
-    string name;
+    SkinPart name;
     int size;   // size of the skinPart if the patches were full - it differs from taxel.size()
              
     /**

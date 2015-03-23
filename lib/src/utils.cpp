@@ -484,8 +484,8 @@ unsigned int factorial(unsigned int n)
 *****************************************************************/
     skinPart::skinPart()
     {
-        name= "";
-        size=  0;
+        name= SKIN_PART_UNKNOWN;
+        size=                 0;
     }
 
     // skinPart::skinPart(const string _name)
@@ -506,7 +506,7 @@ unsigned int factorial(unsigned int n)
     void skinPart::print(int verbosity)
     {
         yDebug("**********\n");
-        yDebug("name: %s\t", name.c_str());
+        yDebug("name: %s\t", SkinPart_s[name].c_str());
         yDebug("size: %i\n", size);
         yDebug("**********\n");
         
@@ -543,7 +543,7 @@ unsigned int factorial(unsigned int n)
     string skinPart::toString(int precision)
     {
         stringstream res;
-        res << "**********\n" << "Name: " << name << "\tSize: "<< size << endl;
+        res << "**********\n" << "Name: " << SkinPart_s[name] << "\tSize: "<< size << endl;
         return res.str();
     }
 
@@ -616,14 +616,18 @@ unsigned int factorial(unsigned int n)
 
     skinPartPWE::~skinPartPWE()
     {
-        for (size_t i = 0; i < txls.size(); i++)
-        {
-            if (txls[i])
-            {
-                delete txls[i];
-                txls[i] = NULL;
-            }
-        }
+        // printf("%lu\n", txls.size());
+        // int i=0;
+
+        // while(!txls.empty())
+        // {
+        //     printf("i %i\n", i); i++;
+        //     if (txls.back())
+        //     {
+        //         delete txls.back();
+        //     }
+        //     txls.pop_back();
+        // }
     }
 
 /****************************************************************/
