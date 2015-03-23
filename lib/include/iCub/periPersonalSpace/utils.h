@@ -381,7 +381,9 @@ class skinPart
 {
   public:
     SkinPart name;
-    int size;   // size of the skinPart if the patches were full - it differs from taxel.size()
+    int size;   // theoretical maximum size of the skinPart if the patches were full ~ corresponds to number of values on the respective port 
+    //and number of columns in the .txt files in icub-main/app/skinGui/conf/positions
+    //IMPORTANT: it differs from taxel.size(), that is the real size of the skinPart with "active" or valid taxels
              
     /**
     * Indexing variable used in the case of reducing the resolution - e.g. taking only triangle centers
