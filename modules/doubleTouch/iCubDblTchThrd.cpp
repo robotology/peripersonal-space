@@ -3,10 +3,6 @@
 #include <sstream>
 #include <iomanip>
 
-#define SKIN_LEFT_HAND      1
-#define SKIN_LEFT_FOREARM   2
-#define SKIN_RIGHT_HAND     4
-#define SKIN_RIGHT_FOREARM  5
 #define VEL_THRES      0.000001        // m/s?
 // VEL_THRES * getRate()
 
@@ -55,7 +51,7 @@ doubleTouchThread::doubleTouchThread(int _rate, const string &_name, const strin
     slv->probl->limb.setAng(gue->joints);
 
     testLimb = new iCubCustomLimb(type);
-    skinPart = -1;
+    skinPart = SKIN_PART_UNKNOWN;
 
     if (type == "LtoR")
     {
@@ -83,7 +79,7 @@ doubleTouchThread::doubleTouchThread(int _rate, const string &_name, const strin
     cntctNormDir.resize(3,0.0);
     cntctPressure = -1;
     cntctLinkNum  = -1;
-    cntctSkinPart = "";
+    cntctSkinPart = SKIN_PART_UNKNOWN;
     cntctH0 = eye(4);
 
     oldEES.resize(3,0.0);
@@ -257,7 +253,7 @@ void doubleTouchThread::run()
     output.addInt(recFlag);
     output.addString(type.c_str());
 
-    if (cntctSkinPart != "")
+    if (cntctSkinPart != SKIN_PART_UNKNOWN)
     {
         matrixIntoBottle(cntctH0,output);
         matrixIntoBottle(slv->probl->limb.getHN(),output);
@@ -333,12 +329,12 @@ void doubleTouchThread::run()
                 {
                     printMessage(4,"Waiting for contact..\n");
                     detectContact(skinContacts); // READ A CONTACT ON THE SKIN
-                    if (cntctSkinPart != "")
+                    if (cntctSkinPart != SKIN_PART_UNKNOWN)
                     {
                         // printMessage(0,"CONTACT!!! skinContact: %s\nskinPart: %s Link: %i Position: %s NormDir: %s\n", cntctSkin.toString(3,3).c_str(),
                         //             cntctSkinPart.c_str(), cntctLinkNum,cntctPosLink.toString(3,3).c_str(),cntctNormDir.toString(3,3).c_str());
                         yInfo("CONTACT!!! skinPart: %s Link: %i Position: %s NormDir: %s",
-                               cntctSkinPart.c_str(), cntctLinkNum,cntctPosLink.toString(3,3).c_str(),
+                               SkinPart_s[cntctSkinPart].c_str(), cntctLinkNum,cntctPosLink.toString(3,3).c_str(),
                                cntctNormDir.toString(3,3).c_str());
 
                         printMessage(1,"Switching to impedance position mode..\n");
@@ -702,7 +698,7 @@ void doubleTouchThread::detectContact(skinContactList *_sCL)
     cntctNormDir.resize(3,0.0);
     cntctPressure = -1;
     cntctLinkNum  = -1;
-    cntctSkinPart = "";
+    cntctSkinPart = SKIN_PART_UNKNOWN;
 
     // Search for a suitable contact:
     for(skinContactList::iterator it=_sCL->begin(); it!=_sCL->end(); it++)
@@ -717,22 +713,8 @@ void doubleTouchThread::detectContact(skinContactList *_sCL)
             cntctNormDir  = it -> getNormalDir();   // Normal direction of the contact
             cntctPressure = it -> getPressure();    // Retrieve the pressure of the contact
 
-            if      (it -> getSkinPart() == SKIN_LEFT_FOREARM)
-            {
-                cntctSkinPart = "SKIN_LEFT_FOREARM";
-            }
-            else if (it -> getSkinPart() == SKIN_RIGHT_FOREARM)
-            {
-                cntctSkinPart = "SKIN_RIGHT_FOREARM";
-            }
-            else if (it -> getSkinPart() == SKIN_LEFT_HAND)
-            {
-                cntctSkinPart = "SKIN_LEFT_HAND";
-            }
-            else if (it -> getSkinPart() == SKIN_RIGHT_HAND)
-            {
-                cntctSkinPart = "SKIN_RIGHT_HAND";
-            }
+            cntctSkinPart = it -> getSkinPart();
+
             printMessage(3,"CONTACT!!! skinContact: %s\n",cntctSkin.toString().c_str());
             cntctPosWRF = locateContact();
             printMessage(2,"cntctPosWRF: %s\n", cntctPosWRF.toString(3,3).c_str());

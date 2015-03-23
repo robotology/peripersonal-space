@@ -93,7 +93,7 @@ protected:
     int cntctLinkNum;       // Link number
     double cntctPressure;   // Pressure
     skinContact cntctSkin;  // SkinContact
-    string cntctSkinPart;   // SkinPart (verbose form)
+    SkinPart cntctSkinPart;   // SkinPart (verbose form)
 
     /***************************************************************************/
     // INTERNAL VARIABLES:
@@ -104,7 +104,7 @@ protected:
     // SkinPart to be handled
     // it can be either 2 (forearm_left), 5 (forearm_right)
     // or even 3 (upperarm_left) and 6 (upperarm_right) [TO DO]
-    int skinPart;
+    SkinPart skinPart;
 
     // Port that reads contacts:
     BufferedPort<iCub::skinDynLib::skinContactList> *skinPort;
