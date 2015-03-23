@@ -473,10 +473,9 @@ unsigned int factorial(unsigned int n)
 
     TaxelPWE::~TaxelPWE()
     {
-        if (pwe)
+        if (pwe!=NULL)
         {
             delete pwe;
-            pwe = NULL;
         }
     }
 
@@ -485,8 +484,8 @@ unsigned int factorial(unsigned int n)
 *****************************************************************/
     skinPart::skinPart()
     {
-        name= SKIN_PART_UNKNOWN;
-        size=                 0;
+        name = SKIN_PART_UNKNOWN;
+        size =                 0;
     }
 
     // skinPart::skinPart(const string _name)
@@ -577,14 +576,14 @@ unsigned int factorial(unsigned int n)
 
     skinPartTaxel::~skinPartTaxel()
     {
-        for (size_t i = 0; i < txls.size(); i++)
-        {
-            if (txls[i])
-            {
-                delete txls[i];
-                txls[i] = NULL;
-            }
-        }
+        // while(!txls.empty())
+        // {
+        //     if (txls.back())
+        //     {
+        //         delete txls.back();
+        //     }
+        //     txls.pop_back();
+        // }
     }
 
 /****************************************************************/
@@ -617,7 +616,7 @@ unsigned int factorial(unsigned int n)
 
     skinPartPWE::~skinPartPWE()
     {
-        // printf("%lu\n", txls.size());
+        // printf("Taxelsize %lu %i\n", txls.size(), get_taxelSize());
         // int i=0;
 
         // while(!txls.empty())

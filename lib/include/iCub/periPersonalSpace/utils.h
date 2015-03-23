@@ -133,23 +133,11 @@ struct IncomingEvent
     double TTC;
 
     /**
-    * Constructor
+    * Constructors
     **/    
     IncomingEvent();
-
-    /**
-    * Constructor with Pos and Vel
-    **/    
     IncomingEvent(const Vector &p, const Vector &v, const double r, const string &s);
-
-    /**
-    * Constructor from bottle
-    **/   
     IncomingEvent(const Bottle &b);
-
-    /**
-    * Copy constructor
-    **/
     IncomingEvent(const IncomingEvent &e);
 
     /**
@@ -464,7 +452,7 @@ class skinPartPWE : public skinPart
     /*
     * Constructor that assigns modality member
     **/
-    skinPartPWE(const string &_modality) : skinPart(), modality(_modality) {};
+    skinPartPWE(const string &_modality) : skinPart(), modality(_modality) { txls.clear(); };
 
     /**
     * Destructor
@@ -485,6 +473,8 @@ class skinPartPWE : public skinPart
     * toString Method
     **/
     string toString(int precision=0);
+
+    int get_taxelSize() { return txls.size(); };
 };
 
 /**

@@ -232,7 +232,9 @@ bool vtRFThread::threadInit()
             yDebug("i: %i filePath: %s",i,filePath.c_str());
             skinPartPWE sP(modality);
             if ( setTaxelPosesFromFile(filePath,sP) )
+            {
                 iCubSkin.push_back(sP);
+            }
         }
         load();
 
@@ -1258,6 +1260,7 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
             }
         }
     }
+
     initRepresentativeTaxels(sP);
 
     return true;
@@ -1756,16 +1759,29 @@ int vtRFThread::printMessage(const int l, const char *f, ...) const
 
 void vtRFThread::threadRelease()
 {
-    printMessage(0,"Saving taxels..\n");
-    save();
+    yDebug("[vtRF::threadRelease]Saving taxels..\n");
+        save();
+
+    yDebug("[vtRF::threadRelease]Deallocating iCubSkin..\n");
+        for (size_t i = 0; i < iCubSkin.size(); i++)
+        {
+            while(!iCubSkin[i].txls.empty())
+            {
+                if (iCubSkin[i].txls.back())
+                {
+                    delete iCubSkin[i].txls.back();
+                }
+                iCubSkin[i].txls.pop_back();
+            }
+        }
     
-    printMessage(0,"Closing controllers..\n");
+    yDebug("[vtRF::threadRelease]Closing controllers..\n");
         ddR.close();
         ddL.close();
         ddT.close();
         ddH.close();
 
-    printMessage(0,"Deleting misc stuff..\n");
+    yDebug("[vtRF::threadRelease]Deleting misc stuff..\n");
         delete armR;
         armR = NULL;
         delete armL;
@@ -1775,46 +1791,46 @@ void vtRFThread::threadRelease()
         delete eWL;
         eWL  = NULL;
 
-    printMessage(0,"Closing ports..\n");
+    yDebug("[vtRF::threadRelease]Closing ports..\n");
         closePort(imagePortInR);
-        printMessage(1,"    imagePortInR successfully closed!\n");
+        yDebug("  imagePortInR successfully closed!\n");
         closePort(imagePortInL);
-        printMessage(1,"    imagePortInL successfully closed!\n");
+        yDebug("  imagePortInL successfully closed!\n");
 
         // closePort(imagePortOutR);
         imagePortOutR.interrupt();
         imagePortOutR.close();
-        printMessage(1,"    imagePortOutR successfully closed!\n");
+        yDebug("  imagePortOutR successfully closed!\n");
         // closePort(imagePortOutL);
         imagePortOutL.interrupt();
         imagePortOutL.close();
-        printMessage(1,"    imagePortOutL successfully closed!\n");
+        yDebug("  imagePortOutL successfully closed!\n");
 
         closePort(dTPort);
-        printMessage(1,"    dTPort successfully closed!\n");
+        yDebug("  dTPort successfully closed!\n");
         closePort(eventsPort);
-        printMessage(1,"    eventsPort successfully closed!\n");
+        yDebug("  eventsPort successfully closed!\n");
 
         closePort(skinPortIn);
-        printMessage(1,"    skinPortIn successfully closed!\n");
+        yDebug("  skinPortIn successfully closed!\n");
 
         // closePort(skinGuiPortForearmL);
         skinGuiPortForearmL.interrupt();
         skinGuiPortForearmL.close();
-        printMessage(1,"    skinGuiPortForearmL successfully closed!\n");
+        yDebug("  skinGuiPortForearmL successfully closed!\n");
         // closePort(skinGuiPortForearmR);
         skinGuiPortForearmR.interrupt();
         skinGuiPortForearmR.close();
-        printMessage(1,"    skinGuiPortForearmR successfully closed!\n");
+        yDebug("  skinGuiPortForearmR successfully closed!\n");
         // closePort(skinGuiPortHandL);
         skinGuiPortHandL.interrupt();
         skinGuiPortHandL.close();
-        printMessage(1,"    skinGuiPortHandL successfully closed!\n");
+        yDebug("  skinGuiPortHandL successfully closed!\n");
         // closePort(skinGuiPortHandR);
         skinGuiPortHandR.interrupt();
         skinGuiPortHandR.close();
-        printMessage(1,"    skinGuiPortHandR successfully closed!\n");
-    printMessage(0,"DONE.\n");
+        yDebug("  skinGuiPortHandR successfully closed!\n");
+    yInfo("[vtRF::threadRelease] done.\n");
 }
 
 // empty line to make gcc happy

@@ -235,7 +235,6 @@ protected:
     **/
     void initRepresentativeTaxels(skinPart &sP);
    
-    
     /**
     * For all active taxels, it returns a set of "representative" active taxels if they were defined for the respective skin part 
     * E.g. if at least one taxel from a triangle was active, the center of this triangle will be part of the output list 
