@@ -48,6 +48,7 @@
 #include <yarp/math/Math.h>
 
 #include <iCub/iKin/iKinFwd.h>
+#include <iCub/skinDynLib/skinContact.h>
 
 #include <vector>
 #include <map>
@@ -62,6 +63,7 @@ using namespace yarp::sig;
 using namespace yarp::math;
 
 using namespace iCub::iKin;
+using namespace iCub::skinDynLib;
 
 using namespace std;
 
@@ -97,7 +99,8 @@ yarp::sig::Vector vectorFromBottle(const Bottle b, int in, const int size);
  * Puts a matrix into a bottle, by cycling through its elements
  * and adding them as double
 **/
-void matrixIntoBottle(const yarp::sig::Matrix m, Bottle &b);
+void      matrixIntoBottle(const yarp::sig::Matrix m, Bottle &b);
+void matrixOfIntIntoBottle(const yarp::sig::Matrix m, Bottle &b);
 
 /**
  * Puts a vector into a bottle, by cycling through its elements
@@ -125,6 +128,9 @@ struct IncomingEvent
     yarp::sig::Vector Vel;
     double Radius;          // average radius of the object
     string Src;             // the source of information the event is coming from
+
+    double NRM;
+    double TTC;
 
     /**
     * Constructor
@@ -173,82 +179,36 @@ struct IncomingEvent
 };
 
 /**
-* It has only one more member 
+* It has only a couple more stuff
 **/
-struct IncomingEvent4Taxel1D : public IncomingEvent
-{
-    double NRM;
-
-    /**
-    * Constructor
-    **/    
-    IncomingEvent4Taxel1D();
-
-    /**
-    * Constructor with Pos and Vel
-    **/    
-    IncomingEvent4Taxel1D(const Vector &p, const Vector &v, const double r, const string &s);
-
-    /**
-    * Copy constructor
-    **/
-    IncomingEvent4Taxel1D(const IncomingEvent &e);
-    IncomingEvent4Taxel1D(const IncomingEvent4Taxel1D &e);
-
-    /**
-    * Copy Operator
-    **/
-    IncomingEvent4Taxel1D &operator=(const IncomingEvent &e);
-
-    /**
-    * Copy Operator
-    **/
-    IncomingEvent4Taxel1D &operator=(const IncomingEvent4Taxel1D &e);
-
-    /**
-    * Print Method
-    **/
-    void print();
-
-    /**
-    * toString Method
-    **/
-    string toString() const;
-};
-
-/**
-* It has only two more members
-**/
-struct IncomingEvent4Taxel2D : public IncomingEvent
+struct IncomingEvent4TaxelPWE : public IncomingEvent
 {
     double NRM;
     double TTC;
 
     /**
-    * Constructor
+    * Constructors
     **/    
-    IncomingEvent4Taxel2D();
+    IncomingEvent4TaxelPWE();
+    IncomingEvent4TaxelPWE(const Vector &p, const Vector &v, const double r, const string &s);
+    IncomingEvent4TaxelPWE(const IncomingEvent &e);
+    IncomingEvent4TaxelPWE(const IncomingEvent4TaxelPWE &e);
 
     /**
-    * Constructor with Pos and Vel
-    **/    
-    IncomingEvent4Taxel2D(const Vector &p, const Vector &v, const double r, const string &s);
-
-    /**
-    * Copy constructor
+    * Copy Operators
     **/
-    IncomingEvent4Taxel2D(const IncomingEvent &e);
-    IncomingEvent4Taxel2D(const IncomingEvent4Taxel2D &e);
+    IncomingEvent4TaxelPWE &operator=(const IncomingEvent &e);
+    IncomingEvent4TaxelPWE &operator=(const IncomingEvent4TaxelPWE &e);
 
     /**
-    * Copy Operator
-    **/
-    IncomingEvent4Taxel2D &operator=(const IncomingEvent &e);
+    * Compute the NRM and TTC from Pos and Vel
+    */
+    void computeNRMTTC();
 
     /**
-    * Copy Operator
-    **/
-    IncomingEvent4Taxel2D &operator=(const IncomingEvent4Taxel2D &e);
+     * Return norm and TTC in a pwe-compliant way
+    */
+    std::vector<double> getNRMTTC();
 
     /**
     * Print Method
@@ -268,28 +228,17 @@ class Taxel
 {
   public:
     int ID;                    // taxels' ID
-    int Resp;                  // taxels' activation level (0-255)
     yarp::sig::Vector px;      // (u,v) projection in the image plane
     yarp::sig::Vector Pos;     // taxel's position w.r.t. the limb
-    yarp::sig::Vector WRFPos;  // taxel's position w.r.t. the root RF
+    yarp::sig::Vector WRFPos;  // taxel's position w.r.t. the root FoR
     yarp::sig::Vector Norm;    // taxel's normal   w.r.t. the limb
-    yarp::sig::Matrix RF;      // taxel's reference Frame (computed from Pos and Norm)
-
-    double rfAngle;            // angle of the receptive field [rad]
+    yarp::sig::Matrix FoR;     // taxel's reference Frame (computed from Pos and Norm)
 
     /**
-    * Default constructor
+    * Constructors
     **/    
     Taxel();
-
-    /**
-    * Constructor with Pos and Norm
-    **/    
     Taxel(const Vector &p, const Vector &n);
-
-    /**
-    * Constructor with Pos, Norm and ID
-    **/    
     Taxel(const Vector &p, const Vector &n, const int &i);
 
     /**
@@ -305,7 +254,7 @@ class Taxel
     /**
     * Compute and set the taxel's reference frame (from its position and its normal vector)
     **/
-    void setRF();
+    void setFoR();
 
     /**
     * Print Method
@@ -320,7 +269,7 @@ class Taxel
     /**
     * Resets the parzen window estimator
     **/
-    virtual bool resetParzenWindow() {};
+    virtual bool resetParzenWindowEstimator() {};
 
     /**
     * Computes the response of the taxel.
@@ -328,26 +277,26 @@ class Taxel
     virtual bool computeResponse() {};
 };
 
-class Taxel1D : public Taxel
+class TaxelPWE : public Taxel
 {
   public:
-    IncomingEvent4Taxel1D   Evnt; // IncomingEvent as seen from the taxel's RF
-    parzenWindowEstimator1D  pwe; // Parzen Window Estimator to compute the response
+    int       Resp;                 // taxels' activation level (0-255)
+    double RFangle;                 // angle of the receptive field [rad]
+
+    IncomingEvent4TaxelPWE Evnt;    // 
+    parzenWindowEstimator *pwe;     // 
 
     /**
-    * Default constructor
+    * Constructors
     **/    
-    Taxel1D() : Taxel() {};
+    TaxelPWE();
+    TaxelPWE(const Vector &p, const Vector &n);
+    TaxelPWE(const Vector &p, const Vector &n, const int &i);
 
-    /**
-    * Constructor with Pos and Norm
-    **/    
-    Taxel1D(const Vector &p, const Vector &n) : Taxel(p,n) {};
-
-    /**
-    * Constructor with Pos, Norm and ID
-    **/    
-    Taxel1D(const Vector &p, const Vector &n, const int &i) : Taxel(p,n,i) {};
+    /*
+    * Destructor
+    **/
+    ~TaxelPWE();
 
     /**
     * init function
@@ -357,13 +306,13 @@ class Taxel1D : public Taxel
     /**
     * Add or remove a sample from the pwe's histogram
     **/
-    bool addSample(const IncomingEvent4Taxel1D ie);
-    bool removeSample(const IncomingEvent4Taxel1D ie);
+    bool    addSample(IncomingEvent4TaxelPWE ie);
+    bool removeSample(IncomingEvent4TaxelPWE ie);
 
     /**
     * Check if the input sample is inside the Receptive field (i.e. the cone)
     **/
-    bool insideRFCheck(const IncomingEvent4Taxel1D ie);
+    bool insideFoRCheck(const IncomingEvent4TaxelPWE ie);
 
     /**
     * Print Method
@@ -378,71 +327,51 @@ class Taxel1D : public Taxel
     /**
     * Resets the parzen window estimator
     **/
-    bool resetParzenWindow();
+    bool resetParzenWindowEstimator();
 
     /**
     * Computes the response of the taxel.
     **/
     bool computeResponse();
+
+    /**
+    * Convert the taxel into a bottle in order to be saved on file
+    **/
+    Bottle TaxelPWEIntoBottle();
 };
 
-class Taxel2D : public Taxel
+class TaxelPWE1D : public TaxelPWE
 {
   public:
-    IncomingEvent4Taxel2D   Evnt;  // IncomingEvent as seen from the taxel's RF
-    parzenWindowEstimator2D pwe;   // taxel's response by means of a 2D parzen window estimator
-
 
     /**
-    * Default constructor
+    * Constructors
     **/    
-    Taxel2D() : Taxel() {};
-
-    /**
-    * Constructor with Pos and Norm
-    **/    
-    Taxel2D(const Vector &p, const Vector &n) : Taxel(p,n) {};
-
-    /**
-    * Constructor with Pos, Norm and ID
-    **/    
-    Taxel2D(const Vector &p, const Vector &n, const int &i) : Taxel(p,n,i) {};
+    TaxelPWE1D() : TaxelPWE()                                                    { pwe = new parzenWindowEstimator1D();};
+    TaxelPWE1D(const Vector &p, const Vector &n) : TaxelPWE(p,n)                 { pwe = new parzenWindowEstimator1D();};
+    TaxelPWE1D(const Vector &p, const Vector &n, const int &i) : TaxelPWE(p,n,i) { pwe = new parzenWindowEstimator1D();};
 
     /**
     * init function
     **/
-    void init() { Taxel::init(); };
+    void init() { TaxelPWE::init(); };
+};
+
+class TaxelPWE2D : public TaxelPWE
+{
+  public:
 
     /**
-    * Add or remove a sample from the pwe's histogram
-    **/
-    bool addSample(const IncomingEvent4Taxel2D ie);
-    bool removeSample(const IncomingEvent4Taxel2D ie);
+    * Constructors
+    **/    
+    TaxelPWE2D() : TaxelPWE()                                                    { pwe = new parzenWindowEstimator2D();};
+    TaxelPWE2D(const Vector &p, const Vector &n) : TaxelPWE(p,n)                 { pwe = new parzenWindowEstimator2D();};
+    TaxelPWE2D(const Vector &p, const Vector &n, const int &i) : TaxelPWE(p,n,i) { pwe = new parzenWindowEstimator2D();};
 
     /**
-    * Check if the input sample is inside the Receptive field (i.e. the cone)
+    * init function
     **/
-    bool insideRFCheck(const IncomingEvent4Taxel2D ie);
-
-    /**
-    * Print Method
-    **/
-    void print(int verbosity=0);
-
-    /**
-    * toString Method
-    **/
-    string toString(int precision=0);
-
-    /**
-    * Resets the parzen window estimator
-    **/
-    bool resetParzenWindow();
-
-    /**
-    * Computes the response of the taxel.
-    **/
-    bool computeResponse();
+    void init() { TaxelPWE::init(); };
 };
 
 /**
@@ -451,7 +380,7 @@ class Taxel2D : public Taxel
 class skinPart
 {
   public:
-    string name;
+    SkinPart name;
     int size;   // size of the skinPart if the patches were full - it differs from taxel.size()
              
     /**
@@ -470,53 +399,41 @@ class skinPart
     * Constructor
     **/    
     skinPart();
+    // skinPart(const string _name);
 
     /**
     * Copy Operator
     **/
-    virtual skinPart &operator=(const skinPart &spw) {};
+    virtual skinPart &operator=(const skinPart &spw);
 
     /**
     * Print Method
     **/
-    virtual void print(int verbosity=0) {};
+    virtual void print(int verbosity=0);
 
     /**
     * toString Method
     **/
-    virtual string toString(int precision=0) {};
+    virtual string toString(int precision=0);
 };
 
-class skinPart1D : public skinPart
+class skinPartTaxel : public skinPart
 {
   public:
-    vector<Taxel1D> taxel;
-    
+    /**
+    * List of taxels that belong to the skinPart.
+    **/
+    vector<Taxel*> txls;
+
+    /**
+    * Destructor
+    **/
+    ~skinPartTaxel();
+
     /**
     * Copy Operator
     **/
-    virtual skinPart1D &operator=(const skinPart1D &spw);
-
-    /**
-    * Print Method
-    **/
-    void print(int verbosity=0);
-
-    /**
-    * toString Method
-    **/
-    string toString(int precision=0);    
-};
-
-class skinPart2D : public skinPart
-{
-  public:
-    vector<Taxel2D> taxel;
-    
-    /**
-    * Copy Operator
-    **/
-    virtual skinPart2D &operator=(const skinPart2D &spw);
+    skinPartTaxel &operator=(const skinPartTaxel &spw);
 
     /**
     * Print Method
@@ -529,6 +446,44 @@ class skinPart2D : public skinPart
     string toString(int precision=0);
 };
 
+class skinPartPWE : public skinPart
+{
+  public:
+    /**
+    * Modality (either 1D or 2D)
+    */
+    string modality;
+
+    /*
+    * List of taxelsPWE that belong to the skinPart (either 1D or 2D)
+    **/
+    vector<TaxelPWE*> txls;
+
+    /*
+    * Constructor that assigns modality member
+    **/
+    skinPartPWE(const string &_modality) : skinPart(), modality(_modality) {};
+
+    /**
+    * Destructor
+    **/
+    ~skinPartPWE();
+
+    /**
+    * Copy Operator
+    **/
+    skinPartPWE &operator=(const skinPartPWE &spw);
+
+    /**
+    * Print Method
+    **/
+    void print(int verbosity=0);
+
+    /**
+    * toString Method
+    **/
+    string toString(int precision=0);
+};
 
 /**
 * Struct that encloses all the information related to the eyes.

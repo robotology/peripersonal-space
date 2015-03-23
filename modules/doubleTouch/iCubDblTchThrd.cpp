@@ -3,17 +3,18 @@
 #include <sstream>
 #include <iomanip>
 
-#define HAND_LEFT      1
-#define FOREARM_LEFT   2
-#define HAND_RIGHT     4
-#define FOREARM_RIGHT  5
+#define SKIN_LEFT_HAND      1
+#define SKIN_LEFT_FOREARM   2
+#define SKIN_RIGHT_HAND     4
+#define SKIN_RIGHT_FOREARM  5
 #define VEL_THRES      0.000001        // m/s?
 // VEL_THRES * getRate()
 
 doubleTouchThread::doubleTouchThread(int _rate, const string &_name, const string &_robot, int _v,
-                                     string _type, int _record, string _filename, string _color) :
-                                     RateThread(_rate), name(_name), robot(_robot), verbosity(_v),
-                                     type(_type), record(_record), filename(_filename), color(_color)
+                                     string _type, int _record, string _filename, string _color,
+                                     bool _autoconnect) : RateThread(_rate), name(_name), robot(_robot),
+                                     verbosity(_v), type(_type), record(_record), filename(_filename),
+                                     color(_color), autoconnect(_autoconnect)
 {
     step     = 0;
     recFlag  = 0;
@@ -58,19 +59,19 @@ doubleTouchThread::doubleTouchThread(int _rate, const string &_name, const strin
 
     if (type == "LtoR")
     {
-        skinPart = FOREARM_LEFT;
+        skinPart = SKIN_LEFT_FOREARM;
     }
     else if (type == "LHtoR")
     {
-        skinPart = HAND_LEFT;
+        skinPart = SKIN_LEFT_HAND;
     }
     else if (type == "RtoL")
     {
-        skinPart = FOREARM_RIGHT;
+        skinPart = SKIN_RIGHT_FOREARM;
     }
     else if (type == "RHtoL")
     {
-        skinPart = HAND_RIGHT;
+        skinPart = SKIN_RIGHT_HAND;
     }
 
     contextGaze = -1;
@@ -94,10 +95,10 @@ bool doubleTouchThread::threadInit()
     skinPort -> open(("/"+name+"/contacts:i").c_str());
     outPort  -> open(("/"+name+"/status:o").c_str());
 
-    // if (robot=="icubSim")
-    // {
+    if (autoconnect)
+    {
         Network::connect("/skinManager/skin_events:o",("/"+name+"/contacts:i").c_str());
-    // }
+    }
     Network::connect(("/"+name+"/status:o").c_str(),"/visuoTactileRF/input:i");
     Network::connect(("/"+name+"/status:o").c_str(),"/visuoTactileWrapper/doubleTouch:i");
 
@@ -121,7 +122,7 @@ bool doubleTouchThread::threadInit()
     OptL.put("local", ("/"+name +"/left_arm").c_str());
 
     // if ((!ddG.open(OptGaze)) || (!ddG.view(igaze))){
-    //    yError(" Could not open the Gaze Controller!");
+    //    yError("[doubleTouch] Could not open the Gaze Controller!");
     //    return false;
     // }
 
@@ -140,12 +141,12 @@ bool doubleTouchThread::threadInit()
 
     if (!ddR.open(OptR))
     {
-        yError(" Could not open right_arm PolyDriver!");
+        yError("[doubleTouch] Could not open right_arm PolyDriver!");
         return false;
     }
     if (!ddL.open(OptL))
     {
-        yError(" Could not open left_arm PolyDriver!");
+        yError("[doubleTouch] Could not open left_arm PolyDriver!");
         return false;
     }
 
@@ -202,13 +203,13 @@ bool doubleTouchThread::threadInit()
 
     if (!ok)
     {
-        printMessage(0,"\nERROR: Problems acquiring either left_arm or right_arm interfaces!!!!\n");
+        yError("[doubleTouch] Problems acquiring either left_arm or right_arm interfaces!!!!\n");
         return false;
     }
 
     if (!alignJointsBounds())
     {
-        printMessage(0,"\nERROR: alignJointsBounds failed!!!\n");
+        yError("[doubleTouch] alignJointsBounds failed!!!\n");
         return false;
     }
     
@@ -229,7 +230,7 @@ bool doubleTouchThread::threadInit()
 
         if (!ok)
         {
-            printMessage(0,"\nERROR: Problems settings impedance values for either left_arm or right_arm!!!\n");
+            yError("[doubleTouch] Problems settings impedance values for either left_arm or right_arm!!!\n");
             return false;
         }
     }
@@ -284,7 +285,7 @@ void doubleTouchThread::run()
                     poss[4]=00.0;  vels[4]=100.0;                     poss[5]=00.0;  vels[5]=100.0;
                     poss[6]=70.0;  vels[6]=100.0;                     poss[7]=100.0; vels[7]=100.0;
                     poss[8]=240.0; vels[8]=200.0; 
-                    printf("configuring master hand...\n");
+                    yDebug("[doubleTouch] Configuring master hand...\n");
                     for (int i=7; i<jntsM; i++)
                     {
                         iposM->setRefAcceleration(i,1e9);
@@ -297,7 +298,7 @@ void doubleTouchThread::run()
                     poss[5]=00.0;  vels[5]=100.0;                     poss[6]=00.0;  vels[6]=100.0;
                     poss[7]=00.0;  vels[7]=100.0;                     poss[8]=00.0;  vels[8]=200.0;
 
-                    printf("configuring slave hand...\n");
+                    yDebug("[doubleTouch] Configuring slave hand...\n");
                     for (int i=7; i<jntsS; i++)
                     {
                         iposS->setRefAcceleration(i,1e9);
@@ -707,7 +708,8 @@ void doubleTouchThread::detectContact(skinContactList *_sCL)
     for(skinContactList::iterator it=_sCL->begin(); it!=_sCL->end(); it++)
     {
         printMessage(4,"skinContact: %s\n",it->toString().c_str());
-        if( it -> getPressure() > 25 && skinPart == it -> getSkinPart())
+        if( it -> getPressure() > 25 && skinPart == it -> getSkinPart() && 
+            norm(it-> getNormalDir()) != 0.0)
         {
             cntctSkin     = *it;                    // Store the skinContact for eventual future use
             cntctPosLink  = it -> getCoP();         // Get the position of the contact;
@@ -715,21 +717,21 @@ void doubleTouchThread::detectContact(skinContactList *_sCL)
             cntctNormDir  = it -> getNormalDir();   // Normal direction of the contact
             cntctPressure = it -> getPressure();    // Retrieve the pressure of the contact
 
-            if      (it -> getSkinPart() == FOREARM_LEFT)
+            if      (it -> getSkinPart() == SKIN_LEFT_FOREARM)
             {
-                cntctSkinPart = "forearm_left";
+                cntctSkinPart = "SKIN_LEFT_FOREARM";
             }
-            else if (it -> getSkinPart() == FOREARM_RIGHT)
+            else if (it -> getSkinPart() == SKIN_RIGHT_FOREARM)
             {
-                cntctSkinPart = "forearm_right";
+                cntctSkinPart = "SKIN_RIGHT_FOREARM";
             }
-            else if (it -> getSkinPart() == HAND_LEFT)
+            else if (it -> getSkinPart() == SKIN_LEFT_HAND)
             {
-                cntctSkinPart = "hand_left";
+                cntctSkinPart = "SKIN_LEFT_HAND";
             }
-            else if (it -> getSkinPart() == HAND_RIGHT)
+            else if (it -> getSkinPart() == SKIN_RIGHT_HAND)
             {
-                cntctSkinPart = "hand_right";
+                cntctSkinPart = "SKIN_RIGHT_HAND";
             }
             printMessage(3,"CONTACT!!! skinContact: %s\n",cntctSkin.toString().c_str());
             cntctPosWRF = locateContact();
@@ -757,6 +759,9 @@ Matrix doubleTouchThread::findH0(skinContact &sc)
     Matrix H0(4,4);
     Vector x(3,0.0), z(3,0.0), y(3,0.0);
 
+    printMessage(5,"[findH0] x %s y %s z %s\n",x.toString(3,3).c_str(),
+                        y.toString(3,3).c_str(),z.toString(3,3).c_str());
+
     x = sc.getNormalDir();
     x = x / norm(x);
 
@@ -772,6 +777,9 @@ Matrix doubleTouchThread::findH0(skinContact &sc)
         z[1] = x[2];
         y = -1*(cross(x,z));
     }
+
+    printMessage(5,"[findH0] x %s y %s z %s\n",x.toString(3,3).c_str(),
+                        y.toString(3,3).c_str(),z.toString(3,3).c_str());
 
     // Let's make them unitary vectors:
     y = y / norm(y);

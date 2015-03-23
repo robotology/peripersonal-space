@@ -71,6 +71,16 @@ void matrixIntoBottle(const yarp::sig::Matrix m, Bottle &b)
     }
 }
 
+void matrixOfIntIntoBottle(const yarp::sig::Matrix m, Bottle &b)
+{
+    Vector v = toVector(m);
+    
+    for (unsigned int i = 0; i < v.size(); i++)
+    {
+        b.addInt(int(v[i]));
+    }
+}
+
 string int_to_string( const int a )
 {
     std::stringstream ss;
@@ -177,85 +187,31 @@ unsigned int factorial(unsigned int n)
 /****************************************************************/
 /* INCOMING EVENT 4 TAXEL WRAPPER
 *****************************************************************/
-    IncomingEvent4Taxel1D::IncomingEvent4Taxel1D() : IncomingEvent()
-    {
-        NRM = 0;
-    }
-
-    IncomingEvent4Taxel1D::IncomingEvent4Taxel1D(const Vector &p, const Vector &v,
-                                                 const double r, const string &s) :
-                                                 IncomingEvent(p,v,r,s)
-    {
-        NRM = 0;
-    }
-
-    IncomingEvent4Taxel1D::IncomingEvent4Taxel1D(const IncomingEvent4Taxel1D &e)
-    {
-        *this = e;   
-    }
-
-    IncomingEvent4Taxel1D::IncomingEvent4Taxel1D(const IncomingEvent &e)
-    {
-        *this = e;   
-    }
-
-    IncomingEvent4Taxel1D & IncomingEvent4Taxel1D::operator=(const IncomingEvent4Taxel1D &e)
-    {
-        IncomingEvent::operator=(e);
-        NRM    = e.NRM;
-        return *this;
-    }
-
-    IncomingEvent4Taxel1D & IncomingEvent4Taxel1D::operator=(const IncomingEvent &e)
-    {
-        Pos    = e.Pos;
-        Vel    = e.Vel;
-        Src    = e.Src;
-        Radius = e.Radius;
-        NRM    = 0;
-        return *this;
-    }
-
-    void IncomingEvent4Taxel1D::print()
-    {
-        yDebug("\tNRM: %g \t %s", NRM, IncomingEvent::toString().c_str());
-    }
-
-    string IncomingEvent4Taxel1D::toString() const
-    {
-        stringstream res;
-        res << "NRM: "<< NRM << "\t "<< IncomingEvent::toString();
-        return res.str();
-    }
-
-/****************************************************************/
-/* INCOMING EVENT 4 TAXEL WRAPPER
-*****************************************************************/
-    IncomingEvent4Taxel2D::IncomingEvent4Taxel2D() : IncomingEvent()
+    IncomingEvent4TaxelPWE::IncomingEvent4TaxelPWE() : IncomingEvent()
     {
         NRM = 0;
         TTC = 0;
     }
 
-    IncomingEvent4Taxel2D::IncomingEvent4Taxel2D(const Vector &p, const Vector &v,
-                                                 const double r, const string &s) :
-                                                 IncomingEvent(p,v,r,s)
+    IncomingEvent4TaxelPWE::IncomingEvent4TaxelPWE(const Vector &p, const Vector &v,
+                                                   const double r, const string &s) :
+                                                   IncomingEvent(p,v,r,s)
     {
-        NRM = 0;
-        TTC = 0;
+        computeNRMTTC();
     }
 
-    IncomingEvent4Taxel2D::IncomingEvent4Taxel2D(const IncomingEvent4Taxel2D &e)
+    IncomingEvent4TaxelPWE::IncomingEvent4TaxelPWE(const IncomingEvent4TaxelPWE &e)
+    {
+        *this = e;
+        computeNRMTTC();
+    }
+
+    IncomingEvent4TaxelPWE::IncomingEvent4TaxelPWE(const IncomingEvent &e)
     {
         *this = e;   
     }
 
-    IncomingEvent4Taxel2D::IncomingEvent4Taxel2D(const IncomingEvent &e)
-    {
-        *this = e;   
-    }
-
-    IncomingEvent4Taxel2D & IncomingEvent4Taxel2D::operator=(const IncomingEvent4Taxel2D &e)
+    IncomingEvent4TaxelPWE & IncomingEvent4TaxelPWE::operator=(const IncomingEvent4TaxelPWE &e)
     {
         IncomingEvent::operator=(e);
         TTC    = e.TTC;
@@ -263,23 +219,43 @@ unsigned int factorial(unsigned int n)
         return *this;
     }
 
-    IncomingEvent4Taxel2D & IncomingEvent4Taxel2D::operator=(const IncomingEvent &e)
+    IncomingEvent4TaxelPWE & IncomingEvent4TaxelPWE::operator=(const IncomingEvent &e)
     {
-        Pos    = e.Pos;
-        Vel    = e.Vel;
-        Src    = e.Src;
-        Radius = e.Radius;
-        TTC    = 0;
-        NRM    = 0;
+        IncomingEvent::operator=(e);
+        computeNRMTTC();
         return *this;
     }
 
-    void IncomingEvent4Taxel2D::print()
+    void IncomingEvent4TaxelPWE::computeNRMTTC()
+    {
+        int sgn = Pos[2]>=0?1:-1;
+        NRM = sgn * norm(Pos);
+
+        // if (norm(Vel) < 0.38 && norm(Vel) > 0.34)
+        // {
+        //     TTC = 10000.0;
+        // }
+        // else
+        // 
+        if (dot(Pos,Vel)==0) TTC = 0;
+        else                 TTC = -norm(Pos)*norm(Pos)/dot(Pos,Vel);
+    }
+
+    std::vector<double> IncomingEvent4TaxelPWE::getNRMTTC()
+    {
+        std::vector<double> x;
+        x.push_back(NRM);
+        x.push_back(TTC);
+
+        return x;
+    }
+
+    void IncomingEvent4TaxelPWE::print()
     {
         yDebug("\tNRM: %g\t TTC: %g \t %s", NRM, TTC, IncomingEvent::toString().c_str());
     }
 
-    string IncomingEvent4Taxel2D::toString() const
+    string IncomingEvent4TaxelPWE::toString() const
     {
         stringstream res;
         res << "NRM: "<< NRM << "\t TTC: " << TTC << "\t "<< IncomingEvent::toString();
@@ -292,13 +268,11 @@ unsigned int factorial(unsigned int n)
     void Taxel::init()
     {
         ID      = 0;
-        Resp    = 0;
-        rfAngle = 40*M_PI/180;
         Pos.resize(3,0.0);
         WRFPos.resize(3,0.0);
         Norm.resize(3,0.0);
         px.resize(2,0.0);
-        RF = eye(4);
+        FoR = eye(4);
     }
 
     Taxel::Taxel()
@@ -311,7 +285,7 @@ unsigned int factorial(unsigned int n)
         init();
         Pos  = p;
         Norm = n;
-        setRF();
+        setFoR();
     }
 
     Taxel::Taxel(const Vector &p, const Vector &n, const int &i)
@@ -320,27 +294,25 @@ unsigned int factorial(unsigned int n)
         ID   = i;
         Pos  = p;
         Norm = n;
-        setRF();
+        setFoR();
     }
 
     Taxel & Taxel::operator=(const Taxel &t)
     {
         ID      = t.ID;
-        Resp    = t.Resp;
         Pos     = t.Pos;
         WRFPos  = t.WRFPos;
         Norm    = t.Norm;
         px      = t.px;
-        RF      = t.RF;
-        rfAngle = t.rfAngle;
+        FoR     = t.FoR;
         return *this;
     }
 
-    void Taxel::setRF()
+    void Taxel::setFoR()
     {
         if (Norm == zeros(3))
         {
-            RF=eye(4);
+            FoR=eye(4);
             return;
         }
         
@@ -360,52 +332,67 @@ unsigned int factorial(unsigned int n)
         y = y / norm(y);
         z = z / norm(z);
 
-        RF=eye(4);
-        RF.setSubcol(x,0,0);
-        RF.setSubcol(y,0,1);
-        RF.setSubcol(z,0,2);
-        RF.setSubcol(Pos,0,3);
+        FoR=eye(4);
+        FoR.setSubcol(x,0,0);
+        FoR.setSubcol(y,0,1);
+        FoR.setSubcol(z,0,2);
+        FoR.setSubcol(Pos,0,3);
     }
 
 /****************************************************************/
-/* TAXEL WRAPPER 1D
+/* TAXEL WRAPPER FOR PWE
 *****************************************************************/
-    bool Taxel1D::addSample(const IncomingEvent4Taxel1D ie)
+
+    TaxelPWE::TaxelPWE() : Taxel(), Evnt()
     {
-        if (!insideRFCheck(ie))
-            return false;
-
-        std::vector <double> X;
-        X.push_back(ie.NRM);
-
-        return pwe.addSample(X);
+        Resp    = 0;
+        RFangle = 40*M_PI/180;
     }
 
-    bool Taxel1D::removeSample(const IncomingEvent4Taxel1D ie)
+    TaxelPWE::TaxelPWE(const Vector &p, const Vector &n) : Taxel(p,n)
     {
-        if (!insideRFCheck(ie))
+        Resp    = 0;
+        RFangle = 40*M_PI/180;
+    };
+
+    TaxelPWE::TaxelPWE(const Vector &p, const Vector &n, const int &i) : Taxel(p,n,i)
+    {
+        Resp    = 0;
+        RFangle = 40*M_PI/180;
+    };
+
+    bool TaxelPWE::addSample(IncomingEvent4TaxelPWE ie)
+    {
+        if (!insideFoRCheck(ie))
             return false;
 
-        std::vector <double> X;
-        X.push_back(ie.NRM);
-
-        return pwe.removeSample(X);
+        std::vector <double> x = ie.getNRMTTC();
+        return pwe->addSample(x);
     }
 
-    bool Taxel1D::insideRFCheck(const IncomingEvent4Taxel1D ie)
+    bool TaxelPWE::removeSample(IncomingEvent4TaxelPWE ie)
     {
-        std::vector<double> binWidth = pwe.getBinWidth();
+        if (!insideFoRCheck(ie))
+            return false;
+
+        std::vector <double> x = ie.getNRMTTC();
+        return pwe->removeSample(x);
+    }
+
+    bool TaxelPWE::insideFoRCheck(const IncomingEvent4TaxelPWE ie)
+    {
+        std::vector<double> binWidth = pwe->getBinWidth();
         double binLimit = 2*binWidth[0];
 
         // the x,y limit of the receptive field at the incoming event's Z
-        double RFlimit = ie.Pos(2)/tan(rfAngle);
+        double RFlimit = ie.Pos(2)/tan(RFangle);
 
         // the x,y limit of the receptive field in the first bin
-        double RFlimit_cyl = binLimit/tan(rfAngle);
+        double RFlimit_cyl = binLimit/tan(RFangle);
 
-        // yDebug("binLimit: %g RFlimit_cyl: %g rfAngle: %g \n", binLimit, RFlimit_cyl, rfAngle);
+        // yDebug("binLimit: %g RFlimit_cyl: %g RFangle: %g \n", binLimit, RFlimit_cyl, RFangle);
         // yDebug("ie.Pos\t%s\n", ie.Pos.toString(3,3).c_str());
-        // yDebug("Hist:\n%s\n", pwe.getHist().toString(3,3).c_str());
+        // yDebug("Hist:\n%s\n", pwe->getHist().toString(3,3).c_str());
 
         if (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit*RFlimit )
         {
@@ -420,155 +407,76 @@ unsigned int factorial(unsigned int n)
         return false;
     }
 
-    void Taxel1D::print(int verbosity)
+    void TaxelPWE::print(int verbosity)
     {
         if (verbosity > 4)
             yDebug("ID %i \tPos %s \tNorm %s \n\tPosHst \n%s\n\n\tNegHst \n%s\n", ID,
                     Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str(),
-                    pwe.getPosHist().toString(3,3).c_str(),
-                    pwe.getNegHist().toString(3,3).c_str());
+                    pwe->getPosHist().toString(3,3).c_str(),
+                    pwe->getNegHist().toString(3,3).c_str());
         else 
             yDebug("ID %i \tPos %s \tNorm %s\n", ID,
                     Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str());
             // yDebug("ID %i \tPos %s \tNorm %s \n\tHst %s\n", ID,
             //         Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str(),
-            //         pwe.getHist().toString(3,3).c_str());
+            //         pwe->getHist().toString(3,3).c_str());
     }
 
-    string Taxel1D::toString(int precision)
+    string TaxelPWE::toString(int precision)
     {
         stringstream res;
         res << "ID: " << ID << "\tPos: "<< Pos.toString(3,3) << "\t Norm: "<< Norm.toString(3,3);
 
         if (precision)
         {
-            res << "\n PosHst:\n"<< pwe.getPosHist().toString(3,3);
-            res << "\n NegHst:\n"<< pwe.getNegHist().toString(3,3) << endl;
+            res << "\n PosHst:\n"<< pwe->getPosHist().toString(3,3);
+            res << "\n NegHst:\n"<< pwe->getNegHist().toString(3,3) << endl;
         }
         return res.str();
     }
 
-    bool Taxel1D::resetParzenWindow()
+    bool TaxelPWE::resetParzenWindowEstimator()
     {
-        pwe.resetAllHist();
+        pwe->resetAllHist();
         return true;
     }
 
-    bool Taxel1D::computeResponse()
+    bool TaxelPWE::computeResponse()
     {
-        if (!insideRFCheck(Evnt))
+        if (!insideFoRCheck(Evnt))
         {
             Resp = 0;
             return false;
         }
 
-        std::vector<double> In;
-        In.push_back(Evnt.NRM);
-        Resp = pwe.computeResponse(In);
+        std::vector<double> In = Evnt.getNRMTTC();
+        Resp = pwe->computeResponse(In);
 
         return true;
     }
 
-/****************************************************************/
-/* TAXEL WRAPPER 2D
-*****************************************************************/
-    bool Taxel2D::addSample(const IncomingEvent4Taxel2D ie)
+    Bottle TaxelPWE::TaxelPWEIntoBottle()
     {
-        if (!insideRFCheck(ie))
-            return false;
+        Bottle res;
+        res.clear();
+        res.addInt(ID);
 
-        std::vector <double> X;
-        X.push_back(ie.NRM);
-        X.push_back(ie.TTC);
+        Bottle &dataPH = res.addList();
+        matrixOfIntIntoBottle(pwe->getPosHist(),dataPH);
 
-        return pwe.addSample(X);
+        Bottle &dataNH = res.addList();
+        matrixOfIntIntoBottle(pwe->getNegHist(),dataNH);
+
+        return res;
     }
 
-    bool Taxel2D::removeSample(const IncomingEvent4Taxel2D ie)
+    TaxelPWE::~TaxelPWE()
     {
-        if (!insideRFCheck(ie))
-            return false;
-
-        std::vector <double> X;
-        X.push_back(ie.NRM);
-        X.push_back(ie.TTC);
-
-        return pwe.removeSample(X);
-    }
-
-    bool Taxel2D::insideRFCheck(const IncomingEvent4Taxel2D ie)
-    {
-        std::vector<double> binWidth = pwe.getBinWidth();
-        double binLimit = 2*binWidth[0];
-
-        // the x,y limit of the receptive field at the incoming event's Z
-        double RFlimit = ie.Pos(2)/tan(rfAngle);
-
-        // the x,y limit of the receptive field in the first bin
-        double RFlimit_cyl = binLimit/tan(rfAngle);
-
-        // yDebug("binLimit: %g RFlimit_cyl: %g rfAngle: %g \n", binLimit, RFlimit_cyl, rfAngle);
-        // yDebug("ie.Pos\t%s\n", ie.Pos.toString(3,3).c_str());
-        // yDebug("Hist:\n%s\n", pwe.getHist().toString(3,3).c_str());
-
-        if (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit*RFlimit )
+        if (pwe)
         {
-            return true;
+            delete pwe;
+            pwe = NULL;
         }
-        // There are two ifs only to let me debug things
-        if ( (abs(ie.Pos(2))<=binLimit) && (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit_cyl*RFlimit_cyl) )
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    void Taxel2D::print(int verbosity)
-    {
-        if (verbosity > 4)
-            yDebug("ID %i \tPos %s \tNorm %s \n\tPosHst \n%s\n\n\tNegHst \n%s\n", ID,
-                    Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str(),
-                    pwe.getPosHist().toString(3,3).c_str(),
-                    pwe.getNegHist().toString(3,3).c_str());
-        else 
-            yDebug("ID %i \tPos %s \tNorm %s\n", ID,
-                    Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str());
-            // yDebug("ID %i \tPos %s \tNorm %s \n\tHst %s\n", ID,
-            //         Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str(),
-            //         pwe.getHist().toString(3,3).c_str());
-    }
-
-    string Taxel2D::toString(int precision)
-    {
-        stringstream res;
-        res << "ID: " << ID << "\tPos: "<< Pos.toString(3,3) << "\t Norm: "<< Norm.toString(3,3);
-
-        if (precision)
-        {
-            res << "\n PosHst:\n"<< pwe.getPosHist().toString(3,3);
-            res << "\n NegHst:\n"<< pwe.getNegHist().toString(3,3) << endl;
-        }
-        return res.str();
-    }
-
-    bool Taxel2D::resetParzenWindow()
-    {
-        pwe.resetAllHist();
-        return true;
-    }
-
-    bool Taxel2D::computeResponse()
-    {
-        if (!insideRFCheck(Evnt))
-            return false;
-
-        std::vector<double> In;
-        In.push_back(Evnt.NRM);
-        In.push_back(Evnt.TTC);
-        Resp = pwe.computeResponse(In);
-
-        return true;
     }
 
 /****************************************************************/
@@ -576,28 +484,30 @@ unsigned int factorial(unsigned int n)
 *****************************************************************/
     skinPart::skinPart()
     {
-        name= "";
-        size=  0;
+        name= SKIN_PART_UNKNOWN;
+        size=                 0;
     }
 
-/****************************************************************/
-/* SKINPART WRAPPER 1D
-*****************************************************************/
-    skinPart1D & skinPart1D::operator=(const skinPart1D &spw)
+    // skinPart::skinPart(const string _name)
+    // {
+    //     name = _name;
+    //     size =     0;
+    // }
+
+    skinPart & skinPart::operator=(const skinPart &spw)
     {
-        name =spw.name;
-        taxel=spw.taxel;
-        size =spw.size;
+        name           = spw.name;
+        size           = spw.size;
+        Taxel2Repr     = spw.Taxel2Repr;
+        Repr2TaxelList = spw.Repr2TaxelList;
         return *this;
     }
 
-    void skinPart1D::print(int verbosity)
+    void skinPart::print(int verbosity)
     {
         yDebug("**********\n");
-        yDebug("name: %s\t", name.c_str());
+        yDebug("name: %s\t", SkinPart_s[name].c_str());
         yDebug("size: %i\n", size);
-        for (size_t i = 0; i < taxel.size(); i++)
-            taxel[i].print(verbosity);
         yDebug("**********\n");
         
         if (verbosity>=4)
@@ -630,75 +540,94 @@ unsigned int factorial(unsigned int n)
         yDebug("**********\n");
     }
 
-    string skinPart1D::toString(int precision)
+    string skinPart::toString(int precision)
     {
         stringstream res;
-        res << "**********\n" << "Name: " << name << "\tSize: "<< size << endl;
-        for (size_t i = 0; i < taxel.size(); i++)
-            res << taxel[i].toString(precision);
-        res << "**********\n";
+        res << "**********\n" << "Name: " << SkinPart_s[name] << "\tSize: "<< size << endl;
         return res.str();
     }
 
 /****************************************************************/
-/* SKINPART WRAPPER 2D
+/* SKINPART TAXEL WRAPPER
 *****************************************************************/
-    skinPart2D & skinPart2D::operator=(const skinPart2D &spw)
+    skinPartTaxel & skinPartTaxel::operator=(const skinPartTaxel &spw)
     {
-        name =spw.name;
-        taxel=spw.taxel;
-        size =spw.size;
+        skinPart::operator=(spw);
+        txls     = spw.txls;
         return *this;
     }
 
-    void skinPart2D::print(int verbosity)
+    void skinPartTaxel::print(int verbosity)
     {
-        yDebug("**********\n");
-        yDebug("name: %s\t", name.c_str());
-        yDebug("size: %i\t", size);
-        yDebug("taxel's size: %lu\n", taxel.size());
-        
-        for (size_t i = 0; i < taxel.size(); i++)
-            taxel[i].print(verbosity);
-        
-        if (verbosity>=4)
-        {
-            yDebug("\nTaxel ID -> representative ID:\n");
-
-            for (size_t i=0; i<size; i++)
-            {
-                yDebug("[ %lu -> %d ]\t",i,Taxel2Repr[i]);
-                if (i % 8 == 7)
-                {
-                    yDebug("\n");
-                }
-            }
-            yDebug("\n");
-            
-            yDebug("Representative ID -> Taxel IDs:\n");
-            for(map<unsigned int, list<unsigned int> >::const_iterator iter_map = Repr2TaxelList.begin(); iter_map != Repr2TaxelList.end(); ++iter_map)
-            {
-                list<unsigned int> l = iter_map->second;
-                yDebug("%d -> {",iter_map->first);
-                for(list<unsigned int>::const_iterator iter_list = l.begin(); iter_list != l.end(); iter_list++)
-                {
-                    yDebug("%u, ",*iter_list);
-                }
-                yDebug("}\n");
-            }    
-            yDebug("\n");
-        }
+        skinPart::print(verbosity);
+        for (size_t i = 0; i < txls.size(); i++)
+            txls[i]->print(verbosity);
         yDebug("**********\n");
     }
 
-    string skinPart2D::toString(int precision)
+    string skinPartTaxel::toString(int precision)
     {
-        stringstream res;
-        res << "**********\n" << "Name: " << name << "\tSize: "<< size << endl;
-        for (size_t i = 0; i < taxel.size(); i++)
-            res << taxel[i].toString(precision);
+        stringstream res(skinPart::toString(precision));
+        for (size_t i = 0; i < txls.size(); i++)
+            res << txls[i]->toString(precision);
         res << "**********\n";
         return res.str();
+    }
+
+    skinPartTaxel::~skinPartTaxel()
+    {
+        for (size_t i = 0; i < txls.size(); i++)
+        {
+            if (txls[i])
+            {
+                delete txls[i];
+                txls[i] = NULL;
+            }
+        }
+    }
+
+/****************************************************************/
+/* SKINPART TAXEL PWE WRAPPER
+*****************************************************************/
+    skinPartPWE & skinPartPWE::operator=(const skinPartPWE &spw)
+    {
+        skinPart::operator=(spw);
+        txls     = spw.txls;
+        modality = spw.modality;
+        return *this;
+    }
+
+    void skinPartPWE::print(int verbosity)
+    {
+        skinPart::print(verbosity);
+        for (size_t i = 0; i < txls.size(); i++)
+            txls[i]->print(verbosity);
+        yDebug("**********\n");
+    }
+
+    string skinPartPWE::toString(int precision)
+    {
+        stringstream res(skinPart::toString(precision));
+        for (size_t i = 0; i < txls.size(); i++)
+            res << txls[i]->toString(precision);
+        res << "**********\n";
+        return res.str();
+    }
+
+    skinPartPWE::~skinPartPWE()
+    {
+        // printf("%lu\n", txls.size());
+        // int i=0;
+
+        // while(!txls.empty())
+        // {
+        //     printf("i %i\n", i); i++;
+        //     if (txls.back())
+        //     {
+        //         delete txls.back();
+        //     }
+        //     txls.pop_back();
+        // }
     }
 
 /****************************************************************/
