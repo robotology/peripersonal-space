@@ -266,7 +266,7 @@ void vtRFThread::run()
         for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
         {
             iCubSkin[i].txls[j]->WRFPos=locateTaxel(iCubSkin[i].txls[j]->Pos,iCubSkin[i].name);
-            printMessage(5,"iCubSkin[%i].txls[%i].WRFPos %s\n",i,j,iCubSkin[i].txls[j]->WRFPos.toString().c_str());
+            printMessage(7,"iCubSkin[%i].txls[%i].WRFPos %s\n",i,j,iCubSkin[i].txls[j]->WRFPos.toString().c_str());
         }
     }
 
@@ -299,7 +299,7 @@ void vtRFThread::run()
         for (size_t i = 0; i < inputEvents.size(); i++)
         {
             incomingEvents.push_back(IncomingEvent(*(inputEvents.get(i).asList())));
-            // printMessage(3,"[EVENT] %s", incomingEvents.back().toString().c_str());
+            printMessage(3,"[EVENT] %s", incomingEvents.back().toString().c_str());
         }
 
         // manage the buffer
@@ -699,9 +699,11 @@ string vtRFThread::load()
                 {
                     if (iCubSkin[i].txls[k]->ID == bbb->get(0).asInt())
                     {
-                        iCubSkin[i].txls[k]->pwe->resize(ext,bNum);
-                        iCubSkin[i].txls[k]->pwe->setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],bNum[1]));
-                        iCubSkin[i].txls[k]->pwe->setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],bNum[1]));
+                        if (iCubSkin[i].txls[k]->pwe->resize(ext,bNum))
+                        {
+                            iCubSkin[i].txls[k]->pwe->setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],bNum[1]));
+                            iCubSkin[i].txls[k]->pwe->setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],bNum[1]));
+                        }
                     }
                 }
             }
@@ -905,7 +907,7 @@ bool vtRFThread::computeResponse()
         for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
         {
             iCubSkin[i].txls[j]->computeResponse();
-            printMessage(4,"\t\tID %i\tResponse %i\n",j,iCubSkin[i].txls[j]->Resp);
+            printMessage(4,"\tID %i\tResponse %i\n",j,iCubSkin[i].txls[j]->Resp);
         }
     }
 
