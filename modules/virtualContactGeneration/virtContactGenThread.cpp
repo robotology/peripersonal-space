@@ -1,10 +1,12 @@
 #include "virtContactGenThread.h"
 #include <yarp/sig/Image.h>
 
-
+//see also Compensator::setTaxelPosesFromFile in icub-main/src/modules/skinManager/src/compensator.cpp
+//see also dbool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
 int virtContactGenerationThread::initSkinParts()
 {
     SkinPart skin_part_name; 
+    skinPartTaxel *skinPartWithTaxels; 
     
     string line;
     ifstream posFile;
@@ -16,18 +18,54 @@ int virtContactGenerationThread::initSkinParts()
     for (std::vector<SkinPart>::const_iterator it = activeSkinPartsNames.begin() ; it != activeSkinPartsNames.end(); ++it){
         skin_part_name = *it;
         
+        // Open File
+        posFile.open(skinPartPosFilePaths[skin_part_name].c_str());  
+        if (!posFile.is_open())
+        {
+           yWarning("[virtContactGenerationThread] File %s has not been opened!",skinPartPosFilePaths[skin_part_name].c_str());
+           return false;
+        }
+        posFile.clear(); 
+        posFile.seekg(0, std::ios::beg);//rewind iterator
+    
+        skinPartTaxel skinPartWithTaxels;
+        
         switch(skin_part_name){
-            case SKIN_LEFT_HAND: 
-                ;
-                break;
+            case SKIN_LEFT_HAND:
+            case SKIN_RIGHT_HAND:
+                for(unsigned int i= 0; getline(posFile,line); i++)
+                {
+                    line.erase(line.find_last_not_of(" \n\r\t")+1);
+                    if(line.empty())
+                        continue;
+                    string number;
+                    istringstream iss(line, istringstream::in);
+                    for(unsigned int j = 0; iss >> number; j++ )
+                    {
+                        if(j<3)
+                            taxelPos[j] = strtod(number.c_str(),NULL);
+                        else
+                            taxelNorm[j-3] = strtod(number.c_str(),NULL);
+                    }
+                    skinPartWithTaxels.size++; //this is incremented for all lines - size of "port"
+                    if((i>=96) && (i<=143) && (i!=107) && (i!=119) && (i!=131) && (i!=139)) //all palm taxels, without thermal pads
+                    {
+                        skinPartWithTaxels.txls.push_back(new Taxel(taxelPos,taxelNorm,i));
+                    }
+               }
+               if (skin_part_name == SKIN_LEFT_HAND){
+                    activeSkinParts[SKIN_LEFT_HAND] = skinPartWithTaxels;
+               }
+               else{  // skin_part_name == SKIN_RIGHT_HAND
+                    activeSkinParts[SKIN_RIGHT_HAND] = skinPartWithTaxels;
+               }
+               break;
             default: 
                 yError("[virtContactGenerationThread] Asked to initialize skinDynLib::SkinPart:: %d, but that skin part is not implemented yet.\n",skin_part_name);
                 return -1;
         }
         
-        //initialize the skinPart container  - create a skin part object and then add it to a vector of the skin parts
-        //init will include adding the valid taxels (again, object from utils), analogous to vtRFThread::setTaxelPosesFromFile
-        // I guess I will add only real taxel (not thermal pads) and only those for which I have positions 
+       
     }
     
     return 0;
