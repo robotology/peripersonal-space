@@ -276,8 +276,8 @@ void vtRFThread::run()
     if (event == NULL)
     {
         // if there is nothing from the port but there was a previous event,
-        // and it did not pass more than 0.5 seconds from the last data, let's use that
-        if ((yarp::os::Time::now() - timeNow <= 0.5) && incomingEvents.size()>0)
+        // and it did not pass more than 0.2 seconds from the last data, let's use that
+        if ((yarp::os::Time::now() - timeNow <= 0.2) && incomingEvents.size()>0)
         {
             Bottle &b = inputEvents.addList();
             b = incomingEvents.back().toBottle();
@@ -806,7 +806,7 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
         for (size_t k = 0; k < eventsBuffer.size(); k++)
         {
             IncomingEvent4TaxelPWE projection = projectIntoTaxelRF(iCubSkin[IDx].txls[j]->FoR,T_a,eventsBuffer[k]);
-            printMessage(4,"Training Taxels: skinPart %d ID %i k %i NORM %g TTC %g\n",IDx,iCubSkin[IDx].txls[j]->ID,k,projection.NRM,projection.TTC);
+            printMessage(3,"Training Taxels: skinPart %d ID %i k %i NORM %g TTC %g\n",IDx,iCubSkin[IDx].txls[j]->ID,k,projection.NRM,projection.TTC);
 
             if (itHasBeenTouched == true)   iCubSkin[IDx].txls[j]->addSample(projection);
             else                            iCubSkin[IDx].txls[j]->removeSample(projection);
@@ -1723,11 +1723,12 @@ bool vtRFThread::getRepresentativeTaxels(const std::vector<unsigned int> IDv, co
         
         if (verbosity>=4)
         {
-            printMessage(4,"Representative taxels on skin part %d: \n",IDx);
+            printMessage(4,"Representative taxels on skin part %d: ",IDx);
             for(std::vector<unsigned int>::const_iterator it = v.begin() ; it != v.end(); ++it)
             {
                 printf("%d ",*it);
             }
+            printf("\n");
         }
     }
 

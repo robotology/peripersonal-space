@@ -118,6 +118,7 @@ double gauss2D(const double x_0, const double y_0,
         
         if (getIndexes(x,b))
         {
+            printf("adding sample %i %i from %g %g\n",b[0],b[1],x[0],x[1]);
             posHist(b[0],b[1]) += 1;
             return true;
         }

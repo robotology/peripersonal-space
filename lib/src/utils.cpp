@@ -367,6 +367,8 @@ unsigned int factorial(unsigned int n)
             return false;
 
         std::vector <double> x = ie.getNRMTTC();
+        printf("[TaxelPWE::addSample] x %g %g\n",x[0],x[1]);
+        
         return pwe->addSample(x);
     }
 
@@ -382,7 +384,7 @@ unsigned int factorial(unsigned int n)
     bool TaxelPWE::insideFoRCheck(const IncomingEvent4TaxelPWE ie)
     {
         std::vector<double> binWidth = pwe->getBinWidth();
-        double binLimit = 2*binWidth[0];
+        double binLimit = 8*binWidth[0];
 
         // the x,y limit of the receptive field at the incoming event's Z
         double RFlimit = ie.Pos(2)/tan(RFangle);
@@ -403,7 +405,6 @@ unsigned int factorial(unsigned int n)
         {
             return true;
         }
-
         return false;
     }
 
