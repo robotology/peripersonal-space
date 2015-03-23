@@ -103,7 +103,7 @@ private:
     int threadPeriod;
     string type;    
        
-    vector<SkinPart> activeSkinPartsVector;
+    vector<SkinPart> activeSkinPartsNamesVector;
  
 
 public:
@@ -179,7 +179,7 @@ public:
             {
                 if(bSkinParts.find("SKIN_LEFT_HAND").asString()=="on"){
                     partOfSkin = SKIN_LEFT_HAND;
-                    activeSkinPartsVector.push_back(partOfSkin);
+                    activeSkinPartsNamesVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_LEFT_HAND to active skin parts.");
                 }
                 
@@ -190,7 +190,7 @@ public:
             {
                 if(bSkinParts.find("SKIN_LEFT_FOREARM").asString()=="on"){
                     partOfSkin = SKIN_LEFT_FOREARM;
-                    activeSkinPartsVector.push_back(partOfSkin);
+                    activeSkinPartsNamesVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_LEFT_FOREARM to active skin parts.");
                 }
             }
@@ -200,7 +200,7 @@ public:
             {
                 if(bSkinParts.find("SKIN_LEFT_UPPER_ARM").asString()=="on"){
                     partOfSkin = SKIN_LEFT_UPPER_ARM;
-                    activeSkinPartsVector.push_back(partOfSkin);
+                    activeSkinPartsNamesVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_LEFT_UPPER_ARM to active skin parts.");
                 }
             }
@@ -210,7 +210,7 @@ public:
             {
                 if(bSkinParts.find("SKIN_RIGHT_HAND").asString()=="on"){
                     partOfSkin = SKIN_RIGHT_HAND;
-                    activeSkinPartsVector.push_back(partOfSkin);
+                    activeSkinPartsNamesVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_RIGHT_HAND to active skin parts.");
                 }
                 
@@ -221,7 +221,7 @@ public:
             {
                 if(bSkinParts.find("SKIN_RIGHT_FOREARM").asString()=="on"){
                     partOfSkin = SKIN_RIGHT_FOREARM;
-                    activeSkinPartsVector.push_back(partOfSkin);
+                    activeSkinPartsNamesVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_RIGHT_FOREARM to active skin parts.");
                 }
                 
@@ -232,7 +232,7 @@ public:
             {
                 if(bSkinParts.find("SKIN_RIGHT_UPPER_ARM").asString()=="on"){
                     partOfSkin = SKIN_RIGHT_UPPER_ARM;
-                    activeSkinPartsVector.push_back(partOfSkin);
+                    activeSkinPartsNamesVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_RIGHT_UPPER_ARM to active skin parts.");
                 }
             }
@@ -245,7 +245,7 @@ public:
            
         //******************************************************
         //*********************** THREAD **********************
-        virtContactGenThrd = new virtContactGenerationThread(threadPeriod,name,robot,verbosity,type,activeSkinPartsVector);
+        virtContactGenThrd = new virtContactGenerationThread(threadPeriod,name,robot,verbosity,type,activeSkinPartsNamesVector);
         if (!virtContactGenThrd -> start())
         {
               delete virtContactGenThrd;
@@ -266,7 +266,7 @@ public:
             delete virtContactGenThrd;
             virtContactGenThrd =  0;
         }
-      
+        
         return true;
     }
 

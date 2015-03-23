@@ -59,18 +59,25 @@ protected:
     
     
     //based on .ini file, contains a list of skin parts that will be part of the virtual contact generation
-    vector<SkinPart> activeSkinParts;
+    vector<SkinPart> activeSkinPartsNames;
+    //will contain actual skin parts with list of taxels and their positions
+    vector<skinPartTaxel> activeSkinParts;
     
     /***************************************************************************/
     // INTERNAL VARIABLES
     // Port with the fake contacts:
     BufferedPort<skinContactList> *skinEventsOutPort;
-    
-    //TODO will need also a vector with the initialized activeSkinParts as the skinParts or 1D or 2D or custom child from the utils.h
-    
+        
     SkinPart skinPartPicked;
   
-     /**
+    /**
+    * Initializes vector of skin parts - activeSkinParts based on the activeSkinPartsNames. 
+    * Uses the class members (activeSkinPartsNames and activeSkinParts) and modifies activeSkinParts - fills it with appropriate taxel objects etc.
+    */
+    int initSkinParts();
+       
+    
+    /**
     * Prints a message according to the verbosity level:
     * @param l is the level of verbosity: if level > verbosity, something is printed
     * @param f is the text. Please use c standard (like printf)
@@ -81,7 +88,7 @@ protected:
 public:
     // CONSTRUCTOR
     virtContactGenerationThread(int _rate, const string &_name, const string &_robot,
-                      int _v, const string &_type, vector<SkinPart> &_activeSkinParts);
+                      int _v, const string &_type, const vector<SkinPart> &_activeSkinPartsNames);
     // INIT
     virtual bool threadInit();
     // RUN
