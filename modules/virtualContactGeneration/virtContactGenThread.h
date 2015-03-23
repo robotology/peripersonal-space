@@ -21,6 +21,10 @@
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
 #include <stdarg.h>
+#include <string> 
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 #include <yarp/os/Time.h>
 #include <yarp/os/RateThread.h>
@@ -60,8 +64,9 @@ protected:
     
     //based on .ini file, contains a list of skin parts that will be part of the virtual contact generation
     vector<SkinPart> activeSkinPartsNames;
+    map<SkinPart,string> skinPartPosFilePaths;
     //will contain actual skin parts with list of taxels and their positions
-    vector<skinPartTaxel> activeSkinParts;
+    map<SkinPart,skinPartTaxel> activeSkinParts;
     
     /***************************************************************************/
     // INTERNAL VARIABLES
@@ -88,7 +93,7 @@ protected:
 public:
     // CONSTRUCTOR
     virtContactGenerationThread(int _rate, const string &_name, const string &_robot,
-                      int _v, const string &_type, const vector<SkinPart> &_activeSkinPartsNames);
+                      int _v, const string &_type, const vector<SkinPart> &_activeSkinPartsNames, const map<SkinPart,string> &_skinPartPosFilePaths);
     // INIT
     virtual bool threadInit();
     // RUN
