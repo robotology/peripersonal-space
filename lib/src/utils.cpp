@@ -367,6 +367,8 @@ unsigned int factorial(unsigned int n)
             return false;
 
         std::vector <double> x = ie.getNRMTTC();
+        printf("[TaxelPWE::addSample] x %g %g\n",x[0],x[1]);
+        
         return pwe->addSample(x);
     }
 
@@ -382,7 +384,7 @@ unsigned int factorial(unsigned int n)
     bool TaxelPWE::insideFoRCheck(const IncomingEvent4TaxelPWE ie)
     {
         std::vector<double> binWidth = pwe->getBinWidth();
-        double binLimit = 2*binWidth[0];
+        double binLimit = 8*binWidth[0];
 
         // the x,y limit of the receptive field at the incoming event's Z
         double RFlimit = ie.Pos(2)/tan(RFangle);
@@ -403,7 +405,6 @@ unsigned int factorial(unsigned int n)
         {
             return true;
         }
-
         return false;
     }
 
@@ -472,10 +473,9 @@ unsigned int factorial(unsigned int n)
 
     TaxelPWE::~TaxelPWE()
     {
-        if (pwe)
+        if (pwe!=NULL)
         {
             delete pwe;
-            pwe = NULL;
         }
     }
 
@@ -484,8 +484,8 @@ unsigned int factorial(unsigned int n)
 *****************************************************************/
     skinPart::skinPart()
     {
-        name= SKIN_PART_UNKNOWN;
-        size=                 0;
+        name = SKIN_PART_UNKNOWN;
+        size =                 0;
     }
 
     // skinPart::skinPart(const string _name)
@@ -576,14 +576,14 @@ unsigned int factorial(unsigned int n)
 
     skinPartTaxel::~skinPartTaxel()
     {
-        for (size_t i = 0; i < txls.size(); i++)
-        {
-            if (txls[i])
-            {
-                delete txls[i];
-                txls[i] = NULL;
-            }
-        }
+        // while(!txls.empty())
+        // {
+        //     if (txls.back())
+        //     {
+        //         delete txls.back();
+        //     }
+        //     txls.pop_back();
+        // }
     }
 
 /****************************************************************/
@@ -616,7 +616,7 @@ unsigned int factorial(unsigned int n)
 
     skinPartPWE::~skinPartPWE()
     {
-        // printf("%lu\n", txls.size());
+        // printf("Taxelsize %lu %i\n", txls.size(), get_taxelSize());
         // int i=0;
 
         // while(!txls.empty())

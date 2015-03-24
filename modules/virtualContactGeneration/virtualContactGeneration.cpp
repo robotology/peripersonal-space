@@ -104,6 +104,7 @@ private:
     string type;    
        
     vector<SkinPart> activeSkinPartsNamesVector;
+    map<SkinPart,string> skinPartsPositionsFilePaths;
  
 
 public:
@@ -129,8 +130,8 @@ public:
         Bottle &bGeneral=rf.findGroup("general");
         bGeneral.setMonitor(rf.getMonitor());  
         
-           //******************* NAME ******************
-          if (bGeneral.check("name"))
+            //******************* NAME ******************
+            if (bGeneral.check("name"))
             {
                 name = bGeneral.find("name").asString();
                 yInfo("Module name set to %s", name.c_str());
@@ -170,9 +171,9 @@ public:
             }
             else yInfo("Could not find type option in the config file; using %s as default",type.c_str());
 
-          //*************** ACTIVE SKIN PARTS GROUP ****************
-          Bottle &bSkinParts=rf.findGroup("skin_parts");
-          if (!bSkinParts.isNull()){
+        //*************** ACTIVE SKIN PARTS GROUP ****************
+        Bottle &bSkinParts=rf.findGroup("skin_parts");
+        if (!bSkinParts.isNull()){
             bSkinParts.setMonitor(rf.getMonitor());
             
             if (bSkinParts.check("SKIN_LEFT_HAND"))
@@ -237,15 +238,57 @@ public:
                 }
             }
             else yInfo("Could not find [skin_parts] SKIN_RIGHT_UPPER_ARM option in the config file; set to default, i.e. off"); 
-          }
-          else{ //bSkinParts.isNull()
-              yInfo("Could not find [skin_parts] group in the config file; set all to default, i.e. off"); 
-          }
+        }
+        else{ //bSkinParts.isNull()
+            yInfo("Could not find [skin_parts] group in the config file; set all to default, i.e. off"); 
+        }
            
+           
+        //*************** SKIN PARTS FILENAMES FROM SKIN MANAGER INI FILES ****************  
+        
+         ResourceFinder skinRF;
+         int partNum;
+         skinRF.setVerbose(false);
+         skinRF.setDefaultContext("skinGui");                //overridden by --context parameter
+         skinRF.setDefaultConfigFile("skinManAll.ini"); //overridden by --from parameter
+         skinRF.configure(0,NULL);
+
+         Bottle &skinEventsConf = skinRF.findGroup("SKIN_EVENTS");
+         if(!skinEventsConf.isNull())
+         {
+            yInfo("SKIN_EVENTS section found\n");
+            if(skinEventsConf.check("skinParts"))
+            {
+                Bottle* skinPartList = skinEventsConf.find("skinParts").asList();
+                partNum=skinPartList->size();
+            }
+            if(skinEventsConf.check("taxelPositionFiles"))
+            {
+                Bottle *taxelPosFiles = skinEventsConf.find("taxelPositionFiles").asList();
+                for(int i=0;i<partNum;i++)     // all of the skinparts
+                {
+                    string taxelPosFile = taxelPosFiles->get(i).asString().c_str();
+                    string filePath(skinRF.findFile(taxelPosFile.c_str()));
+                    if (filePath!="")
+                    {
+                        yInfo("[skin_event] filePath [%i in bottle] %s; setting under %s in skinPartsPositionsFilePath.\n",i,filePath.c_str(),SkinPart_s[i+1].c_str());
+                        skinPartsPositionsFilePaths[(SkinPart)(i+1)] = filePath;    //! Importantly, this is relying on the fact that the skin parts are in the 
+                        //right order in the .ini file, matching with SkinPart enum, and starting with 1 for left hand
+                    }
+                        
+                    
+                }
+            }
+            else
+            {
+                yError(" No skin's configuration files found.");
+                return 0;
+            }
+        }
            
         //******************************************************
         //*********************** THREAD **********************
-        virtContactGenThrd = new virtContactGenerationThread(threadPeriod,name,robot,verbosity,type,activeSkinPartsNamesVector);
+        virtContactGenThrd = new virtContactGenerationThread(threadPeriod,name,robot,verbosity,type,activeSkinPartsNamesVector,skinPartsPositionsFilePaths);
         if (!virtContactGenThrd -> start())
         {
               delete virtContactGenThrd;
