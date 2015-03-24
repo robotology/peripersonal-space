@@ -81,6 +81,10 @@ protected:
     */
     int initSkinParts();
        
+     /**
+    * Prints the initialized skin parts into files - for debugging purposes. Only if verbosity > 5.
+    */
+    void printInitializedSkinParts();
     
     /**
     * Prints a message according to the verbosity level:

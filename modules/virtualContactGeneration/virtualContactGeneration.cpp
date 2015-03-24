@@ -345,11 +345,11 @@ int main(int argc, char * argv[])
         yInfo("");
         yInfo("   --context    path:  where to find the called resource");
         yInfo("   --from       from:  the name of the .ini file.");
-        yInfo("   --name       name:  the name of the module (default virtualContactGeneration).");
-        yInfo("   --robot      robot: the name of the robot. Default icubSim.");
-        yInfo("   --rate       rate:  the period used by the thread. Default 100ms.");
-        yInfo("   --verbosity  int:   verbosity level (default 0).");
-        yInfo("   --type       type:  selection of fake contacts - e.g. 'random'.");
+        yInfo("   --general::name       name:  the name of the module (default virtualContactGeneration).");
+        yInfo("   --general::robot      robot: the name of the robot. Default icubSim.");
+        yInfo("   --general::rate       rate:  the period used by the thread. Default 100ms.");
+        yInfo("   --general::verbosity  int:   verbosity level (default 0).");
+        yInfo("   --general::type       type:  selection of fake contacts - e.g. 'random'.");
      
         yInfo("");
         return 0;

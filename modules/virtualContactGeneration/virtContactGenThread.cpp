@@ -6,8 +6,7 @@
 int virtContactGenerationThread::initSkinParts()
 {
     SkinPart skin_part_name; 
-    skinPartTaxel *skinPartWithTaxels; 
-    
+       
     string line;
     ifstream posFile;
     yarp::sig::Vector taxelPos(3,0.0);
@@ -17,6 +16,7 @@ int virtContactGenerationThread::initSkinParts()
     //go through skin parts and initialize them
     for (std::vector<SkinPart>::const_iterator it = activeSkinPartsNames.begin() ; it != activeSkinPartsNames.end(); ++it){
         skin_part_name = *it;
+        skinPartTaxel skinPartWithTaxels; 
         
         // Open File
         posFile.open(skinPartPosFilePaths[skin_part_name].c_str());  
@@ -25,10 +25,9 @@ int virtContactGenerationThread::initSkinParts()
            yWarning("[virtContactGenerationThread] File %s has not been opened!",skinPartPosFilePaths[skin_part_name].c_str());
            return false;
         }
+        printMessage(4,"Initializing %s from %s.\n",SkinPart_s[skin_part_name].c_str(),skinPartPosFilePaths[skin_part_name].c_str());
         posFile.clear(); 
         posFile.seekg(0, std::ios::beg);//rewind iterator
-    
-        skinPartTaxel skinPartWithTaxels;
         
         switch(skin_part_name){
             case SKIN_LEFT_HAND:
@@ -40,6 +39,7 @@ int virtContactGenerationThread::initSkinParts()
                         continue;
                     string number;
                     istringstream iss(line, istringstream::in);
+                    taxelPos.zero(); taxelNorm.zero();
                     for(unsigned int j = 0; iss >> number; j++ )
                     {
                         if(j<3)
@@ -51,24 +51,60 @@ int virtContactGenerationThread::initSkinParts()
                     if((i>=96) && (i<=143) && (i!=107) && (i!=119) && (i!=131) && (i!=139)) //all palm taxels, without thermal pads
                     {
                         skinPartWithTaxels.txls.push_back(new Taxel(taxelPos,taxelNorm,i));
+                        printMessage(10,"Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",i,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
                     }
-               }
-               if (skin_part_name == SKIN_LEFT_HAND){
-                    activeSkinParts[SKIN_LEFT_HAND] = skinPartWithTaxels;
-               }
-               else{  // skin_part_name == SKIN_RIGHT_HAND
+                }
+                if(skinPartWithTaxels.size != 192){
+                    yWarning("[virtContactGenerationThread]::initSkinParts():initalizing %s from file, 192 positions expected, but %d present.\n",SkinPart_s[skin_part_name].c_str(),skinPartWithTaxels.size);
+                }
+                skinPartWithTaxels.name = skin_part_name;
+                if (skin_part_name == SKIN_LEFT_HAND){
+                   activeSkinParts[SKIN_LEFT_HAND] = skinPartWithTaxels;
+                   printMessage(4,"Adding SKIN_LEFT_HAND to activeSkinParts, it now has %d members.\n",activeSkinParts.size());
+                }
+                else{  // skin_part_name == SKIN_RIGHT_HAND
                     activeSkinParts[SKIN_RIGHT_HAND] = skinPartWithTaxels;
-               }
-               break;
+                    printMessage(4,"Adding SKIN_RIGHT_HAND to activeSkinParts, it now has %d members.\n",activeSkinParts.size());
+                }
+                break;
             default: 
                 yError("[virtContactGenerationThread] Asked to initialize skinDynLib::SkinPart:: %d, but that skin part is not implemented yet.\n",skin_part_name);
                 return -1;
         }
         
+        posFile.close();
+        
        
     }
     
     return 0;
+    
+}
+
+void virtContactGenerationThread::printInitializedSkinParts()
+{
+    
+    for (std::map<SkinPart,skinPartTaxel>::const_iterator it = activeSkinParts.begin() ; it != activeSkinParts.end(); ++it){
+        skinPartTaxel locSkinPartTaxel = it->second;
+        vector<Taxel*> taxels = locSkinPartTaxel.txls;
+        printMessage(6,"Iterating through activeSkinParts (%d members), now: it->first: %d, locSkinPartTaxel.name:%d, %s.\n",activeSkinParts.size(),it->first,locSkinPartTaxel.name,SkinPart_s[locSkinPartTaxel.name].c_str());
+        ofstream outFile;   
+        outFile.open(SkinPart_s[locSkinPartTaxel.name].c_str());
+        if (outFile.fail())          // Check for file creation and return error.
+        {
+           printMessage(6,"Error opening %s for output.\n",SkinPart_s[it->second.name].c_str());
+           continue;
+        }
+        for (vector<Taxel*>::const_iterator it_taxel = taxels.begin(); it_taxel!= taxels.end(); ++it_taxel){
+             outFile << (**it_taxel).Pos[0] << " " <<(**it_taxel).Pos[1] << " " <<(**it_taxel).Pos[2] << " " <<(**it_taxel).Norm[0] << " " <<(**it_taxel).Norm[1] << " " <<(**it_taxel).Norm[2] << " " <<(**it_taxel).ID <<endl; 
+        }
+        printMessage(6,"Wrote to file %s for output.\n",SkinPart_s[locSkinPartTaxel.name].c_str());
+        outFile.close();             
+    }
+    
+
+
+    
     
 }
 
@@ -89,7 +125,11 @@ bool virtContactGenerationThread::threadInit()
      /* initialize random seed: */
     srand (time(NULL));
     
-  
+    initSkinParts();
+    
+    if(verbosity > 5){
+        printInitializedSkinParts();
+    }
     
     return true;
 }
