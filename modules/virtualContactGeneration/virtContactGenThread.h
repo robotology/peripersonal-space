@@ -29,11 +29,15 @@
 #include <yarp/os/Time.h>
 #include <yarp/os/RateThread.h>
 #include <yarp/os/BufferedPort.h>
+#include <yarp/os/RFModule.h>
+#include <yarp/os/Stamp.h>
 
 #include <iCub/skinDynLib/skinContact.h>
 #include <iCub/skinDynLib/skinContactList.h>
 
 #include <iCub/periPersonalSpace/utils.h>
+
+#define VIRT_CONTACT_PRESSURE 100
 
 using namespace std;
 
@@ -61,20 +65,28 @@ protected:
     // type of selection of contacts - e.g. random
     string type;
     
-    
     //based on .ini file, contains a list of skin parts that will be part of the virtual contact generation
     vector<SkinPart> activeSkinPartsNames;
     map<SkinPart,string> skinPartPosFilePaths;
-    //will contain actual skin parts with list of taxels and their positions
-    map<SkinPart,skinPartTaxel> activeSkinParts;
-    
+       
     /***************************************************************************/
     // INTERNAL VARIABLES
+    
+    // Stamp for the setEnvelope for the ports
+    yarp::os::Stamp ts;
+    
     // Port with the fake contacts:
     BufferedPort<skinContactList> *skinEventsOutPort;
-        
-    SkinPart skinPartPicked;
-  
+    
+    //will contain actual skin parts with list of taxels and their positions
+    map<SkinPart,skinPartTaxel> activeSkinParts;
+    int skinPartIndexInVector;
+    SkinPart skinPartPickedName;
+    skinPartTaxel skinPartPicked;
+    int taxelPickedIndex;
+    Taxel taxelPicked;
+    std::vector<unsigned int> taxelIDinList;
+   
     /**
     * Initializes vector of skin parts - activeSkinParts based on the activeSkinPartsNames. 
     * Uses the class members (activeSkinPartsNames and activeSkinParts) and modifies activeSkinParts - fills it with appropriate taxel objects etc.
