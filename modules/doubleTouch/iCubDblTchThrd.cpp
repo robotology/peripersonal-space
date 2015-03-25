@@ -7,10 +7,10 @@
 // VEL_THRES * getRate()
 
 doubleTouchThread::doubleTouchThread(int _rate, const string &_name, const string &_robot, int _v,
-                                     string _type, int _record, string _filename, string _color,
+                                     string _type, double _jnt_vels, int _record, string _filename, string _color,
                                      bool _autoconnect) : RateThread(_rate), name(_name), robot(_robot),
                                      verbosity(_v), type(_type), record(_record), filename(_filename),
-                                     color(_color), autoconnect(_autoconnect)
+                                     color(_color), autoconnect(_autoconnect), jnt_vels(_jnt_vels)
 {
     step     = 0;
     recFlag  = 0;
@@ -302,24 +302,12 @@ void doubleTouchThread::run()
                         iposS->positionMove(i,poss[i-7]);
                     }
 
-                    if (robot == "icubSim")
+                    vels.resize(7,jnt_vels);
+                    for (int i=0; i<7; i++)
                     {
-                        vels.resize(7,20.0);
-                        for (int i=0; i<7; i++)
-                        {
-                            iposS->setRefSpeed(i,vels[i]);
-                            iposM->setRefSpeed(i,vels[i]);
-                        }
-                    }
-                    else if (robot == "icub")
-                    {
-                        vels.resize(7,10.0);
-                        for (int i=0; i<7; i++)
-                        {
-                            iposS->setRefSpeed(i,vels[i]);
-                            iposM->setRefSpeed(i,vels[i]);
-                        }
-                    }
+                        iposS->setRefSpeed(i,vels[i]);
+                        iposM->setRefSpeed(i,vels[i]);
+                     }
                 }
                 printMessage(0,"WAITING FOR CONTACT...\n");
                 step++;

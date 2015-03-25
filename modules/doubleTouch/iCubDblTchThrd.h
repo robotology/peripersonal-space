@@ -97,9 +97,10 @@ protected:
 
     /***************************************************************************/
     // INTERNAL VARIABLES:
-    int  step;    // Flag to know in which step the thread is
-    bool recFlag; // Flag to know if the recording module has to record
-    int  iter;    // iterator to keep track of the recording steps
+    int        step; // Flag to know in which step the thread is
+    bool    recFlag; // Flag to know if the recording module has to record
+    int        iter; // Iterator to keep track of the recording steps
+    double jnt_vels; // Joint velocities during the double touch
 
     // SkinPart to be handled
     // it can be either 2 (forearm_left), 5 (forearm_right)
@@ -241,7 +242,7 @@ protected:
 public:
     // CONSTRUCTOR
     doubleTouchThread(int _rate, const string &_name, const string &_robot,
-                      int _v, const string _type, int _record, string _filename,
+                      int _v, const string _type, double _jnt_vels, int _record, string _filename,
                       string _color, bool _autoconnect);
     // INIT
     virtual bool threadInit();

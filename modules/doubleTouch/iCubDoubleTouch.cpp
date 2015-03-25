@@ -127,6 +127,8 @@ private:
 
     bool autoconnect;
 
+    double jnt_vels;
+
 public:
     doubleTouch()
     {
@@ -138,9 +140,10 @@ public:
         filename = ".txt";
         color    = "";
 
-        verbosity = 0;      // verbosity
-        rate      = 100;    // rate of the doubleTouchThread
-        record    = 0;      // record data
+        verbosity =    0;    // verbosity
+        rate      =  100;    // rate of the doubleTouchThread
+        record    =    0;    // record data
+        jnt_vels  = 10.0;    // joint speed for the double touch
 
         autoconnect = false;
     }
@@ -168,8 +171,8 @@ public:
                 //-----------------
                 case VOCAB4('s','t','a','r'):
                 {
-                    dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity,
-                                                       type, record, filename, color,
+                    dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity, type,
+                                                       jnt_vels, record, filename, color,
                                                        autoconnect);
                     bool strt = dblTchThrd -> start();
                     if (!strt)
@@ -282,11 +285,11 @@ public:
             else yInfo("Module filename set to default, i.e. %s", filename.c_str());
 
         //***************** Filename *****************
-            if (rf.check("jnt_speed")) {
-                jnt_speed = rf.find("jnt_speed").asDouble();
-                yInfo("Module jnt_speed set to %g", jnt_speed);
+            if (rf.check("jnt_vels")) {
+                jnt_vels = rf.find("jnt_vels").asDouble();
+                yInfo("Module jnt_vels set to %g", jnt_vels);
             }
-            else yInfo("Module jnt_speed set to default, i.e. %g", jnt_speed);
+            else yInfo("Module jnt_vels set to default, i.e. %g", jnt_vels);
 
         //***************** color *****************
             if (rf.check("color")) {
@@ -334,7 +337,7 @@ public:
         else
         {
             dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity,
-                                type, record, filename, color, autoconnect);
+                        type, jnt_vels, record, filename, color, autoconnect);
             bool strt = dblTchThrd -> start();
             if (!strt)
             {
@@ -403,6 +406,7 @@ int main(int argc, char * argv[])
         yInfo("                        a recording session. Default 'calibration.txt'.");
         yInfo("                        A date is appended at the beginning for completeness.");
         yInfo("   --autoconnect flag: if or not to autoconnect to the skinManager");
+        yInfo("   --jnt_vels    double: specify the joint level speed during the double touch. Default 4[deg/s].");
         yInfo("   --alignEyes   flag: if or not to use the rpc-thing and sync with alignEyes module.");
         yInfo("");
         return 0;
