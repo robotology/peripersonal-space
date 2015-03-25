@@ -281,6 +281,13 @@ public:
             }
             else yInfo("Module filename set to default, i.e. %s", filename.c_str());
 
+        //***************** Filename *****************
+            if (rf.check("jnt_speed")) {
+                jnt_speed = rf.find("jnt_speed").asDouble();
+                yInfo("Module jnt_speed set to %g", jnt_speed);
+            }
+            else yInfo("Module jnt_speed set to default, i.e. %g", jnt_speed);
+
         //***************** color *****************
             if (rf.check("color")) {
                 color = rf.find("color").asString();
