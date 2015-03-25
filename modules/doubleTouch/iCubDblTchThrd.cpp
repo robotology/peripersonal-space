@@ -304,7 +304,7 @@ void doubleTouchThread::run()
 
                     if (robot == "icubSim")
                     {
-                        vels.resize(7,4.0);
+                        vels.resize(7,20.0);
                         for (int i=0; i<7; i++)
                         {
                             iposS->setRefSpeed(i,vels[i]);
