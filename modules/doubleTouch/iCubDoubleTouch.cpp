@@ -395,10 +395,12 @@ int main(int argc, char * argv[])
         yInfo("   --rate        rate:  the period used by the thread. Default 100ms.");
         yInfo("   --verbosity   int:   verbosity level (default 0).");
         yInfo("   --record      int:   if to record data or not.");
-        yInfo("       record==0 -> nothing is recorded, the double touch is iterating over and");
+        yInfo("      --record 0 -> nothing is recorded, the double touch is iterating over and");
         yInfo("                    over again. Demonstrative and testing purposes.");
-        yInfo("       record==1 -> recording for visuo-tactile reference frames purposes.");
-        yInfo("       record==2 -> recording for kinematic calibration purposes.");
+        yInfo("      --record 1 -> recording for visuo-tactile reference frames purposes.");
+        yInfo("      --record 2 -> recording for kinematic calibration purposes.");
+        yInfo("      --record 3 -> nothing is recorded. The double touch is executed once.");
+        yInfo("                    The robot does not come back to a resting position.");
         yInfo("   --color       color: robot color (black or white - MANDATORY!)");
         yInfo("   --type        type:  the type of task (default 'LtoR'). Allowed type names:");
         yInfo("   --type               'RtoL','LtoR','RHtoL','LHtoR'");

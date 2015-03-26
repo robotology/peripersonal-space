@@ -409,14 +409,17 @@ void doubleTouchThread::run()
                 break;
             case 8:
                 printMessage(0,"Going to rest...\n");
-                goToRest();
-                printMessage(1,"Switching to position mode..\n");
-                imodeS -> setInteractionMode(2,VOCAB_IM_STIFF);
-                imodeS -> setInteractionMode(3,VOCAB_IM_STIFF);
-                goToRest();
+                if (record != 3)
+                {
+                    goToRest();
+                    printMessage(1,"Switching to position mode..\n");
+                    imodeS -> setInteractionMode(2,VOCAB_IM_STIFF);
+                    imodeS -> setInteractionMode(3,VOCAB_IM_STIFF);
+                    goToRest();
 
-                printMessage(0,"WAITING FOR CONTACT...\n");
-                step = 1;
+                    printMessage(0,"WAITING FOR CONTACT...\n");
+                    step = 1;
+                }
                 break;
             default:
                 printMessage(0,"ERROR!!! doubleTouchThread should never be here!!!\nStep: %d",step);
@@ -785,10 +788,13 @@ int doubleTouchThread::printMessage(const int l, const char *f, ...) const
 void doubleTouchThread::threadRelease()
 {
     printMessage(0,"Returning to position mode..\n");
-        goToRest();
-        imodeS -> setInteractionMode(2,VOCAB_IM_STIFF);
-        imodeS -> setInteractionMode(3,VOCAB_IM_STIFF);
-        goToRest();
+        if (record != 3)
+        {
+            goToRest();
+            imodeS -> setInteractionMode(2,VOCAB_IM_STIFF);
+            imodeS -> setInteractionMode(3,VOCAB_IM_STIFF);
+            goToRest();
+        }
 
     printMessage(0,"Closing ports..\n");
         closePort(skinPort);
