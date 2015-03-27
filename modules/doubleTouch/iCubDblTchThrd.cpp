@@ -8,9 +8,9 @@
 
 doubleTouchThread::doubleTouchThread(int _rate, const string &_name, const string &_robot, int _v,
                                      string _type, double _jnt_vels, int _record, string _filename, string _color,
-                                     bool _autoconnect) : RateThread(_rate), name(_name), robot(_robot),
+                                     bool _autoconnect, bool _dontgoback) : RateThread(_rate), name(_name), robot(_robot),
                                      verbosity(_v), type(_type), record(_record), filename(_filename),
-                                     color(_color), autoconnect(_autoconnect), jnt_vels(_jnt_vels)
+                                     color(_color), autoconnect(_autoconnect), jnt_vels(_jnt_vels), dontgoback(_dontgoback)
 {
     step     = 0;
     recFlag  = 0;
@@ -409,7 +409,7 @@ void doubleTouchThread::run()
                 break;
             case 8:
                 printMessage(0,"Going to rest...\n");
-                if (record != 3)
+                if (dontgoback)
                 {
                     goToRest();
                     printMessage(1,"Switching to position mode..\n");

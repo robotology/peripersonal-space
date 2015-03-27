@@ -125,7 +125,7 @@ private:
 
     int verbosity,rate,record;
 
-    bool autoconnect;
+    bool autoconnect, dontgoback;
 
     double jnt_vels;
 
@@ -146,6 +146,7 @@ public:
         jnt_vels  = 10.0;    // joint speed for the double touch
 
         autoconnect = false;
+        dontgoback  = false;
     }
 
     bool respond(const Bottle &command, Bottle &reply)
@@ -173,7 +174,7 @@ public:
                 {
                     dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity, type,
                                                        jnt_vels, record, filename, color,
-                                                       autoconnect);
+                                                       autoconnect, dontgoback);
                     bool strt = dblTchThrd -> start();
                     if (!strt)
                     {
@@ -228,6 +229,7 @@ public:
         //********************** CONFIGS ***********************
             bool alignEyes = rf.check("alignEyes");
             autoconnect    = rf.check("autoconnect");
+            dontgoback     = rf.check("dontgoback");
         //******************* NAME ******************
             if (rf.check("name"))
             {
@@ -337,7 +339,7 @@ public:
         else
         {
             dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity,
-                        type, jnt_vels, record, filename, color, autoconnect);
+                        type, jnt_vels, record, filename, color, autoconnect, dontgoback);
             bool strt = dblTchThrd -> start();
             if (!strt)
             {
@@ -399,8 +401,8 @@ int main(int argc, char * argv[])
         yInfo("                    over again. Demonstrative and testing purposes.");
         yInfo("      --record 1 -> recording for visuo-tactile reference frames purposes.");
         yInfo("      --record 2 -> recording for kinematic calibration purposes.");
-        yInfo("      --record 3 -> nothing is recorded. The double touch is executed once.");
-        yInfo("                    The robot does not come back to a resting position.");
+        yInfo("   --dontgoback  flag: nothing is recorded. The double touch is executed once.");
+        yInfo("                       The robot does not come back to a resting position.");
         yInfo("   --color       color: robot color (black or white - MANDATORY!)");
         yInfo("   --type        type:  the type of task (default 'LtoR'). Allowed type names:");
         yInfo("   --type               'RtoL','LtoR','RHtoL','LHtoR'");
