@@ -88,7 +88,7 @@ void closePort(yarp::os::Contactable *_port);
 yarp::sig::Matrix matrixFromBottle(const yarp::os::Bottle b, int in, const int r, const int c);
 
 /**
- * Retrieves a matrix from a bottle:
+ * Retrieves a vector from a bottle:
  * @param b    is the bottle
  * @param in   is the index from which start acquiring values
  * @param size is the size of the vector
