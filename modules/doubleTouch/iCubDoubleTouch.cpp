@@ -230,6 +230,16 @@ public:
             bool alignEyes = rf.check("alignEyes");
             autoconnect    = rf.check("autoconnect");
             dontgoback     = rf.check("dontgoback");
+
+            if (dontgoback)
+            {
+                yInfo("Dontgoback flag set to ON");
+            }
+
+            if (autoconnect)
+            {
+                yInfo("Autoconnect flag set to ON");
+            }
         //******************* NAME ******************
             if (rf.check("name"))
             {

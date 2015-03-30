@@ -408,9 +408,9 @@ void doubleTouchThread::run()
                 }
                 break;
             case 8:
-                printMessage(0,"Going to rest...\n");
-                if (dontgoback)
+                if (!dontgoback)
                 {
+                    printMessage(0,"Going to rest...\n");
                     goToRest();
                     printMessage(1,"Switching to position mode..\n");
                     imodeS -> setInteractionMode(2,VOCAB_IM_STIFF);
@@ -788,7 +788,7 @@ int doubleTouchThread::printMessage(const int l, const char *f, ...) const
 void doubleTouchThread::threadRelease()
 {
     printMessage(0,"Returning to position mode..\n");
-        if (record != 3)
+        if (!dontgoback)
         {
             goToRest();
             imodeS -> setInteractionMode(2,VOCAB_IM_STIFF);
