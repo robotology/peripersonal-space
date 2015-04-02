@@ -345,8 +345,9 @@ public:
             
             if (bHandConf.check("master"))
             {
-                Bottle &grpMaster=bHandConf.findGroup("master");
-                handPossMaster = vectorFromBottle(grpMaster,0,9);
+                Bottle *bottleMaster=bHandConf.find("master").asList(); //will take the value from key master as a bottle - so just the numbers in brackets
+                //printf("%s",grpMaster.toString().c_str());
+                handPossMaster = vectorFromBottle(*bottleMaster,0,9);
                 yInfo("Initializing master hand configuration from config file.");
                 yDebug("Joint positions: %f %f %f %f %f %f %f %f %f",handPossMaster[0],handPossMaster[1],handPossMaster[2],
                        handPossMaster[3],handPossMaster[4],handPossMaster[5],handPossMaster[6],handPossMaster[7],handPossMaster[8]);
@@ -354,8 +355,8 @@ public:
             else yInfo("Could not find [master] option in the config file; set to default.");
             if (bHandConf.check("slave"))
             {
-                Bottle &grpSlave=bHandConf.findGroup("slave");
-                handPossSlave = vectorFromBottle(grpSlave,0,9);
+                Bottle *bottleSlave=bHandConf.find("slave").asList();
+                handPossSlave = vectorFromBottle(*bottleSlave,0,9);
                 yInfo("Initializing slave hand configuration from config file.");
                 yDebug("Joint positions: %f %f %f %f %f %f %f %f %f",handPossSlave[0],handPossSlave[1],handPossSlave[2],
                        handPossSlave[3],handPossSlave[4],handPossSlave[5],handPossSlave[6],handPossSlave[7],handPossSlave[8]);
