@@ -8,10 +8,12 @@
 
 doubleTouchThread::doubleTouchThread(int _rate, const string &_name, const string &_robot, int _v,
                                      string _type, double _jnt_vels, int _record, string _filename, string _color,
-                                     bool _autoconnect, bool _dontgoback) : RateThread(_rate), name(_name), robot(_robot),
-                                     verbosity(_v), type(_type), record(_record), filename(_filename),
-                                     color(_color), autoconnect(_autoconnect), jnt_vels(_jnt_vels), dontgoback(_dontgoback)
+                                     bool _autoconnect, bool _dontgoback, const Vector &_hand_poss_master, const Vector &_hand_poss_slave) :
+                                     RateThread(_rate), name(_name), robot(_robot),verbosity(_v), type(_type), record(_record),
+                                     filename(_filename), color(_color), autoconnect(_autoconnect), jnt_vels(_jnt_vels), dontgoback(_dontgoback),
+                                     handPossMaster(_hand_poss_master),handPossSlave(_hand_poss_slave)
 {
+        
     step     = 0;
     recFlag  = 0;
     skinPort = new BufferedPort<iCub::skinDynLib::skinContactList>;
@@ -273,33 +275,34 @@ void doubleTouchThread::run()
                 // move the thumbs close to the hand
                 {
                     // drive the hand in pointing pose
-                    Vector poss(9,0.0);
+                    
                     Vector vels(9,0.0);
-
-                    poss[0]=40.0;  vels[0]=100.0;                     poss[1]=10.0;  vels[1]=100.0;
-                    poss[2]=60.0;  vels[2]=100.0;                     poss[3]=70.0;  vels[3]=100.0;
-                    poss[4]=00.0;  vels[4]=100.0;                     poss[5]=00.0;  vels[5]=100.0;
-                    poss[6]=70.0;  vels[6]=100.0;                     poss[7]=100.0; vels[7]=100.0;
-                    poss[8]=240.0; vels[8]=200.0; 
+                    
+                    vels[0]=100.0;   vels[1]=100.0;
+                    vels[2]=100.0;   vels[3]=100.0;
+                    vels[4]=100.0;   vels[5]=100.0;
+                    vels[6]=100.0;   vels[7]=100.0;
+                    vels[8]=200.0; 
                     yDebug("[doubleTouch] Configuring master hand...\n");
                     for (int i=7; i<jntsM; i++)
                     {
                         iposM->setRefAcceleration(i,1e9);
                         iposM->setRefSpeed(i,vels[i-7]);
-                        iposM->positionMove(i,poss[i-7]);
+                        iposM->positionMove(i,handPossMaster[i-7]);
                     }
 
-                    poss[1]=10.0;  vels[1]=100.0;                     poss[2]=60.0;  vels[2]=100.0;
-                    poss[3]=70.0;  vels[3]=100.0;                     poss[4]=00.0;  vels[4]=100.0;
-                    poss[5]=00.0;  vels[5]=100.0;                     poss[6]=00.0;  vels[6]=100.0;
-                    poss[7]=00.0;  vels[7]=100.0;                     poss[8]=00.0;  vels[8]=200.0;
+                    vels[0]=100.0;   vels[1]=100.0; 
+                    vels[2]=100.0;   vels[3]=100.0; 
+                    vels[4]=100.0;   vels[5]=100.0;  
+                    vels[6]=100.0;   vels[7]=100.0; 
+                    vels[8]=200.0;
 
                     yDebug("[doubleTouch] Configuring slave hand...\n");
                     for (int i=7; i<jntsS; i++)
                     {
                         iposS->setRefAcceleration(i,1e9);
                         iposS->setRefSpeed(i,vels[i-7]);
-                        iposS->positionMove(i,poss[i-7]);
+                        iposS->positionMove(i,handPossSlave[i-7]);
                     }
 
                     vels.resize(7,jnt_vels);

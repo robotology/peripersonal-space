@@ -99,6 +99,7 @@ Linux (Ubuntu 12.04, Debian Squeeze).
 #include <ctime>
 #include <sstream>
 
+#include <iCub/periPersonalSpace/utils.h>
 #include "iCubDblTchThrd.h"
 
 using namespace yarp;
@@ -128,6 +129,9 @@ private:
     bool autoconnect, dontgoback;
 
     double jnt_vels;
+    
+    Vector handPossMaster; //hand configuration for "master" arm
+    Vector handPossSlave; //hand configuration for "slave" arm
 
 public:
     doubleTouch()
@@ -147,6 +151,22 @@ public:
 
         autoconnect = false;
         dontgoback  = false;
+        
+        handPossMaster.resize(9,0.0);
+        //default parameters correspond to master hand with index finger sticking out and all other fingers bent inside
+        handPossMaster[0]=40.0; handPossMaster[1]=10.0;  
+        handPossMaster[2]=60.0; handPossMaster[3]=70.0;  
+        handPossMaster[4]=00.0; handPossMaster[5]=00.0; 
+        handPossMaster[6]=70.0; handPossMaster[7]=100.0; 
+        handPossMaster[8]=240.0; 
+        
+        handPossSlave.resize(9,0.0);
+        handPossSlave[0]=40.0;  handPossSlave[1]=10.0;  
+        handPossSlave[2]=60.0;  handPossSlave[3]=70.0;  
+        handPossSlave[4]=00.0;  handPossSlave[5]=00.0;
+        handPossSlave[6]=00.0;  handPossSlave[7]=00.0;
+        handPossSlave[8]=00.0;  
+        
     }
 
     bool respond(const Bottle &command, Bottle &reply)
@@ -174,7 +194,7 @@ public:
                 {
                     dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity, type,
                                                        jnt_vels, record, filename, color,
-                                                       autoconnect, dontgoback);
+                                                       autoconnect, dontgoback, handPossMaster, handPossSlave);
                     bool strt = dblTchThrd -> start();
                     if (!strt)
                     {
@@ -318,6 +338,35 @@ public:
                 }
             }
 
+        //*********** [hand_configuration] group    
+        Bottle &bHandConf=rf.findGroup("hand_configuration");
+        if (!bHandConf.isNull()){
+            bHandConf.setMonitor(rf.getMonitor());
+            
+            if (bHandConf.check("master"))
+            {
+                Bottle &grpMaster=bHandConf.findGroup("master");
+                handPossMaster = vectorFromBottle(grpMaster,0,9);
+                yInfo("Initializing master hand configuration from config file.");
+                yDebug("Joint positions: %f %f %f %f %f %f %f %f %f",handPossMaster[0],handPossMaster[1],handPossMaster[2],
+                       handPossMaster[3],handPossMaster[4],handPossMaster[5],handPossMaster[6],handPossMaster[7],handPossMaster[8]);
+            }
+            else yInfo("Could not find [master] option in the config file; set to default.");
+            if (bHandConf.check("slave"))
+            {
+                Bottle &grpSlave=bHandConf.findGroup("slave");
+                handPossSlave = vectorFromBottle(grpSlave,0,9);
+                yInfo("Initializing slave hand configuration from config file.");
+                yDebug("Joint positions: %f %f %f %f %f %f %f %f %f",handPossSlave[0],handPossSlave[1],handPossSlave[2],
+                       handPossSlave[3],handPossSlave[4],handPossSlave[5],handPossSlave[6],handPossSlave[7],handPossSlave[8]);
+            }
+            else yInfo("Could not find [slave] option in the config file; set to default.");
+        }
+        else{ //bHandConf.isNull()
+            yInfo("Could not find [hand_configuration] group in the config file; set all to default."); 
+        }   
+            
+            
         // Let's add some contextual info (the date) to the file created!
             time_t now = time(0);
             tm *ltm = localtime(&now);
@@ -349,7 +398,7 @@ public:
         else
         {
             dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity,
-                        type, jnt_vels, record, filename, color, autoconnect, dontgoback);
+                        type, jnt_vels, record, filename, color, autoconnect, dontgoback, handPossMaster, handPossSlave);
             bool strt = dblTchThrd -> start();
             if (!strt)
             {

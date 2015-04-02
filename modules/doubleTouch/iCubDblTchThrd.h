@@ -83,7 +83,8 @@ protected:
     bool autoconnect;
     // Flag used to know if the doubleTouch should go back after the first movement or not
     bool dontgoback;
-
+    Vector handPossMaster; //hand configuration for "master" arm - 9 joints
+    Vector handPossSlave; //hand configuration for "slave" arm - 9 joints
     /***************************************************************************/
     // CONTACT-RELATED VARIABLES:
     Vector cntctPosLink;    // Position in i-th link RF
@@ -127,6 +128,7 @@ protected:
     Vector            *encsS;
     iCubArm           *armS;
     int jntsS;
+        
     // "Classical" interfaces - MASTER ARM
     IEncoders         *iencsM;
     IPositionControl2 *iposM;
@@ -135,7 +137,7 @@ protected:
     Vector            *encsM;
     iCubArm           *armM;
     int jntsM;
-
+      
     // Gaze controller interface
     IGazeControl       *igaze;
     int contextGaze;
@@ -245,7 +247,7 @@ public:
     // CONSTRUCTOR
     doubleTouchThread(int _rate, const string &_name, const string &_robot,
                       int _v, const string _type, double _jnt_vels, int _record, string _filename,
-                      string _color, bool _autoconnect, bool _dontgoback);
+                      string _color, bool _autoconnect, bool _dontgoback, const Vector &_hand_poss_master, const Vector &_hand_poss_slave);
     // INIT
     virtual bool threadInit();
     // RUN
