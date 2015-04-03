@@ -775,7 +775,7 @@ int doubleTouchThread::printMessage(const int l, const char *f, ...) const
 {
     if (verbosity>=l)
     {
-        fprintf(stdout,"*** %s: ",name.c_str());
+        fprintf(stdout,"[%s] ",name.c_str());
 
         va_list ap;
         va_start(ap,f);
