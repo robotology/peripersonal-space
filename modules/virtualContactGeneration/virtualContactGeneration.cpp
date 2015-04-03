@@ -297,12 +297,20 @@ public:
                     return false;
         }
         yInfo("virtContactGenThrd instantiated...");
+
+        if (rf.check("autoconnect"))
+        {
+            if (Network::connect(("/"+name+"/virtualContacts:o").c_str(),"/doubleTouch/contacts:i"))
+            {
+                yInfo("Autoconnection to doubleTouch port, i.e. /doubleTouch/contacts:i, successful!");
+            }
+        }
         return true;
     }
 
     bool close()
     {
-        cout << "virtContactGeneration: Stopping thread.." << endl;
+        yInfo("virtContactGeneration: Stopping thread..");
         if (virtContactGenThrd)
         {
             virtContactGenThrd -> stop();

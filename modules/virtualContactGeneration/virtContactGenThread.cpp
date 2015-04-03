@@ -167,7 +167,7 @@ int virtContactGenerationThread::printMessage(const int l, const char *f, ...) c
 {
     if (verbosity>=l)
     {
-        fprintf(stdout,"*** %s: ",name.c_str());
+        fprintf(stdout,"[%s] ",name.c_str());
 
         va_list ap;
         va_start(ap,f);
@@ -181,10 +181,9 @@ int virtContactGenerationThread::printMessage(const int l, const char *f, ...) c
 
 void virtContactGenerationThread::threadRelease()
 {
-     printMessage(0,"Closing ports..\n");
-     closePort(skinEventsOutPort);
-     printMessage(1,"skinEventsOutPort successfully closed!\n");
-
+    printMessage(0,"Closing ports..\n");
+    closePort(skinEventsOutPort);
+    printMessage(1,"skinEventsOutPort successfully closed!\n");
 }
 
 
