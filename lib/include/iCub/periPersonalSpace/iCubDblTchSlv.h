@@ -107,7 +107,7 @@ struct doubleTouch_Problem
     iKinLinIneqConstr          *sLIC;
     int                         nJoints;
     int                         nVars;
-    doubleTouch_Variables   guess;
+    doubleTouch_Variables       guess;
 
     std::string        getType()    { return limb.getType(); }
     int                getNVars()   { return nVars; }

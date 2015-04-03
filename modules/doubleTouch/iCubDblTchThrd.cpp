@@ -244,7 +244,8 @@ bool doubleTouchThread::threadInit()
     Matrix HIndex=slv->probl->index.getH(joints*CTRL_DEG2RAD);
     slv->probl->limb.setHN(HIndex);
     testLimb->setHN(HIndex);
-    printMessage(1,"HIndex:\n%s\n", HIndex.toString(3,3).c_str());
+    printMessage(1,"Index type: %s \t HIndex:\n%s\n", slv->probl->index.getType().c_str(),
+                                                      HIndex.toString(3,3).c_str());
 
     return true;
 }
