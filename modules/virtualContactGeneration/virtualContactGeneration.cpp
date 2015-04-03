@@ -271,7 +271,7 @@ public:
                     string filePath(skinRF.findFile(taxelPosFile.c_str()));
                     if (filePath!="")
                     {
-                        yInfo("[skin_event] filePath [%i in bottle] %s; setting under %s in skinPartsPositionsFilePath.\n",i,filePath.c_str(),SkinPart_s[i+1].c_str());
+                        if(verbosity>0) yInfo("[skin_event] filePath [%i in bottle] %s; setting under %s in skinPartsPositionsFilePath.\n",i,filePath.c_str(),SkinPart_s[i+1].c_str());
                         skinPartsPositionsFilePaths[(SkinPart)(i+1)] = filePath;    //! Importantly, this is relying on the fact that the skin parts are in the 
                         //right order in the .ini file, matching with SkinPart enum, and starting with 1 for left hand
                     }
