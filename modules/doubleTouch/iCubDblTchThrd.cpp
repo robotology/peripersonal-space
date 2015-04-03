@@ -95,7 +95,12 @@ bool doubleTouchThread::threadInit()
 
     if (autoconnect)
     {
-        Network::connect("/skinManager/skin_events:o",("/"+name+"/contacts:i").c_str());
+        yInfo("[doubleTouch] Autoconnect flag set to ON");
+        if (!Network::connect("/skinManager/skin_events:o",("/"+name+"/contacts:i").c_str()))
+        {
+            Network::connect("/virtualContactGeneration/virtualContacts:o",
+                             ("/"+name+"/contacts:i").c_str());
+        }
     }
     Network::connect(("/"+name+"/status:o").c_str(),"/visuoTactileRF/input:i");
     Network::connect(("/"+name+"/status:o").c_str(),"/visuoTactileWrapper/doubleTouch:i");
@@ -338,7 +343,7 @@ void doubleTouchThread::run()
             case 2:
                 solveIK();
                 printMessage(0,"Going to taxel... Desired EE: %s\n",(sol->ee).toString(3,3).c_str());
-                printMessage(2,"jnts=%s\n",(sol->joints*CTRL_RAD2DEG).toString(3,3).c_str());
+                printMessage(1,"Desired joint configuration:  %s\n",(sol->joints*CTRL_RAD2DEG).toString(3,3).c_str());
                 step++;
                 recFlag = 1;
                 break;
@@ -589,8 +594,6 @@ void doubleTouchThread::handleGaze()
 Vector doubleTouchThread::findFinalConfiguration()
 {
     Vector q=solution.subVector(nDOF-1-7,nDOF-1);
-    // cout << "q: " << q.toString(3,3) << endl;
-    // cout << "q: " << (CTRL_RAD2DEG*(armM -> setAng(q*CTRL_DEG2RAD))).toString(3,3) << endl;
     armM -> setAng(q*CTRL_DEG2RAD);
     return armM -> EndEffPosition();
 }
@@ -601,8 +604,8 @@ void doubleTouchThread::testAchievement()
     iencsS->getEncoders(encsS->data());
 
     testLimb->setAng((*encsS)*CTRL_DEG2RAD,(*encsM)*CTRL_DEG2RAD);
-    printMessage(0,"Final EE    %s\n", testLimb->EndEffPosition().toString(3,3).c_str());
-    printMessage(2,"jnts=%s\n",(testLimb->getAng()*CTRL_RAD2DEG).toString(3,3).c_str());
+    printMessage(0,"Final end effector :          %s\n", testLimb->EndEffPosition().toString(3,3).c_str());
+    printMessage(2,"Final Joint configuration:    %s\n",(testLimb->getAng()*CTRL_RAD2DEG).toString(3,3).c_str());
 }
 
 void doubleTouchThread::solveIK(string s="standard")
@@ -635,11 +638,22 @@ void doubleTouchThread::goToTaxelMaster()
     Vector qM(nJnts,0.0);
     std::vector<int> Ejoints;
 
+    if (verbosity>2)
+    {
+        printf("[doubleTouch] Moving master links: ");
+    }
     for (int i = 0; i < 7; i++)
     {
         Ejoints.push_back(i);
         qM[i] = solution[nDOF-7+i];
-        printMessage(3,"Moving master link #%i to: %g\n",i,qM[i]);
+        if (verbosity>2)
+        {
+            printf("#%i to: %g\t",i,qM[i]);
+        }
+    }
+    if (verbosity>2)
+    {
+        printf("\n");
     }
 
     iposM -> positionMove(nJnts,Ejoints.data(),qM.data());
@@ -647,10 +661,21 @@ void doubleTouchThread::goToTaxelMaster()
 
 void doubleTouchThread::goToTaxelSlave()
 {
+    if (verbosity>2)
+    {
+        printf("[doubleTouch] Moving slave  links: ");
+    }
     for (int i = 0; i < nDOF-7; i++)
     {
-        printMessage(3,"Moving slave link #%i to: %g\n",nDOF-7-1-i,-solution[i]);
+        if (verbosity>2)
+        {
+            printf("#%i to: %g\t",nDOF-7-1-i,-solution[i]);
+        }
         iposS -> positionMove(nDOF-7-1-i,-solution[i]);
+    }
+    if (verbosity>2)
+    {
+        printf("\n");
     }
 }
 
