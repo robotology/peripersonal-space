@@ -431,7 +431,7 @@ void vtRFThread::manageSkinEvents()
             {
                 for (size_t j = 0; j < iCubSkin[i].txls.size(); j++) // cycle through the taxels
                 {
-                    if (iCubSkin[i].txls[j]->Resp > 100)
+                    if (iCubSkin[i].txls[j]->Resp > 50)
                     {
                         taxelsIDs.push_back(iCubSkin[i].txls[j]->ID);
                         isThereAnEvent = true;
