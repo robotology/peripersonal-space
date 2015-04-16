@@ -155,6 +155,12 @@ public:
             yWarning("Autoconnect mode set to ON");
         }
 
+        bool stiff=rf.check("stiff");
+        if (stiff)
+        {
+            yInfo("Stiff Mode enabled.");
+        }
+
         Property optionCartL;
         optionCartL.put("device","cartesiancontrollerclient");
         optionCartL.put("remote","/icub/cartesianController/left_arm");
@@ -216,11 +222,14 @@ public:
         IImpedanceControl *iimp;  driverJointL.view(iimp);
         for (int i=0; i<2; i++)
         {
-            imode->setInteractionMode(0,VOCAB_IM_COMPLIANT); iimp->setImpedance(0,0.4,0.03); 
-            imode->setInteractionMode(1,VOCAB_IM_COMPLIANT); iimp->setImpedance(1,0.4,0.03);
-            imode->setInteractionMode(2,VOCAB_IM_COMPLIANT); iimp->setImpedance(2,0.4,0.03);
-            imode->setInteractionMode(3,VOCAB_IM_COMPLIANT); iimp->setImpedance(3,0.2,0.01);
-            imode->setInteractionMode(4,VOCAB_IM_COMPLIANT); iimp->setImpedance(4,0.2,0.0);
+            if (!stiff)
+            {
+                imode->setInteractionMode(0,VOCAB_IM_COMPLIANT); iimp->setImpedance(0,0.4,0.03); 
+                imode->setInteractionMode(1,VOCAB_IM_COMPLIANT); iimp->setImpedance(1,0.4,0.03);
+                imode->setInteractionMode(2,VOCAB_IM_COMPLIANT); iimp->setImpedance(2,0.4,0.03);
+                imode->setInteractionMode(3,VOCAB_IM_COMPLIANT); iimp->setImpedance(3,0.2,0.01);
+                imode->setInteractionMode(4,VOCAB_IM_COMPLIANT); iimp->setImpedance(4,0.2,0.0);
+            }
 
             driverJointR.view(imode);
             driverJointR.view(iimp);
@@ -317,6 +326,7 @@ int main(int argc, char * argv[])
         yInfo("   --name        name:  the name of the module (default avoidance).");
         yInfo("   --autoConnect flag:  if to auto connect the ports or not. Default no.");
         yInfo("   --catching    flag:  if enabled, the robot will catch the target instead of avoiding it.");
+        yInfo("   --stiff       flag:  if enabled, the robot will perform movements in stiff mode instead of compliant.");
         yInfo("");
         return 0;
     }
