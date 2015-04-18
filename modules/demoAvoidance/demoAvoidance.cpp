@@ -8,7 +8,7 @@
  * later version published by the Free Software Foundation.
  *
  * A copy of the license can be found at
- * http://www.robotcub.org/icub/license/gpl.txt
+ * http://www.robotcub.org/"+robot+"/license/gpl.txt
  *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -54,6 +54,8 @@ protected:
     int contextL,contextR;
     Port dataPort;
     int motionGain;
+
+    RpcServer          rpcSrvr;
 
     Mutex mutex;
     struct Data {
@@ -123,6 +125,62 @@ protected:
     }
     
 public:
+    bool respond(const Bottle &command, Bottle &reply)
+    {
+        int ack =Vocab::encode("ack");
+        int nack=Vocab::encode("nack");
+
+        if (command.size()>0)
+        {
+            if (command.get(0).asString() == "get")
+            {
+                if (command.get(1).asString() == "motionGain")
+                {
+                    reply.addVocab(ack);
+                    reply.addDouble(motionGain);
+                }
+                else
+                {
+                    reply.addVocab(nack);
+                }
+            }
+            else if (command.get(0).asString() == "set")
+            {
+                if (command.get(1).asString() == "motionGain")
+                {
+                    reply.addVocab(ack);
+                    motionGain = command.get(2).asDouble();
+                    reply.addDouble(motionGain);
+                }
+                else if (command.get(1).asString() == "behavior")
+                {
+                    if (command.get(2).asString() == "avoidance")
+                    {
+                        reply.addVocab(ack);
+                        motionGain = -1.0;
+                        reply.addDouble(motionGain);
+                    }
+                    else if (command.get(2).asString() == "catching")
+                    {
+                        reply.addVocab(ack);
+                        motionGain = 1.0;
+                        reply.addDouble(motionGain);
+                    }
+                    else
+                    {
+                        reply.addVocab(nack);
+                    }
+                }
+                else
+                {
+                    reply.addVocab(nack);
+                }
+            }
+        }
+
+        return true;
+    }
+
     //********************************************
     bool configure(ResourceFinder &rf)
     {
@@ -138,7 +196,8 @@ public:
         data["right"]=data["left"];
         data["right"].home_x[1]=-data["right"].home_x[1];
 
-        string name=rf.check("name",Value("avoidance")).asString().c_str();
+        string  name=rf.check("name",Value("avoidance")).asString().c_str();
+        string robot=rf.check("robot",Value("icub")).asString().c_str();
         motionGain = -1.0;
         if (rf.check("catching"))
         {
@@ -163,7 +222,7 @@ public:
 
         Property optionCartL;
         optionCartL.put("device","cartesiancontrollerclient");
-        optionCartL.put("remote","/icub/cartesianController/left_arm");
+        optionCartL.put("remote","/"+robot+"/cartesianController/left_arm");
         optionCartL.put("local",("/"+name+"/cart/left_arm").c_str());
         if (!driverCartL.open(optionCartL))
         {
@@ -173,7 +232,7 @@ public:
 
         Property optionCartR;
         optionCartR.put("device","cartesiancontrollerclient");
-        optionCartR.put("remote","/icub/cartesianController/right_arm");
+        optionCartR.put("remote","/"+robot+"/cartesianController/right_arm");
         optionCartR.put("local",("/"+name+"/cart/right_arm").c_str());
         if (!driverCartR.open(optionCartR))
         {
@@ -183,7 +242,7 @@ public:
 
         Property optionJointL;
         optionJointL.put("device","remote_controlboard");
-        optionJointL.put("remote","/icub/left_arm");
+        optionJointL.put("remote","/"+robot+"/left_arm");
         optionJointL.put("local",("/"+name+"/joint/left_arm").c_str());
         if (!driverJointL.open(optionJointL))
         {
@@ -193,7 +252,7 @@ public:
 
         Property optionJointR;
         optionJointR.put("device","remote_controlboard");
-        optionJointR.put("remote","/icub/right_arm");
+        optionJointR.put("remote","/"+robot+"/right_arm");
         optionJointR.put("local",("/"+name+"/joint/right_arm").c_str());
         if (!driverJointR.open(optionJointR))
         {
@@ -242,6 +301,9 @@ public:
         {
             Network::connect("/visuoTactileRF/skin_events:o",("/"+name+"/data:i").c_str());
         }
+
+        rpcSrvr.open(("/"+name+"/rpc:i").c_str());
+        attach(rpcSrvr);
         return true; 
     }
 
