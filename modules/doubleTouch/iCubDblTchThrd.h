@@ -73,6 +73,7 @@ protected:
     string robot;
     // Type of the chain (either "LtoR", "RtoL", or "both")
     string type;
+    string curTaskType;
     // Flag to know if a recording session is needed.
     int record;
     // Name of the file that will store data
@@ -120,6 +121,26 @@ protected:
     PolyDriver       ddG; // gaze controller  driver
 
     // "Classical" interfaces - SLAVE ARM
+    IEncoders         *iencsL;
+    IPositionControl2 *iposL;
+    IInteractionMode  *imodeL;
+    IImpedanceControl *iimpL;
+    IControlLimits    *ilimL;
+    Vector            *encsL;
+    iCubArm           *armL;
+    int jntsL;
+        
+    // "Classical" interfaces - MASTER ARM
+    IEncoders         *iencsR;
+    IPositionControl2 *iposR;
+    IImpedanceControl *iimpR;
+    IInteractionMode  *imodeR;
+    IControlLimits    *ilimR;
+    Vector            *encsR;
+    iCubArm           *armR;
+    int jntsR;
+
+    // "Classical" interfaces - SLAVE ARM
     IEncoders         *iencsS;
     IPositionControl2 *iposS;
     IInteractionMode  *imodeS;
@@ -133,14 +154,11 @@ protected:
     IEncoders         *iencsM;
     IPositionControl2 *iposM;
     IImpedanceControl *iimpM;
+    IInteractionMode  *imodeM;
     IControlLimits    *ilimM;
     Vector            *encsM;
     iCubArm           *armM;
     int jntsM;
-      
-    // Gaze controller interface
-    IGazeControl       *igaze;
-    int contextGaze;
 
     // IPOPT STUFF
     doubleTouch_Variables *gue;    // guess
@@ -149,12 +167,15 @@ protected:
     Vector solution;
     int nDOF;
 
+    // 
+    Vector armPossHome;
+
     // CUSTOM LIMB (for testing the achievement of the task)
     iCubCustomLimb *testLimb;
 
     // CHECKMOTIONDONE VARIABLES:
-    Vector oldEES;
-    Vector oldEEM;
+    Vector oldEEL;
+    Vector oldEER;
 
     /**
     * Aligns joint bounds according to the actual limits of the robot
@@ -168,16 +189,10 @@ protected:
     bool checkMotionDone();
 
     /**
-    * Creates a delay (what for? In order to remember
-    * that I have to improve my module and remove this!)
-    */
-    void delay(int sec);
-
-    /**
     * Reads the contact from either /skinManager/skin_events:o or
     * /wholeBodyDynamics/contacts:o , and handles the skinContacts
     */
-    void detectContact(skinContactList *_sCL);
+    bool detectContact(skinContactList *_sCL);
 
     /**
     * Finds the proper H0 for the limb
@@ -188,15 +203,20 @@ protected:
     /**
     * Moves arms to starting (home) position
     */
-    void goToRest();
+    void steerArmsHome();
+
+    /**
+    * Configure hands to the pointing configuration
+    */
+    void configureHands();
+
+    bool selectTask();
+    bool clearTask();
 
     /**
     * Solves the Inverse Kinematic task
-    * @param s is the type of movement (either "standard" or "waypoint")
     */
-    void solveIK()    { solveIK("standard"); };
-
-    void solveIK(string s);
+    void solveIK();
 
     /**
     * Goes to the configuration found by solveIK()
@@ -206,9 +226,9 @@ protected:
     void goToTaxelSlave();
 
     /**
-    * Handles the gaze controller for each step of the module
+    * Sends the output to the port
     */
-    void handleGaze();
+    void sendOutput();
 
     /**
     * Locates the contact in World Reference Frame's coordinates

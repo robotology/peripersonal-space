@@ -130,8 +130,8 @@ private:
 
     double jnt_vels;
     
-    Vector handPossMaster; //hand configuration for "master" arm
-    Vector handPossSlave; //hand configuration for "slave" arm
+    Vector handPossM; //hand configuration for "master" arm
+    Vector handPossS; //hand configuration for "slave" arm
 
 public:
     doubleTouch()
@@ -152,21 +152,20 @@ public:
         autoconnect = false;
         dontgoback  = false;
         
-        handPossMaster.resize(9,0.0);
+        handPossM.resize(9,0.0);
         //default parameters correspond to master hand with index finger sticking out and all other fingers bent inside
-        handPossMaster[0]=40.0; handPossMaster[1]=10.0;  
-        handPossMaster[2]=60.0; handPossMaster[3]=70.0;  
-        handPossMaster[4]=00.0; handPossMaster[5]=00.0; 
-        handPossMaster[6]=70.0; handPossMaster[7]=100.0; 
-        handPossMaster[8]=240.0; 
+        handPossM[0]=40.0; handPossM[1]=10.0;  
+        handPossM[2]=60.0; handPossM[3]=70.0;  
+        handPossM[4]=00.0; handPossM[5]=00.0; 
+        handPossM[6]=70.0; handPossM[7]=100.0; 
+        handPossM[8]=240.0; 
         
-        handPossSlave.resize(9,0.0);
-        handPossSlave[0]=40.0;  handPossSlave[1]=10.0;  
-        handPossSlave[2]=60.0;  handPossSlave[3]=70.0;  
-        handPossSlave[4]=00.0;  handPossSlave[5]=00.0;
-        handPossSlave[6]=00.0;  handPossSlave[7]=00.0;
-        handPossSlave[8]=00.0;  
-        
+        handPossS.resize(9,0.0);
+        handPossS[0]=40.0;  handPossS[1]=10.0;  
+        handPossS[2]=60.0;  handPossS[3]=70.0;  
+        handPossS[4]=00.0;  handPossS[5]=00.0;
+        handPossS[6]=00.0;  handPossS[7]=00.0;
+        handPossS[8]=00.0;  
     }
 
     bool respond(const Bottle &command, Bottle &reply)
@@ -194,7 +193,7 @@ public:
                 {
                     dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity, type,
                                                        jnt_vels, record, filename, color,
-                                                       autoconnect, dontgoback, handPossMaster, handPossSlave);
+                                                       autoconnect, dontgoback, handPossM, handPossS);
                     bool strt = dblTchThrd -> start();
                     if (!strt)
                     {
@@ -347,19 +346,19 @@ public:
             {
                 Bottle *bottleMaster=bHandConf.find("master").asList(); //will take the value from key master as a bottle - so just the numbers in brackets
                 //printf("%s",grpMaster.toString().c_str());
-                handPossMaster = vectorFromBottle(*bottleMaster,0,9);
+                handPossM = vectorFromBottle(*bottleMaster,0,9);
                 yInfo("Initializing master hand configuration from config file.");
-                yDebug("Joint positions: %f %f %f %f %f %f %f %f %f",handPossMaster[0],handPossMaster[1],handPossMaster[2],
-                       handPossMaster[3],handPossMaster[4],handPossMaster[5],handPossMaster[6],handPossMaster[7],handPossMaster[8]);
+                yDebug("Joint positions: %f %f %f %f %f %f %f %f %f",handPossM[0],handPossM[1],handPossM[2],
+                       handPossM[3],handPossM[4],handPossM[5],handPossM[6],handPossM[7],handPossM[8]);
             }
             else yInfo("Could not find [master] option in the config file; set to default.");
             if (bHandConf.check("slave"))
             {
                 Bottle *bottleSlave=bHandConf.find("slave").asList();
-                handPossSlave = vectorFromBottle(*bottleSlave,0,9);
+                handPossS = vectorFromBottle(*bottleSlave,0,9);
                 yInfo("Initializing slave hand configuration from config file.");
-                yDebug("Joint positions: %f %f %f %f %f %f %f %f %f",handPossSlave[0],handPossSlave[1],handPossSlave[2],
-                       handPossSlave[3],handPossSlave[4],handPossSlave[5],handPossSlave[6],handPossSlave[7],handPossSlave[8]);
+                yDebug("Joint positions: %f %f %f %f %f %f %f %f %f",handPossS[0],handPossS[1],handPossS[2],
+                       handPossS[3],handPossS[4],handPossS[5],handPossS[6],handPossS[7],handPossS[8]);
             }
             else yInfo("Could not find [slave] option in the config file; set to default.");
         }
@@ -399,7 +398,7 @@ public:
         else
         {
             dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity,
-                        type, jnt_vels, record, filename, color, autoconnect, dontgoback, handPossMaster, handPossSlave);
+                        type, jnt_vels, record, filename, color, autoconnect, dontgoback, handPossM, handPossS);
             bool strt = dblTchThrd -> start();
             if (!strt)
             {
