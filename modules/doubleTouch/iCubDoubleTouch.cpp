@@ -463,8 +463,8 @@ int main(int argc, char * argv[])
         yInfo("   --dontgoback  flag: nothing is recorded. The double touch is executed once.");
         yInfo("                       The robot does not come back to a resting position.");
         yInfo("   --color       color: robot color (black or white - MANDATORY!)");
-        yInfo("   --type        type:  the type of task (default 'LtoR'). Allowed type names:");
-        yInfo("   --type               'RtoL','LtoR','RHtoL','LHtoR'");
+        yInfo("   --type        type:  the type of task (default 'LtoR').");
+        yInfo("                        Allowed type names: 'RtoL','LtoR','RHtoL','LHtoR'");
         yInfo("   --filename    file:  the name of the file to be saved in case of");
         yInfo("                        a recording session. Default 'calibration.txt'.");
         yInfo("                        A date is appended at the beginning for completeness.");

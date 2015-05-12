@@ -58,6 +58,11 @@ doubleTouchThread::doubleTouchThread(int _rate, const string &_name, const strin
 
     oldEEL.resize(3,0.0);
     oldEER.resize(3,0.0);
+
+    slv=NULL;
+    gue=NULL;
+    sol=NULL;
+    testLimb=NULL;
 }
 
 bool doubleTouchThread::threadInit()
@@ -270,6 +275,7 @@ void doubleTouchThread::run()
                 if (!dontgoback)
                 {
                     printMessage(0,"Going to rest...\n");
+                    clearTask();
                     steerArmsHome();
                     printMessage(1,"Switching to position mode..\n");
                     imodeS -> setInteractionMode(2,VOCAB_IM_STIFF);
@@ -315,15 +321,15 @@ bool doubleTouchThread::selectTask()
 
     if (curTaskType == "LtoR" || curTaskType == "RtoL")
     {
-        gue->joints[1]   = -45.0*CTRL_DEG2RAD; gue->joints[3]   = -30.0*CTRL_DEG2RAD;
-        gue->joints[4]   =  30.0*CTRL_DEG2RAD; gue->joints[5]   = -30.0*CTRL_DEG2RAD;
-        gue->joints[6]   =  30.0*CTRL_DEG2RAD; gue->joints[8]   =  45.0*CTRL_DEG2RAD;
+        gue->joints[1]   = -armPossHome[3]; gue->joints[3]   = -armPossHome[1];
+        gue->joints[4]   = -armPossHome[0]; gue->joints[5]   = -armPossHome[0];
+        gue->joints[6]   =  armPossHome[1]; gue->joints[8]   =  armPossHome[3];
     }
     else if (curTaskType == "LHtoR" || curTaskType == "RHtoL")
     {
-        gue->joints[1+2] = -45.0*CTRL_DEG2RAD; gue->joints[3+2] = -30.0*CTRL_DEG2RAD;
-        gue->joints[4+2] =  30.0*CTRL_DEG2RAD; gue->joints[5+2] = -30.0*CTRL_DEG2RAD;
-        gue->joints[6+2] =  30.0*CTRL_DEG2RAD; gue->joints[8+2] =  45.0*CTRL_DEG2RAD;
+        gue->joints[1+2] = -armPossHome[3]; gue->joints[3+2] = -armPossHome[1];
+        gue->joints[4+2] = -armPossHome[0]; gue->joints[5+2] =  armPossHome[0];
+        gue->joints[6+2] =  armPossHome[1]; gue->joints[8+2] =  armPossHome[3];
     }
     sol->clone(*gue);
 
@@ -394,17 +400,30 @@ bool doubleTouchThread::selectTask()
 
 bool doubleTouchThread::clearTask()
 {
+    yInfo("[doubleTouch] Clearing task..");
+
     if (slv)
+    {
         delete slv; slv=NULL;
+    }
     
     if (gue)
+    {
         delete gue; gue=NULL;
+    }
 
     if (sol)
+    {
         delete sol; sol=NULL;
+    }
 
     if (testLimb)
+    {
         delete testLimb; testLimb=NULL;
+    }
+
+    // This has been made in order for sendOutput to work properly
+    cntctSkinPart=SKIN_PART_UNKNOWN;
 
     return true;
 }
@@ -694,7 +713,7 @@ bool doubleTouchThread::detectContact(skinContactList *_sCL)
     // Search for a suitable contact:
     for(skinContactList::iterator it=_sCL->begin(); it!=_sCL->end(); it++)
     {
-        printMessage(3,"skinContact: %s\n",it->toString().c_str());
+        printMessage(3,"skinContact: %s\n",it->toString(3).c_str());
         if( it -> getPressure() > 25 &&
             skinPart == it -> getSkinPart() && 
             norm(it-> getNormalDir()) != 0.0)
