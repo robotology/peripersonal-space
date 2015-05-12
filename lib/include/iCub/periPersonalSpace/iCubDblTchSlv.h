@@ -127,6 +127,11 @@ struct doubleTouch_Problem
      * Copy operator.
      */
     doubleTouch_Problem & operator=(const doubleTouch_Problem &sp);
+
+    /**
+     * Destructor.
+     */
+    ~doubleTouch_Problem();
 };
 
 /**
@@ -157,6 +162,11 @@ class doubleTouch_Solver
         * Solves the Inverse Kinematics task associated with the double touch.
         */
         bool solve(doubleTouch_Variables &solution);
+
+        /**
+         * Destructor.
+         */
+        ~doubleTouch_Solver();
 };
 
 // empty line to make gcc happy

@@ -57,6 +57,7 @@
 #include <deque>
 
 #include <yarp/os/Property.h>
+#include <yarp/os/Log.h>
 #include <yarp/dev/ControlBoardInterfaces.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/sig/Matrix.h>

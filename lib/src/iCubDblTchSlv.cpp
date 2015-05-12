@@ -78,7 +78,9 @@ using namespace iCub::iKin;
         }
         else
         {
-            printf("ERROR in configuring the shoulder constraints!! Type: %s\n\n", _type.c_str());
+            yError("[doubleTouch_Problem] ERROR in configuring the shoulder constraints!! Type: %s\n\n", _type.c_str());
+            sLIC = NULL;
+            mLIC = NULL;
         }
     }
 
@@ -88,6 +90,12 @@ using namespace iCub::iKin;
         mLIC    = sp.mLIC;    sLIC    = sp.sLIC;
         nJoints = sp.nJoints; nVars   = sp.nVars;
         return *this;
+    }
+
+    doubleTouch_Problem::~doubleTouch_Problem()
+    {
+        delete sLIC; sLIC = NULL;
+        delete mLIC; mLIC = NULL;
     }
 
 /************************************************************************/
@@ -478,6 +486,13 @@ using namespace iCub::iKin;
         {
             probl = new doubleTouch_Problem(_type,"right_index");
         }
+        else
+        {
+            yError("[doubleTouch_Solver] ERROR: type was not among the admissible values!");
+            yError("[doubleTouch_Solver] Type: %s",_type.c_str());
+            yError("[doubleTouch_Solver] Admissible values: 'RtoL','RHtoL','LtoR','LHtoR'");
+            probl = NULL;
+        }
     }
 
     /************************************************************************/
@@ -520,6 +535,11 @@ using namespace iCub::iKin;
         Ipopt::ApplicationReturnStatus status=app->OptimizeTNLP(GetRawPtr(nlp));
         solution=nlp->getSolution();
         return (status==Ipopt::Solve_Succeeded);
+    }
+
+    doubleTouch_Solver::~doubleTouch_Solver()
+    {
+        delete probl; probl = NULL;
     }
 
 // empty line to make gcc happy
