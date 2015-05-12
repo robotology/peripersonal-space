@@ -201,10 +201,6 @@ void doubleTouchThread::run()
                 }
                 break;
             case 4:
-                if (record == 0)
-                {
-                    Time::delay(1.0);
-                }
                 step++;
                 break;
             case 5:
@@ -398,15 +394,14 @@ void doubleTouchThread::configureHands()
     Vector vels(9,100.0);    
     vels[8]=200.0; 
 
-    yDebug("[doubleTouch] Configuring master hand...\n");
+    printMessage(1,"Configuring master and slave hands...\n");
     for (int i=7; i<jntsM; i++)
     {
         iposM->setRefAcceleration(i,1e9);
         iposM->setRefSpeed(i,vels[i-7]);
         iposM->positionMove(i,handPossMaster[i-7]);
     }
-
-    yDebug("[doubleTouch] Configuring slave hand...\n");
+    
     for (int i=7; i<jntsS; i++)
     {
         iposS->setRefAcceleration(i,1e9);
@@ -507,7 +502,7 @@ bool doubleTouchThread::testAchievement2(skinContactList *_sCL)
 
 bool doubleTouchThread::checkMotionDone()
 {
-    if (step == 1 || step == 7 || step == 8 || (record == 0 && (step == 4 || step == 5)))
+    if (step == 1 || step == 7 || (record == 0 && (step == 4 || step == 5)))
         return true;
     
     iencsL->getEncoders(encsL->data());
@@ -569,9 +564,9 @@ void doubleTouchThread::solveIK()
 
 void doubleTouchThread::goToTaxel()
 {
-    goToTaxelMaster();
-    Time::delay(2.0);
     goToTaxelSlave();
+    Time::delay(2.0);
+    goToTaxelMaster();
 }
 
 void doubleTouchThread::goToTaxelMaster()
@@ -580,7 +575,7 @@ void doubleTouchThread::goToTaxelMaster()
     Vector qM(nJnts,0.0);
     std::vector<int> Ejoints;
 
-    if (verbosity>2)
+    if (verbosity>1)
     {
         printf("[doubleTouch] Moving master links: ");
     }
@@ -588,12 +583,12 @@ void doubleTouchThread::goToTaxelMaster()
     {
         Ejoints.push_back(i);
         qM[i] = solution[nDOF-7+i];
-        if (verbosity>2)
+        if (verbosity>1)
         {
             printf("#%i to: %g\t",i,qM[i]);
         }
     }
-    if (verbosity>2)
+    if (verbosity>1)
     {
         printf("\n");
     }
@@ -603,19 +598,19 @@ void doubleTouchThread::goToTaxelMaster()
 
 void doubleTouchThread::goToTaxelSlave()
 {
-    if (verbosity>2)
+    if (verbosity>1)
     {
         printf("[doubleTouch] Moving slave  links: ");
     }
     for (int i = 0; i < nDOF-7; i++)
     {
-        if (verbosity>2)
+        if (verbosity>1)
         {
             printf("#%i to: %g\t",nDOF-7-1-i,-solution[i]);
         }
         iposS -> positionMove(nDOF-7-1-i,-solution[i]);
     }
-    if (verbosity>2)
+    if (verbosity>1)
     {
         printf("\n");
     }
