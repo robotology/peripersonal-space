@@ -417,75 +417,70 @@ void vtRFThread::run()
 
 void vtRFThread::manageSkinEvents()
 {
-    // main/src/modules/skinManager/src/compensationThread.cpp:250
     vector <int> taxelsIDs; 
     SkinPart part = SKIN_PART_UNKNOWN;
     int iCubSkinID=-1;
     bool isThereAnEvent = false;
 
+    Bottle out; out.clear();
+    Bottle b;     b.clear();
+
     if (incomingEvents.size()>0)  // if there's an event
     {
         for (size_t i = 0; i < iCubSkinSize; i++) // cycle through the skinparts
         {
-            if (!isThereAnEvent)       // process only one contact at a time
+            b.clear();
+            isThereAnEvent = false;
+
+            for (size_t j = 0; j < iCubSkin[i].txls.size(); j++) // cycle through the taxels
             {
-                for (size_t j = 0; j < iCubSkin[i].txls.size(); j++) // cycle through the taxels
+                if (iCubSkin[i].txls[j]->Resp > 50)
                 {
-                    if (iCubSkin[i].txls[j]->Resp > 50)
+                    taxelsIDs.push_back(iCubSkin[i].txls[j]->ID);
+                    isThereAnEvent = true;
+                }
+            }
+            if (isThereAnEvent && taxelsIDs.size()>0)
+            {
+                Vector geoCenter(3,0.0), normalDir(3,0.0);
+                int w = 0, w_sum = 0;
+                part   = iCubSkin[i].name;
+
+                if (part == SKIN_LEFT_FOREARM || part == SKIN_LEFT_HAND)
+                {
+                    b.addString("left");
+                }
+                else if (part == SKIN_RIGHT_FOREARM || part == SKIN_RIGHT_HAND)
+                {
+                    b.addString("right");
+                }
+
+                for (size_t i = 0; i < taxelsIDs.size(); ++i)
+                {
+                    for (size_t j = 0; j < iCubSkin[iCubSkinID].txls.size(); j++)
                     {
-                        taxelsIDs.push_back(iCubSkin[i].txls[j]->ID);
-                        isThereAnEvent = true;
+                        if (iCubSkin[iCubSkinID].txls[j]->ID == taxelsIDs[i])
+                        {
+                            w = iCubSkin[iCubSkinID].txls[j]->Resp;
+                            geoCenter += iCubSkin[iCubSkinID].txls[j]->WRFPos*w;
+                            normalDir += locateTaxel(iCubSkin[iCubSkinID].txls[j]->Norm,part)*w;
+                            w_sum += w;
+                        }
                     }
                 }
-                if (isThereAnEvent)
-                {
-                    part   = iCubSkin[i].name;
-                    iCubSkinID = i;
-                }
-                else
-                    taxelsIDs.clear();
+
+                geoCenter /= w_sum;
+                normalDir /= w_sum;
+                vectorIntoBottle(geoCenter,b);
+                vectorIntoBottle(normalDir,b);
+
+                out.addList().read(b);
             }
         }
     }
 
-    if (isThereAnEvent && taxelsIDs.size()>0)
-    {
-        Vector geoCenter(3,0.0), normalDir(3,0.0);
-        int w = 0, w_sum = 0;
-
-        Bottle b;
-        b.clear();
-
-        if (part == SKIN_LEFT_FOREARM || part == SKIN_LEFT_HAND)
-        {
-            b.addString("left");
-        }
-        else if (part == SKIN_RIGHT_FOREARM || part == SKIN_RIGHT_HAND)
-        {
-            b.addString("right");
-        }
-
-        for (size_t i = 0; i < taxelsIDs.size(); ++i)
-        {
-            for (size_t j = 0; j < iCubSkin[iCubSkinID].txls.size(); j++)
-            {
-                if (iCubSkin[iCubSkinID].txls[j]->ID == taxelsIDs[i])
-                {
-                    w = iCubSkin[iCubSkinID].txls[j]->Resp;
-                    geoCenter += iCubSkin[iCubSkinID].txls[j]->WRFPos*w;
-                    normalDir += locateTaxel(iCubSkin[iCubSkinID].txls[j]->Norm,part)*w;
-                    w_sum += w;
-                }
-            }
-        }
-
-        geoCenter /= w_sum;
-        normalDir /= w_sum;
-        vectorIntoBottle(geoCenter,b);
-        vectorIntoBottle(normalDir,b);
-        skinPortOut.setEnvelope(ts);
-        skinPortOut.write(b);     // send something anyway (if there is no contact the bottle is empty)
-    }
+    skinPortOut.setEnvelope(ts);
+    skinPortOut.write(out);     // send something anyway (if there is no contact the bottle is empty)
 }
 
 void vtRFThread::sendContactsToSkinGui()

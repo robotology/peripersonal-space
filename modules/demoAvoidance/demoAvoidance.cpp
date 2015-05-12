@@ -72,8 +72,12 @@ protected:
     //********************************************
     bool read(ConnectionReader &connection)
     {
+        Bottle in;
+        in.read(connection);
+        
         Bottle input;
-        input.read(connection);
+        input=*in.get(0).asList();
+
         if (input.size()>=7)
         {
             string arm=input.get(0).asString().c_str();
