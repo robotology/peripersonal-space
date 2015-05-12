@@ -205,6 +205,7 @@ protected:
     * Moves arms to starting (home) position
     */
     void steerArmsHome();
+    void steerArmsHomeMasterSlave();
 
     /**
     * Configure hands to the pointing configuration

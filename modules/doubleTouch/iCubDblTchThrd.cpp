@@ -256,11 +256,11 @@ void doubleTouchThread::run()
                 {
                     printMessage(0,"Going to rest...\n");
                     clearTask();
-                    steerArmsHome();
+                    steerArmsHomeMasterSlave();
                     printMessage(1,"Switching to position mode..\n");
                     imodeS -> setInteractionMode(2,VOCAB_IM_STIFF);
                     imodeS -> setInteractionMode(3,VOCAB_IM_STIFF);
-                    steerArmsHome();
+                    steerArmsHomeMasterSlave();
 
                     printMessage(0,"WAITING FOR CONTACT...\n");
                     step = 1;
@@ -644,6 +644,32 @@ void doubleTouchThread::steerArmsHome()
     for (int i = 7; i < 16; i++)
     {
         iposR -> positionMove(i,0.0);
+    }
+}
+
+void doubleTouchThread::steerArmsHomeMasterSlave()
+{
+    printMessage(1,"Moving arms to home, i.e. %s...\n",
+                    (CTRL_RAD2DEG*armPossHome).toString(3,3).c_str());
+
+    for (int i = 0; i < 7; i++)
+    {
+        iposM -> positionMove(i,CTRL_RAD2DEG*armPossHome[i]);
+    }
+    for (int i = 7; i < 16; i++)
+    {
+        iposM -> positionMove(i,0.0);
+    }
+
+    Time::delay(2.0);
+    
+    for (int i = 0; i < 7; i++)
+    {
+        iposS -> positionMove(i,CTRL_RAD2DEG*armPossHome[i]);
+    }
+    for (int i = 7; i < 16; i++)
+    {
+        iposS -> positionMove(i,0.0);
     }
 }
 
