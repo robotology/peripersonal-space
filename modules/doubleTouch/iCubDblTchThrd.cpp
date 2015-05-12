@@ -7,9 +7,9 @@
 // VEL_THRES * getRate()
 
 doubleTouchThread::doubleTouchThread(int _rate, const string &_name, const string &_robot, int _v,
-                                     string _type, double _jnt_vels, int _record, string _filename, string _color,
+                                     std::vector<SkinPart> _skinParts, double _jnt_vels, int _record, string _filename, string _color,
                                      bool _autoconnect, bool _dontgoback, const Vector &_hand_poss_master, const Vector &_hand_poss_slave) :
-                                     RateThread(_rate), name(_name), robot(_robot),verbosity(_v), type(_type), record(_record),
+                                     RateThread(_rate), name(_name), robot(_robot),verbosity(_v), skinParts(_skinParts), record(_record),
                                      filename(_filename), color(_color), autoconnect(_autoconnect), jnt_vels(_jnt_vels), dontgoback(_dontgoback),
                                      handPossMaster(_hand_poss_master),handPossSlave(_hand_poss_slave)
 {
@@ -25,25 +25,6 @@ doubleTouchThread::doubleTouchThread(int _rate, const string &_name, const strin
 
     armL = new iCubArm("left");
     armR = new iCubArm("right");
-
-    skinPart = SKIN_PART_UNKNOWN;
-
-    if (type == "LtoR")
-    {
-        skinPart = SKIN_LEFT_FOREARM;
-    }
-    else if (type == "LHtoR")
-    {
-        skinPart = SKIN_LEFT_HAND;
-    }
-    else if (type == "RtoL")
-    {
-        skinPart = SKIN_RIGHT_FOREARM;
-    }
-    else if (type == "RHtoL")
-    {
-        skinPart = SKIN_RIGHT_HAND;
-    }
 
     iter = 1;
 
@@ -190,7 +171,6 @@ void doubleTouchThread::run()
 
                         printMessage(1,"Switching to impedance position mode..\n");
                         imodeS -> setInteractionMode(2,VOCAB_IM_COMPLIANT);
-                        printf("canajsjjs\n");
                         imodeS -> setInteractionMode(3,VOCAB_IM_COMPLIANT);
                         step++;
                     }
@@ -402,25 +382,10 @@ bool doubleTouchThread::clearTask()
 {
     yInfo("[doubleTouch] Clearing task..");
 
-    if (slv)
-    {
-        delete slv; slv=NULL;
-    }
-    
-    if (gue)
-    {
-        delete gue; gue=NULL;
-    }
-
-    if (sol)
-    {
-        delete sol; sol=NULL;
-    }
-
-    if (testLimb)
-    {
-        delete testLimb; testLimb=NULL;
-    }
+    delete slv; slv=NULL;
+    delete gue; gue=NULL;
+    delete sol; sol=NULL;
+    delete testLimb; testLimb=NULL;
 
     // This has been made in order for sendOutput to work properly
     cntctSkinPart=SKIN_PART_UNKNOWN;
@@ -457,10 +422,10 @@ void doubleTouchThread::sendOutput()
     output.addInt(step);
     output.addInt(record);
     output.addInt(recFlag);
-    output.addString(type.c_str());
 
     if (cntctSkinPart != SKIN_PART_UNKNOWN)
     {
+        output.addString(curTaskType.c_str());
         matrixIntoBottle(cntctH0,output);
         matrixIntoBottle(slv->probl->limb.getHN(),output);
         matrixIntoBottle(armM->getH(),output);
@@ -489,7 +454,7 @@ bool doubleTouchThread::testAchievement2(skinContactList *_sCL)
     // Search for a suitable contact:
     for(skinContactList::iterator it=_sCL->begin(); it!=_sCL->end(); it++)
     {
-        if(skinPart == it -> getSkinPart())
+        if(cntctSkinPart == it -> getSkinPart())
         {
             /**
             * ENCODERS SLAVE (They're 7 DOF straightforwardly acquired from shoulder to wrist)
@@ -525,7 +490,7 @@ bool doubleTouchThread::testAchievement2(skinContactList *_sCL)
             ofstream outputfile;
             outputfile.open (filename.c_str(),ios::app);
             outputfile  << iter << "\t" << fixed << Time::now() << "\t"
-                        << robot  << "\t" << color << "\t" << type << "\t"
+                        << robot  << "\t" << color << "\t" << curTaskType << "\t"
                         << qS.toString(3,3) << "\t" << qM.toString(3,3) << "\t"
                         << toVector(cntctH0).toString(3,3) << "\t"
                         << toVector(cntctH0_final).toString(3,3);
@@ -589,9 +554,6 @@ void doubleTouchThread::testAchievement()
 
 void doubleTouchThread::solveIK()
 {
-    printf("aoijcascdj\n");
-    cntctH0 = findH0(cntctSkin);
-
     printMessage(2,"H0: \n%s\n",cntctH0.toString(3,3).c_str());
     slv->probl->limb.setH0(SE3inv(cntctH0));
     testLimb->setH0(SE3inv(cntctH0));
@@ -715,22 +677,27 @@ bool doubleTouchThread::detectContact(skinContactList *_sCL)
     {
         printMessage(3,"skinContact: %s\n",it->toString(3).c_str());
         if( it -> getPressure() > 25 &&
-            skinPart == it -> getSkinPart() && 
             norm(it-> getNormalDir()) != 0.0)
         {
-            cntctSkin     = *it;                    // Store the skinContact for eventual future use
-            cntctPosLink  = it -> getCoP();         // Get the position of the contact;
-            cntctLinkNum  = it -> getLinkNumber();  // Retrieve the link number of the contact;
-            cntctNormDir  = it -> getNormalDir();   // Normal direction of the contact
-            cntctPressure = it -> getPressure();    // Retrieve the pressure of the contact
-
-            cntctSkinPart = it -> getSkinPart();
-
-            if (selectTask())
+            for (int i = 0; i < skinParts.size(); i++)
             {
-                cntctPosWRF = locateContact();
-                cntctH0     = findH0(cntctSkin);
-                return true;
+                if (skinParts[i] == it -> getSkinPart())
+                {
+                    cntctSkin     = *it;                    // Store the skinContact for eventual future use
+                    cntctPosLink  = it -> getCoP();         // Get the position of the contact;
+                    cntctLinkNum  = it -> getLinkNumber();  // Retrieve the link number of the contact;
+                    cntctNormDir  = it -> getNormalDir();   // Normal direction of the contact
+                    cntctPressure = it -> getPressure();    // Retrieve the pressure of the contact
+
+                    cntctSkinPart = it -> getSkinPart();
+
+                    if (selectTask())
+                    {
+                        cntctPosWRF = locateContact();
+                        cntctH0     = findH0(cntctSkin);
+                        return true;
+                    }
+                }
             }
         }
     }
@@ -761,7 +728,7 @@ Matrix doubleTouchThread::findH0(skinContact &sc)
     x = sc.getNormalDir();
     x = x / norm(x);
 
-    if (type!="LHtoR" && type!="RHtoL")
+    if (curTaskType!="LHtoR" && curTaskType!="RHtoL")
     {
         z[0] = -x[2]/x[0]; z[2] = 1;
         y = -1*(cross(x,z));
@@ -819,6 +786,12 @@ void doubleTouchThread::threadRelease()
             imodeR -> setInteractionMode(3,VOCAB_IM_STIFF);
             steerArmsHome();
         }
+
+        delete encsR; encsR = NULL;
+        delete  armR;  armR = NULL;
+
+        delete encsL; encsL = NULL;
+        delete  armL;  armL = NULL;
 
     printMessage(0,"Closing ports..\n");
         closePort(skinPort);

@@ -87,7 +87,8 @@ Linux (Ubuntu 12.04, Debian Squeeze).
 \author: Alessandro Roncone
 */ 
 
-#include <yarp/os/all.h>
+#include <yarp/os/Log.h>
+#include <yarp/os/RpcClient.h>
 
 #include <yarp/sig/Vector.h>
 #include <yarp/sig/Matrix.h>
@@ -132,6 +133,8 @@ private:
     
     Vector handPossM; //hand configuration for "master" arm
     Vector handPossS; //hand configuration for "slave" arm
+
+    std::vector<SkinPart> _sPs;
 
 public:
     doubleTouch()
@@ -191,7 +194,7 @@ public:
                 //-----------------
                 case VOCAB4('s','t','a','r'):
                 {
-                    dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity, type,
+                    dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity, _sPs,
                                                        jnt_vels, record, filename, color,
                                                        autoconnect, dontgoback, handPossM, handPossS);
                     bool strt = dblTchThrd -> start();
@@ -252,120 +255,168 @@ public:
 
             if (dontgoback)
             {
-                yInfo("Dontgoback flag set to ON");
+                yInfo("[doubleTouch] Dontgoback flag set to ON");
             }
 
             if (autoconnect)
             {
-                yInfo("Autoconnect flag set to ON");
+                yInfo("[doubleTouch] Autoconnect flag set to ON");
             }
         //******************* NAME ******************
             if (rf.check("name"))
             {
                 name = rf.find("name").asString();
-                yInfo("Module name set to %s", name.c_str());
+                yInfo("[doubleTouch] Module name set to %s", name.c_str());
             }
-            else yInfo("Module name set to default, i.e. %s", name.c_str());
+            else yInfo("[doubleTouch] Module name set to default, i.e. %s", name.c_str());
             setName(name.c_str());
 
         //******************* ROBOT ******************
             if (rf.check("robot"))
             {
                 robot = rf.find("robot").asString();
-                yInfo("Robot is: %s", robot.c_str());
+                yInfo("[doubleTouch] Robot is: %s", robot.c_str());
             }
-            else yInfo("Could not find robot option in the config file; using %s as default",robot.c_str());
+            else yInfo("[doubleTouch] Could not find robot option in the config file; using %s as default",robot.c_str());
 
         //******************* TYPE ******************
             if (rf.check("type"))
             {
                 type = rf.find("type").asString();
-                yInfo("Type is: %s", type.c_str());
+                yInfo("[doubleTouch] Type is: %s", type.c_str());
+
+                if (type=="RtoL")
+                {
+                    _sPs.push_back(SKIN_RIGHT_FOREARM);
+                }
+                else if (type=="RHtoL")
+                {
+                    _sPs.push_back(SKIN_RIGHT_HAND);
+                }
+                else if (type=="LtoR")
+                {
+                    _sPs.push_back(SKIN_LEFT_FOREARM);
+                }
+                else if (type=="LHtoR")
+                {
+                    _sPs.push_back(SKIN_LEFT_HAND);
+                }
+                else if (type=="all_RtoL")
+                {
+                    _sPs.push_back(SKIN_RIGHT_FOREARM);
+                    _sPs.push_back(SKIN_RIGHT_HAND);
+                }
+                else if (type=="all_LtoR")
+                {
+                    _sPs.push_back(SKIN_LEFT_FOREARM);
+                    _sPs.push_back(SKIN_LEFT_HAND);
+                }
+                else if (type=="all_12DoF")
+                {
+                    _sPs.push_back(SKIN_LEFT_FOREARM);
+                    _sPs.push_back(SKIN_RIGHT_FOREARM);
+                }
+                else if (type=="all_14DoF")
+                {
+                    _sPs.push_back(SKIN_LEFT_HAND);
+                    _sPs.push_back(SKIN_RIGHT_HAND);
+                }
+                else if (type=="all")
+                {
+                    _sPs.push_back(SKIN_LEFT_FOREARM);
+                    _sPs.push_back(SKIN_RIGHT_FOREARM);
+                    _sPs.push_back(SKIN_LEFT_HAND);
+                    _sPs.push_back(SKIN_RIGHT_HAND);
+                }
+                else
+                {
+                    yError("[doubleTouch] ERROR: type option was not among the admissible values!");
+                    return false;
+                }
+
             }
-            else yInfo("Could not find type option in the config file; using %s as default",type.c_str());
+            else yInfo("[doubleTouch] Could not find type option in the config file; using %s as default",type.c_str());
 
         //******************* VERBOSE ******************
             if (rf.check("verbosity"))
             {
                 verbosity = rf.find("verbosity").asInt();
-                yInfo("doubleTouchThread verbosity set to %i", verbosity);
+                yInfo("[doubleTouch] verbosity set to %i", verbosity);
             }
-            else yInfo("Could not find verbosity option in the config file; using %i as default",verbosity);
+            else yInfo("[doubleTouch] Could not find verbosity option in the config file; using %i as default",verbosity);
 
         //****************** rate ******************
             if (rf.check("rate"))
             {
                 rate = rf.find("rate").asInt();
-                yInfo("doubleTouchThread rateThread working at %i ms.",rate);
+                yInfo("[doubleTouch] rateThread working at %i ms.",rate);
             }
-            else yInfo("Could not find rate in the config file; using %i as default",rate);
+            else yInfo("[doubleTouch] Could not find rate in the config file; using %i as default",rate);
 
         //****************** record ******************
             if (rf.check("record"))
             {
                 record = rf.find("record").asInt();
-                yInfo("doubleTouchThread record variable is set to %i",record);
+                yInfo("[doubleTouch] record variable is set to %i",record);
             }
-            else yInfo("Could not find record in the config file; using %i as default",record);
+            else yInfo("[doubleTouch] Could not find record in the config file; using %i as default",record);
 
         //***************** Filename *****************
             if (rf.check("filename")) {
                 filename = rf.find("filename").asString();
-                yInfo("Module filename set to %s", filename.c_str());
+                yInfo("[doubleTouch] Module filename set to %s", filename.c_str());
             }
-            else yInfo("Module filename set to default, i.e. %s", filename.c_str());
+            else yInfo("[doubleTouch] Module filename set to default, i.e. %s", filename.c_str());
 
-        //***************** Filename *****************
+        //************* joint velocities *************
             if (rf.check("jnt_vels")) {
                 jnt_vels = rf.find("jnt_vels").asDouble();
-                yInfo("Module jnt_vels set to %g", jnt_vels);
+                yInfo("[doubleTouch] Module jnt_vels set to %g", jnt_vels);
             }
-            else yInfo("Module jnt_vels set to default, i.e. %g", jnt_vels);
+            else yInfo("[doubleTouch] Module jnt_vels set to default, i.e. %g", jnt_vels);
 
         //***************** color *****************
             if (rf.check("color")) {
                 color = rf.find("color").asString();
-                yInfo("Robot color set to %s", color.c_str());
+                yInfo("[doubleTouch] Robot color set to %s", color.c_str());
             }
             else 
             {
                 if (record==2)
                 {
-                    yError("Robot color wasn't instantiated, and this should be a recording session for calibration purposes!.");
-                    yInfo("I will finish here.");
+                    yError("[doubleTouch] Robot color wasn't instantiated, and this should be a recording session for calibration purposes!.");
+                    yError("[doubleTouch] I will finish here.");
                     return false;
                 }
             }
 
-        //*********** [hand_configuration] group    
+        //*********** [hand_configuration] group ***********
         Bottle &bHandConf=rf.findGroup("hand_configuration");
+
         if (!bHandConf.isNull()){
             bHandConf.setMonitor(rf.getMonitor());
             
             if (bHandConf.check("master"))
             {
-                Bottle *bottleMaster=bHandConf.find("master").asList(); //will take the value from key master as a bottle - so just the numbers in brackets
-                //printf("%s",grpMaster.toString().c_str());
+                Bottle *bottleMaster=bHandConf.find("master").asList();
                 handPossM = vectorFromBottle(*bottleMaster,0,9);
-                yInfo("Initializing master hand configuration from config file.");
-                yDebug("Joint positions: %f %f %f %f %f %f %f %f %f",handPossM[0],handPossM[1],handPossM[2],
-                       handPossM[3],handPossM[4],handPossM[5],handPossM[6],handPossM[7],handPossM[8]);
+                yInfo("[doubleTouch] Initializing master hand configuration: %s",
+                        handPossM.toString(3,3).c_str());
             }
-            else yInfo("Could not find [master] option in the config file; set to default.");
+            else yInfo("[doubleTouch] Could not find [master] option in the config file; set to default.");
+
             if (bHandConf.check("slave"))
             {
                 Bottle *bottleSlave=bHandConf.find("slave").asList();
                 handPossS = vectorFromBottle(*bottleSlave,0,9);
-                yInfo("Initializing slave hand configuration from config file.");
-                yDebug("Joint positions: %f %f %f %f %f %f %f %f %f",handPossS[0],handPossS[1],handPossS[2],
-                       handPossS[3],handPossS[4],handPossS[5],handPossS[6],handPossS[7],handPossS[8]);
+                yInfo("[doubleTouch] Initializing slave hand configuration: %s",
+                        handPossS.toString(3,3).c_str());
             }
-            else yInfo("Could not find [slave] option in the config file; set to default.");
+            else yInfo("[doubleTouch] Could not find [slave] option in the config file; set to default.");
         }
-        else{ //bHandConf.isNull()
-            yInfo("Could not find [hand_configuration] group in the config file; set all to default."); 
+        else{
+            yInfo("[doubleTouch] Could not find [hand_configuration] group in the config file; set all to default."); 
         }   
-            
             
         // Let's add some contextual info (the date) to the file created!
             time_t now = time(0);
@@ -385,7 +436,7 @@ public:
             {
                 filename = "../data/"+time+filename;
             }
-            yInfo("Storing file set to: %s",filename.c_str());
+            yInfo("[doubleTouch] Storing file set to: %s",filename.c_str());
 
         //******************************************************
         //************************ PORTS ***********************
@@ -398,7 +449,7 @@ public:
         else
         {
             dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity,
-                        type, jnt_vels, record, filename, color, autoconnect, dontgoback, handPossM, handPossS);
+                        _sPs, jnt_vels, record, filename, color, autoconnect, dontgoback, handPossM, handPossS);
             bool strt = dblTchThrd -> start();
             if (!strt)
             {
@@ -465,6 +516,7 @@ int main(int argc, char * argv[])
         yInfo("   --color       color: robot color (black or white - MANDATORY!)");
         yInfo("   --type        type:  the type of task (default 'LtoR').");
         yInfo("                        Allowed type names: 'RtoL','LtoR','RHtoL','LHtoR'");
+        yInfo("                        Combinations: 'all','all_LtoR','all_RtoL','all_12DoF','all_14DoF'");
         yInfo("   --filename    file:  the name of the file to be saved in case of");
         yInfo("                        a recording session. Default 'calibration.txt'.");
         yInfo("                        A date is appended at the beginning for completeness.");

@@ -25,6 +25,7 @@
 #include <yarp/os/Time.h>
 #include <yarp/os/RateThread.h>
 #include <yarp/os/BufferedPort.h>
+#include <yarp/os/Log.h>
 
 #include <yarp/sig/Vector.h>
 #include <yarp/sig/Matrix.h>
@@ -106,10 +107,10 @@ protected:
     int        iter; // Iterator to keep track of the recording steps
     double jnt_vels; // Joint velocities during the double touch
 
-    // SkinPart to be handled
-    // it can be either 2 (forearm_left), 5 (forearm_right)
-    // or even 3 (upperarm_left) and 6 (upperarm_right) [TO DO]
-    SkinPart skinPart;
+    // SkinParts to be handled
+    // it can be either SKIN_LEFT_FOREARM, SKIN_LEFT_HAND,
+    // SKIN_RIGHT_FOREARM, SKIN_RIGHT_HAND or a combination of them
+    std::vector<SkinPart> skinParts;
 
     // Port that reads contacts:
     BufferedPort<iCub::skinDynLib::skinContactList> *skinPort;
@@ -266,8 +267,9 @@ protected:
 public:
     // CONSTRUCTOR
     doubleTouchThread(int _rate, const string &_name, const string &_robot,
-                      int _v, const string _type, double _jnt_vels, int _record, string _filename,
-                      string _color, bool _autoconnect, bool _dontgoback, const Vector &_hand_poss_master, const Vector &_hand_poss_slave);
+                      int _v, std::vector<SkinPart> _skinParts, double _jnt_vels,
+                      int _record, string _filename, string _color, bool _autoconnect,
+                      bool _dontgoback, const Vector &_hand_poss_master, const Vector &_hand_poss_slave);
     // INIT
     virtual bool threadInit();
     // RUN
