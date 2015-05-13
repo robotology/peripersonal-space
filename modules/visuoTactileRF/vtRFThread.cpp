@@ -821,47 +821,51 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
 
 bool vtRFThread::projectIncomingEvent()
 {
-    for (size_t i = 0; i < iCubSkinSize; i++)
+    for (size_t k = 0; k < incomingEvents.size(); k++)
     {
-        Matrix T_a = eye(4);               // transform matrix relative to the arm
-        if ((iCubSkin[i].name == SKIN_LEFT_FOREARM) || (iCubSkin[i].name == SKIN_LEFT_HAND))
+        for (size_t i = 0; i < iCubSkinSize; i++)
         {
-            iencsL->getEncoders(encsL->data());
-            yarp::sig::Vector qL=encsL->subVector(0,6);
-            armL -> setAng(qL*CTRL_DEG2RAD);
-            if (iCubSkin[i].name == SKIN_LEFT_FOREARM) 
-                T_a = armL -> getH(3+4, true);
-            else //(iCubSkin[i].name == SKIN_LEFT_HAND) 
-                T_a = armL -> getH(3+6, true);
-        }
-        else if ((iCubSkin[i].name == SKIN_RIGHT_FOREARM) || (iCubSkin[i].name == SKIN_RIGHT_HAND))
-        {
-            iencsR->getEncoders(encsR->data());
-            yarp::sig::Vector qR=encsR->subVector(0,6);
-            armR -> setAng(qR*CTRL_DEG2RAD);
-            if (iCubSkin[i].name == SKIN_RIGHT_FOREARM)
-                T_a = armR -> getH(3+4, true);
-            else //(iCubSkin[i].name == SKIN_RIGHT_HAND) 
-                T_a = armR -> getH(3+6, true);
-        }
-        else
-            yError("[vtRFThread] in projectIncomingEvent!\n");
+            Matrix T_a = eye(4);               // transform matrix relative to the arm
+            if ((iCubSkin[i].name == SKIN_LEFT_FOREARM) || (iCubSkin[i].name == SKIN_LEFT_HAND))
+            {
+                iencsL->getEncoders(encsL->data());
+                yarp::sig::Vector qL=encsL->subVector(0,6);
+                armL -> setAng(qL*CTRL_DEG2RAD);
+                if (iCubSkin[i].name == SKIN_LEFT_FOREARM) 
+                    T_a = armL -> getH(3+4, true);
+                else //(iCubSkin[i].name == SKIN_LEFT_HAND) 
+                    T_a = armL -> getH(3+6, true);
+            }
+            else if ((iCubSkin[i].name == SKIN_RIGHT_FOREARM) || (iCubSkin[i].name == SKIN_RIGHT_HAND))
+            {
+                iencsR->getEncoders(encsR->data());
+                yarp::sig::Vector qR=encsR->subVector(0,6);
+                armR -> setAng(qR*CTRL_DEG2RAD);
+                if (iCubSkin[i].name == SKIN_RIGHT_FOREARM)
+                    T_a = armR -> getH(3+4, true);
+                else //(iCubSkin[i].name == SKIN_RIGHT_HAND) 
+                    T_a = armR -> getH(3+6, true);
+            }
+            else
+                yError("[vtRFThread] in projectIncomingEvent!\n");
 
-        // yInfo("T_A:\n%s",T_a.toString().c_str());
+            // yInfo("T_A:\n%s",T_a.toString().c_str());
 
-        for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
-        {
-            iCubSkin[i].txls[j]->Evnt=projectIntoTaxelRF(iCubSkin[i].txls[j]->FoR,T_a,
-                                                         incomingEvents[incomingEvents.size()-1]);
+            for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
+            {
+                iCubSkin[i].txls[j]->Evnt=projectIntoTaxelRF(iCubSkin[i].txls[j]->FoR,T_a,
+                                                             incomingEvents[k]);
 
-            // There's a reason behind this choice
-            dumpedVector.push_back(iCubSkin[i].txls[j]->Evnt.Pos[0]);
-            dumpedVector.push_back(iCubSkin[i].txls[j]->Evnt.Pos[1]);
-            dumpedVector.push_back(iCubSkin[i].txls[j]->Evnt.Pos[2]);
+                // There's a reason behind this choice
+                dumpedVector.push_back(iCubSkin[i].txls[j]->Evnt.Pos[0]);
+                dumpedVector.push_back(iCubSkin[i].txls[j]->Evnt.Pos[1]);
+                dumpedVector.push_back(iCubSkin[i].txls[j]->Evnt.Pos[2]);
 
-            printMessage(5,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,iCubSkin[i].txls[j]->Evnt.toString().c_str());
+                printMessage(5,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,iCubSkin[i].txls[j]->Evnt.toString().c_str());
+            }
         }
     }
+
     return true;
 }
 
