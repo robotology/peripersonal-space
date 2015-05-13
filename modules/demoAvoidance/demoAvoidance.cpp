@@ -55,6 +55,9 @@ protected:
     Port dataPort;
     int motionGain;
 
+    bool useLeftArm;
+    bool useRightArm;
+
     RpcServer          rpcSrvr;
 
     Mutex mutex;
@@ -74,30 +77,35 @@ protected:
     {
         Bottle in;
         in.read(connection);
-        
-        Bottle input;
-        input=*in.get(0).asList();
 
-        if (input.size()>=7)
+        if (in.size()>=1)
         {
-            string arm=input.get(0).asString().c_str();
-            transform(arm.begin(),arm.end(),arm.begin(),::tolower);
-            mutex.lock();
-            map<string,Data>::iterator it=data.find(arm);
-            if (it!=data.end())
+            Bottle input;
+            input=*(in.get(0).asList());
+
+            if (input.size()>=7)
             {
-                Data &d=it->second;
-                d.point[0]=input.get(1).asDouble();
-                d.point[1]=input.get(2).asDouble();
-                d.point[2]=input.get(3).asDouble();
-                d.dir[0]=input.get(4).asDouble();
-                d.dir[1]=input.get(5).asDouble();
-                d.dir[2]=input.get(6).asDouble();
-                d.persistence=PPS_AVOIDANCE_PERSISTENCE;
-                d.timeout=PPS_AVOIDANCE_TIMEOUT;
+                yDebug("[demoAvoidance] got command (%s)",input.toString().c_str());
+                string arm=input.get(0).asString().c_str();
+                transform(arm.begin(),arm.end(),arm.begin(),::tolower);
+                mutex.lock();
+                map<string,Data>::iterator it=data.find(arm);
+                if (it!=data.end())
+                {
+                    Data &d=it->second;
+                    d.point[0]=input.get(1).asDouble();
+                    d.point[1]=input.get(2).asDouble();
+                    d.point[2]=input.get(3).asDouble();
+                    d.dir[0]=input.get(4).asDouble();
+                    d.dir[1]=input.get(5).asDouble();
+                    d.dir[2]=input.get(6).asDouble();
+                    d.persistence=PPS_AVOIDANCE_PERSISTENCE;
+                    d.timeout=PPS_AVOIDANCE_TIMEOUT;
+                }
+                mutex.unlock();
             }
-            mutex.unlock();
         }
+
         return true;
     }
 
@@ -188,17 +196,14 @@ public:
     //********************************************
     bool configure(ResourceFinder &rf)
     {
-        data["left"]=Data();
-        data["left"].home_x[0]=-0.30;
-        data["left"].home_x[1]=-0.20;
-        data["left"].home_x[2]=+0.05;
+        if (rf.check("noLeftArm") && rf.check("noRightArm"))
+        {
+            yError("[demoAvoidance] no arm has been selected. Closing.");
+            return false;
+        }
 
-        Matrix R(4,4);
-        R(0,0)=-1.0; R(2,1)=-1.0; R(1,2)=-1.0; R(3,3)=1.0;
-        data["left"].home_o=dcm2axis(R);
-
-        data["right"]=data["left"];
-        data["right"].home_x[1]=-data["right"].home_x[1];
+        useLeftArm  = false;
+        useRightArm = false;
 
         string  name=rf.check("name",Value("avoidance")).asString().c_str();
         string robot=rf.check("robot",Value("icub")).asString().c_str();
@@ -209,82 +214,69 @@ public:
         }
         if (motionGain!=-1.0)
         {
-            yWarning("motionGain set to catching");
+            yWarning("[demoAvoidance] motionGain set to catching");
         }
 
         bool autoConnect=rf.check("autoConnect");
         if (autoConnect)
         {
-            yWarning("Autoconnect mode set to ON");
+            yWarning("[demoAvoidance] Autoconnect mode set to ON");
         }
 
         bool stiff=rf.check("stiff");
         if (stiff)
         {
-            yInfo("Stiff Mode enabled.");
+            yInfo("[demoAvoidance] Stiff Mode enabled.");
         }
 
-        Property optionCartL;
-        optionCartL.put("device","cartesiancontrollerclient");
-        optionCartL.put("remote","/"+robot+"/cartesianController/left_arm");
-        optionCartL.put("local",("/"+name+"/cart/left_arm").c_str());
-        if (!driverCartL.open(optionCartL))
+        Matrix R(4,4);
+        R(0,0)=-1.0; R(2,1)=-1.0; R(1,2)=-1.0; R(3,3)=1.0;
+
+        if (!rf.check("noLeftArm"))
         {
-            close();
-            return false;
-        }
+            useLeftArm=true;
 
-        Property optionCartR;
-        optionCartR.put("device","cartesiancontrollerclient");
-        optionCartR.put("remote","/"+robot+"/cartesianController/right_arm");
-        optionCartR.put("local",("/"+name+"/cart/right_arm").c_str());
-        if (!driverCartR.open(optionCartR))
-        {
-            close();
-            return false;
-        }
+            data["left"]=Data();
+            data["left"].home_x[0]=-0.30;
+            data["left"].home_x[1]=-0.20;
+            data["left"].home_x[2]=+0.05;
+            data["left"].home_o=dcm2axis(R);
 
-        Property optionJointL;
-        optionJointL.put("device","remote_controlboard");
-        optionJointL.put("remote","/"+robot+"/left_arm");
-        optionJointL.put("local",("/"+name+"/joint/left_arm").c_str());
-        if (!driverJointL.open(optionJointL))
-        {
-            close();
-            return false;
-        }
+            Property optionCartL;
+            optionCartL.put("device","cartesiancontrollerclient");
+            optionCartL.put("remote","/"+robot+"/cartesianController/left_arm");
+            optionCartL.put("local",("/"+name+"/cart/left_arm").c_str());
+            if (!driverCartL.open(optionCartL))
+            {
+                close();
+                return false;
+            }
 
-        Property optionJointR;
-        optionJointR.put("device","remote_controlboard");
-        optionJointR.put("remote","/"+robot+"/right_arm");
-        optionJointR.put("local",("/"+name+"/joint/right_arm").c_str());
-        if (!driverJointR.open(optionJointR))
-        {
-            close();
-            return false;
-        }
+            Property optionJointL;
+            optionJointL.put("device","remote_controlboard");
+            optionJointL.put("remote","/"+robot+"/left_arm");
+            optionJointL.put("local",("/"+name+"/joint/left_arm").c_str());
+            if (!driverJointL.open(optionJointL))
+            {
+                close();
+                return false;
+            }
 
-        driverCartL.view(data["left"].iarm);
-        driverCartR.view(data["right"].iarm);
+            driverCartL.view(data["left"].iarm);
+            data["left"].iarm->storeContext(&contextL);
 
-        data["left"].iarm->storeContext(&contextL);
-        data["right"].iarm->storeContext(&contextR);
+            Vector dof;
+            data["left"].iarm->getDOF(dof);
+            dof=0.0; dof[3]=dof[4]=dof[5]=dof[6]=1.0;
+            data["left"].iarm->setDOF(dof,dof);
+            data["left"].iarm->setTrajTime(0.9);
 
-        Vector dof;
-        data["left"].iarm->getDOF(dof);
-        dof=0.0; dof[3]=dof[4]=dof[5]=dof[6]=1.0;
-        data["left"].iarm->setDOF(dof,dof);  data["right"].iarm->setDOF(dof,dof);
-        data["left"].iarm->setTrajTime(0.9); data["right"].iarm->setTrajTime(0.9);
+            data["left"].iarm->goToPoseSync(data["left"].home_x,data["left"].home_o);
+            data["left"].iarm->waitMotionDone();
 
-        data["left"].iarm->goToPoseSync(data["left"].home_x,data["left"].home_o);
-        data["right"].iarm->goToPoseSync(data["right"].home_x,data["right"].home_o);
-        data["left"].iarm->waitMotionDone();
-        data["right"].iarm->waitMotionDone();
+            IInteractionMode  *imode; driverJointL.view(imode);
+            IImpedanceControl *iimp;  driverJointL.view(iimp);
 
-        IInteractionMode  *imode; driverJointL.view(imode);
-        IImpedanceControl *iimp;  driverJointL.view(iimp);
-        for (int i=0; i<2; i++)
-        {
             if (!stiff)
             {
                 imode->setInteractionMode(0,VOCAB_IM_COMPLIANT); iimp->setImpedance(0,0.4,0.03); 
@@ -293,9 +285,62 @@ public:
                 imode->setInteractionMode(3,VOCAB_IM_COMPLIANT); iimp->setImpedance(3,0.2,0.01);
                 imode->setInteractionMode(4,VOCAB_IM_COMPLIANT); iimp->setImpedance(4,0.2,0.0);
             }
+        }
 
-            driverJointR.view(imode);
-            driverJointR.view(iimp);
+        if (!rf.check("noRightArm"))
+        {
+            useRightArm = true;
+
+            data["right"]=Data();
+            data["right"].home_x[0]=-0.30;
+            data["right"].home_x[1]=+0.20;
+            data["right"].home_x[2]=+0.05;
+            data["right"].home_o=dcm2axis(R);
+
+            Property optionCartR;
+            optionCartR.put("device","cartesiancontrollerclient");
+            optionCartR.put("remote","/"+robot+"/cartesianController/right_arm");
+            optionCartR.put("local",("/"+name+"/cart/right_arm").c_str());
+            if (!driverCartR.open(optionCartR))
+            {
+                close();
+                return false;
+            }
+
+            Property optionJointR;
+            optionJointR.put("device","remote_controlboard");
+            optionJointR.put("remote","/"+robot+"/right_arm");
+            optionJointR.put("local",("/"+name+"/joint/right_arm").c_str());
+            if (!driverJointR.open(optionJointR))
+            {
+                close();
+                return false;
+            }
+
+            driverCartR.view(data["right"].iarm);
+            data["right"].iarm->storeContext(&contextR);
+
+            Vector dof;
+            data["right"].iarm->getDOF(dof);
+            dof=0.0; dof[3]=dof[4]=dof[5]=dof[6]=1.0;
+            data["right"].iarm->setDOF(dof,dof);
+            data["right"].iarm->setTrajTime(0.9);
+
+            data["right"].iarm->goToPoseSync(data["right"].home_x,data["right"].home_o);
+            data["right"].iarm->waitMotionDone();
+
+
+            IInteractionMode  *imode; driverJointR.view(imode);
+            IImpedanceControl *iimp;  driverJointR.view(iimp);
+
+            if (!stiff)
+            {
+                imode->setInteractionMode(0,VOCAB_IM_COMPLIANT); iimp->setImpedance(0,0.4,0.03); 
+                imode->setInteractionMode(1,VOCAB_IM_COMPLIANT); iimp->setImpedance(1,0.4,0.03);
+                imode->setInteractionMode(2,VOCAB_IM_COMPLIANT); iimp->setImpedance(2,0.4,0.03);
+                imode->setInteractionMode(3,VOCAB_IM_COMPLIANT); iimp->setImpedance(3,0.2,0.01);
+                imode->setInteractionMode(4,VOCAB_IM_COMPLIANT); iimp->setImpedance(4,0.2,0.0);
+            }
         }
 
         dataPort.open(("/"+name+"/data:i").c_str());
@@ -315,8 +360,15 @@ public:
     bool updateModule()
     {
         mutex.lock();
-        manageArm(data["left"]);
-        manageArm(data["right"]);
+        if (useLeftArm)
+        {
+            manageArm(data["left"]);
+        }
+        
+        if (useRightArm)
+        {
+            manageArm(data["right"]);
+        }
         mutex.unlock(); 
         return true;
     }
@@ -330,40 +382,48 @@ public:
     //********************************************
     bool close()
     {
+        yInfo("[demoAvoidance] Closing module..");
+
         dataPort.close();
 
-        if (driverCartL.isValid())
+        if (useLeftArm)
         {
-            data["left"].iarm->stopControl();
-            data["left"].iarm->restoreContext(contextL);
-            driverCartL.close(); 
+            if (driverCartL.isValid())
+            {
+                data["left"].iarm->stopControl();
+                data["left"].iarm->restoreContext(contextL);
+                driverCartL.close(); 
+            }
+
+            if (driverJointL.isValid())
+            {
+                IInteractionMode *imode;
+                driverJointL.view(imode);
+                for (int j=0; j<5; j++)
+                    imode->setInteractionMode(j,VOCAB_IM_STIFF);
+
+                driverJointL.close();
+            }
         }
 
-        if (driverCartR.isValid())
+        if (useRightArm)
         {
-            data["right"].iarm->stopControl();
-            data["right"].iarm->restoreContext(contextR);
-            driverCartR.close();
-        }
+            if (driverCartR.isValid())
+            {
+                data["right"].iarm->stopControl();
+                data["right"].iarm->restoreContext(contextR);
+                driverCartR.close();
+            }
 
-        if (driverJointL.isValid())
-        {
-            IInteractionMode *imode;
-            driverJointL.view(imode);
-            for (int j=0; j<5; j++)
-                imode->setInteractionMode(j,VOCAB_IM_STIFF);
+            if (driverJointR.isValid())
+            {
+                IInteractionMode *imode;
+                driverJointR.view(imode);
+                for (int j=0; j<5; j++)
+                    imode->setInteractionMode(j,VOCAB_IM_STIFF);
 
-            driverJointL.close();
-        }
-
-        if (driverJointR.isValid())
-        {
-            IInteractionMode *imode;
-            driverJointR.view(imode);
-            for (int j=0; j<5; j++)
-                imode->setInteractionMode(j,VOCAB_IM_STIFF);
-
-            driverJointR.close();
+                driverJointR.close();
+            }
         }
 
         return true;
@@ -393,6 +453,8 @@ int main(int argc, char * argv[])
         yInfo("   --autoConnect flag:  if to auto connect the ports or not. Default no.");
         yInfo("   --catching    flag:  if enabled, the robot will catch the target instead of avoiding it.");
         yInfo("   --stiff       flag:  if enabled, the robot will perform movements in stiff mode instead of compliant.");
+        yInfo("   --noLeftArm   flag:  if enabled, the robot will perform movements without the left arm.");
+        yInfo("   --noRightArm  flag:  if enabled, the robot will perform movements without the rihgt arm.");
         yInfo("");
         return 0;
     }
