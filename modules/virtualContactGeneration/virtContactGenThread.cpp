@@ -67,6 +67,77 @@ int virtContactGenerationThread::initSkinParts()
                     printMessage(4,"Adding SKIN_RIGHT_HAND to activeSkinParts, it now has %d members.\n",activeSkinParts.size());
                 }
                 break;
+                
+            case SKIN_LEFT_FOREARM:
+            case SKIN_RIGHT_FOREARM:
+                for(unsigned int i= 0; getline(posFile,line); i++)
+                {
+                    line.erase(line.find_last_not_of(" \n\r\t")+1);
+                    if(line.empty())
+                        continue;
+                    string number;
+                    istringstream iss(line, istringstream::in);
+                    taxelPos.zero(); taxelNorm.zero();
+                    for(unsigned int j = 0; iss >> number; j++ )
+                    {
+                        if(j<3)
+                            taxelPos[j] = strtod(number.c_str(),NULL);
+                        else
+                            taxelNorm[j-3] = strtod(number.c_str(),NULL);
+                    }
+                    skinPartWithTaxels.size++; //this is incremented for all lines - size of "port"
+                    if((i>=0) && (i<=191)) //first patch - full one, 16 triangles, lower part of forearm (though in Marco's files, it is called upper)
+                    {
+                        if( ((i % 12) != 6) && ((i % 12) != 10)){ //every 7th and 11th taxel of a triangle are thermal pads  
+                            skinPartWithTaxels.txls.push_back(new Taxel(taxelPos,taxelNorm,i));
+                            printMessage(10,"Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",i,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                        }
+                    }
+                    else if((i>=192) && (i<=383)){ //second patch - 7 triangles in skin V1, upper part of forearm (though in Marco's files, it is called lower)
+                        if( ((i>=204) && (i<=215)) && (i!=204+6) && (i!=204+10)){ //first triangle without thermal pads
+                            skinPartWithTaxels.txls.push_back(new Taxel(taxelPos,taxelNorm,i));
+                            printMessage(10,"Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",i,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                        }
+                        else  if( ((i>=252) && (i<=263)) && (i!=252+6) && (i!=252+10)){ //2nd triangle without thermal pads
+                            skinPartWithTaxels.txls.push_back(new Taxel(taxelPos,taxelNorm,i));
+                            printMessage(10,"Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",i,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                        }
+                        else if( ((i>=288) && (i<=299)) && (i!=288+6) && (i!=288+10)){ //3rd triangle without thermal pads
+                            skinPartWithTaxels.txls.push_back(new Taxel(taxelPos,taxelNorm,i));
+                            printMessage(10,"Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",i,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                        }
+                        else if( ((i>=300) && (i<=311)) && (i!=300+6) && (i!=300+10)){ //4th triangle without thermal pads
+                            skinPartWithTaxels.txls.push_back(new Taxel(taxelPos,taxelNorm,i));
+                            printMessage(10,"Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",i,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                        }
+                        else if( ((i>=312) && (i<=323)) && (i!=312+6) && (i!=312+10)){ //5th triangle without thermal pads
+                            skinPartWithTaxels.txls.push_back(new Taxel(taxelPos,taxelNorm,i));
+                            printMessage(10,"Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",i,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                        }
+                        else if( ((i>=336) && (i<=347)) && (i!=336+6) && (i!=336+10)){ //6th triangle without thermal pads
+                            skinPartWithTaxels.txls.push_back(new Taxel(taxelPos,taxelNorm,i));
+                            printMessage(10,"Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",i,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                        }
+                        else if( ((i>=348) && (i<=359)) && (i!=348+6) && (i!=348+10)){ //7th triangle without thermal pads
+                            skinPartWithTaxels.txls.push_back(new Taxel(taxelPos,taxelNorm,i));
+                            printMessage(10,"Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",i,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                        }
+                    }
+                }
+                if(skinPartWithTaxels.size != 384){
+                    yWarning("[virtContactGenerationThread]::initSkinParts():initalizing %s from file, 384 positions expected, but %d present.\n",SkinPart_s[skin_part_name].c_str(),skinPartWithTaxels.size);
+                }
+                skinPartWithTaxels.name = skin_part_name;
+                if (skin_part_name == SKIN_LEFT_FOREARM){
+                   activeSkinParts[SKIN_LEFT_FOREARM] = skinPartWithTaxels;
+                   printMessage(4,"Adding SKIN_LEFT_FOREARM to activeSkinParts, it now has %d members.\n",activeSkinParts.size());
+                }
+                else{  // skin_part_name == SKIN_RIGHT_FOREARM
+                    activeSkinParts[SKIN_RIGHT_FOREARM] = skinPartWithTaxels;
+                    printMessage(4,"Adding SKIN_RIGHT_FOREARM to activeSkinParts, it now has %d members.\n",activeSkinParts.size());
+                }
+                break;
+                
             default: 
                 yError("[virtContactGenerationThread] Asked to initialize skinDynLib::SkinPart:: %d, but that skin part is not implemented yet.\n",skin_part_name);
                 return -1;
