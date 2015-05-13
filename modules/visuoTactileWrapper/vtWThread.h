@@ -93,17 +93,17 @@ protected:
         BufferedPort<Bottle>  pf3dTrackerPort;
         Bottle               *pf3dTrackerBottle;
         Vector                pf3dTrackerPos;
-        Vector                pf3dTrackerVelEstimate;
+        Vector                pf3dTrackerVel;
 
         BufferedPort<Bottle>  optFlowPort;
         Bottle               *optFlowBottle;
         Vector                optFlowPos;
-        Vector                optFlowVelEstimate;
+        Vector                optFlowVel;
 
         BufferedPort<Bottle>  doubleTouchPort;           
         Bottle               *doubleTouchBottle;
         Vector                doubleTouchPos;
-        Vector                doubleTouchVelEstimate;
+        Vector                doubleTouchVel;
     
         int doubleTouchStep;                 // the step the doubleTouch is in
         string      currentTask;
@@ -111,7 +111,10 @@ protected:
         BufferedPort<Bottle>  fgtTrackerPort;           
         Bottle               *fgtTrackerBottle;
         Vector                fgtTrackerPos;
-        Vector                fgtTrackerVelEstimate;
+        Vector                fgtTrackerVel;
+
+        BufferedPort<Bottle>  genericObjectsPort;
+        Bottle               *genericObjectsBottle;
 
     // Velocity Estimators (using adaptive window linear fitting)
         AWLinEstimator       *linEst_optFlow;
