@@ -417,9 +417,9 @@ void vtRFThread::run()
 
 void vtRFThread::manageSkinEvents()
 {
+    printMessage(2,"Sending events skin events..");
     vector <int> taxelsIDs; 
     SkinPart part = SKIN_PART_UNKNOWN;
-    int iCubSkinID=-1;
     bool isThereAnEvent = false;
 
     Bottle out; out.clear();
@@ -444,7 +444,7 @@ void vtRFThread::manageSkinEvents()
             {
                 Vector geoCenter(3,0.0), normalDir(3,0.0);
                 int w = 0, w_sum = 0;
-                part   = iCubSkin[i].name;
+                part  = iCubSkin[i].name;
 
                 if (part == SKIN_LEFT_FOREARM || part == SKIN_LEFT_HAND)
                 {
@@ -455,15 +455,15 @@ void vtRFThread::manageSkinEvents()
                     b.addString("right");
                 }
 
-                for (size_t i = 0; i < taxelsIDs.size(); ++i)
+                for (size_t k = 0; k < taxelsIDs.size(); k++)
                 {
-                    for (size_t j = 0; j < iCubSkin[iCubSkinID].txls.size(); j++)
+                    for (size_t p = 0; p < iCubSkin[i].txls.size(); p++)
                     {
-                        if (iCubSkin[iCubSkinID].txls[j]->ID == taxelsIDs[i])
+                        if (iCubSkin[i].txls[p]->ID == taxelsIDs[k])
                         {
-                            w = iCubSkin[iCubSkinID].txls[j]->Resp;
-                            geoCenter += iCubSkin[iCubSkinID].txls[j]->WRFPos*w;
-                            normalDir += locateTaxel(iCubSkin[iCubSkinID].txls[j]->Norm,part)*w;
+                            w = iCubSkin[i].txls[p]->Resp;
+                            geoCenter += iCubSkin[i].txls[p]->WRFPos*w;
+                            normalDir += locateTaxel(iCubSkin[i].txls[p]->Norm,part)*w;
                             w_sum += w;
                         }
                     }
@@ -481,6 +481,7 @@ void vtRFThread::manageSkinEvents()
 
     skinPortOut.setEnvelope(ts);
     skinPortOut.write(out);     // send something anyway (if there is no contact the bottle is empty)
+    printMessage(3,"Skin events sent\n");
 }
 
 void vtRFThread::sendContactsToSkinGui()
