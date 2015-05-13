@@ -123,12 +123,17 @@ bool virtContactGenerationThread::threadInit()
      /* initialize random seed: */
     srand (time(NULL));
     
-    initSkinParts();
+    int returnValue = initSkinParts();
+    if(returnValue == -1){
+        yError("[virtContactGenerationThread] Could not initialize skin parts.\n");
+        return false;  
+    }
     if(verbosity > 5){
         printInitializedSkinParts();
     }
     if (activeSkinPartsNames.size() != activeSkinParts.size()){
         yError("[virtContactGenerationThread] activeSkinPartsNames and activeSkinParts have different size (%d vs. %d).\n",activeSkinPartsNames.size(),activeSkinParts.size());
+        return false;    
     }
         
     return true;
