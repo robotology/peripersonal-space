@@ -36,7 +36,7 @@ bool vtWThread::threadInit()
     pf3dTrackerPort.open(("/"+name+"/pf3dTracker:i").c_str());
     doubleTouchPort.open(("/"+name+"/doubleTouch:i").c_str());
     fgtTrackerPort.open(("/"+name+"/fingertipTracker:i").c_str());
-    genericObjectPort.open(("/"+name+"/genericObject:i").c_str());
+    genericObjectsPort.open(("/"+name+"/genericObjects:i").c_str());
     outPortGui.open(("/"+name+"/gui:o").c_str());
     eventsPort.open(("/"+name+"/events:o").c_str());
     depth2kinPort.open(("/"+name+"/depth2kin:o").c_str());
@@ -45,7 +45,7 @@ bool vtWThread::threadInit()
     Network::connect("/pf3dTracker/data:o",("/"+name+"/pf3dTracker:i").c_str());
     Network::connect("/doubleTouch/status:o",("/"+name+"/doubleTouch:i").c_str());
     Network::connect("/fingertipTracker/out:o",("/"+name+"/fingertipTracker:i").c_str());
-    Network::connect("/objectGeneratorSim/obstacles:o",("/"+name+"/genericObject:i").c_str());
+    Network::connect("/objectGeneratorSim/obstacles:o",("/"+name+"/genericObjects:i").c_str());
     Network::connect(("/"+name+"/events:o").c_str(),"/visuoTactileRF/events:i");
     Network::connect(("/"+name+"/gui:o").c_str(),"/iCubGui/objects");
 
@@ -139,11 +139,11 @@ void vtWThread::run()
     events.clear();
 
     // process the generiObject port
-    if (genericObjectBottle = genericObjectPort.read(false))
+    if (genericObjectsBottle = genericObjectsPort.read(false))
     {
-        for (int i = 0; i < genericObjectBottle->size(); i++)
+        for (int i = 0; i < genericObjectsBottle->size(); i++)
         {
-            Bottle b = *(genericObjectBottle->get(i).asList());
+            Bottle b = *(genericObjectsBottle->get(i).asList());
             if (b.size()>=4)
             {
                 Vector p(3,0.0);
@@ -154,7 +154,7 @@ void vtWThread::run()
                 p[2] = b.get(2).asDouble();
                 r    = b.get(3).asDouble();
 
-                events.push_back(IncomingEvent(p,Vector(3,0.0),r,"genericObject"));
+                events.push_back(IncomingEvent(p,Vector(3,0.0),r,"genericObjects"));
                 isTarget=true;
             }
         }
