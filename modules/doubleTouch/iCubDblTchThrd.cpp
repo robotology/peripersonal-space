@@ -189,22 +189,31 @@ void doubleTouchThread::run()
                 {
                     Time::delay(2.0);
                 }
-                if (record == 0)
+
+                if (curTaskType == "LHtoR" || curTaskType == "RHtoL")
                 {
-                    goToTaxel();
-                    step += 3;
+                    goToTaxelMaster();
                 }
                 else
                 {
-                    goToTaxelMaster();
-                    step++;
+                    goToTaxelSlave();                    
                 }
+                
+                step++;
                 break;
             case 4:
+                Time::delay(0.0);
                 step++;
                 break;
             case 5:
-                goToTaxelSlave();
+                if (curTaskType == "LHtoR" || curTaskType == "RHtoL")
+                {
+                    goToTaxelSlave();
+                }
+                else
+                {
+                    goToTaxelMaster();                    
+                }
                 step++;
                 break;
             case 6:
@@ -743,11 +752,11 @@ Matrix doubleTouchThread::findH0(skinContact &sc)
     Matrix H0(4,4);
     Vector x(3,0.0), z(3,0.0), y(3,0.0);
 
-    printMessage(5,"[findH0] x %s y %s z %s\n",x.toString(3,3).c_str(),
-                        y.toString(3,3).c_str(),z.toString(3,3).c_str());
-
     x = sc.getNormalDir();
-    x = x / norm(x);
+    if (x[0] == 0.0)
+    {
+        x[0] = 0.00000001;    // Avoid the division by 0
+    }
 
     if (curTaskType!="LHtoR" && curTaskType!="RHtoL")
     {
@@ -756,21 +765,17 @@ Matrix doubleTouchThread::findH0(skinContact &sc)
     }
     else
     {
-        // In this case x[0] == 1!
-        // We have to find a different rule:
+        // When x[0]==+-1, We can exploit an easier rule:
         z[1] = x[2];
         y = -1*(cross(x,z));
     }
 
-    printMessage(5,"[findH0] x %s y %s z %s\n",x.toString(3,3).c_str(),
-                        y.toString(3,3).c_str(),z.toString(3,3).c_str());
-
     // Let's make them unitary vectors:
+    x = x / norm(x);
     y = y / norm(y);
     z = z / norm(z);
-
-    H0.zero();
-    H0(3,3) = 1;
+    
+    H0 = eye(4);
     H0.setSubcol(x,0,0);
     H0.setSubcol(y,0,1);
     H0.setSubcol(z,0,2);
