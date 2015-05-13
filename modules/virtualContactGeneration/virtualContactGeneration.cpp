@@ -351,14 +351,19 @@ int main(int argc, char * argv[])
         yInfo(""); 
         yInfo("Options:");
         yInfo("");
-        yInfo("   --context    path:  where to find the called resource");
-        yInfo("   --from       from:  the name of the .ini file.");
-        yInfo("   --general::name       name:  the name of the module (default virtualContactGeneration).");
-        yInfo("   --general::robot      robot: the name of the robot. Default icubSim.");
-        yInfo("   --general::rate       rate:  the period used by the thread. Default 100ms.");
-        yInfo("   --general::verbosity  int:   verbosity level (default 0).");
-        yInfo("   --general::type       type:  selection of fake contacts - e.g. 'random'.");
-     
+        yInfo("  --context    path:  where to find the called resource");
+        yInfo("  --from       from:  the name of the .ini file.");
+        yInfo("  --general::name      name:  the name of the module (default virtualContactGeneration).");
+        yInfo("  --general::robot     robot: the name of the robot. Default icubSim.");
+        yInfo("  --general::rate      rate:  the period used by the thread. Default 100ms.");
+        yInfo("  --general::verbosity int:   verbosity level (default 0).");
+        yInfo("  --general::type      type:  selection of fake contacts - right now 'random' is the only option available.");
+        yInfo("  --skin_parts::SKIN_RIGHT_UPPER_ARM on/off: if to enable the right upper arm or not.");
+        yInfo("  --skin_parts::SKIN_RIGHT_FOREARM   on/off: if to enable the right forearm   or not.");
+        yInfo("  --skin_parts::SKIN_RIGHT_HAND      on/off: if to enable the right hand      or not.");
+        yInfo("  --skin_parts::SKIN_LEFT_UPPER_ARM  on/off: if to enable the left  upper arm or not.");
+        yInfo("  --skin_parts::SKIN_LEFT_FOREARM    on/off: if to enable the left  forearm   or not.");
+        yInfo("  --skin_parts::SKIN_LEFT_HAND       on/off: if to enable the left  hand      or not.");
         yInfo("");
         return 0;
     }
