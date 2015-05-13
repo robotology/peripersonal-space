@@ -417,7 +417,6 @@ void vtRFThread::run()
 
 void vtRFThread::manageSkinEvents()
 {
-    printMessage(2,"Sending events skin events..");
     vector <int> taxelsIDs; 
     SkinPart part = SKIN_PART_UNKNOWN;
     bool isThereAnEvent = false;
@@ -446,14 +445,7 @@ void vtRFThread::manageSkinEvents()
                 int w = 0, w_sum = 0;
                 part  = iCubSkin[i].name;
 
-                if (part == SKIN_LEFT_FOREARM || part == SKIN_LEFT_HAND)
-                {
-                    b.addString("left");
-                }
-                else if (part == SKIN_RIGHT_FOREARM || part == SKIN_RIGHT_HAND)
-                {
-                    b.addString("right");
-                }
+                b.addString(SkinPart_s[iCubSkin[i].name]);
 
                 for (size_t k = 0; k < taxelsIDs.size(); k++)
                 {
@@ -481,7 +473,6 @@ void vtRFThread::manageSkinEvents()
 
     skinPortOut.setEnvelope(ts);
     skinPortOut.write(out);     // send something anyway (if there is no contact the bottle is empty)
-    printMessage(3,"Skin events sent\n");
 }
 
 void vtRFThread::sendContactsToSkinGui()

@@ -87,6 +87,16 @@ protected:
             {
                 yDebug("[demoAvoidance] got command (%s)",input.toString().c_str());
                 string arm=input.get(0).asString().c_str();
+
+                if (arm == "skin_right_hand" || arm == "skin_right_forearm")
+                {
+                    arm = "right";
+                }
+                else if (arm == "skin_left_hand" || arm == "skin_left_forearm")
+                {
+                    arm = "left";
+                }
+                
                 transform(arm.begin(),arm.end(),arm.begin(),::tolower);
                 mutex.lock();
                 map<string,Data>::iterator it=data.find(arm);
