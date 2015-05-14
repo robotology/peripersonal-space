@@ -202,7 +202,7 @@ void doubleTouchThread::run()
                 step++;
                 break;
             case 4:
-                Time::delay(0.0);
+                Time::delay(2.0);
                 step++;
                 break;
             case 5:
@@ -262,14 +262,15 @@ void doubleTouchThread::run()
                     printMessage(0,"Going to rest...\n");
                     clearTask();
                     steerArmsHomeMasterSlave();
-                    printMessage(1,"Switching to position mode..\n");
-                    imodeS -> setInteractionMode(2,VOCAB_IM_STIFF);
-                    imodeS -> setInteractionMode(3,VOCAB_IM_STIFF);
-                    steerArmsHomeMasterSlave();
-
-                    printMessage(0,"WAITING FOR CONTACT...\n");
-                    step = 1;
+                    step++;
                 }
+                break;
+            case 9:
+                printMessage(1,"Switching to position mode..\n");
+                imodeS -> setInteractionMode(2,VOCAB_IM_STIFF);
+                imodeS -> setInteractionMode(3,VOCAB_IM_STIFF);
+                yInfo("[doubleTouch] WAITING FOR CONTACT...\n");
+                step = 1;
                 break;
             default:
                 yError("[doubleTouch] doubleTouchThread should never be here!!!\nStep: %d",step);
@@ -293,7 +294,7 @@ bool doubleTouchThread::selectTask()
             curTaskType = "RHtoL";
             break;
         case SKIN_RIGHT_FOREARM:
-            curTaskType = "RHtoL";
+            curTaskType = "RtoL";
             break;
     }
 
@@ -460,23 +461,14 @@ bool doubleTouchThread::testAchievement2(skinContactList *_sCL)
     {
         if(cntctSkinPart == it -> getSkinPart())
         {
-            /**
-            * ENCODERS SLAVE (They're 7 DOF straightforwardly acquired from shoulder to wrist)
-            */
             iencsS->getEncoders(encsS->data());
             Vector qS=encsS->subVector(0,12);
             armS -> setAng(qS*CTRL_DEG2RAD);
 
-            /**
-            * ENCODERS MASTER (They're 7 DOF straightforwardly acquired from shoulder to wrist)
-            */
             iencsM->getEncoders(encsM->data());
             Vector qM=encsM->subVector(0,12);
             armM -> setAng(qM*CTRL_DEG2RAD);
 
-            /**
-            * FINAL TAXEL REFERENCE FRAME
-            */
             Matrix cntctH0_final = findH0(*it);
 
             /**
@@ -511,7 +503,7 @@ bool doubleTouchThread::testAchievement2(skinContactList *_sCL)
 
 bool doubleTouchThread::checkMotionDone()
 {
-    if (step == 1 || step == 7 || (record == 0 && (step == 4 || step == 5)))
+    if (step == 7 || (record == 0 && (step == 4 || step == 5)))
         return true;
     
     iencsL->getEncoders(encsL->data());
@@ -636,12 +628,8 @@ void doubleTouchThread::steerArmsHome()
     }
     for (int i = 7; i < 16; i++)
     {
-        if (i==7)
-        {
-            iposL -> positionMove(i,60.0);
-        }
-        else
-            iposL -> positionMove(i,0.0);
+        if (i==7)   iposL -> positionMove(i,60.0);
+        else        iposL -> positionMove(i,0.0);
     }
 
     Time::delay(2.0);
@@ -652,12 +640,8 @@ void doubleTouchThread::steerArmsHome()
     }
     for (int i = 7; i < 16; i++)
     {
-        if (i==7)
-        {
-            iposR -> positionMove(i,60.0);
-        }
-        else
-            iposR -> positionMove(i,0.0);
+        if (i==7)   iposR -> positionMove(i,60.0);
+        else        iposR -> positionMove(i,0.0);
     }
 }
 
@@ -672,8 +656,8 @@ void doubleTouchThread::steerArmsHomeMasterSlave()
     }
     for (int i = 7; i < 16; i++)
     {
-        if (i==7)             iposM -> positionMove(i,60.0);
-        else                iposM -> positionMove(i,0.0);
+        if (i==7)   iposM -> positionMove(i,60.0);
+        else        iposM -> positionMove(i,0.0);
     }
 
     Time::delay(2.0);
@@ -684,10 +668,8 @@ void doubleTouchThread::steerArmsHomeMasterSlave()
     }
     for (int i = 7; i < 16; i++)
     {
-        if (i==7)
-            iposS -> positionMove(i,60.0);
-        else
-            iposS -> positionMove(i,0.0);
+        if (i==7)   iposS -> positionMove(i,60.0);
+        else        iposS -> positionMove(i,0.0);
     }
 }
 
