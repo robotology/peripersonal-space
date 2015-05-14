@@ -636,7 +636,12 @@ void doubleTouchThread::steerArmsHome()
     }
     for (int i = 7; i < 16; i++)
     {
-        iposL -> positionMove(i,0.0);
+        if (i==7)
+        {
+            iposL -> positionMove(i,60.0);
+        }
+        else
+            iposL -> positionMove(i,0.0);
     }
 
     Time::delay(2.0);
@@ -647,7 +652,12 @@ void doubleTouchThread::steerArmsHome()
     }
     for (int i = 7; i < 16; i++)
     {
-        iposR -> positionMove(i,0.0);
+        if (i==7)
+        {
+            iposR -> positionMove(i,60.0);
+        }
+        else
+            iposR -> positionMove(i,0.0);
     }
 }
 
@@ -662,7 +672,8 @@ void doubleTouchThread::steerArmsHomeMasterSlave()
     }
     for (int i = 7; i < 16; i++)
     {
-        iposM -> positionMove(i,0.0);
+        if (i==7)             iposM -> positionMove(i,60.0);
+        else                iposM -> positionMove(i,0.0);
     }
 
     Time::delay(2.0);
@@ -673,7 +684,10 @@ void doubleTouchThread::steerArmsHomeMasterSlave()
     }
     for (int i = 7; i < 16; i++)
     {
-        iposS -> positionMove(i,0.0);
+        if (i==7)
+            iposS -> positionMove(i,60.0);
+        else
+            iposS -> positionMove(i,0.0);
     }
 }
 
