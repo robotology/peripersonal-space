@@ -1135,11 +1135,9 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
     yarp::sig::Vector taxelPos(3,0.0);
     yarp::sig::Vector taxelNorm(3,0.0);
 
-    // Remove Path (Linux Only)
     string filename = strrchr(filePath.c_str(), '/');
     filename = filename.c_str() ? filename.c_str() + 1 : filePath.c_str();
 
-    // Remove "_mesh.txt"
     if      (filename == "left_forearm_mesh.txt")    { sP.name = SKIN_LEFT_FOREARM; }
     else if (filename == "left_forearm_nomesh.txt")  { sP.name = SKIN_LEFT_FOREARM; }
     else if (filename == "right_forearm_mesh.txt")   { sP.name = SKIN_RIGHT_FOREARM; }
