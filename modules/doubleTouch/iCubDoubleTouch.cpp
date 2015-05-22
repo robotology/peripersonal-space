@@ -399,7 +399,7 @@ public:
             if (bHandConf.check("master"))
             {
                 Bottle *bottleMaster=bHandConf.find("master").asList();
-                handPossM = vectorFromBottle(*bottleMaster,0,9);
+                handPossM = iCub::skinDynLib::vectorFromBottle(*bottleMaster,0,9);
                 yInfo("[doubleTouch] Initializing master hand configuration: %s",
                         handPossM.toString(3,3).c_str());
             }
@@ -408,7 +408,7 @@ public:
             if (bHandConf.check("slave"))
             {
                 Bottle *bottleSlave=bHandConf.find("slave").asList();
-                handPossS = vectorFromBottle(*bottleSlave,0,9);
+                handPossS = iCub::skinDynLib::vectorFromBottle(*bottleSlave,0,9);
                 yInfo("[doubleTouch] Initializing slave hand configuration: %s",
                         handPossS.toString(3,3).c_str());
             }
