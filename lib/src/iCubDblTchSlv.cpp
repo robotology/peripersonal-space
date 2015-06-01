@@ -282,8 +282,7 @@ using namespace iCub::iKin;
             {
                 if (i < offs)
                 {
-                    g_l[i]=0;
-                    g_u[i]=1e-6; // This seems to me a big margin, isn't it?
+                    g_l[i]=g_u[i]=0.0;
                 }
                 else if (i < lenLower+offs)
                 {
