@@ -263,79 +263,79 @@ unsigned int factorial(unsigned int n)
 /****************************************************************/
 /* TAXEL WRAPPER
 *****************************************************************/
-    void Taxel::init()
-    {
-        ID      = 0;
-        Pos.resize(3,0.0);
-        WRFPos.resize(3,0.0);
-        Norm.resize(3,0.0);
-        px.resize(2,0.0);
-        FoR = eye(4);
-    }
+    // void Taxel::init()
+    // {
+    //     ID      = 0;
+    //     Pos.resize(3,0.0);
+    //     WRFPos.resize(3,0.0);
+    //     Norm.resize(3,0.0);
+    //     px.resize(2,0.0);
+    //     FoR = eye(4);
+    // }
 
-    Taxel::Taxel()
-    {
-        init();
-    }
+    // Taxel::Taxel()
+    // {
+    //     init();
+    // }
 
-    Taxel::Taxel(const Vector &p, const Vector &n)
-    {
-        init();
-        Pos  = p;
-        Norm = n;
-        setFoR();
-    }
+    // Taxel::Taxel(const Vector &p, const Vector &n)
+    // {
+    //     init();
+    //     Pos  = p;
+    //     Norm = n;
+    //     setFoR();
+    // }
 
-    Taxel::Taxel(const Vector &p, const Vector &n, const int &i)
-    {
-        init();
-        ID   = i;
-        Pos  = p;
-        Norm = n;
-        setFoR();
-    }
+    // Taxel::Taxel(const Vector &p, const Vector &n, const int &i)
+    // {
+    //     init();
+    //     ID   = i;
+    //     Pos  = p;
+    //     Norm = n;
+    //     setFoR();
+    // }
 
-    Taxel & Taxel::operator=(const Taxel &t)
-    {
-        ID      = t.ID;
-        Pos     = t.Pos;
-        WRFPos  = t.WRFPos;
-        Norm    = t.Norm;
-        px      = t.px;
-        FoR     = t.FoR;
-        return *this;
-    }
+    // Taxel & Taxel::operator=(const Taxel &t)
+    // {
+    //     ID      = t.ID;
+    //     Pos     = t.Pos;
+    //     WRFPos  = t.WRFPos;
+    //     Norm    = t.Norm;
+    //     px      = t.px;
+    //     FoR     = t.FoR;
+    //     return *this;
+    // }
 
-    void Taxel::setFoR()
-    {
-        if (Norm == zeros(3))
-        {
-            FoR=eye(4);
-            return;
-        }
+    // void Taxel::setFoR()
+    // {
+    //     if (Norm == zeros(3))
+    //     {
+    //         FoR=eye(4);
+    //         return;
+    //     }
         
-        // Set the proper orientation for the touching end-effector
-        Vector x(3,0.0), z(3,0.0), y(3,0.0);
+    //     // Set the proper orientation for the touching end-effector
+    //     Vector x(3,0.0), z(3,0.0), y(3,0.0);
 
-        z = Norm;
-        if (z[0] == 0.0)
-        {
-            z[0] = 0.00000001;    // Avoid the division by 0
-        }
-        y[0] = -z[2]/z[0]; y[2] = 1;
-        x = -1*(cross(z,y));
+    //     z = Norm;
+    //     if (z[0] == 0.0)
+    //     {
+    //         z[0] = 0.00000001;    // Avoid the division by 0
+    //     }
+    //     y[0] = -z[2]/z[0]; y[2] = 1;
+    //     x = -1*(cross(z,y));
         
-        // Let's make them unitary vectors:
-        x = x / norm(x);
-        y = y / norm(y);
-        z = z / norm(z);
+    //     // Let's make them unitary vectors:
+    //     x = x / norm(x);
+    //     y = y / norm(y);
+    //     z = z / norm(z);
 
-        FoR=eye(4);
-        FoR.setSubcol(x,0,0);
-        FoR.setSubcol(y,0,1);
-        FoR.setSubcol(z,0,2);
-        FoR.setSubcol(Pos,0,3);
-    }
+    //     FoR=eye(4);
+    //     FoR.setSubcol(x,0,0);
+    //     FoR.setSubcol(y,0,1);
+    //     FoR.setSubcol(z,0,2);
+    //     FoR.setSubcol(Pos,0,3);
+    // }
 
 /****************************************************************/
 /* TAXEL WRAPPER FOR PWE
@@ -408,23 +408,19 @@ unsigned int factorial(unsigned int n)
 
     void TaxelPWE::print(int verbosity)
     {
-        if (verbosity > 4)
-            yDebug("ID %i \tPos %s \tNorm %s \n\tPosHst \n%s\n\n\tNegHst \n%s\n", ID,
-                    Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str(),
+        if (verbosity > 3)
+            yDebug("%s\n\tPosHst \n%s\n\n\tNegHst \n%s\n",
+                    iCub::skinDynLib::Taxel::toString(verbosity).c_str(),
                     pwe->getPosHist().toString(3,3).c_str(),
                     pwe->getNegHist().toString(3,3).c_str());
         else 
-            yDebug("ID %i \tPos %s \tNorm %s\n", ID,
-                    Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str());
-            // yDebug("ID %i \tPos %s \tNorm %s \n\tHst %s\n", ID,
-            //         Pos.toString(3,3).c_str(), Norm.toString(3,3).c_str(),
-            //         pwe->getHist().toString(3,3).c_str());
+            yDebug("%s",iCub::skinDynLib::Taxel::toString(verbosity).c_str());
     }
 
     string TaxelPWE::toString(int precision)
     {
         stringstream res;
-        res << "ID: " << ID << "\tPos: "<< Pos.toString(3,3) << "\t Norm: "<< Norm.toString(3,3);
+        res << iCub::skinDynLib::Taxel::toString();
 
         if (precision)
         {
@@ -477,154 +473,154 @@ unsigned int factorial(unsigned int n)
         }
     }
 
-/****************************************************************/
-/* SKINPART WRAPPER
-*****************************************************************/
-    skinPart::skinPart()
-    {
-        name = SKIN_PART_UNKNOWN;
-        size =                 0;
-    }
+// /****************************************************************/
+// /* SKINPART WRAPPER
+// *****************************************************************/
+//     skinPart::skinPart()
+//     {
+//         name = SKIN_PART_UNKNOWN;
+//         size =                 0;
+//     }
 
-    // skinPart::skinPart(const string _name)
-    // {
-    //     name = _name;
-    //     size =     0;
-    // }
+//     // skinPart::skinPart(const string _name)
+//     // {
+//     //     name = _name;
+//     //     size =     0;
+//     // }
 
-    skinPart & skinPart::operator=(const skinPart &spw)
-    {
-        name           = spw.name;
-        size           = spw.size;
-        Taxel2Repr     = spw.Taxel2Repr;
-        Repr2TaxelList = spw.Repr2TaxelList;
-        return *this;
-    }
+//     skinPart & skinPart::operator=(const skinPart &spw)
+//     {
+//         name           = spw.name;
+//         size           = spw.size;
+//         Taxel2Repr     = spw.Taxel2Repr;
+//         Repr2TaxelList = spw.Repr2TaxelList;
+//         return *this;
+//     }
 
-    void skinPart::print(int verbosity)
-    {
-        yDebug("**********\n");
-        yDebug("name: %s\t", SkinPart_s[name].c_str());
-        yDebug("size: %i\n", size);
-        yDebug("**********\n");
+//     void skinPart::print(int verbosity)
+//     {
+//         yDebug("**********\n");
+//         yDebug("name: %s\t", SkinPart_s[name].c_str());
+//         yDebug("size: %i\n", size);
+//         yDebug("**********\n");
         
-        if (verbosity>=4)
-        {
-            yDebug("\nTaxel ID -> representative ID:\n");
+//         if (verbosity>=4)
+//         {
+//             yDebug("\nTaxel ID -> representative ID:\n");
 
-            for (size_t i=0; i<size; i++)
-            {
-                yDebug("[ %lu -> %d ]\t",i,Taxel2Repr[i]);
-                if (i % 8 == 7)
-                {
-                    yDebug("\n");
-                }
-            }
-            yDebug("\n");
+//             for (size_t i=0; i<size; i++)
+//             {
+//                 yDebug("[ %lu -> %d ]\t",i,Taxel2Repr[i]);
+//                 if (i % 8 == 7)
+//                 {
+//                     yDebug("\n");
+//                 }
+//             }
+//             yDebug("\n");
             
-            yDebug("Representative ID -> Taxel IDs:\n");
-            for(map<unsigned int, list<unsigned int> >::const_iterator iter_map = Repr2TaxelList.begin(); iter_map != Repr2TaxelList.end(); ++iter_map)
-            {
-                list<unsigned int> l = iter_map->second;
-                yDebug("%d -> {",iter_map->first);
-                for(list<unsigned int>::const_iterator iter_list = l.begin(); iter_list != l.end(); iter_list++)
-                {
-                    yDebug("%u, ",*iter_list);
-                }
-                yDebug("}\n");
-            }    
-            yDebug("\n");
-        }
-        yDebug("**********\n");
-    }
+//             yDebug("Representative ID -> Taxel IDs:\n");
+//             for(map<unsigned int, list<unsigned int> >::const_iterator iter_map = Repr2TaxelList.begin(); iter_map != Repr2TaxelList.end(); ++iter_map)
+//             {
+//                 list<unsigned int> l = iter_map->second;
+//                 yDebug("%d -> {",iter_map->first);
+//                 for(list<unsigned int>::const_iterator iter_list = l.begin(); iter_list != l.end(); iter_list++)
+//                 {
+//                     yDebug("%u, ",*iter_list);
+//                 }
+//                 yDebug("}\n");
+//             }    
+//             yDebug("\n");
+//         }
+//         yDebug("**********\n");
+//     }
 
-    string skinPart::toString(int precision)
-    {
-        stringstream res;
-        res << "**********\n" << "Name: " << SkinPart_s[name] << "\tSize: "<< size << endl;
-        return res.str();
-    }
+//     string skinPart::toString(int precision)
+//     {
+//         stringstream res;
+//         res << "**********\n" << "Name: " << SkinPart_s[name] << "\tSize: "<< size << endl;
+//         return res.str();
+//     }
 
-/****************************************************************/
-/* SKINPART TAXEL WRAPPER
-*****************************************************************/
-    skinPartTaxel & skinPartTaxel::operator=(const skinPartTaxel &spw)
-    {
-        skinPart::operator=(spw);
-        txls     = spw.txls;
-        return *this;
-    }
+// /****************************************************************/
+// /* SKINPART TAXEL WRAPPER
+// *****************************************************************/
+//     skinPartTaxel & skinPartTaxel::operator=(const skinPartTaxel &spw)
+//     {
+//         skinPart::operator=(spw);
+//         taxels     = spw.taxels;
+//         return *this;
+//     }
 
-    void skinPartTaxel::print(int verbosity)
-    {
-        skinPart::print(verbosity);
-        for (size_t i = 0; i < txls.size(); i++)
-            txls[i]->print(verbosity);
-        yDebug("**********\n");
-    }
+//     void skinPartTaxel::print(int verbosity)
+//     {
+//         skinPart::print(verbosity);
+//         for (size_t i = 0; i < taxels.size(); i++)
+//             taxels[i]->print(verbosity);
+//         yDebug("**********\n");
+//     }
 
-    string skinPartTaxel::toString(int precision)
-    {
-        stringstream res(skinPart::toString(precision));
-        for (size_t i = 0; i < txls.size(); i++)
-            res << txls[i]->toString(precision);
-        res << "**********\n";
-        return res.str();
-    }
+//     string skinPartTaxel::toString(int precision)
+//     {
+//         stringstream res(skinPart::toString(precision));
+//         for (size_t i = 0; i < taxels.size(); i++)
+//             res << taxels[i]->toString(precision);
+//         res << "**********\n";
+//         return res.str();
+//     }
 
-    skinPartTaxel::~skinPartTaxel()
-    {
-        // while(!txls.empty())
-        // {
-        //     if (txls.back())
-        //     {
-        //         delete txls.back();
-        //     }
-        //     txls.pop_back();
-        // }
-    }
+//     skinPartTaxel::~skinPartTaxel()
+//     {
+//         // while(!taxels.empty())
+//         // {
+//         //     if (taxels.back())
+//         //     {
+//         //         delete taxels.back();
+//         //     }
+//         //     taxels.pop_back();
+//         // }
+//     }
 
 /****************************************************************/
 /* SKINPART TAXEL PWE WRAPPER
 *****************************************************************/
     skinPartPWE & skinPartPWE::operator=(const skinPartPWE &spw)
     {
-        skinPart::operator=(spw);
-        txls     = spw.txls;
-        modality = spw.modality;
+        iCub::skinDynLib::skinPart::operator=(spw);
+        taxels = spw.taxels;
+        modality  = spw.modality;
         return *this;
     }
 
     void skinPartPWE::print(int verbosity)
     {
-        skinPart::print(verbosity);
-        for (size_t i = 0; i < txls.size(); i++)
-            txls[i]->print(verbosity);
+        iCub::skinDynLib::skinPart::print(verbosity);
+        for (size_t i = 0; i < taxels.size(); i++)
+            taxels[i]->print(verbosity);
         yDebug("**********\n");
     }
 
     string skinPartPWE::toString(int precision)
     {
-        stringstream res(skinPart::toString(precision));
-        for (size_t i = 0; i < txls.size(); i++)
-            res << txls[i]->toString(precision);
+        stringstream res(iCub::skinDynLib::skinPart::toString(precision));
+        for (size_t i = 0; i < taxels.size(); i++)
+            res << taxels[i]->toString(precision);
         res << "**********\n";
         return res.str();
     }
 
     skinPartPWE::~skinPartPWE()
     {
-        // printf("Taxelsize %lu %i\n", txls.size(), get_taxelSize());
+        // printf("Taxelsize %lu %i\n", taxels.size(), get_taxelSize());
         // int i=0;
 
-        // while(!txls.empty())
+        // while(!taxels.empty())
         // {
         //     printf("i %i\n", i); i++;
-        //     if (txls.back())
+        //     if (taxels.back())
         //     {
-        //         delete txls.back();
+        //         delete taxels.back();
         //     }
-        //     txls.pop_back();
+        //     taxels.pop_back();
         // }
     }
 

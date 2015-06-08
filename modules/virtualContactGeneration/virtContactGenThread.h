@@ -33,6 +33,7 @@
 #include <yarp/os/Stamp.h>
 
 #include <iCub/skinDynLib/skinContact.h>
+ #include <iCub/skinDynLib/skinPart.h>
 #include <iCub/skinDynLib/skinContactList.h>
 
 #include <iCub/periPersonalSpace/utils.h>
@@ -79,10 +80,10 @@ protected:
     BufferedPort<skinContactList> *skinEventsOutPort;
     
     //will contain actual skin parts with list of taxels and their positions
-    map<SkinPart,skinPartTaxel> activeSkinParts;
+    map<SkinPart,iCub::skinDynLib::skinPart> activeSkinParts;
     int skinPartIndexInVector;
     SkinPart skinPartPickedName;
-    skinPartTaxel skinPartPicked;
+    iCub::skinDynLib::skinPart skinPartPicked;
     int taxelPickedIndex;
     Taxel taxelPicked;
     std::vector<unsigned int> taxelIDinList;

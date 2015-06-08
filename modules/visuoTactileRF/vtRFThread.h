@@ -181,7 +181,7 @@ protected:
     * @return the position of the taxel in the WRF
     **/
     yarp::sig::Vector locateTaxel(const yarp::sig::Vector &_pos,
-                                  const iCub::skinDynLib::SkinPart &part);
+                                  const string &part);
 
     /**
     * Projects all the taxels belonging to a skinPart from their
@@ -222,7 +222,7 @@ protected:
     * @param act  is the activation level of the taxel
     **/
     void drawTaxel(ImageOf<PixelRgb> &Im, const yarp::sig::Vector &px,
-                   const iCub::skinDynLib::SkinPart &part, const int act);
+                   const string &part, const int act);
 
     /**
     * Finds out the positions of the taxels w.r.t. their respective limbs

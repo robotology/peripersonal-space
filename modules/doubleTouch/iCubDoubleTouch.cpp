@@ -94,7 +94,7 @@ Linux (Ubuntu 12.04, Debian Squeeze).
 #include <yarp/sig/Matrix.h>
 
 #include <yarp/math/Math.h>
-
+ 
 #include <iostream>
 #include <string.h> 
 #include <ctime>
