@@ -49,26 +49,16 @@
 
 #include <iCub/iKin/iKinFwd.h>
 #include <iCub/skinDynLib/skinContact.h>
+// #include <iCub/skinDynLib/skinPart.h>
 
-#include <vector>
 #include <map>
 #include <list> 
 #include <sstream>
 
 #include "parzenWindowEstimator.h"
 
-using namespace yarp;
-using namespace yarp::os;
-using namespace yarp::sig;
-using namespace yarp::math;
-
-using namespace iCub::iKin;
-using namespace iCub::skinDynLib;
-
-using namespace std;
-
 /**
- * Converts a matrix to a vector with 16 elements
+ * Converts a matrix to a yarp::sig::Vector with 16 elements
 **/
 yarp::sig::Vector toVector(yarp::sig::Matrix m);
 
@@ -88,31 +78,23 @@ void closePort(yarp::os::Contactable *_port);
 yarp::sig::Matrix matrixFromBottle(const yarp::os::Bottle b, int in, const int r, const int c);
 
 /**
- * Retrieves a vector from a bottle:
- * @param b    is the bottle
- * @param in   is the index from which start acquiring values
- * @param size is the size of the vector
-**/
-yarp::sig::Vector vectorFromBottle(const Bottle b, int in, const int size);
-
-/**
  * Puts a matrix into a bottle, by cycling through its elements
  * and adding them as double
 **/
-void      matrixIntoBottle(const yarp::sig::Matrix m, Bottle &b);
-void matrixOfIntIntoBottle(const yarp::sig::Matrix m, Bottle &b);
+void      matrixIntoBottle(const yarp::sig::Matrix m, yarp::os::Bottle &b);
+void matrixOfIntIntoBottle(const yarp::sig::Matrix m, yarp::os::Bottle &b);
 
 /**
- * Puts a vector into a bottle, by cycling through its elements
+ * Puts a Vector into a bottle, by cycling through its elements
  * and adding them as double
 **/
-void vectorIntoBottle(const yarp::sig::Vector v, Bottle &b);
+void VectorIntoBottle(const yarp::sig::Vector v, yarp::os::Bottle &b);
 
 
 /**
 * Converts an int to a string
 **/
-string int_to_string( const int a );
+std::string int_to_string( const int a );
 
 /**
 * Computes the factorial using a recursive method
@@ -127,7 +109,7 @@ struct IncomingEvent
     yarp::sig::Vector Pos;
     yarp::sig::Vector Vel;
     double Radius;          // average radius of the object
-    string Src;             // the source of information the event is coming from
+    std::string Src;       // the source of information the event is coming from
 
     double NRM;
     double TTC;
@@ -136,19 +118,20 @@ struct IncomingEvent
     * Constructors
     **/    
     IncomingEvent();
-    IncomingEvent(const Vector &p, const Vector &v, const double r, const string &s);
-    IncomingEvent(const Bottle &b);
+    IncomingEvent(const yarp::sig::Vector &p, const yarp::sig::Vector &v,
+                  const double r, const std::string &s);
+    IncomingEvent(const yarp::os::Bottle &b);
     IncomingEvent(const IncomingEvent &e);
 
     /**
     * 
     **/    
-    Bottle toBottle();
+    yarp::os::Bottle toBottle();
 
     /**
     * 
     **/
-    bool fromBottle(const Bottle &b);
+    bool fromBottle(const yarp::os::Bottle &b);
 
     /**
     * Copy Operator
@@ -163,7 +146,7 @@ struct IncomingEvent
     /**
     * toString Method
     **/
-    string toString() const;
+    std::string toString() const;
 };
 
 /**
@@ -178,7 +161,8 @@ struct IncomingEvent4TaxelPWE : public IncomingEvent
     * Constructors
     **/    
     IncomingEvent4TaxelPWE();
-    IncomingEvent4TaxelPWE(const Vector &p, const Vector &v, const double r, const string &s);
+    IncomingEvent4TaxelPWE(const yarp::sig::Vector &p, const yarp::sig::Vector &v,
+                           const double r, const std::string &s);
     IncomingEvent4TaxelPWE(const IncomingEvent &e);
     IncomingEvent4TaxelPWE(const IncomingEvent4TaxelPWE &e);
 
@@ -206,7 +190,7 @@ struct IncomingEvent4TaxelPWE : public IncomingEvent
     /**
     * toString Method
     **/
-    string toString() const;
+    std::string toString() const;
 };
 
 /**
@@ -226,8 +210,8 @@ class Taxel
     * Constructors
     **/    
     Taxel();
-    Taxel(const Vector &p, const Vector &n);
-    Taxel(const Vector &p, const Vector &n, const int &i);
+    Taxel(const yarp::sig::Vector &p, const yarp::sig::Vector &n);
+    Taxel(const yarp::sig::Vector &p, const yarp::sig::Vector &n, const int &i);
 
     /**
     * Copy Operator
@@ -240,7 +224,7 @@ class Taxel
     void init();
 
     /**
-    * Compute and set the taxel's reference frame (from its position and its normal vector)
+    * Compute and set the taxel's reference frame (from its position and its normal Vector)
     **/
     void setFoR();
 
@@ -252,7 +236,7 @@ class Taxel
     /**
     * toString Method
     **/
-    virtual string toString(int precision=0) {};
+    virtual std::string toString(int precision=0) {};
 
     /**
     * Resets the parzen window estimator
@@ -278,8 +262,8 @@ class TaxelPWE : public Taxel
     * Constructors
     **/    
     TaxelPWE();
-    TaxelPWE(const Vector &p, const Vector &n);
-    TaxelPWE(const Vector &p, const Vector &n, const int &i);
+    TaxelPWE(const yarp::sig::Vector &p, const yarp::sig::Vector &n);
+    TaxelPWE(const yarp::sig::Vector &p, const yarp::sig::Vector &n, const int &i);
 
     /*
     * Destructor
@@ -310,7 +294,7 @@ class TaxelPWE : public Taxel
     /**
     * toString Method
     **/
-    string toString(int precision=0);
+    std::string toString(int precision=0);
 
     /**
     * Resets the parzen window estimator
@@ -325,7 +309,7 @@ class TaxelPWE : public Taxel
     /**
     * Convert the taxel into a bottle in order to be saved on file
     **/
-    Bottle TaxelPWEIntoBottle();
+    yarp::os::Bottle TaxelPWEIntoBottle();
 };
 
 class TaxelPWE1D : public TaxelPWE
@@ -336,8 +320,8 @@ class TaxelPWE1D : public TaxelPWE
     * Constructors
     **/    
     TaxelPWE1D() : TaxelPWE()                                                    { pwe = new parzenWindowEstimator1D();};
-    TaxelPWE1D(const Vector &p, const Vector &n) : TaxelPWE(p,n)                 { pwe = new parzenWindowEstimator1D();};
-    TaxelPWE1D(const Vector &p, const Vector &n, const int &i) : TaxelPWE(p,n,i) { pwe = new parzenWindowEstimator1D();};
+    TaxelPWE1D(const yarp::sig::Vector &p, const yarp::sig::Vector &n) : TaxelPWE(p,n)                 { pwe = new parzenWindowEstimator1D();};
+    TaxelPWE1D(const yarp::sig::Vector &p, const yarp::sig::Vector &n, const int &i) : TaxelPWE(p,n,i) { pwe = new parzenWindowEstimator1D();};
 
     /**
     * init function
@@ -353,8 +337,8 @@ class TaxelPWE2D : public TaxelPWE
     * Constructors
     **/    
     TaxelPWE2D() : TaxelPWE()                                                    { pwe = new parzenWindowEstimator2D();};
-    TaxelPWE2D(const Vector &p, const Vector &n) : TaxelPWE(p,n)                 { pwe = new parzenWindowEstimator2D();};
-    TaxelPWE2D(const Vector &p, const Vector &n, const int &i) : TaxelPWE(p,n,i) { pwe = new parzenWindowEstimator2D();};
+    TaxelPWE2D(const yarp::sig::Vector &p, const yarp::sig::Vector &n) : TaxelPWE(p,n)                 { pwe = new parzenWindowEstimator2D();};
+    TaxelPWE2D(const yarp::sig::Vector &p, const yarp::sig::Vector &n, const int &i) : TaxelPWE(p,n,i) { pwe = new parzenWindowEstimator2D();};
 
     /**
     * init function
@@ -368,28 +352,29 @@ class TaxelPWE2D : public TaxelPWE
 class skinPart
 {
   public:
-    SkinPart name;
+    iCub::skinDynLib::SkinPart name;
     int size;   // theoretical maximum size of the skinPart if the patches were full ~ corresponds to number of values on the respective port 
     //and number of columns in the .txt files in icub-main/app/skinGui/conf/positions
     //IMPORTANT: it differs from taxel.size(), that is the real size of the skinPart with "active" or valid taxels
              
     /**
     * Indexing variable used in the case of reducing the resolution - e.g. taking only triangle centers
-    * The index into the vector is the taxel ID, the value stored is its representative
+    * The index into the Vector is the taxel ID, the value stored is its representative
     **/
-    vector<int> Taxel2Repr; 
+    std::vector<int> Taxel2Repr; 
 
     /**
     * Mapping in the opposite direction
-    * Indexed by representative taxel IDs, it stores lists of the taxels being represented - e.g. all taxels of a triangle
+    * Indexed by representative taxel IDs, it stores lists of the taxels being represented 
+    * e.g. all taxels of a triangle
     **/
-    map<unsigned int, list<unsigned int> > Repr2TaxelList;
+    std::map<unsigned int, std::list<unsigned int> > Repr2TaxelList;
 
     /**
     * Constructor
     **/    
     skinPart();
-    // skinPart(const string _name);
+    // skinPart(const std::string _name);
 
     /**
     * Copy Operator
@@ -404,7 +389,7 @@ class skinPart
     /**
     * toString Method
     **/
-    virtual string toString(int precision=0);
+    virtual std::string toString(int precision=0);
 };
 
 class skinPartTaxel : public skinPart
@@ -413,7 +398,7 @@ class skinPartTaxel : public skinPart
     /**
     * List of taxels that belong to the skinPart.
     **/
-    vector<Taxel*> txls;
+    std::vector<Taxel*> txls;
 
     /**
     * Destructor
@@ -433,7 +418,7 @@ class skinPartTaxel : public skinPart
     /**
     * toString Method
     **/
-    string toString(int precision=0);
+    std::string toString(int precision=0);
 };
 
 class skinPartPWE : public skinPart
@@ -442,17 +427,17 @@ class skinPartPWE : public skinPart
     /**
     * Modality (either 1D or 2D)
     */
-    string modality;
+    std::string modality;
 
     /*
     * List of taxelsPWE that belong to the skinPart (either 1D or 2D)
     **/
-    vector<TaxelPWE*> txls;
+    std::vector<TaxelPWE*> txls;
 
     /*
     * Constructor that assigns modality member
     **/
-    skinPartPWE(const string &_modality) : skinPart(), modality(_modality) { txls.clear(); };
+    skinPartPWE(const std::string &_modality) : skinPart(), modality(_modality) { txls.clear(); };
 
     /**
     * Destructor
@@ -472,7 +457,7 @@ class skinPartPWE : public skinPart
     /**
     * toString Method
     **/
-    string toString(int precision=0);
+    std::string toString(int precision=0);
 
     int get_taxelSize() { return txls.size(); };
 };
@@ -484,18 +469,18 @@ class skinPartPWE : public skinPart
 class eyeWrapper
 {
 public:
-    string name;
+    std::string name;
 
-    iCubEye *eye;
+    iCub::iKin::iCubEye *eye;
 
     double headVersion;
-    Matrix *Prj;
+    yarp::sig::Matrix *Prj;
 
 public:
     /**
     * Constructor
     **/    
-    eyeWrapper(string _name, double _hV, const ResourceFinder &_eyeCalibRF);
+    eyeWrapper(std::string _name, double _hV, const yarp::os::ResourceFinder &_eyeCalibRF);
 
     /**
     * Copy Operator

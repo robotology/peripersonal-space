@@ -16,6 +16,11 @@
  * Public License for more details
 */
 
+#ifndef __ICUBDBLTCHSLV_H__
+#define __ICUBDBLTCHSLV_H__
+
+#include "iKinFwdMod.h"
+
 /**
  * \defgroup doubleTouchSlvLib doubleTouchSlvLib
  *  
@@ -36,13 +41,6 @@
  * CopyPolicy: Released under the terms of the GNU GPL v2.0.
  *
  */ 
-
-#include "iKinFwdMod.h"
-
-using namespace yarp::sig;
-using namespace yarp::math;
-using namespace iCub::ctrl;
-using namespace std;
 
 /**
 * @ingroup doubleTouchSlvLib
@@ -101,27 +99,27 @@ struct doubleTouch_Variables
 */
 struct doubleTouch_Problem
 {
-    iCubCustomLimb              limb;
-    iCubFinger                  index;
-    iKinLinIneqConstr          *mLIC;
-    iKinLinIneqConstr          *sLIC;
-    int                         nJoints;
-    int                         nVars;
-    doubleTouch_Variables       guess;
+    iCubCustomLimb                 limb;
+    iCub::iKin::iCubFinger         index;
+    iCub::iKin::iKinLinIneqConstr *mLIC;
+    iCub::iKin::iKinLinIneqConstr *sLIC;
+    int                            nJoints;
+    int                            nVars;
+    doubleTouch_Variables          guess;
 
-    std::string        getType()    { return limb.getType(); }
-    int                getNVars()   { return nVars; }
-    iKinLinIneqConstr* getMLIC()    { return mLIC; }
-    iKinLinIneqConstr* getSLIC()    { return sLIC; }
-    iKinChainMod*      asChainMod() { return limb.asChainMod(); }
-    iCubCustomLimb*    getLimb()    { return &limb; }
+    std::string                    getType()    { return limb.getType(); }
+    int                            getNVars()   { return nVars; }
+    iCub::iKin::iKinLinIneqConstr* getMLIC()    { return mLIC; }
+    iCub::iKin::iKinLinIneqConstr* getSLIC()    { return sLIC; }
+    iKinChainMod*                  asChainMod() { return limb.asChainMod(); }
+    iCubCustomLimb*                getLimb()    { return &limb; }
 
     /**
     * Constructor. 
     * @param _type is the type of subproblem that has to be instantiated. Right now, it can be
     *              'RtoL','LtoR','RHtoL','LHtoR'
     */
-    doubleTouch_Problem(string _type, string _indextype);
+    doubleTouch_Problem(std::string _type, std::string _indextype);
 
     /**
      * Copy operator.
@@ -151,7 +149,7 @@ class doubleTouch_Solver
         * @param type is the type of subproblem that has to be instantiated. Right now, it can be
         *             either 'RtoL','LtoR','RHtoL', or 'LHtoR'
         */
-        doubleTouch_Solver(string _type);
+        doubleTouch_Solver(std::string _type);
 
         /**
         * Sets the initial parameters from which starting the optimization.
@@ -168,5 +166,7 @@ class doubleTouch_Solver
          */
         ~doubleTouch_Solver();
 };
+
+#endif
 
 // empty line to make gcc happy

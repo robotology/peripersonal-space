@@ -1,5 +1,11 @@
 #include "iCub/periPersonalSpace/parzenWindowEstimator.h"
 
+using namespace yarp;
+using namespace yarp::os;
+using namespace yarp::sig;
+
+using namespace std;
+
 double gauss(const double x_0, const double sigma, const double val)
 {
     double res = (1/(sqrt(2*M_PI)*sigma))*

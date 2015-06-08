@@ -58,6 +58,7 @@ using namespace yarp::sig;
 using namespace yarp::math;
 using namespace yarp::dev;
 using namespace iCub::skinDynLib;
+using namespace iCub::iKin;
 
 using namespace std;
 

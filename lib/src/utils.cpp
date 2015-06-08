@@ -1,5 +1,15 @@
 #include "iCub/periPersonalSpace/utils.h"
 
+using namespace yarp;
+using namespace yarp::os;
+using namespace yarp::sig;
+using namespace yarp::math;
+
+using namespace iCub::iKin;
+using namespace iCub::skinDynLib;
+
+using namespace std;
+
 yarp::sig::Vector toVector(yarp::sig::Matrix m)
 {
     Vector res(m.rows()*m.cols(),0.0);
@@ -39,18 +49,6 @@ yarp::sig::Matrix matrixFromBottle(const Bottle b, int in, const int r, const in
     }
     
     return m;
-}
-
-yarp::sig::Vector vectorFromBottle(const Bottle b, int in, const int size)
-{
-    yarp::sig::Vector v(size,0.0);
-
-    for (size_t i = 0; i < size; i++)
-    {
-        v[i] = b.get(in).asDouble();
-        in++;
-    }
-    return v;
 }
 
 void vectorIntoBottle(const yarp::sig::Vector v, Bottle &b)
