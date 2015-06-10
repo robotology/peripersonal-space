@@ -90,7 +90,6 @@ void matrixOfIntIntoBottle(const yarp::sig::Matrix m, yarp::os::Bottle &b);
 **/
 void vectorIntoBottle(const yarp::sig::Vector v, yarp::os::Bottle &b);
 
-
 /**
 * Converts an int to a string
 **/
@@ -268,7 +267,7 @@ class TaxelPWE : public iCub::skinDynLib::Taxel
     /*
     * Destructor
     **/
-    ~TaxelPWE();
+    virtual ~TaxelPWE();
 
     /**
     * init function
@@ -289,12 +288,12 @@ class TaxelPWE : public iCub::skinDynLib::Taxel
     /**
     * Print Method
     **/
-    void print(int verbosity=0);
+    virtual void print(int verbosity=0);
 
     /**
     * toString Method
     **/
-    std::string toString(int precision=0);
+    std::string toString(int verbosity=0);
 
     /**
     * Resets the parzen window estimator
@@ -309,7 +308,7 @@ class TaxelPWE : public iCub::skinDynLib::Taxel
     /**
     * Convert the taxel into a bottle in order to be saved on file
     **/
-    yarp::os::Bottle TaxelPWEIntoBottle();
+    virtual yarp::os::Bottle TaxelPWEIntoBottle();
 };
 
 class TaxelPWE1D : public TaxelPWE
@@ -317,16 +316,59 @@ class TaxelPWE1D : public TaxelPWE
   public:
 
     /**
-    * Constructors
-    **/    
-    TaxelPWE1D() : TaxelPWE()                                                                          { pwe = new parzenWindowEstimator1D();};
-    TaxelPWE1D(const yarp::sig::Vector &p, const yarp::sig::Vector &n) : TaxelPWE(p,n)                 { pwe = new parzenWindowEstimator1D();};
-    TaxelPWE1D(const yarp::sig::Vector &p, const yarp::sig::Vector &n, const int &i) : TaxelPWE(p,n,i) { pwe = new parzenWindowEstimator1D();};
+    * Default Constructor
+    **/
+    TaxelPWE1D();
+    
+    /**
+     * Constructor with position and normal vectors
+     * @param _p is the position of the taxel
+     * @param _n is the normal vector of the taxel
+     */
+    TaxelPWE1D(const yarp::sig::Vector &p,
+               const yarp::sig::Vector &n);
+    
+    /**
+     * Constructor with position, normal and ID
+     * @param _p is the position of the taxel
+     * @param _n is the normal vector of the taxel
+     * @param _i is the ID of the taxel
+     */
+    TaxelPWE1D(const yarp::sig::Vector &p,
+               const yarp::sig::Vector &n,
+               const int &i);
+
+    /**
+    * Copy Constructor
+    * @param _t is the Taxel to copy from
+    **/
+    TaxelPWE1D(const Taxel &_t);
+
+    /**
+    * Copy Constructor
+    * @param _t is the Taxel to copy from
+    **/
+    TaxelPWE1D(const TaxelPWE1D &_t);
+
+    /*
+    * Copy Operator
+    **/
+    TaxelPWE1D &operator=(const TaxelPWE1D &t);
+
+    /*
+    * Copy Operator with the base class (i.e. Taxel)
+    **/
+    TaxelPWE1D &operator=(const Taxel &t);
 
     /**
     * init function
     **/
     void init() { TaxelPWE::init(); };
+
+    /**
+    * Print Method
+    **/
+    void print(int verbosity=0) { TaxelPWE::print(verbosity); };
 };
 
 class TaxelPWE2D : public TaxelPWE
@@ -334,92 +376,135 @@ class TaxelPWE2D : public TaxelPWE
   public:
 
     /**
-    * Constructors
-    **/    
-    TaxelPWE2D() : TaxelPWE()                                                                          { pwe = new parzenWindowEstimator2D();};
-    TaxelPWE2D(const yarp::sig::Vector &p, const yarp::sig::Vector &n) : TaxelPWE(p,n)                 { pwe = new parzenWindowEstimator2D();};
-    TaxelPWE2D(const yarp::sig::Vector &p, const yarp::sig::Vector &n, const int &i) : TaxelPWE(p,n,i) { pwe = new parzenWindowEstimator2D();};
+    * Default Constructor
+    **/ 
+    TaxelPWE2D();
+
+    /**
+     * Constructor with position and normal vectors
+     * @param _p is the position of the taxel
+     * @param _n is the normal vector of the taxel
+     */
+    TaxelPWE2D(const yarp::sig::Vector &p,
+               const yarp::sig::Vector &n);
+
+    /**
+     * Constructor with position, normal and ID
+     * @param _p is the position of the taxel
+     * @param _n is the normal vector of the taxel
+     * @param _i is the ID of the taxel
+     */
+    TaxelPWE2D(const yarp::sig::Vector &p,
+               const yarp::sig::Vector &n,
+               const int &i);
+
+    /**
+    * Copy Constructor
+    * @param _t is the Taxel to copy from
+    **/
+    TaxelPWE2D(const Taxel &_t);
+
+    /**
+    * Copy Constructor
+    * @param _t is the Taxel to copy from
+    **/
+    TaxelPWE2D(const TaxelPWE2D &_t);
+
+    /*
+    * Copy Operator
+    **/
+    TaxelPWE2D &operator=(const TaxelPWE2D &t);
+
+    /*
+    * Copy Operator with the base class (i.e. Taxel)
+    **/
+    TaxelPWE2D &operator=(const Taxel &t);
 
     /**
     * init function
     **/
     void init() { TaxelPWE::init(); };
+
+    /**
+    * Print Method
+    **/
+    void print(int verbosity=0) { TaxelPWE::print(verbosity); };
 };
 
 /**
 * Class that encloses all the information related to a skinpart.
 **/
-// class skinPart
-// {
-//   public:
-//     iCub::skinDynLib::SkinPart name;
-//     int size;   // theoretical maximum size of the skinPart if the patches were full ~ corresponds to number of values on the respective port 
-//     //and number of columns in the .txt files in icub-main/app/skinGui/conf/positions
-//     //IMPORTANT: it differs from taxel.size(), that is the real size of the skinPart with "active" or valid taxels
-             
-//     /**
-//     * Indexing variable used in the case of reducing the resolution - e.g. taking only triangle centers
-//     * The index into the Vector is the taxel ID, the value stored is its representative
-//     **/
-//     std::vector<int> Taxel2Repr; 
+    // class skinPart
+    // {
+    //   public:
+    //     iCub::skinDynLib::SkinPart name;
+    //     int size;   // theoretical maximum size of the skinPart if the patches were full ~ corresponds to number of values on the respective port 
+    //     //and number of columns in the .txt files in icub-main/app/skinGui/conf/positions
+    //     //IMPORTANT: it differs from taxel.size(), that is the real size of the skinPart with "active" or valid taxels
+                 
+    //     /**
+    //     * Indexing variable used in the case of reducing the resolution - e.g. taking only triangle centers
+    //     * The index into the Vector is the taxel ID, the value stored is its representative
+    //     **/
+    //     std::vector<int> Taxel2Repr; 
 
-//     /**
-//     * Mapping in the opposite direction
-//     * Indexed by representative taxel IDs, it stores lists of the taxels being represented 
-//     * e.g. all taxels of a triangle
-//     **/
-//     std::map<unsigned int, std::list<unsigned int> > Repr2TaxelList;
+    //     /**
+    //     * Mapping in the opposite direction
+    //     * Indexed by representative taxel IDs, it stores lists of the taxels being represented 
+    //     * e.g. all taxels of a triangle
+    //     **/
+    //     std::map<unsigned int, std::list<unsigned int> > Repr2TaxelList;
 
-//     /**
-//     * Constructor
-//     **/    
-//     skinPart();
-//     // skinPart(const std::string _name);
+    //     /**
+    //     * Constructor
+    //     **/    
+    //     skinPart();
+    //     // skinPart(const std::string _name);
 
-//     /**
-//     * Copy Operator
-//     **/
-//     virtual skinPart &operator=(const skinPart &spw);
+    //     /**
+    //     * Copy Operator
+    //     **/
+    //     virtual skinPart &operator=(const skinPart &spw);
 
-//     /**
-//     * Print Method
-//     **/
-//     virtual void print(int verbosity=0);
+    //     /**
+    //     * Print Method
+    //     **/
+    //     virtual void print(int verbosity=0);
 
-//     /**
-//     * toString Method
-//     **/
-//     virtual std::string toString(int precision=0);
-// };
+    //     /**
+    //     * toString Method
+    //     **/
+    //     virtual std::string toString(int precision=0);
+    // };
 
-// class skinPartTaxel : public skinPart
-// {
-//   public:
-//     /**
-//     * List of taxels that belong to the skinPart.
-//     **/
-//     std::vector<iCub::skinDynLib::Taxel*> taxels;
+    // class skinPartTaxel : public skinPart
+    // {
+    //   public:
+    //     /**
+    //     * List of taxels that belong to the skinPart.
+    //     **/
+    //     std::vector<iCub::skinDynLib::Taxel*> taxels;
 
-//     /**
-//     * Destructor
-//     **/
-//     ~skinPartTaxel();
+    //     /**
+    //     * Destructor
+    //     **/
+    //     ~skinPartTaxel();
 
-//     /**
-//     * Copy Operator
-//     **/
-//     skinPartTaxel &operator=(const skinPartTaxel &spw);
+    //     /**
+    //     * Copy Operator
+    //     **/
+    //     skinPartTaxel &operator=(const skinPartTaxel &spw);
 
-//     /**
-//     * Print Method
-//     **/
-//     void print(int verbosity=0);
+    //     /**
+    //     * Print Method
+    //     **/
+    //     void print(int verbosity=0);
 
-//     /**
-//     * toString Method
-//     **/
-//     std::string toString(int precision=0);
-// };
+    //     /**
+    //     * toString Method
+    //     **/
+    //     std::string toString(int precision=0);
+    // };
 
 class skinPartPWE : public iCub::skinDynLib::skinPart
 {
@@ -432,12 +517,18 @@ class skinPartPWE : public iCub::skinDynLib::skinPart
     /*
     * Constructor that assigns modality member
     **/
-    skinPartPWE(const std::string &_modality) : skinPart(), modality(_modality) { taxels.clear(); };
+    skinPartPWE(const std::string &_modality);
 
     /**
     * Destructor
     **/
     ~skinPartPWE();
+
+    /**
+    * Copy Constructor
+    * @param _spwe is the skinPartPWE to copy from
+    **/
+    skinPartPWE(const skinPartPWE &_spwe);
 
     /**
     * Copy Operator

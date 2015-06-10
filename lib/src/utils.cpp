@@ -347,13 +347,16 @@ unsigned int factorial(unsigned int n)
         RFangle = 40*M_PI/180;
     }
 
-    TaxelPWE::TaxelPWE(const Vector &p, const Vector &n) : Taxel(p,n)
+    TaxelPWE::TaxelPWE(const Vector &p,
+                       const Vector &n) : Taxel(p,n), Evnt()
     {
         Resp    = 0;
         RFangle = 40*M_PI/180;
     };
 
-    TaxelPWE::TaxelPWE(const Vector &p, const Vector &n, const int &i) : Taxel(p,n,i)
+    TaxelPWE::TaxelPWE(const Vector &p,
+                       const Vector &n,
+                       const int &i) : Taxel(p,n,i), Evnt()
     {
         Resp    = 0;
         RFangle = 40*M_PI/180;
@@ -408,24 +411,21 @@ unsigned int factorial(unsigned int n)
 
     void TaxelPWE::print(int verbosity)
     {
+        yDebug("[TAXEL] %s", iCub::skinDynLib::Taxel::toString(verbosity).c_str());
         if (verbosity > 3)
-            yDebug("%s\n\tPosHst \n%s\n\n\tNegHst \n%s\n",
-                    iCub::skinDynLib::Taxel::toString(verbosity).c_str(),
-                    pwe->getPosHist().toString(3,3).c_str(),
-                    pwe->getNegHist().toString(3,3).c_str());
-        else 
-            yDebug("%s",iCub::skinDynLib::Taxel::toString(verbosity).c_str());
+        {
+            yDebug("[PWE] %s",pwe->toString(verbosity).c_str());
+        }
     }
 
-    string TaxelPWE::toString(int precision)
+    string TaxelPWE::toString(int verbosity)
     {
         stringstream res;
-        res << iCub::skinDynLib::Taxel::toString();
+        res << "[TAXEL] " << iCub::skinDynLib::Taxel::toString(verbosity);
 
-        if (precision)
+        if (verbosity)
         {
-            res << "\n PosHst:\n"<< pwe->getPosHist().toString(3,3);
-            res << "\n NegHst:\n"<< pwe->getNegHist().toString(3,3) << endl;
+            res << "[PWE] " << pwe->toString(verbosity);
         }
         return res.str();
     }
@@ -471,6 +471,149 @@ unsigned int factorial(unsigned int n)
         {
             delete pwe;
         }
+    }
+
+/****************************************************************/
+/* TAXEL WRAPPER FOR PWE 1D                                     */
+/****************************************************************/
+    TaxelPWE1D::TaxelPWE1D() : TaxelPWE()
+    {
+        pwe = new parzenWindowEstimator1D();
+    }
+
+    TaxelPWE1D::TaxelPWE1D(const yarp::sig::Vector &p,
+                           const yarp::sig::Vector &n) : TaxelPWE(p,n)
+    {
+        pwe = new parzenWindowEstimator1D();
+    }
+
+    TaxelPWE1D::TaxelPWE1D(const yarp::sig::Vector &p,
+                           const yarp::sig::Vector &n,
+                           const int &i) : TaxelPWE(p,n,i)
+    {
+        pwe = new parzenWindowEstimator1D();
+    }
+
+    TaxelPWE1D::TaxelPWE1D(const Taxel &_t)
+    {
+        *this = _t;
+    }
+
+    TaxelPWE1D::TaxelPWE1D(const TaxelPWE1D &_t)
+    {
+        *this = _t;
+    }
+
+    TaxelPWE1D & TaxelPWE1D::operator=(const Taxel &t)
+    {
+        if (this == &t)
+        {
+            return *this;
+        }
+
+        iCub::skinDynLib::Taxel::operator=(t);
+
+        // if (pwe)
+        // {
+        //     delete pwe;
+        // }
+        pwe = new parzenWindowEstimator1D();
+
+        return *this;
+    }
+
+    TaxelPWE1D & TaxelPWE1D::operator=(const TaxelPWE1D &t)
+    {
+        if (this == &t)
+        {
+            return *this;
+        }
+
+        iCub::skinDynLib::Taxel::operator=(t);
+
+        Evnt = t.Evnt;
+
+        if (pwe)
+        {
+            delete pwe;
+        }
+
+        parzenWindowEstimator1D* newpwe = dynamic_cast<parzenWindowEstimator1D*>(t.pwe);
+        pwe = new parzenWindowEstimator1D(*(newpwe));
+
+        return *this;
+    }
+
+/****************************************************************/
+/* TAXEL WRAPPER FOR PWE 2D                                     */
+/****************************************************************/
+    TaxelPWE2D::TaxelPWE2D() : TaxelPWE()
+    {
+        pwe = new parzenWindowEstimator2D();
+    }
+
+    TaxelPWE2D::TaxelPWE2D(const yarp::sig::Vector &p,
+                           const yarp::sig::Vector &n) : TaxelPWE(p,n)
+    {
+        pwe = new parzenWindowEstimator2D();
+    }
+
+    TaxelPWE2D::TaxelPWE2D(const yarp::sig::Vector &p,
+                           const yarp::sig::Vector &n,
+                           const int &i) : TaxelPWE(p,n,i)
+    {
+        pwe = new parzenWindowEstimator2D();
+    }
+
+
+    TaxelPWE2D::TaxelPWE2D(const Taxel &_t)
+    {
+        *this = _t;
+    }
+
+    TaxelPWE2D::TaxelPWE2D(const TaxelPWE2D &_t)
+    {
+        *this = _t;
+    }
+
+    TaxelPWE2D & TaxelPWE2D::operator=(const Taxel &t)
+    {
+        if (this == &t)
+        {
+            return *this;
+        }
+
+        iCub::skinDynLib::Taxel::operator=(t);
+
+        // if (pwe)
+        // {
+        //     delete pwe;
+        // }
+        pwe = new parzenWindowEstimator2D();
+
+        return *this;
+    }
+
+    TaxelPWE2D & TaxelPWE2D::operator=(const TaxelPWE2D &t)
+    {
+        if (this == &t)
+        {
+            return *this;
+        }
+
+        iCub::skinDynLib::Taxel::operator=(t);
+
+        Evnt = t.Evnt;
+
+        if (pwe)
+        {
+            delete pwe;
+        }
+
+        parzenWindowEstimator2D* newpwe = dynamic_cast<parzenWindowEstimator2D*>(t.pwe);
+        pwe = new parzenWindowEstimator2D(*(newpwe));
+
+        return *this;
     }
 
 // /****************************************************************/
@@ -583,11 +726,46 @@ unsigned int factorial(unsigned int n)
 /****************************************************************/
 /* SKINPART TAXEL PWE WRAPPER
 *****************************************************************/
+    skinPartPWE::skinPartPWE(const std::string &_modality) :
+                             skinPart(), modality(_modality)
+    {
+        clearTaxels();
+    }
+
+    skinPartPWE::skinPartPWE(const skinPartPWE &_spwe)
+    {
+        *this = _spwe;
+    }
+
     skinPartPWE & skinPartPWE::operator=(const skinPartPWE &spw)
     {
+        if (this == &spw)
+        {
+            return *this;
+        }
+
         iCub::skinDynLib::skinPart::operator=(spw);
-        taxels = spw.taxels;
+
         modality  = spw.modality;
+
+        clearTaxels();
+        if (modality=="1D")
+        {
+            for (std::vector<Taxel*>::const_iterator it = spw.taxels.begin();
+                 it != spw.taxels.end(); ++it)
+            {
+                taxels.push_back(new TaxelPWE1D(*(*it)));
+            }
+        }
+        else if (modality=="2D")
+        {
+            for (std::vector<Taxel*>::const_iterator it = spw.taxels.begin();
+                 it != spw.taxels.end(); ++it)
+            {
+                taxels.push_back(new TaxelPWE2D(*(*it)));
+            }
+        }
+        
         return *this;
     }
 

@@ -76,6 +76,18 @@ class parzenWindowEstimator
     parzenWindowEstimator(const yarp::sig::Matrix _ext, const std::vector<int> _binsNum);
 
     /**
+    * Copy Constructor
+    * @param _pwe is the parzenWindowEstimator to copy from
+    **/
+    parzenWindowEstimator(const parzenWindowEstimator &_pwe);
+
+    /**
+    * Copy Operator
+    * @param _pwe is the parzenWindowEstimator to copy from
+    **/
+    parzenWindowEstimator &operator=(const parzenWindowEstimator &_pwe);
+
+    /**
     * Resize the estimator to a given extension and number of samples
     * The histogram changes accordingly (and it's cleared as well).
     **/
@@ -113,29 +125,34 @@ class parzenWindowEstimator
     /**
     * Print Function
     **/
-    void print();
+    virtual void print();
+
+    /**
+    * toString Method
+    * @param verbosity is the verbosity level
+    **/
+    virtual std::string toString(int verbosity=0);
 
     /**
     * Self-explaining functions
     **/
-    std::vector<int>    getHistSize()              { return binsNum; };
-    std::vector<double> getBinWidth()              { return binWidth; };
+    std::vector<int>    getHistSize()           { return binsNum; };
+    std::vector<double> getBinWidth()           { return binWidth; };
     
-    yarp::sig::Matrix getExt()                                { return ext; };
+    virtual yarp::sig::Matrix getExt()          { return ext; };
 
-    int    getPosHist(int i, int j=0) { return int(posHist(i,j)); };
-    yarp::sig::Matrix getPosHist()               { return posHist; };
-
-    int    getNegHist(int i, int j=0) { return int(negHist(i,j)); };    
-    yarp::sig::Matrix getNegHist()               { return negHist; };
+    int    getPosHist(int i, int j=0)           { return int(posHist(i,j)); };
+    yarp::sig::Matrix getPosHist()              { return posHist; };
+    int    getNegHist(int i, int j=0)           { return int(negHist(i,j)); };    
+    yarp::sig::Matrix getNegHist()              { return negHist; };
 
     double getHist(int i, int j=0);
     yarp::sig::Matrix getHist();
 
     void setPosHist(int val, int i, int j=0)    { posHist(i,j) = val; };
     void setNegHist(int val, int i, int j=0)    { negHist(i,j) = val; };
-    void setPosHist(const yarp::sig::Matrix &v)            { posHist = v; };
-    void setNegHist(const yarp::sig::Matrix &v)            { negHist = v; };
+    void setPosHist(const yarp::sig::Matrix &v) { posHist = v; };
+    void setNegHist(const yarp::sig::Matrix &v) { negHist = v; };
 
     void resetAllHist()                         { posHist.zero(); negHist.zero(); };
 };
@@ -151,6 +168,12 @@ class parzenWindowEstimator1D : public parzenWindowEstimator
     **/
     parzenWindowEstimator1D();
     parzenWindowEstimator1D(const yarp::sig::Matrix _ext, const std::vector<int> _binsNum);
+
+    /**
+    * Copy Constructor
+    * @param _pwe is the parzenWindowEstimator to copy from
+    **/
+    parzenWindowEstimator1D(const parzenWindowEstimator1D &_pwe);
         
     /**
     * Get the value of the receptive field at a certain x
@@ -167,7 +190,7 @@ class parzenWindowEstimator1D : public parzenWindowEstimator
     /**
     * Print Function
     **/
-    void print();
+    void print() { parzenWindowEstimator::print(); };
 };
 
 /**
@@ -197,7 +220,7 @@ class parzenWindowEstimator2D : public parzenWindowEstimator
     /**
     * Print Function
     **/
-    void print();
+    void print() { parzenWindowEstimator::print(); };
 };
 
 #endif
