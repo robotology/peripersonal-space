@@ -28,7 +28,7 @@ source_group("Source Files" FILES ${folder_source})
 source_group("Header Files" FILES ${folder_header})
 
 add_library(${PROJECTNAME} ${folder_source} ${folder_header})
-target_link_libraries(${PROJECTNAME} ${YARP_LIBRARIES} iKin ${ICUB_LIBRARIES} ${IPOPT_LIBRARIES})
+target_link_libraries(${PROJECTNAME} ${YARP_LIBRARIES} iKin skinDynLib icubmod ${IPOPT_LIBRARIES})
 icubcontrib_export_library(${PROJECTNAME} INTERNAL_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include
                                           EXTERNAL_INCLUDE_DIRS ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${IPOPT_INCLUDE_DIRS}
                                           DESTINATION include/iCub/periPersonalSpace
