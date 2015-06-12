@@ -368,7 +368,7 @@ unsigned int factorial(unsigned int n)
             return false;
 
         std::vector <double> x = ie.getNRMTTC();
-        printf("[TaxelPWE::addSample] x %g %g\n",x[0],x[1]);
+        // printf("[TaxelPWE::addSample] x %g %g\n",x[0],x[1]);
         
         return pwe->addSample(x);
     }

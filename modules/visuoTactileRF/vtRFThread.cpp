@@ -782,7 +782,6 @@ string vtRFThread::save()
             data.clear();
 
             Matrix           getExt = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[0])->pwe->getExt();
-            printf("getExt %s\n",getExt.toString(3,3).c_str());
             matrixIntoBottle(getExt,data);
 
             std::vector<int> bNum  = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[0])->pwe->getHistSize();
