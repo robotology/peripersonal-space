@@ -42,7 +42,7 @@
     </module>
     <module>
         <name>visuoTactileRF</name>
-        <parameters>--taxelsFile taxels1D_noFAR.ini</parameters>
+        <parameters>--taxelsFile taxels1D_learned.ini</parameters>
         <node>icub15</node>
         <stdio></stdio>
     </module>
