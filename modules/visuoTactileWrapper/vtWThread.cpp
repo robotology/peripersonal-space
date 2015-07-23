@@ -58,7 +58,7 @@ bool vtWThread::threadInit()
     }
 
     igaze -> storeContext(&contextGaze);
-    igaze -> setSaccadesStatus(false);
+    igaze -> setSaccadesMode(false);
     igaze -> setNeckTrajTime(0.75);
     igaze -> setEyesTrajTime(0.5);
     
