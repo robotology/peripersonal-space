@@ -465,7 +465,7 @@ void vtRFThread::manageSkinEvents()
                 normalDir /= w_sum;
                 vectorIntoBottle(geoCenter,b);
                 vectorIntoBottle(normalDir,b);
-
+                b.addInt(w_sum);
                 out.addList().read(b);
             }
         }
