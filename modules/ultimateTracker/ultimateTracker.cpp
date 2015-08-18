@@ -97,6 +97,8 @@ private:
     int kalmanOrder;
     int timeThres;
 
+    bool useNearBlobber;
+
 public:
     ultimateTracker()
     {
@@ -177,6 +179,15 @@ public:
             else cout << "Could not find verbosity option in " <<
                          "config file; using "<< verbosity <<" as default.\n";
 
+        //******************* VERBOSE ******************
+            if (rf.check("useNearBlobber"))
+            {
+                useNearBlobber = rf.find("useNearBlobber").asInt();
+                cout << "utManagerThread useNearBlobber set to " << useNearBlobber << endl;
+            }
+            else cout << "Could not find useNearBlobber option in " <<
+                         "config file; using "<< useNearBlobber <<" as default.\n";
+
         //****************** managerRate ******************
             if (rf.check("managerRate"))
             {
@@ -227,7 +238,7 @@ public:
             cout << "ULTIMATE TRACKER: kalmanThread istantiated...\n";
 
             string managerThrdName = name + "/Manager";
-            utMngrThrd = new utManagerThread(managerRate, managerThrdName, robot, verbosity,kalThrd);
+            utMngrThrd = new utManagerThread(managerRate, managerThrdName, robot, verbosity, kalThrd, useNearBlobber);
             if (!utMngrThrd -> start())
             {
                 delete utMngrThrd;
@@ -284,7 +295,7 @@ int main(int argc, char * argv[])
     Network yarp;
 
     ResourceFinder moduleRF;
-    moduleRF.setVerbose(false);
+    moduleRF.setVerbose(true);
     moduleRF.setDefaultContext("periPersonalSpace");
     moduleRF.setDefaultConfigFile("ultimateTracker.ini");
     moduleRF.configure(argc,argv);

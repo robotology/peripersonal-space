@@ -56,6 +56,8 @@ protected:
     // INTERNAL VARIABLES:
     kalmanThread          *kalThrd;     // Pointer to the kalmanThread in order to access its data.
 
+    bool useNearBlobber;
+
     int    stateFlag;
     double timeNow;
 
@@ -63,6 +65,10 @@ protected:
     Bottle                     *motionCUTBottle; // bottle used for the port
     Vector                      motionCUTPos;    // current position of the center of the blob
     vector <yarp::sig::Vector>  oldMcutPoss;     // old positions
+
+    BufferedPort<Bottle>  *nearBlobberTarget;   // port for reading from the nearBlobber
+    Bottle                *nearBlobberBottle;   // bottle used for the port
+    Vector                 nearBlobberPos;      // current position of the blob
 
     BufferedPort<Bottle>  *templatePFTrackerTarget;  // port for reading from templatePFTracker
     Bottle                *templatePFTrackerBottle;  // bottle used for the port
@@ -77,6 +83,18 @@ protected:
     Vector    kalOut;
 
     bool noInput();
+
+    /**
+    * Standard mode in which the templateTracker and the SFM are used.
+    * @return int the state of the kalman filter
+    **/
+    int run_with_templateTracker_SFM();
+
+    /**
+     * New mode in which the 3D point is provided by the nearBlobber
+     * @return int the state of the kalman filter
+    **/
+    int run_with_nearBlobber();
 
     /**
     * Processes data coming from the motionCUT.
@@ -99,12 +117,17 @@ protected:
     **/
     bool readFromTracker();
 
-
     /**
     * Converts the 2D tracked point into a 3D point thanks to the stereovision.
     * @return true/false for success/failure (if the stereoVision fails it returns false)
     **/
     bool getPointFromStereo();
+
+    /**
+    * Reads the output from the nearBlobber, and retrieves the 3D point of the center of the nearest blob
+    * @return true/false for success/failure (if the stereoVision fails it returns false)
+    **/
+    bool getPointFromNearBlobber();
 
     /**
     * Handles the kalman filter, by inizializing it and feeding it with stereo 3D data.
@@ -135,7 +158,7 @@ protected:
     
 public:
     // CONSTRUCTOR
-    utManagerThread(int _rate, const string &_name, const string &_robot, int _v, kalmanThread *_kT);
+    utManagerThread(int _rate, const string &_name, const string &_robot, int _v, kalmanThread *_kT, bool _useNearBlobber);
     // INIT
     virtual bool threadInit();
     // RUN

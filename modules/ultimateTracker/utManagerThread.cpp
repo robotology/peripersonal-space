@@ -1,7 +1,7 @@
 #include "utManagerThread.h"
 
-utManagerThread::utManagerThread(int _rate, const string &_name, const string &_robot, int _v, kalmanThread *_kT) :
-                       RateThread(_rate), name(_name), robot(_robot), verbosity(_v)
+utManagerThread::utManagerThread(int _rate, const string &_name, const string &_robot, int _v, kalmanThread *_kT, bool _useNearBlobber) :
+                       RateThread(_rate), name(_name), robot(_robot), verbosity(_v), useNearBlobber(_useNearBlobber)
 {
     kalThrd   = _kT;
 
@@ -14,6 +14,9 @@ utManagerThread::utManagerThread(int _rate, const string &_name, const string &_
     templatePFTrackerTarget = new BufferedPort<Bottle>;
     templatePFTrackerPos.resize(2,0.0);
 
+    nearBlobberTarget = new BufferedPort<Bottle>;
+    nearBlobberPos.resize(3,0.0);
+
     SFMPos.resize(3,0.0);
     kalOut.resize(3,0.0);
 }
@@ -22,6 +25,7 @@ bool utManagerThread::threadInit()
 {
     motionCUTBlobs -> open(("/"+name+"/mCUT:i").c_str());
     templatePFTrackerTarget -> open(("/"+name+"/pfTracker:i").c_str());
+    nearBlobberTarget -> open(("/"+name+"/nearBlobber:i").c_str());
     SFMrpcPort.open(("/"+name+"/SFM:o").c_str());
     outPortGui.open(("/"+name+"/gui:o").c_str());
     outPortEvents.open(("/"+name+"/events:o").c_str());
@@ -31,18 +35,41 @@ bool utManagerThread::threadInit()
     Network::connect(("/"+name+"/SFM:o").c_str(),"/SFM/rpc");
     // Network::connect(("/"+name+"/gui:o").c_str(),"/iCubGui/objects");
     Network::connect(("/"+name+"/events:o").c_str(),"/visuoTactileWrapper/optFlow:i");    
+    Network::connect("/nearBlobber/points3d:o",("/"+name+"/nearBlobber:i").c_str());
 
     return true;
 }
 
 void utManagerThread::run()
 {
+    int kalState=-1;
+
+    if (useNearBlobber==true)
+    {
+        kalState=run_with_nearBlobber();
+    }
+    else
+    {
+        kalState=run_with_templateTracker_SFM();
+    }
+    
+    kalThrd -> getKalmanOutput(kalOut);
+    printMessage(1,"stateFlag %i kalState %i kalmanPos: %s\n",stateFlag,kalState,kalOut.toString().c_str());
+
+    if (stateFlag == 3)
+    {
+        sendData();
+    }
+}
+
+int utManagerThread::run_with_templateTracker_SFM()
+{
     int kalState = -1;
 
     switch (stateFlag)
     {
         case 0:
-            printMessage(0,"Looking for motion...\n");
+            yDebug("Looking for motion...\n");
             timeNow = yarp::os::Time::now();
             oldMcutPoss.clear();
             stateFlag++;
@@ -53,7 +80,7 @@ void utManagerThread::run()
             // if so, initialize the tracker, and step up.
             if (processMotion())
             {
-                printMessage(0,"Initializing tracker...\n");
+                yDebug("Initializing tracker...\n");
                 timeNow = yarp::os::Time::now();
                 initializeTracker();
                 stateFlag++;
@@ -65,13 +92,16 @@ void utManagerThread::run()
             readFromTracker();
             if (getPointFromStereo())
             {
-                printMessage(0,"Initializing Kalman filter...\n");
+                yDebug("Initializing Kalman filter...\n");
                 kalThrd -> setKalmanState(KALMAN_INIT);
                 kalThrd -> kalmanInit(SFMPos);
                 stateFlag++;
             }
             break;
         case 3:
+            // state #03: keep reading data from the Tracker and retrieving the 3D point from the SFM
+            // With this info, keep feeding the kalman filter until it thinks that the object is still
+            // tracked. If not, go back from the initial state.
             printMessage(2,"Reading from tracker and SFM...\n");
             readFromTracker();
             if (getPointFromStereo())
@@ -83,23 +113,75 @@ void utManagerThread::run()
             sendGuiTarget();
             if (kalState == KALMAN_STOPPED)
             {
-                printMessage(0,"For some reasons, the kalman filters stopped. Going back to initial state.\n");
+                yDebug("For some reasons, the kalman filters stopped. Going back to initial state.\n");
                 stateFlag = 0;
             }
             break;
         default:
-            printMessage(0,"ERROR!!! utManagerThread should never be here!!!\nState: %d\n",stateFlag);
+            yError(" utManagerThread should never be here!!!\nState: %d\n",stateFlag);
             Time::delay(1);
             break;
     }
-    
-    kalThrd -> getKalmanOutput(kalOut);
-    printMessage(1,"stateFlag %i kalState %i kalmanPos: %s\n",stateFlag,kalState,kalOut.toString().c_str());
 
-    if (stateFlag == 3)
+    return kalState;
+}
+
+int utManagerThread::run_with_nearBlobber()
+{
+    int kalState = -1;
+
+    switch (stateFlag)
     {
-        sendData();
+        case 0:
+            yDebug("Looking for motion...\n");
+            timeNow = yarp::os::Time::now();
+            oldMcutPoss.clear();
+            stateFlag++;
+            deleteGuiTarget();
+            break;
+        case 1:
+            // state #01: check the motionCUT and see if there's something interesting.
+            // if so, step up.
+            if (processMotion())
+            {
+                yDebug("Initializing tracker...\n");
+                timeNow = yarp::os::Time::now();
+                stateFlag++;
+            }
+            break;
+        case 2:
+            // state #02: read data from the nearBlobber and retrieve the 3D point of the center of the nearest blob
+            // with that, initialize the kalman filter, and then step up.
+            if (getPointFromNearBlobber())
+            {
+                yDebug("Initializing Kalman filter...\n");
+                kalThrd -> setKalmanState(KALMAN_INIT);
+                kalThrd -> kalmanInit(nearBlobberPos);
+                stateFlag++;
+            }
+            break;
+        case 3:
+            printMessage(2,"Reading from tracker and SFM...\n");
+            if (getPointFromNearBlobber())
+            {
+                kalThrd -> setKalmanInput(nearBlobberPos);
+            }
+            
+            kalThrd -> getKalmanState(kalState);
+            sendGuiTarget();
+            if (kalState == KALMAN_STOPPED)
+            {
+                yInfo("For some reasons, the kalman filters stopped. Going back to initial state.\n");
+                stateFlag = 0;
+            }
+            break;
+        default:
+            yError("utManagerThread should never be here!!!\tState: %d\n",stateFlag);
+            Time::delay(1);
+            break;
     }
+
+    return kalState;
 }
 
 void utManagerThread::sendData()
@@ -233,6 +315,7 @@ bool utManagerThread::readFromTracker()
             templatePFTrackerPos(0) = templatePFTrackerBottle->get(0).asDouble();
             templatePFTrackerPos(1) = templatePFTrackerBottle->get(1).asDouble();
         }
+        return true;
     }
 
     if (noInput())
@@ -270,6 +353,37 @@ bool utManagerThread::getPointFromStereo()
         return true;
     } 
 
+    return false;
+}
+
+bool utManagerThread::getPointFromNearBlobber()
+{
+    if (nearBlobberBottle = nearBlobberTarget->read(false))
+    {
+        if (nearBlobberBottle!=NULL)
+        {
+            Vector NBtmp(3,0.0);
+            NBtmp(0) = nearBlobberBottle->get(0).asDouble();
+            NBtmp(1) = nearBlobberBottle->get(1).asDouble();
+            NBtmp(2) = nearBlobberBottle->get(2).asDouble();
+
+            if (NBtmp(0) == 0.0 && NBtmp(1) == 0.0 && NBtmp(2) == 0.0)
+            {
+                return false;
+            }
+            else
+            {
+                timeNow = yarp::os::Time::now();
+                nearBlobberPos = NBtmp;
+                return true;
+            }
+        }
+    }
+
+    if (noInput())
+    {
+        stateFlag = 0;
+    }
     return false;
 }
 
@@ -311,10 +425,10 @@ void utManagerThread::deleteGuiTarget()
 
 void utManagerThread::threadRelease()
 {
-    printMessage(0,"Deleting target from the iCubGui..\n");
+    yDebug("Deleting target from the iCubGui..\n");
         deleteGuiTarget();
 
-    printMessage(0,"Closing ports..\n");
+    yDebug("Closing ports..\n");
         closePort(motionCUTBlobs);
         printMessage(1,"    motionCUTBlobs successfully closed!\n");
 }
