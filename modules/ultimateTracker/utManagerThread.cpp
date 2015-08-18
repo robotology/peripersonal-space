@@ -1,7 +1,7 @@
 #include "utManagerThread.h"
 
-utManagerThread::utManagerThread(int _rate, const string &_name, const string &_robot, int _v, kalmanThread *_kT, bool _useNearBlobber) :
-                       RateThread(_rate), name(_name), robot(_robot), verbosity(_v), useNearBlobber(_useNearBlobber)
+utManagerThread::utManagerThread(int _rate, const string &_name, const string &_robot, int _v, kalmanThread *_kT, bool _useDispBlobber) :
+                       RateThread(_rate), name(_name), robot(_robot), verbosity(_v), useDispBlobber(_useDispBlobber)
 {
     kalThrd   = _kT;
 
@@ -14,8 +14,8 @@ utManagerThread::utManagerThread(int _rate, const string &_name, const string &_
     templatePFTrackerTarget = new BufferedPort<Bottle>;
     templatePFTrackerPos.resize(2,0.0);
 
-    nearBlobberTarget = new BufferedPort<Bottle>;
-    nearBlobberPos.resize(3,0.0);
+    dispBlobberTarget = new BufferedPort<Bottle>;
+    dispBlobberPos.resize(3,0.0);
 
     SFMPos.resize(3,0.0);
     kalOut.resize(3,0.0);
@@ -25,7 +25,7 @@ bool utManagerThread::threadInit()
 {
     motionCUTBlobs -> open(("/"+name+"/mCUT:i").c_str());
     templatePFTrackerTarget -> open(("/"+name+"/pfTracker:i").c_str());
-    nearBlobberTarget -> open(("/"+name+"/nearBlobber:i").c_str());
+    dispBlobberTarget -> open(("/"+name+"/dispBlobber:i").c_str());
     SFMrpcPort.open(("/"+name+"/SFM:o").c_str());
     outPortGui.open(("/"+name+"/gui:o").c_str());
     outPortEvents.open(("/"+name+"/events:o").c_str());
@@ -35,7 +35,7 @@ bool utManagerThread::threadInit()
     Network::connect(("/"+name+"/SFM:o").c_str(),"/SFM/rpc");
     // Network::connect(("/"+name+"/gui:o").c_str(),"/iCubGui/objects");
     Network::connect(("/"+name+"/events:o").c_str(),"/visuoTactileWrapper/optFlow:i");    
-    Network::connect("/nearBlobber/points3d:o",("/"+name+"/nearBlobber:i").c_str());
+    Network::connect("/dispBlobber/points3d:o",("/"+name+"/dispBlobber:i").c_str());
 
     return true;
 }
@@ -44,9 +44,9 @@ void utManagerThread::run()
 {
     int kalState=-1;
 
-    if (useNearBlobber==true)
+    if (useDispBlobber==true)
     {
-        kalState=run_with_nearBlobber();
+        kalState=run_with_dispBlobber();
     }
     else
     {
@@ -126,7 +126,7 @@ int utManagerThread::run_with_templateTracker_SFM()
     return kalState;
 }
 
-int utManagerThread::run_with_nearBlobber()
+int utManagerThread::run_with_dispBlobber()
 {
     int kalState = -1;
 
@@ -150,21 +150,21 @@ int utManagerThread::run_with_nearBlobber()
             }
             break;
         case 2:
-            // state #02: read data from the nearBlobber and retrieve the 3D point of the center of the nearest blob
+            // state #02: read data from the dispBlobber and retrieve the 3D point of the center of the nearest blob
             // with that, initialize the kalman filter, and then step up.
-            if (getPointFromNearBlobber())
+            if (getPointFromDispBlobber())
             {
                 yDebug("Initializing Kalman filter...\n");
                 kalThrd -> setKalmanState(KALMAN_INIT);
-                kalThrd -> kalmanInit(nearBlobberPos);
+                kalThrd -> kalmanInit(dispBlobberPos);
                 stateFlag++;
             }
             break;
         case 3:
             printMessage(2,"Reading from tracker and SFM...\n");
-            if (getPointFromNearBlobber())
+            if (getPointFromDispBlobber())
             {
-                kalThrd -> setKalmanInput(nearBlobberPos);
+                kalThrd -> setKalmanInput(dispBlobberPos);
             }
             
             kalThrd -> getKalmanState(kalState);
@@ -356,13 +356,13 @@ bool utManagerThread::getPointFromStereo()
     return false;
 }
 
-bool utManagerThread::getPointFromNearBlobber()
+bool utManagerThread::getPointFromDispBlobber()
 {
-    if (nearBlobberBottle = nearBlobberTarget->read(false))
+    if (dispBlobberBottle = dispBlobberTarget->read(false))
     {
-        if (nearBlobberBottle!=NULL)
+        if (dispBlobberBottle!=NULL)
         {
-            Bottle *nearestBlob = nearBlobberBottle->get(0).asList();
+            Bottle *nearestBlob = dispBlobberBottle->get(0).asList();
             Vector NBtmp(3,0.0);
             NBtmp(0) = nearestBlob->get(0).asDouble();
             NBtmp(1) = nearestBlob->get(1).asDouble();
@@ -375,7 +375,7 @@ bool utManagerThread::getPointFromNearBlobber()
             else
             {
                 timeNow = yarp::os::Time::now();
-                nearBlobberPos = NBtmp;
+                dispBlobberPos = NBtmp;
                 return true;
             }
         }
