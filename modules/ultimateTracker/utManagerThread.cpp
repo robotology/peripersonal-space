@@ -362,7 +362,7 @@ bool utManagerThread::getPointFromNearBlobber()
     {
         if (nearBlobberBottle!=NULL)
         {
-            Bottle nearestBlob = nearBlobberBottle->get(0).asList();
+            Bottle *nearestBlob = nearBlobberBottle->get(0).asList();
             Vector NBtmp(3,0.0);
             NBtmp(0) = nearestBlob->get(0).asDouble();
             NBtmp(1) = nearestBlob->get(1).asDouble();
