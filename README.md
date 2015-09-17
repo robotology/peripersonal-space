@@ -11,15 +11,24 @@ We consider a scenario where external objects are approaching individual skin pa
 
 ## Video
 
-A video of the capabilities of the software is available here: 
+[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/hVQginjCTC0/0.jpg)](http://www.youtube.com/watch?v=hVQginjCTC0)
 
 ## Repository Structure
 
 ### PeriPersonal Space Library
 
-The library is located under the `lib` directory. 
+The library is located under the `lib` directory. It wraps some useful methods and utilities used throughout the code. Most notably:
+ * A Parzen Window Estimator class, both in 1D and 2D.
+ * An inverse kinematics solver for the 12DoF or 14DoF self-touch task
+ * A revised, improved `iKin` library with non standard kinematics in order to allow for reading a DH chain from the end-effector up to the base of the kinematic chain.
 
 ### Modules
+
+The modules are located under the `modules` directory. Some of them include:
+ * `doubleTouch`: this module implements the double touch paradigm. A video describing this can be found here  (https://youtu.be/hVQginjCTC0)
+ * `ultimateTracker`:
+ * `visuoTactileRF`:
+ * `visuoTactileWrapper`:
 
 ## Authors
 
