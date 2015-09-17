@@ -25,10 +25,10 @@ The library is located under the `lib` directory. It wraps some useful methods a
 ### Modules
 
 The modules are located under the `modules` directory. Some of them include:
- * `doubleTouch`: this module implements the double touch paradigm. A video describing this can be found here  (https://youtu.be/hVQginjCTC0)
- * `ultimateTracker`:
- * `visuoTactileRF`:
- * `visuoTactileWrapper`:
+ * `doubleTouch`: this module implements the double touch paradigm. A video describing this can be found here  (https://youtu.be/pfse424t5mQ)
+ * `ultimateTracker`: A 3D tracker able to track objects with stereoVision and disparity map.
+ * `visuoTactileRF`: The core module which manages the peripersonal space and does the actual learning of visuo-tactile representation
+ * `visuoTactileWrapper`: A corollary module which "wraps" a variety of input signals used for the peripersonal space learning (e.g. double touch signal, optical flow, 3D optical flow from the `ultimateTracker`, ...) and sends them to the `visuoTactileRF` module
 
 ## Authors
 
