@@ -32,6 +32,6 @@ The modules are located under the `modules` directory. Some of them include:
 
 ## Authors
 
- * Alessandro Roncone [@alecive](https://github.com/alecive)
- * Matej Hoffman [@matejhof](https://github.com/matejhof)
- * Ugo Pattacini [@pattacini](https://github.com/pattacini)
+ * [Alessandro Roncone @alecive](https://github.com/alecive)
+ * [Matej Hoffman @matejhof](https://github.com/matejhof)
+ * [Ugo Pattacini @pattacini](https://github.com/pattacini)
