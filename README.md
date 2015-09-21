@@ -11,7 +11,7 @@ We consider a scenario where external objects are approaching individual skin pa
 
 ## Video
 
-[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/hVQginjCTC0/0.jpg)](http://www.youtube.com/watch?v=hVQginjCTC0)
+[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/3IaXxNwC_7E/0.jpg)](http://www.youtube.com/watch?v=3IaXxNwC_7E)
 
 ## Repository Structure
 
