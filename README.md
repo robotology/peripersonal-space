@@ -11,7 +11,7 @@ We consider a scenario where external objects are approaching individual skin pa
 
 ## Video
 
-[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/3IaXxNwC_7E/0.jpg)](http://www.youtube.com/watch?v=3IaXxNwC_7E)
+[![peripersonal space video](http://img.youtube.com/vi/3IaXxNwC_7E/0.jpg)](http://www.youtube.com/watch?v=3IaXxNwC_7E)
 
 ## Repository Structure
 
@@ -32,6 +32,6 @@ The modules are located under the `modules` directory. Some of them include:
 
 ## Authors
 
- * [Alessandro Roncone @alecive](https://github.com/alecive)
- * [Matej Hoffman @matejhof](https://github.com/matejhof)
- * [Ugo Pattacini @pattacini](https://github.com/pattacini)
+ * [Alessandro Roncone (@alecive)](https://github.com/alecive)
+ * [Matej Hoffman (@matejhof)](https://github.com/matejhof)
+ * [Ugo Pattacini (@pattacini)](https://github.com/pattacini)
