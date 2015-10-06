@@ -11,6 +11,8 @@ We consider a scenario where external objects are approaching individual skin pa
 
 ## Video
 
+For a video on the peripersonal space, click on the image below (you will be redirected to a youtube video):
+
 [![peripersonal space video](http://img.youtube.com/vi/3IaXxNwC_7E/0.jpg)](http://www.youtube.com/watch?v=3IaXxNwC_7E)
 
 ## Repository Structure
