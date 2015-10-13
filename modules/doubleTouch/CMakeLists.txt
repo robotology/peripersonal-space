@@ -15,7 +15,7 @@ include_directories(${periPersonalSpace_INCLUDE_DIRS})
 
 add_executable(doubleTouch ${source} ${header} )
 
-target_link_libraries(doubleTouch periPersonalSpace ${YARP_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(doubleTouch periPersonalSpace ${YARP_LIBRARIES})
 
 install(TARGETS doubleTouch DESTINATION bin)
 
