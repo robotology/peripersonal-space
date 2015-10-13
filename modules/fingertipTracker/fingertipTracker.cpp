@@ -72,7 +72,6 @@ Linux (Ubuntu 12.04, Debian Squeeze, Debian Wheezy).
 
 #include "fgtThread.h"
 
-YARP_DECLARE_DEVICES(icubmod)
 
 using namespace yarp;
 using namespace yarp::os;
@@ -247,8 +246,7 @@ int main(int argc, char * argv[])
 {
     Network yarp;
 
-    YARP_REGISTER_DEVICES(icubmod)
-
+    
     ResourceFinder moduleRF;
     moduleRF.setVerbose(false);
     moduleRF.setDefaultContext("periPersonalSpace");

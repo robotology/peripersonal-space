@@ -487,8 +487,7 @@ int main(int argc, char * argv[])
 {
     Network yarp;
 
-    YARP_REGISTER_DEVICES(icubmod)
-
+    
     ResourceFinder rf;
     rf.setVerbose(false);
     rf.setDefaultContext("periPersonalSpace");

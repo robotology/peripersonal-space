@@ -56,7 +56,6 @@
 #include <iCub/skinDynLib/skinContact.h>
 #include <iCub/skinDynLib/skinContactList.h>
 
-YARP_DECLARE_DEVICES(icubmod)
 
 using namespace yarp;
 using namespace yarp::os;

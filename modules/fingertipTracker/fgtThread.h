@@ -45,7 +45,6 @@
 #include <highgui.h>
 #include <iCub/periPersonalSpace/utils.h>
 
-YARP_DECLARE_DEVICES(icubmod)
 
 using namespace yarp;
 using namespace yarp::sig;

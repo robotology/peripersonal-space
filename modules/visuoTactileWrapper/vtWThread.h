@@ -54,7 +54,6 @@
 #include <iCub/periPersonalSpace/utils.h>
 #include <iCub/ctrl/adaptWinPolyEstimator.h>
 
-YARP_DECLARE_DEVICES(icubmod)
 
 using namespace yarp;
 using namespace yarp::os;

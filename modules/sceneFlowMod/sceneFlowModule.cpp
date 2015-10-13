@@ -87,7 +87,6 @@ Linux (Ubuntu 9.04, Debian Squeeze) and Windows 7.
 #include <iCub/ctrl/math.h>
 #include "sceneFlowThreadMod.h"
 
-YARP_DECLARE_DEVICES(icubmod)
 
 using namespace std;
 using namespace yarp::os;
@@ -183,8 +182,7 @@ int main(int argc, char *argv[])
     if (!yarp.checkNetwork())
         return -1;
 
-    YARP_REGISTER_DEVICES(icubmod)
-
+    
     ResourceFinder rf;
     rf.setVerbose(true);
     rf.setDefaultContext("sceneFlowModule/conf");
