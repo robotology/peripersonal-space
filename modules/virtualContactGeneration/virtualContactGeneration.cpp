@@ -57,7 +57,7 @@ YARP, ICUB libraries
 
 
 \section portsc_sec Ports Created
-- <i> /<name>/contacts:i </i> it sends out the virtual skinContacts created.
+- <i> /<name>/virtualContacts:o </i> it sends out the virtual skinContacts created.
 
 \section in_files_sec Input Data Files
 None.
