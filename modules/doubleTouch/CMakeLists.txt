@@ -13,9 +13,9 @@ source_group("Header Files" FILES ${header})
 include_directories(${YARP_INCLUDE_DIRS})
 include_directories(${periPersonalSpace_INCLUDE_DIRS})
 
-add_executable(doubleTouch ${source} ${header} )
+add_executable(${PROJECT_NAME} ${source} ${header} )
 
-target_link_libraries(doubleTouch periPersonalSpace ${YARP_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} periPersonalSpace ${YARP_LIBRARIES} ${IPOPT_LIBRARIES})
 
-install(TARGETS doubleTouch DESTINATION bin)
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
