@@ -332,7 +332,7 @@ public:
 
         //*************** eyes' Resource finder ****************
             ResourceFinder gazeRF;
-            // gazeRF.setQuiet();
+            gazeRF.setVerbose(bool(verbosity));
             gazeRF.setDefaultContext("iKinGazeCtrl");
             robot=="icub"?gazeRF.setDefaultConfigFile("config.ini"):gazeRF.setDefaultConfigFile("configSim.ini");
             gazeRF.configure(0,NULL);
@@ -340,14 +340,20 @@ public:
 
             ResourceFinder eyeAlignRF;
 
-            if (gazeRF.check("camerasFile"))
+            Bottle &camerasGroup = gazeRF.findGroup("cameras");
+
+            if(!camerasGroup.isNull())
             {
-                eyeAlignRF.setVerbose(false);
-                gazeRF.check("camerasContext")?
-                eyeAlignRF.setDefaultContext(gazeRF.find("camerasContext").asString().c_str()):
+                eyeAlignRF.setVerbose(bool(verbosity));
+                camerasGroup.check("context")?
+                eyeAlignRF.setDefaultContext(camerasGroup.find("context").asString().c_str()):
                 eyeAlignRF.setDefaultContext(gazeRF.getContext().c_str());
-                eyeAlignRF.setDefaultConfigFile(gazeRF.find("camerasFile").asString().c_str());            
-                eyeAlignRF.configure(0,NULL);
+                eyeAlignRF.setDefaultConfigFile(camerasGroup.find("file").asString().c_str()); 
+                eyeAlignRF.configure(0,NULL); 
+            }
+            else
+            {
+                yWarning("Did not find camera calibration group into iKinGazeCtrl ResourceFinder!");        
             }
 
         //******************************************************
