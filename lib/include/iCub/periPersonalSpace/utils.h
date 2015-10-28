@@ -58,37 +58,15 @@
 #include "parzenWindowEstimator.h"
 
 /**
- * Converts a matrix to a yarp::sig::Vector with 16 elements
-**/
-yarp::sig::Vector toVector(yarp::sig::Matrix m);
-
-
-/**
  * Closes properly a given port
 **/
 void closePort(yarp::os::Contactable *_port);
 
 /**
- * Retrieves a matrix from a bottle:
- * @param b  is the bottle
- * @param in is the index from which start acquiring values
- * @param r  is the number of rows of the matrix
- * @param c  is the number of cols of the matrix
-**/
-yarp::sig::Matrix matrixFromBottle(const yarp::os::Bottle b, int in, const int r, const int c);
-
-/**
  * Puts a matrix into a bottle, by cycling through its elements
- * and adding them as double
+ * and adding them as integers
 **/
-void      matrixIntoBottle(const yarp::sig::Matrix m, yarp::os::Bottle &b);
 void matrixOfIntIntoBottle(const yarp::sig::Matrix m, yarp::os::Bottle &b);
-
-/**
- * Puts a Vector into a bottle, by cycling through its elements
- * and adding them as double
-**/
-void vectorIntoBottle(const yarp::sig::Vector v, yarp::os::Bottle &b);
 
 /**
 * Converts an int to a string

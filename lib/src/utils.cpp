@@ -10,18 +10,6 @@ using namespace iCub::skinDynLib;
 
 using namespace std;
 
-yarp::sig::Vector toVector(yarp::sig::Matrix m)
-{
-    Vector res(m.rows()*m.cols(),0.0);
-    
-    for (size_t r = 0; r < m.rows(); r++)
-    {
-        res.setSubvector(r*m.cols(),m.getRow(r));
-    }
-
-    return res;
-}
-
 void closePort(Contactable *_port)
 {
     if (_port)
@@ -31,41 +19,6 @@ void closePort(Contactable *_port)
 
         delete _port;
         _port = 0;
-    }
-}
-
-yarp::sig::Matrix matrixFromBottle(const Bottle b, int in, const int r, const int c)
-{
-    yarp::sig::Matrix m(r,c);
-    m.zero();
-    
-    for (size_t i = 0; i<r; i++)
-    {
-        for (size_t j = 0; j<c; j++)
-        {
-            m(i,j) =  b.get(in).asDouble();
-            in++;
-        }
-    }
-    
-    return m;
-}
-
-void vectorIntoBottle(const yarp::sig::Vector v, Bottle &b)
-{
-    for (unsigned int i = 0; i < v.size(); i++)
-    {
-        b.addDouble(v[i]);
-    }
-}
-
-void matrixIntoBottle(const yarp::sig::Matrix m, Bottle &b)
-{
-    Vector v = toVector(m);
-    
-    for (unsigned int i = 0; i < v.size(); i++)
-    {
-        b.addDouble(v[i]);
     }
 }
 
