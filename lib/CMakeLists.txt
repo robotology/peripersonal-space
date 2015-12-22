@@ -26,7 +26,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 source_group("Source Files" FILES ${folder_source})
 source_group("Header Files" FILES ${folder_header})
 
-add_definitions(${IPOPT_DEFINITIONS})
+add_definitions(${IPOPT_DEFINITIONS} -D_USE_MATH_DEFINES)
 add_library(${PROJECT_NAME} ${folder_source} ${folder_header})
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " ${IPOPT_LINK_FLAGS}")
 target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES} iKin skinDynLib ${IPOPT_LIBRARIES})

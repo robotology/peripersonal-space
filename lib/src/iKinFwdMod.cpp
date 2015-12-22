@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <sstream>
+#include <algorithm>
 
 #include <gsl/gsl_math.h>
 
