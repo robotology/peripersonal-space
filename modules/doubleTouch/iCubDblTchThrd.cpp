@@ -189,6 +189,7 @@ void doubleTouchThread::run()
                 {
                     Time::delay(2.0);
                 }
+
                 if (curTaskType == "LHtoR" || curTaskType == "RHtoL")
                 {
                     goToTaxelMaster();
@@ -769,7 +770,6 @@ Matrix doubleTouchThread::findH0(skinContact &sc)
     x = x / norm(x);
     y = y / norm(y);
     z = z / norm(z);
-
     
     H0 = eye(4);
     H0.setSubcol(x,0,0);

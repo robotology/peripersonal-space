@@ -95,6 +95,7 @@ Linux (Ubuntu 12.04, Debian Squeeze).
 
 #include <yarp/math/Math.h>
 
+ 
 #include <iostream>
 #include <string.h> 
 #include <ctime>
@@ -487,8 +488,7 @@ int main(int argc, char * argv[])
 {
     Network yarp;
 
-    YARP_REGISTER_DEVICES(icubmod)
-
+    
     ResourceFinder rf;
     rf.setVerbose(false);
     rf.setDefaultContext("periPersonalSpace");
