@@ -110,7 +110,7 @@ void fgtThread::run()
                             output.addInt(fgt);
                             if (fgt)
                             {
-                                vectorIntoBottle(fingertip,output);
+                                iCub::skinDynLib::vectorIntoBottle(fingertip,output);
                             }
 
                             outPort.write();
