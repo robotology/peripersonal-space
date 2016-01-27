@@ -34,8 +34,6 @@
 #define PPS_AVOIDANCE_PERSISTENCE   0.3     // [s]
 #define PPS_AVOIDANCE_TIMEOUT       1.0     // [s]
 
-YARP_DECLARE_DEVICES(icubmod)
-
 using namespace std;
 using namespace yarp::os;
 using namespace yarp::dev;
@@ -445,7 +443,6 @@ public:
 int main(int argc, char * argv[])
 {
     Network yarp;
-    YARP_REGISTER_DEVICES(icubmod)
 
     ResourceFinder moduleRF;
     moduleRF.setVerbose(false);

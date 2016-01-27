@@ -19,9 +19,9 @@ doubleTouchThread::doubleTouchThread(int _rate, const string &_name, const strin
     outPort  = new BufferedPort<Bottle>;
 
     armPossHome.resize(7,0.0);
-    armPossHome[0] = -30.0*CTRL_DEG2RAD;
-    armPossHome[1] =  30.0*CTRL_DEG2RAD;
-    armPossHome[3] =  45.0*CTRL_DEG2RAD;
+    armPossHome[0]=-30.0*iCub::ctrl::CTRL_DEG2RAD;
+    armPossHome[1]=30.0*iCub::ctrl::CTRL_DEG2RAD;
+    armPossHome[3]=45.0*iCub::ctrl::CTRL_DEG2RAD;
 
     armL = new iCubArm("left");
     armR = new iCubArm("right");
@@ -179,7 +179,7 @@ void doubleTouchThread::run()
             case 2:
                 solveIK();
                 yInfo("[doubleTouch] Going to taxel... Desired EE: %s\n",(sol->ee).toString(3,3).c_str());
-                printMessage(1,"Desired joint configuration:  %s\n",(sol->joints*CTRL_RAD2DEG).toString(3,3).c_str());
+                printMessage(1,"Desired joint configuration:  %s\n",(sol->joints*iCub::ctrl::CTRL_RAD2DEG).toString(3,3).c_str());
                 step++;
                 recFlag = 1;
                 break;
@@ -189,22 +189,30 @@ void doubleTouchThread::run()
                 {
                     Time::delay(2.0);
                 }
-                if (record == 0)
+                if (curTaskType == "LHtoR" || curTaskType == "RHtoL")
                 {
-                    goToTaxel();
-                    step += 3;
+                    goToTaxelMaster();
                 }
                 else
                 {
-                    goToTaxelMaster();
-                    step++;
+                    goToTaxelSlave();                    
                 }
+                
+                step++;
                 break;
             case 4:
+                Time::delay(2.0);
                 step++;
                 break;
             case 5:
-                goToTaxelSlave();
+                if (curTaskType == "LHtoR" || curTaskType == "RHtoL")
+                {
+                    goToTaxelSlave();
+                }
+                else
+                {
+                    goToTaxelMaster();                    
+                }
                 step++;
                 break;
             case 6:
@@ -253,14 +261,15 @@ void doubleTouchThread::run()
                     printMessage(0,"Going to rest...\n");
                     clearTask();
                     steerArmsHomeMasterSlave();
-                    printMessage(1,"Switching to position mode..\n");
-                    imodeS -> setInteractionMode(2,VOCAB_IM_STIFF);
-                    imodeS -> setInteractionMode(3,VOCAB_IM_STIFF);
-                    steerArmsHomeMasterSlave();
-
-                    printMessage(0,"WAITING FOR CONTACT...\n");
-                    step = 1;
+                    step++;
                 }
+                break;
+            case 9:
+                printMessage(1,"Switching to position mode..\n");
+                imodeS -> setInteractionMode(2,VOCAB_IM_STIFF);
+                imodeS -> setInteractionMode(3,VOCAB_IM_STIFF);
+                yInfo("[doubleTouch] WAITING FOR CONTACT...\n");
+                step = 1;
                 break;
             default:
                 yError("[doubleTouch] doubleTouchThread should never be here!!!\nStep: %d",step);
@@ -284,7 +293,7 @@ bool doubleTouchThread::selectTask()
             curTaskType = "RHtoL";
             break;
         case SKIN_RIGHT_FOREARM:
-            curTaskType = "RHtoL";
+            curTaskType = "RtoL";
             break;
     }
 
@@ -365,7 +374,7 @@ bool doubleTouchThread::selectTask()
     Vector joints;
     iencsM->getEncoders(encsM->data());
     slv->probl->index.getChainJoints(*encsM,joints);
-    Matrix HIndex=slv->probl->index.getH(joints*CTRL_DEG2RAD);
+    Matrix HIndex=slv->probl->index.getH(joints*iCub::ctrl::CTRL_DEG2RAD);
     slv->probl->limb.setHN(HIndex);
     testLimb->setHN(HIndex);
     printMessage(1,"Index type: %s \t HIndex:\n%s\n", slv->probl->index.getType().c_str(),
@@ -451,23 +460,14 @@ bool doubleTouchThread::testAchievement2(skinContactList *_sCL)
     {
         if(cntctSkinPart == it -> getSkinPart())
         {
-            /**
-            * ENCODERS SLAVE (They're 7 DOF straightforwardly acquired from shoulder to wrist)
-            */
             iencsS->getEncoders(encsS->data());
             Vector qS=encsS->subVector(0,12);
-            armS -> setAng(qS*CTRL_DEG2RAD);
+            armS->setAng(qS*iCub::ctrl::CTRL_DEG2RAD);
 
-            /**
-            * ENCODERS MASTER (They're 7 DOF straightforwardly acquired from shoulder to wrist)
-            */
             iencsM->getEncoders(encsM->data());
             Vector qM=encsM->subVector(0,12);
-            armM -> setAng(qM*CTRL_DEG2RAD);
+            armM->setAng(qM*iCub::ctrl::CTRL_DEG2RAD);
 
-            /**
-            * FINAL TAXEL REFERENCE FRAME
-            */
             Matrix cntctH0_final = findH0(*it);
 
             /**
@@ -502,17 +502,17 @@ bool doubleTouchThread::testAchievement2(skinContactList *_sCL)
 
 bool doubleTouchThread::checkMotionDone()
 {
-    if (step == 1 || step == 7 || (record == 0 && (step == 4 || step == 5)))
+    if (step == 7 || (record == 0 && (step == 4 || step == 5)))
         return true;
     
     iencsL->getEncoders(encsL->data());
     Vector qL=encsL->subVector(0,6);
-    armL -> setAng(qL*CTRL_DEG2RAD);
+    armL->setAng(qL*iCub::ctrl::CTRL_DEG2RAD);
     Vector eeL = armL -> EndEffPosition();
 
     iencsR->getEncoders(encsR->data());
     Vector qR=encsR->subVector(0,6);
-    armR -> setAng(qR*CTRL_DEG2RAD);
+    armR->setAng(qR*iCub::ctrl::CTRL_DEG2RAD);
     Vector eeR = armR -> EndEffPosition();
 
     double normL = norm(eeL - oldEEL);
@@ -533,7 +533,7 @@ bool doubleTouchThread::checkMotionDone()
 Vector doubleTouchThread::findFinalConfiguration()
 {
     Vector q=solution.subVector(nDOF-1-7,nDOF-1);
-    armM -> setAng(q*CTRL_DEG2RAD);
+    armM->setAng(q*iCub::ctrl::CTRL_DEG2RAD);
     return armM -> EndEffPosition();
 }
 
@@ -542,9 +542,9 @@ void doubleTouchThread::testAchievement()
     iencsM->getEncoders(encsM->data());
     iencsS->getEncoders(encsS->data());
 
-    testLimb->setAng((*encsS)*CTRL_DEG2RAD,(*encsM)*CTRL_DEG2RAD);
+    testLimb->setAng((*encsS)*iCub::ctrl::CTRL_DEG2RAD,(*encsM)*iCub::ctrl::CTRL_DEG2RAD);
     printMessage(0,"Final end effector :          %s\n", testLimb->EndEffPosition().toString(3,3).c_str());
-    printMessage(2,"Final Joint configuration:    %s\n",(testLimb->getAng()*CTRL_RAD2DEG).toString(3,3).c_str());
+    printMessage(2,"Final Joint configuration:    %s\n",(testLimb->getAng()*iCub::ctrl::CTRL_RAD2DEG).toString(3,3).c_str());
 }
 
 void doubleTouchThread::solveIK()
@@ -557,7 +557,7 @@ void doubleTouchThread::solveIK()
     slv->setInitialGuess(*sol);
     slv->solve(*sol);
     // sol->print();
-    solution = CTRL_RAD2DEG * sol->joints;
+    solution=iCub::ctrl::CTRL_RAD2DEG * sol->joints;
 
     testLimb->setAng(sol->joints);
 }
@@ -619,52 +619,56 @@ void doubleTouchThread::goToTaxelSlave()
 void doubleTouchThread::steerArmsHome()
 {   
     printMessage(1,"Moving arms to home, i.e. %s...\n",
-                    (CTRL_RAD2DEG*armPossHome).toString(3,3).c_str());
+                 (iCub::ctrl::CTRL_RAD2DEG*armPossHome).toString(3,3).c_str());
 
     for (int i = 0; i < 7; i++)
     {
-        iposL -> positionMove(i,CTRL_RAD2DEG*armPossHome[i]);
+        iposL->positionMove(i,iCub::ctrl::CTRL_RAD2DEG*armPossHome[i]);
     }
     for (int i = 7; i < 16; i++)
     {
-        iposL -> positionMove(i,0.0);
+        if (i==7)   iposL -> positionMove(i,60.0);
+        else        iposL -> positionMove(i,0.0);
     }
 
     Time::delay(2.0);
     
     for (int i = 0; i < 7; i++)
     {
-        iposR -> positionMove(i,CTRL_RAD2DEG*armPossHome[i]);
+        iposR->positionMove(i,iCub::ctrl::CTRL_RAD2DEG*armPossHome[i]);
     }
     for (int i = 7; i < 16; i++)
     {
-        iposR -> positionMove(i,0.0);
+        if (i==7)   iposR -> positionMove(i,60.0);
+        else        iposR -> positionMove(i,0.0);
     }
 }
 
 void doubleTouchThread::steerArmsHomeMasterSlave()
 {
     printMessage(1,"Moving arms to home, i.e. %s...\n",
-                    (CTRL_RAD2DEG*armPossHome).toString(3,3).c_str());
+                 (iCub::ctrl::CTRL_RAD2DEG*armPossHome).toString(3,3).c_str());
 
     for (int i = 0; i < 7; i++)
     {
-        iposM -> positionMove(i,CTRL_RAD2DEG*armPossHome[i]);
+        iposM->positionMove(i,iCub::ctrl::CTRL_RAD2DEG*armPossHome[i]);
     }
     for (int i = 7; i < 16; i++)
     {
-        iposM -> positionMove(i,0.0);
+        if (i==7)   iposM -> positionMove(i,60.0);
+        else        iposM -> positionMove(i,0.0);
     }
 
     Time::delay(2.0);
     
     for (int i = 0; i < 7; i++)
     {
-        iposS -> positionMove(i,CTRL_RAD2DEG*armPossHome[i]);
+        iposS->positionMove(i,iCub::ctrl::CTRL_RAD2DEG*armPossHome[i]);
     }
     for (int i = 7; i < 16; i++)
     {
-        iposS -> positionMove(i,0.0);
+        if (i==7)   iposS -> positionMove(i,60.0);
+        else        iposS -> positionMove(i,0.0);
     }
 }
 
@@ -743,11 +747,11 @@ Matrix doubleTouchThread::findH0(skinContact &sc)
     Matrix H0(4,4);
     Vector x(3,0.0), z(3,0.0), y(3,0.0);
 
-    printMessage(5,"[findH0] x %s y %s z %s\n",x.toString(3,3).c_str(),
-                        y.toString(3,3).c_str(),z.toString(3,3).c_str());
-
     x = sc.getNormalDir();
-    x = x / norm(x);
+    if (x[0] == 0.0)
+    {
+        x[0] = 0.00000001;    // Avoid the division by 0
+    }
 
     if (curTaskType!="LHtoR" && curTaskType!="RHtoL")
     {
@@ -756,21 +760,18 @@ Matrix doubleTouchThread::findH0(skinContact &sc)
     }
     else
     {
-        // In this case x[0] == 1!
-        // We have to find a different rule:
+        // When x[0]==+-1, We can exploit an easier rule:
         z[1] = x[2];
         y = -1*(cross(x,z));
     }
 
-    printMessage(5,"[findH0] x %s y %s z %s\n",x.toString(3,3).c_str(),
-                        y.toString(3,3).c_str(),z.toString(3,3).c_str());
-
     // Let's make them unitary vectors:
+    x = x / norm(x);
     y = y / norm(y);
     z = z / norm(z);
 
-    H0.zero();
-    H0(3,3) = 1;
+    
+    H0 = eye(4);
     H0.setSubcol(x,0,0);
     H0.setSubcol(y,0,1);
     H0.setSubcol(z,0,2);

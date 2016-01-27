@@ -50,7 +50,6 @@
 #include <iCub/periPersonalSpace/iCubDblTchSlv.h>
 #include <iCub/periPersonalSpace/utils.h>
 
-YARP_DECLARE_DEVICES(icubmod)
 
 using namespace yarp;
 using namespace yarp::os;
@@ -58,6 +57,7 @@ using namespace yarp::sig;
 using namespace yarp::math;
 using namespace yarp::dev;
 using namespace iCub::skinDynLib;
+using namespace iCub::iKin;
 
 using namespace std;
 
