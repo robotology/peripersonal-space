@@ -223,6 +223,39 @@ bool vtRFThread::threadInit()
         encsH = new yarp::sig::Vector(jntsH,0.0);
 
     /**************************/
+        // try
+        // {
+        //     Taxel *base = new Taxel();
+        //     Taxel *derived = new TaxelPWE1D();
+        //     TaxelPWE1D *casted;
+
+        //     casted = dynamic_cast<TaxelPWE1D*>(derived);
+        //     if (casted==0) cout << "Null pointer on first type-cast.\n";
+
+        //     casted = dynamic_cast<TaxelPWE1D*>(base);
+        //     if (casted==0) cout << "Null pointer on second type-cast.\n";
+        // }
+        // catch (exception& e)
+        // {
+        //     cout << "Exception: " << e.what() << endl;
+        // }
+    /**************************/
+        // Vector taxelPos(3,0.5);
+        // Vector taxelNrm(3,0.2);
+
+        // std::vector<Taxel*> taxels;
+        // taxels.push_back(new TaxelPWE1D(taxelPos,taxelNrm,2));
+
+        // printf("*********\n\n*********\n");
+        // taxels[0] -> print(10);
+        // printf("*********\n\n*********\n");
+        // TaxelPWE1D *t  = dynamic_cast<TaxelPWE1D*>(taxels[0]);
+        // t -> print();
+        // taxels[0] -> setID(199);
+        // printf("*********\n\n*********\n");
+        // t -> print(10);
+        // printf("*********\n\n*********\n");
+    /**************************/
         yDebug("Setting up iCubSkin...");
         iCubSkinSize = filenames.size();
 
@@ -237,6 +270,20 @@ bool vtRFThread::threadInit()
             }
         }
         load();
+            // printf("*********\n\n*********\n");
+            // iCubSkin[0].print();
+            // printf("*********\n\n*********\n");
+
+            // TaxelPWE1D *tdc = dynamic_cast<TaxelPWE1D*>(iCubSkin[0].taxels[0]);
+            // cout << tdc << endl;
+            // if (tdc)
+            // {
+            //     cout << tdc->pwe << endl;
+            //     // cout << *tdc << endl;
+            //     tdc -> print(5);
+            //     // TaxelPWE1D *tpwe = dynamic_cast<TaxelPWE1D*>(iCubSkin[0].taxels[0]);
+            //     printf("\n\n\n\n\n");
+            // }
 
         yInfo("iCubSkin correctly instantiated. Size: %i",iCubSkin.size());
         if (verbosity>= 2)
@@ -267,8 +314,8 @@ void vtRFThread::run()
     {
         for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
-            iCubSkin[i].taxels[j]->WRFPos=locateTaxel(iCubSkin[i].taxels[j]->Pos,iCubSkin[i].name);
-            printMessage(7,"iCubSkin[%i].taxels[%i].WRFPos %s\n",i,j,iCubSkin[i].taxels[j]->WRFPos.toString().c_str());
+            iCubSkin[i].taxels[j]->setWRFPosition(locateTaxel(iCubSkin[i].taxels[j]->getPosition(),iCubSkin[i].name));
+            printMessage(7,"iCubSkin[%i].taxels[%i].WRFPos %s\n",i,j,iCubSkin[i].taxels[j]->getWRFPosition().toString().c_str());
         }
     }
 
@@ -742,7 +789,7 @@ string vtRFThread::save()
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
             {
                 data.clear();
-                data=iCubSkin[i].taxels[j]->TaxelPWEIntoBottle();
+                data=dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->TaxelPWEIntoBottle();
                 myfile << data.toString() << "\n";
             }
         }
@@ -1014,7 +1061,10 @@ bool vtRFThread::projectIntoImagePlane(vector <skinPartPWE> &sP, const string &e
         {
             if (eye=="rightEye" || eye=="leftEye")
             {
-                projectPoint(sP[i].taxels[j]->WRFPos,sP[i].taxels[j]->px,eye);
+                yarp::sig::Vector WRFpos = sP[i].taxels[j]->getWRFPosition();
+                yarp::sig::Vector px     = sP[i].taxels[j]->getPx();
+                projectPoint(WRFpos,px,eye);
+                sP[i].taxels[j]->setPx(px);
             }
             else
             {
