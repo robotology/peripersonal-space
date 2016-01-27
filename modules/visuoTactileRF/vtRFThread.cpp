@@ -12,8 +12,8 @@
 
 // enum SkinPart { 
 //     SKIN_PART_UNKNOWN=0, 
-//     SKIN_LEFT_HAND, SKIN_LEFT_FOREARM, SKIN_LEFT_UPPER_ARM, 
-//     SKIN_RIGHT_HAND, SKIN_RIGHT_FOREARM, SKIN_RIGHT_UPPER_ARM, 
+//     SkinPart_s[SKIN_LEFT_HAND], SkinPart_s[SKIN_LEFT_FOREARM], SKIN_LEFT_UPPER_ARM, 
+//     SkinPart_s[SKIN_RIGHT_HAND], SkinPart_s[SKIN_RIGHT_FOREARM], SKIN_RIGHT_UPPER_ARM, 
 //     SKIN_FRONT_TORSO, 
 //     SKIN_PART_ALL, SKIN_PART_SIZE
 // };
@@ -265,10 +265,10 @@ void vtRFThread::run()
     // project taxels in World Reference Frame
     for (size_t i = 0; i < iCubSkin.size(); i++)
     {
-        for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
+        for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
-            iCubSkin[i].txls[j]->WRFPos=locateTaxel(iCubSkin[i].txls[j]->Pos,iCubSkin[i].name);
-            printMessage(7,"iCubSkin[%i].txls[%i].WRFPos %s\n",i,j,iCubSkin[i].txls[j]->WRFPos.toString().c_str());
+            iCubSkin[i].taxels[j]->WRFPos=locateTaxel(iCubSkin[i].taxels[j]->Pos,iCubSkin[i].name);
+            printMessage(7,"iCubSkin[%i].taxels[%i].WRFPos %s\n",i,j,iCubSkin[i].taxels[j]->WRFPos.toString().c_str());
         }
     }
 
@@ -339,7 +339,7 @@ void vtRFThread::run()
                 else
                 {
                     yWarning("No Learning has been put in place.");
-                    size_t txlsize = iCubSkin[0].txls.size();
+                    size_t txlsize = iCubSkin[0].taxels.size();
                     for (size_t j = 0; j < txlsize; j++)
                     {
                         dumpedVector.push_back(0.0);
@@ -349,7 +349,7 @@ void vtRFThread::run()
             }
             else
             {
-                size_t txlsize = iCubSkin[0].txls.size();
+                size_t txlsize = iCubSkin[0].taxels.size();
                 for (size_t j = 0; j < txlsize; j++)
                 {
                     dumpedVector.push_back(0.0);
@@ -358,7 +358,7 @@ void vtRFThread::run()
         }
         else
         {
-            size_t txlsize = iCubSkin[0].txls.size();
+            size_t txlsize = iCubSkin[0].taxels.size();
             for (size_t j = 0; j < txlsize; j++)
             {
                 dumpedVector.push_back(0.0);
@@ -373,14 +373,14 @@ void vtRFThread::run()
         timeNow = yarp::os::Time::now();
         yInfo("No significant event in the last 2 seconds. Erasing the buffer..");
 
-        for (size_t j = 0; j < iCubSkin[0].txls.size(); j++)
+        for (size_t j = 0; j < iCubSkin[0].taxels.size(); j++)
         {
             dumpedVector.push_back(0.0);
         }
     }
     else
     {
-        for (size_t j = 0; j < iCubSkin[0].txls.size(); j++)
+        for (size_t j = 0; j < iCubSkin[0].taxels.size(); j++)
         {
             dumpedVector.push_back(0.0);
         }
@@ -431,11 +431,11 @@ void vtRFThread::manageSkinEvents()
             b.clear();
             isThereAnEvent = false;
 
-            for (size_t j = 0; j < iCubSkin[i].txls.size(); j++) // cycle through the taxels
+            for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++) // cycle through the taxels
             {
-                if (iCubSkin[i].txls[j]->Resp > 50)
+                if (iCubSkin[i].taxels[j]->Resp > 50)
                 {
-                    taxelsIDs.push_back(iCubSkin[i].txls[j]->ID);
+                    taxelsIDs.push_back(iCubSkin[i].taxels[j]->ID);
                     isThereAnEvent = true;
                 }
             }
@@ -449,13 +449,13 @@ void vtRFThread::manageSkinEvents()
 
                 for (size_t k = 0; k < taxelsIDs.size(); k++)
                 {
-                    for (size_t p = 0; p < iCubSkin[i].txls.size(); p++)
+                    for (size_t p = 0; p < iCubSkin[i].taxels.size(); p++)
                     {
-                        if (iCubSkin[i].txls[p]->ID == taxelsIDs[k])
+                        if (iCubSkin[i].taxels[p]->ID == taxelsIDs[k])
                         {
-                            w = iCubSkin[i].txls[p]->Resp;
-                            geoCenter += iCubSkin[i].txls[p]->WRFPos*w;
-                            normalDir += locateTaxel(iCubSkin[i].txls[p]->Norm,part)*w;
+                            w = iCubSkin[i].taxels[p]->Resp;
+                            geoCenter += iCubSkin[i].taxels[p]->WRFPos*w;
+                            normalDir += locateTaxel(iCubSkin[i].taxels[p]->Norm,part)*w;
                             w_sum += w;
                         }
                     }
@@ -485,29 +485,29 @@ void vtRFThread::sendContactsToSkinGui()
 
         if (incomingEvents.size()>0)
         {
-            for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
+            for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
             {
-                if(iCubSkin[i].Repr2TaxelList.empty())
+                if(iCubSkin[i].repr2TaxelList.empty())
                 {  
                     //we simply light up the taxels themselves
-                    respToSkin[iCubSkin[i].txls[j]->ID] = iCubSkin[i].txls[j]->Resp;
+                    respToSkin[iCubSkin[i].taxels[j]->ID] = iCubSkin[i].taxels[j]->Resp;
                 }
                 else
                 { 
                     //we light up all the taxels represented by the particular taxel
-                    list<unsigned int> l = iCubSkin[i].Repr2TaxelList[iCubSkin[i].txls[j]->ID];
+                    list<unsigned int> l = iCubSkin[i].repr2TaxelList[iCubSkin[i].taxels[j]->ID];
 
                     if (l.empty())
                     {
-                        yWarning("skinPart %d Taxel %d : no list of represented taxels is available, even if Repr2TaxelList is not empty",i,iCubSkin[i].txls[j]->ID);
-                        respToSkin[iCubSkin[i].txls[j]->ID] = iCubSkin[i].txls[j]->Resp;
+                        yWarning("skinPart %d Taxel %d : no list of represented taxels is available, even if repr2TaxelList is not empty",i,iCubSkin[i].taxels[j]->ID);
+                        respToSkin[iCubSkin[i].taxels[j]->ID] = iCubSkin[i].taxels[j]->Resp;
                     }
                     else
                     {
                         for(list<unsigned int>::const_iterator iter_list = l.begin(); iter_list != l.end(); iter_list++)
                         {
                             //for all the represented taxels, we assign the activation of the super-taxel
-                            respToSkin[*iter_list] =  iCubSkin[i].txls[j]->Resp;
+                            respToSkin[*iter_list] =  iCubSkin[i].taxels[j]->Resp;
                         } 
                     }
                 }
@@ -533,19 +533,19 @@ void vtRFThread::sendContactsToSkinGui()
         // compensatedTactileDataPort.write();
 
         BufferedPort<Bottle> *outPort;
-        if(iCubSkin[i].name == SKIN_LEFT_FOREARM)
+        if(iCubSkin[i].name == SkinPart_s[SKIN_LEFT_FOREARM])
         {
             outPort = &skinGuiPortForearmL; 
         }
-        else if(iCubSkin[i].name == SKIN_RIGHT_FOREARM)
+        else if(iCubSkin[i].name == SkinPart_s[SKIN_RIGHT_FOREARM])
         {
             outPort = &skinGuiPortForearmR; 
         }
-        else if(iCubSkin[i].name == SKIN_LEFT_HAND)
+        else if(iCubSkin[i].name == SkinPart_s[SKIN_LEFT_HAND])
         {
             outPort = &skinGuiPortHandL; 
         }
-        else if(iCubSkin[i].name == SKIN_RIGHT_HAND)
+        else if(iCubSkin[i].name == SkinPart_s[SKIN_RIGHT_HAND])
         {
             outPort = &skinGuiPortHandR;
         }
@@ -676,7 +676,7 @@ string vtRFThread::load()
                 }
             }
             if (verbosity>=3) printf("\n");
-            iCubSkin[i].Taxel2Repr = mapp;
+            iCubSkin[i].taxel2Repr = mapp;
 
             for (size_t j = 0; j < nTaxels; j++)
             {
@@ -684,14 +684,14 @@ string vtRFThread::load()
                 bbb = bb.get(j+7).asList();
                 printMessage(3,"Reading taxel %s\n",bbb->toString().c_str());
 
-                for (int k = 0; k < iCubSkin[i].txls.size(); k++)
+                for (int k = 0; k < iCubSkin[i].taxels.size(); k++)
                 {
-                    if (iCubSkin[i].txls[k]->ID == bbb->get(0).asInt())
+                    if (iCubSkin[i].taxels[k]->ID == bbb->get(0).asInt())
                     {
-                        if (iCubSkin[i].txls[k]->pwe->resize(ext,bNum))
+                        if (iCubSkin[i].taxels[k]->pwe->resize(ext,bNum))
                         {
-                            iCubSkin[i].txls[k]->pwe->setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],bNum[1]));
-                            iCubSkin[i].txls[k]->pwe->setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],bNum[1]));
+                            iCubSkin[i].taxels[k]->pwe->setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],bNum[1]));
+                            iCubSkin[i].taxels[k]->pwe->setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],bNum[1]));
                         }
                     }
                 }
@@ -719,30 +719,30 @@ string vtRFThread::save()
             Bottle data;
             data.clear();
 
-            Matrix           getExt = iCubSkin[i].txls[0]->pwe->getExt();
+            Matrix           getExt = iCubSkin[i].taxels[0]->pwe->getExt();
             matrixIntoBottle(getExt,data);
 
-            std::vector<int> bNum  = iCubSkin[i].txls[0]->pwe->getHistSize();
+            std::vector<int> bNum  = iCubSkin[i].taxels[0]->pwe->getHistSize();
 
             myfile << "[" << SkinPart_s[iCubSkin[i].name] << "]" << endl;
             myfile << "modality\t"  << iCubSkin[i].modality << endl;
             myfile << "size    \t"  << iCubSkin[i].size << endl;    
-            myfile << "nTaxels \t"  << iCubSkin[i].txls.size() << endl;
+            myfile << "nTaxels \t"  << iCubSkin[i].taxels.size() << endl;
             myfile << "ext     \t(" << data.toString() << ")\n";
             myfile << "binsNum \t(" << bNum[0] << "\t" << bNum[1] << ")\n";
 
             data.clear();
             Bottle &representatives = data.addList();
-            for (size_t q = 0; q < iCubSkin[i].Taxel2Repr.size(); q++)
+            for (size_t q = 0; q < iCubSkin[i].taxel2Repr.size(); q++)
             {
-                representatives.addInt(iCubSkin[i].Taxel2Repr[q]);
+                representatives.addInt(iCubSkin[i].taxel2Repr[q]);
             } 
             myfile << "Mapping\t" << data.toString() << endl;
 
-            for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
+            for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
             {
                 data.clear();
-                data=iCubSkin[i].txls[j]->TaxelPWEIntoBottle();
+                data=iCubSkin[i].taxels[j]->TaxelPWEIntoBottle();
                 myfile << data.toString() << "\n";
             }
         }
@@ -757,24 +757,24 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
     getRepresentativeTaxels(IDv, IDx, v);
 
     Matrix T_a = eye(4);                     // transform matrix relative to the arm
-    if ((iCubSkin[IDx].name == SKIN_LEFT_FOREARM) || (iCubSkin[IDx].name == SKIN_LEFT_HAND))
+    if ((iCubSkin[IDx].name == SkinPart_s[SKIN_LEFT_FOREARM]) || (iCubSkin[IDx].name == SkinPart_s[SKIN_LEFT_HAND]))
     {
         iencsL->getEncoders(encsL->data());
         yarp::sig::Vector qL=encsL->subVector(0,6);
         armL -> setAng(qL*CTRL_DEG2RAD);
-        if (iCubSkin[IDx].name == SKIN_LEFT_FOREARM) 
+        if (iCubSkin[IDx].name == SkinPart_s[SKIN_LEFT_FOREARM]) 
             T_a = armL -> getH(3+4, true);
-        else //(iCubSkin[i].name == SKIN_LEFT_HAND) 
+        else //(iCubSkin[i].name == SkinPart_s[SKIN_LEFT_HAND]) 
             T_a = armL -> getH(3+6, true);
     }
-    else if ((iCubSkin[IDx].name == SKIN_RIGHT_FOREARM) || (iCubSkin[IDx].name == SKIN_RIGHT_HAND))
+    else if ((iCubSkin[IDx].name == SkinPart_s[SKIN_RIGHT_FOREARM]) || (iCubSkin[IDx].name == SkinPart_s[SKIN_RIGHT_HAND]))
     {
         iencsR->getEncoders(encsR->data());
         yarp::sig::Vector qR=encsR->subVector(0,6);
         armR -> setAng(qR*CTRL_DEG2RAD);
-        if (iCubSkin[IDx].name == SKIN_RIGHT_FOREARM)
+        if (iCubSkin[IDx].name == SkinPart_s[SKIN_RIGHT_FOREARM])
             T_a = armR -> getH(3+4, true);
-        else //(iCubSkin[i].name == SKIN_RIGHT_HAND) 
+        else //(iCubSkin[i].name == SkinPart_s[SKIN_RIGHT_HAND]) 
             T_a = armR -> getH(3+6, true);
     }
     else
@@ -783,12 +783,12 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
         return false;
     }
 
-    for (size_t j = 0; j < iCubSkin[IDx].txls.size(); j++)
+    for (size_t j = 0; j < iCubSkin[IDx].taxels.size(); j++)
     {
         bool itHasBeenTouched = false;
         for (size_t w = 0; w < v.size(); w++)
         {
-            if (iCubSkin[IDx].txls[j]->ID == v[w])
+            if (iCubSkin[IDx].taxels[j]->ID == v[w])
             {
                 itHasBeenTouched = true;
             }
@@ -796,11 +796,11 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
 
         for (size_t k = 0; k < eventsBuffer.size(); k++)
         {
-            IncomingEvent4TaxelPWE projection = projectIntoTaxelRF(iCubSkin[IDx].txls[j]->FoR,T_a,eventsBuffer[k]);
-            printMessage(3,"Training Taxels: skinPart %d ID %i k %i NORM %g TTC %g\n",IDx,iCubSkin[IDx].txls[j]->ID,k,projection.NRM,projection.TTC);
+            IncomingEvent4TaxelPWE projection = projectIntoTaxelRF(iCubSkin[IDx].taxels[j]->FoR,T_a,eventsBuffer[k]);
+            printMessage(3,"Training Taxels: skinPart %d ID %i k %i NORM %g TTC %g\n",IDx,iCubSkin[IDx].taxels[j]->ID,k,projection.NRM,projection.TTC);
 
-            if (itHasBeenTouched == true)   iCubSkin[IDx].txls[j]->addSample(projection);
-            else                            iCubSkin[IDx].txls[j]->removeSample(projection);
+            if (itHasBeenTouched == true)   iCubSkin[IDx].taxels[j]->addSample(projection);
+            else                            iCubSkin[IDx].taxels[j]->removeSample(projection);
         }
 
         if (itHasBeenTouched == true)   dumpedVector.push_back(1.0);
@@ -817,24 +817,24 @@ bool vtRFThread::projectIncomingEvent()
         for (size_t i = 0; i < iCubSkinSize; i++)
         {
             Matrix T_a = eye(4);               // transform matrix relative to the arm
-            if ((iCubSkin[i].name == SKIN_LEFT_FOREARM) || (iCubSkin[i].name == SKIN_LEFT_HAND))
+            if ((iCubSkin[i].name == SkinPart_s[SKIN_LEFT_FOREARM]) || (iCubSkin[i].name == SkinPart_s[SKIN_LEFT_HAND]))
             {
                 iencsL->getEncoders(encsL->data());
                 yarp::sig::Vector qL=encsL->subVector(0,6);
                 armL -> setAng(qL*CTRL_DEG2RAD);
-                if (iCubSkin[i].name == SKIN_LEFT_FOREARM) 
+                if (iCubSkin[i].name == SkinPart_s[SKIN_LEFT_FOREARM]) 
                     T_a = armL -> getH(3+4, true);
-                else //(iCubSkin[i].name == SKIN_LEFT_HAND) 
+                else //(iCubSkin[i].name == SkinPart_s[SKIN_LEFT_HAND]) 
                     T_a = armL -> getH(3+6, true);
             }
-            else if ((iCubSkin[i].name == SKIN_RIGHT_FOREARM) || (iCubSkin[i].name == SKIN_RIGHT_HAND))
+            else if ((iCubSkin[i].name == SkinPart_s[SKIN_RIGHT_FOREARM]) || (iCubSkin[i].name == SkinPart_s[SKIN_RIGHT_HAND]))
             {
                 iencsR->getEncoders(encsR->data());
                 yarp::sig::Vector qR=encsR->subVector(0,6);
                 armR -> setAng(qR*CTRL_DEG2RAD);
-                if (iCubSkin[i].name == SKIN_RIGHT_FOREARM)
+                if (iCubSkin[i].name == SkinPart_s[SKIN_RIGHT_FOREARM])
                     T_a = armR -> getH(3+4, true);
-                else //(iCubSkin[i].name == SKIN_RIGHT_HAND) 
+                else //(iCubSkin[i].name == SkinPart_s[SKIN_RIGHT_HAND]) 
                     T_a = armR -> getH(3+6, true);
             }
             else
@@ -842,17 +842,17 @@ bool vtRFThread::projectIncomingEvent()
 
             // yInfo("T_A:\n%s",T_a.toString().c_str());
 
-            for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
+            for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
             {
-                iCubSkin[i].txls[j]->Evnt=projectIntoTaxelRF(iCubSkin[i].txls[j]->FoR,T_a,
+                iCubSkin[i].taxels[j]->Evnt=projectIntoTaxelRF(iCubSkin[i].taxels[j]->FoR,T_a,
                                                              incomingEvents[k]);
 
                 // There's a reason behind this choice
-                dumpedVector.push_back(iCubSkin[i].txls[j]->Evnt.Pos[0]);
-                dumpedVector.push_back(iCubSkin[i].txls[j]->Evnt.Pos[1]);
-                dumpedVector.push_back(iCubSkin[i].txls[j]->Evnt.Pos[2]);
+                dumpedVector.push_back(iCubSkin[i].taxels[j]->Evnt.Pos[0]);
+                dumpedVector.push_back(iCubSkin[i].taxels[j]->Evnt.Pos[1]);
+                dumpedVector.push_back(iCubSkin[i].taxels[j]->Evnt.Pos[2]);
 
-                printMessage(5,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,iCubSkin[i].txls[j]->Evnt.toString().c_str());
+                printMessage(5,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,iCubSkin[i].taxels[j]->Evnt.toString().c_str());
             }
         }
     }
@@ -886,9 +886,9 @@ void vtRFThread::resetParzenWindows()
 {
     for (size_t i = 0; i < iCubSkinSize; i++)
     {
-        for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
+        for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
-            iCubSkin[i].txls[j]->resetParzenWindowEstimator();
+            iCubSkin[i].taxels[j]->resetParzenWindowEstimator();
         }
     }
 }
@@ -897,10 +897,10 @@ bool vtRFThread::computeResponse()
 {
     for (size_t i = 0; i < iCubSkinSize; i++)
     {
-        for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
+        for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
-            iCubSkin[i].txls[j]->computeResponse();
-            printMessage(4,"\tID %i\tResponse %i\n",j,iCubSkin[i].txls[j]->Resp);
+            iCubSkin[i].taxels[j]->computeResponse();
+            printMessage(4,"\tID %i\tResponse %i\n",j,iCubSkin[i].taxels[j]->Resp);
         }
     }
 
@@ -957,10 +957,10 @@ void vtRFThread::drawTaxels(string _eye)
 
     for (size_t i = 0; i < iCubSkinSize; i++)
     {
-        for (size_t j = 0; j < iCubSkin[i].txls.size(); j++)
+        for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
-            drawTaxel(imgOut,iCubSkin[i].txls[j]->px,iCubSkin[i].name,iCubSkin[i].txls[j]->Resp);
-            printMessage(6,"iCubSkin[%i].txls[%i].px %s\n",i,j,iCubSkin[i].txls[j]->px.toString().c_str());
+            drawTaxel(imgOut,iCubSkin[i].taxels[j]->px,iCubSkin[i].name,iCubSkin[i].taxels[j]->Resp);
+            printMessage(6,"iCubSkin[%i].taxels[%i].px %s\n",i,j,iCubSkin[i].taxels[j]->px.toString().c_str());
         }
     }
 
@@ -985,8 +985,8 @@ void vtRFThread::drawTaxel(ImageOf<PixelRgb> &Im, const yarp::sig::Vector &px,
         {
             for (size_t y=0; y<2*r; y++)
             {
-                if (part == SKIN_LEFT_FOREARM || part == SKIN_RIGHT_FOREARM ||
-                    part == SKIN_LEFT_HAND    || part == SKIN_RIGHT_HAND)
+                if (part == SkinPart_s[SKIN_LEFT_FOREARM] || part == SkinPart_s[SKIN_RIGHT_FOREARM] ||
+                    part == SkinPart_s[SKIN_LEFT_HAND]    || part == SkinPart_s[SKIN_RIGHT_HAND])
                 {
                     if (act>0)
                     {
@@ -1011,11 +1011,11 @@ bool vtRFThread::projectIntoImagePlane(vector <skinPartPWE> &sP, const string &e
 {
     for (size_t i = 0; i < sP.size(); i++)
     {
-        for (size_t j = 0; j < sP[i].txls.size(); j++)
+        for (size_t j = 0; j < sP[i].taxels.size(); j++)
         {
             if (eye=="rightEye" || eye=="leftEye")
             {
-                projectPoint(sP[i].txls[j]->WRFPos,sP[i].txls[j]->px,eye);
+                projectPoint(sP[i].taxels[j]->WRFPos,sP[i].taxels[j]->px,eye);
             }
             else
             {
@@ -1088,13 +1088,13 @@ yarp::sig::Vector vtRFThread::locateTaxel(const yarp::sig::Vector &_pos, const i
     yarp::sig::Vector WRFpos(4,0.0);
     Matrix T = eye(4);
 
-    if (part == SKIN_LEFT_FOREARM || part == SKIN_LEFT_HAND)
+    if (part == SkinPart_s[SKIN_LEFT_FOREARM] || part == SkinPart_s[SKIN_LEFT_HAND])
     {
         iencsL->getEncoders(encsL->data());
         yarp::sig::Vector qL=encsL->subVector(0,6);
         armL -> setAng(qL*CTRL_DEG2RAD);
     }
-    else if (part == SKIN_RIGHT_FOREARM || part == SKIN_RIGHT_HAND)
+    else if (part == SkinPart_s[SKIN_RIGHT_FOREARM] || part == SkinPart_s[SKIN_RIGHT_HAND])
     {
         iencsR->getEncoders(encsR->data());
         yarp::sig::Vector qR=encsR->subVector(0,6);
@@ -1105,10 +1105,10 @@ yarp::sig::Vector vtRFThread::locateTaxel(const yarp::sig::Vector &_pos, const i
         yError("[vtRFThread] locateTaxel() failed!\n");
     }
 
-    if      (part == SKIN_LEFT_FOREARM ) { T = armL -> getH(3+4, true); } // torso + up to elbow
-    else if (part == SKIN_RIGHT_FOREARM) { T = armR -> getH(3+4, true); } // torso + up to elbow
-    else if (part == SKIN_LEFT_HAND)     { T = armL -> getH(3+6, true); } // torso + up to wrist
-    else if (part == SKIN_RIGHT_HAND)    { T = armR -> getH(3+6, true); } // torso + up to wrist
+    if      (part == SkinPart_s[SKIN_LEFT_FOREARM] ) { T = armL -> getH(3+4, true); } // torso + up to elbow
+    else if (part == SkinPart_s[SKIN_RIGHT_FOREARM]) { T = armR -> getH(3+4, true); } // torso + up to elbow
+    else if (part == SkinPart_s[SKIN_LEFT_HAND])     { T = armL -> getH(3+6, true); } // torso + up to wrist
+    else if (part == SkinPart_s[SKIN_RIGHT_HAND])    { T = armR -> getH(3+6, true); } // torso + up to wrist
     else    {  yError("[vtRFThread] locateTaxel() failed!\n"); }
 
     pos.push_back(1);
@@ -1131,12 +1131,12 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
     filename = filename.c_str() ? filename.c_str() + 1 : filePath.c_str();
 
     // Remove "_mesh.txt"
-    if      (filename == "left_forearm_mesh.txt")    { sP.name = SKIN_LEFT_FOREARM; }
-    else if (filename == "left_forearm_nomesh.txt")  { sP.name = SKIN_LEFT_FOREARM; }
-    else if (filename == "right_forearm_mesh.txt")   { sP.name = SKIN_RIGHT_FOREARM; }
-    else if (filename == "right_forearm_nomesh.txt") { sP.name = SKIN_RIGHT_FOREARM; }
-    else if (filename == "left_hand_V2_1.txt")       { sP.name = SKIN_LEFT_HAND; }
-    else if (filename == "right_hand_V2_1.txt")      { sP.name = SKIN_RIGHT_HAND; }
+    if      (filename == "left_forearm_mesh.txt")    { sP.name = SkinPart_s[SKIN_LEFT_FOREARM]; }
+    else if (filename == "left_forearm_nomesh.txt")  { sP.name = SkinPart_s[SKIN_LEFT_FOREARM]; }
+    else if (filename == "right_forearm_mesh.txt")   { sP.name = SkinPart_s[SKIN_RIGHT_FOREARM]; }
+    else if (filename == "right_forearm_nomesh.txt") { sP.name = SkinPart_s[SKIN_RIGHT_FOREARM]; }
+    else if (filename == "left_hand_V2_1.txt")       { sP.name = SkinPart_s[SKIN_LEFT_HAND]; }
+    else if (filename == "right_hand_V2_1.txt")      { sP.name = SkinPart_s[SKIN_RIGHT_HAND]; }
     else
     {
         yError("[vtRFThread] Unexpected skin part file name: %s.\n",filename.c_str());
@@ -1171,7 +1171,7 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
                 taxelNorm[j-3] = strtod(number.c_str(),NULL);
         }
 
-        if (sP.name == SKIN_LEFT_FOREARM || sP.name == SKIN_RIGHT_FOREARM)
+        if (sP.name == SkinPart_s[SKIN_LEFT_FOREARM] || sP.name == SkinPart_s[SKIN_RIGHT_FOREARM])
         {
             // the taxels at the centers of respective triangles [note that i == taxelID == (line in the .txt file +1)]
             // e.g. first triangle of upper arm is at lines 1-12, center at line 4, thus i=2 
@@ -1198,11 +1198,11 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
                 sP.size++;
                 if (modality=="1D")
                 {
-                    sP.txls.push_back(new TaxelPWE1D(taxelPos,taxelNorm,i));
+                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNorm,i));
                 }
                 else
                 {
-                    sP.txls.push_back(new TaxelPWE2D(taxelPos,taxelNorm,i));
+                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNorm,i));
                 }
             }
             else
@@ -1210,7 +1210,7 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
                 sP.size++;
             }
         }
-        else if (sP.name == SKIN_LEFT_HAND)
+        else if (sP.name == SkinPart_s[SKIN_LEFT_HAND])
         { //we want to represent the 48 taxels of the palm (ignoring fingertips) with 5 taxels -
          // manually marking 5 regions of the palm and selecting their "centroids" as the representatives
             if((i==99) || (i==101) || (i==109) || (i==122) || (i==134)) 
@@ -1218,11 +1218,11 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
                 sP.size++;
                 if (modality=="1D")
                 {
-                    sP.txls.push_back(new TaxelPWE1D(taxelPos,taxelNorm,i));
+                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNorm,i));
                 }
                 else
                 {
-                    sP.txls.push_back(new TaxelPWE2D(taxelPos,taxelNorm,i));
+                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNorm,i));
                 }
             }
             else
@@ -1230,7 +1230,7 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
                 sP.size++;
             }
         }
-        else if (sP.name == SKIN_RIGHT_HAND)
+        else if (sP.name == SkinPart_s[SKIN_RIGHT_HAND])
         { //right hand has different taxel nr.s than left hand 
             // if((i==101) || (i==103) || (i==118) || (i==137)) // || (i==124)) remove one taxel
             if((i==101) || (i==103) || (i==118) || (i==137)) // || (i==124)) remove one taxel
@@ -1238,11 +1238,11 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
                 sP.size++;
                 if (modality=="1D")
                 {
-                    sP.txls.push_back(new TaxelPWE1D(taxelPos,taxelNorm,i));
+                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNorm,i));
                 }
                 else
                 {
-                    sP.txls.push_back(new TaxelPWE2D(taxelPos,taxelNorm,i));
+                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNorm,i));
                 }
             }
             else
@@ -1261,35 +1261,35 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
 {
     int i=0;
     list<unsigned int> taxels_list;
-    if (sP.name == SKIN_LEFT_FOREARM || sP.name == SKIN_RIGHT_FOREARM)
+    if (sP.name == SkinPart_s[SKIN_LEFT_FOREARM] || sP.name == SkinPart_s[SKIN_RIGHT_FOREARM])
     {
         for (i=0;i<sP.size;i++)
         {
             //4th taxel of each 12 is the triangle midpoint
-            sP.Taxel2Repr.push_back(((i/12)*12)+3); //initialize all 384 taxels with triangle center as the representative
+            sP.taxel2Repr.push_back(((i/12)*12)+3); //initialize all 384 taxels with triangle center as the representative
             //fill a map of lists here somehow
         }
         
-        // set to -1 the Taxel2Repr for all the taxels that don't exist
+        // set to -1 the taxel2Repr for all the taxels that don't exist
         for (i=192;i<=203;i++)
         {
-            sP.Taxel2Repr[i]=-1; //these taxels don't exist
+            sP.taxel2Repr[i]=-1; //these taxels don't exist
         }
         for (i=216;i<=251;i++)
         {
-            sP.Taxel2Repr[i]=-1; //these taxels don't exist
+            sP.taxel2Repr[i]=-1; //these taxels don't exist
         }
         for (i=264;i<=287;i++)
         {
-            sP.Taxel2Repr[i]=-1; //these taxels don't exist
+            sP.taxel2Repr[i]=-1; //these taxels don't exist
         }
         for (i=324;i<=335;i++)
         {
-            sP.Taxel2Repr[i]=-1; //these taxels don't exist
+            sP.taxel2Repr[i]=-1; //these taxels don't exist
         }
         for (i=360;i<=383;i++)
         {
-            sP.Taxel2Repr[i]=-1; //these taxels don't exist
+            sP.taxel2Repr[i]=-1; //these taxels don't exist
         }
         
         // Set up the inverse - from every representative taxel to list of taxels it is representing
@@ -1298,112 +1298,112 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[3] = taxels_list;
+        sP.repr2TaxelList[3] = taxels_list;
         
         taxels_list.clear(); 
         for(i=12;i<=23;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[15] = taxels_list;
+        sP.repr2TaxelList[15] = taxels_list;
         
         taxels_list.clear(); 
         for(i=24;i<=35;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[27] = taxels_list;
+        sP.repr2TaxelList[27] = taxels_list;
         
         taxels_list.clear(); 
         for(i=36;i<=47;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[39] = taxels_list;
+        sP.repr2TaxelList[39] = taxels_list;
         
         taxels_list.clear(); 
         for(i=48;i<=59;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[51] = taxels_list;
+        sP.repr2TaxelList[51] = taxels_list;
         
         taxels_list.clear(); 
         for(i=60;i<=71;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[63] = taxels_list;
+        sP.repr2TaxelList[63] = taxels_list;
         
         taxels_list.clear(); 
         for(i=72;i<=83;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[75] = taxels_list;
+        sP.repr2TaxelList[75] = taxels_list;
         
         taxels_list.clear(); 
         for(i=84;i<=95;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[87] = taxels_list;
+        sP.repr2TaxelList[87] = taxels_list;
         
         taxels_list.clear(); 
         for(i=96;i<=107;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[99] = taxels_list;
+        sP.repr2TaxelList[99] = taxels_list;
         
         taxels_list.clear(); 
         for(i=108;i<=119;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[111] = taxels_list;
+        sP.repr2TaxelList[111] = taxels_list;
         
         taxels_list.clear(); 
         for(i=120;i<=131;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[123] = taxels_list;
+        sP.repr2TaxelList[123] = taxels_list;
         
         taxels_list.clear(); 
         for(i=132;i<=143;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[135] = taxels_list;
+        sP.repr2TaxelList[135] = taxels_list;
         
         taxels_list.clear(); 
         for(i=144;i<=155;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[147] = taxels_list;
+        sP.repr2TaxelList[147] = taxels_list;
         
         taxels_list.clear(); 
         for(i=156;i<=167;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[159] = taxels_list;
+        sP.repr2TaxelList[159] = taxels_list;
         
         taxels_list.clear(); 
         for(i=168;i<=179;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[171] = taxels_list;
+        sP.repr2TaxelList[171] = taxels_list;
         
         taxels_list.clear(); 
         for(i=180;i<=191;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[183] = taxels_list;
+        sP.repr2TaxelList[183] = taxels_list;
         //up to here - upper (full) patch on forearm
         
         //from here - lower patch with many dummy taxels
@@ -1412,65 +1412,65 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[207] = taxels_list;
+        sP.repr2TaxelList[207] = taxels_list;
         
         taxels_list.clear(); 
         for(i=252;i<=263;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[255] = taxels_list;
+        sP.repr2TaxelList[255] = taxels_list;
         
         taxels_list.clear(); 
         for(i=288;i<=299;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[291] = taxels_list;
+        sP.repr2TaxelList[291] = taxels_list;
         
         taxels_list.clear(); 
         for(i=300;i<=311;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[303] = taxels_list;
+        sP.repr2TaxelList[303] = taxels_list;
         
         taxels_list.clear(); 
         for(i=312;i<=323;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[315] = taxels_list;
+        sP.repr2TaxelList[315] = taxels_list;
         
         taxels_list.clear(); 
         for(i=336;i<=347;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[339] = taxels_list;
+        sP.repr2TaxelList[339] = taxels_list;
         
         taxels_list.clear(); 
         for(i=348;i<=359;i++)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[351] = taxels_list;
+        sP.repr2TaxelList[351] = taxels_list;
     }
-    else if(sP.name == SKIN_LEFT_HAND)
+    else if(sP.name == SkinPart_s[SKIN_LEFT_HAND])
     {
         for(i=0;i<sP.size;i++)
         {
             // Fill all the 192 with -1 - half of the taxels don't exist, 
             // and for fingertips we don't have positions either
-            sP.Taxel2Repr.push_back(-1); 
+            sP.taxel2Repr.push_back(-1); 
         }
 
         // Upper left area of the palm - at thumb
         for (i=121;i<=128;i++)
         {
-            sP.Taxel2Repr[i] = 122;
+            sP.taxel2Repr[i] = 122;
         }
-        sP.Taxel2Repr[131] = 122; //thermal pad
+        sP.taxel2Repr[131] = 122; //thermal pad
 
         // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
         taxels_list.clear();
@@ -1479,18 +1479,18 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
             taxels_list.push_back(i);
         }
         taxels_list.push_back(131);
-        sP.Repr2TaxelList[122] = taxels_list;
+        sP.repr2TaxelList[122] = taxels_list;
 
         // Upper center of the palm
         for (i=96;i<=99;i++)
         {
-            sP.Taxel2Repr[i] = 99;
+            sP.taxel2Repr[i] = 99;
         }
-        sP.Taxel2Repr[102] = 99;
-        sP.Taxel2Repr[103] = 99;
-        sP.Taxel2Repr[120] = 99;
-        sP.Taxel2Repr[129] = 99;
-        sP.Taxel2Repr[130] = 99;
+        sP.taxel2Repr[102] = 99;
+        sP.taxel2Repr[103] = 99;
+        sP.taxel2Repr[120] = 99;
+        sP.taxel2Repr[129] = 99;
+        sP.taxel2Repr[130] = 99;
 
         // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
         taxels_list.clear(); 
@@ -1503,18 +1503,18 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         taxels_list.push_back(120);
         taxels_list.push_back(129);
         taxels_list.push_back(130);
-        sP.Repr2TaxelList[99] = taxels_list;
+        sP.repr2TaxelList[99] = taxels_list;
 
         // Upper right of the palm (away from the thumb)
-        sP.Taxel2Repr[100] = 101;
-        sP.Taxel2Repr[101] = 101;
+        sP.taxel2Repr[100] = 101;
+        sP.taxel2Repr[101] = 101;
         for (i=104;i<=107;i++)
         {
-            sP.Taxel2Repr[i] = 101; //N.B. 107 is thermal pad
+            sP.taxel2Repr[i] = 101; //N.B. 107 is thermal pad
         }
-        sP.Taxel2Repr[113] = 101;
-        sP.Taxel2Repr[116] = 101;
-        sP.Taxel2Repr[117] = 101;
+        sP.taxel2Repr[113] = 101;
+        sP.taxel2Repr[116] = 101;
+        sP.taxel2Repr[117] = 101;
 
         // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
         taxels_list.clear(); 
@@ -1527,18 +1527,18 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         taxels_list.push_back(113);
         taxels_list.push_back(116);
         taxels_list.push_back(117);
-        sP.Repr2TaxelList[101] = taxels_list;
+        sP.repr2TaxelList[101] = taxels_list;
 
         // Center area of the palm
         for(i=108;i<=112;i++)
         {
-            sP.Taxel2Repr[i] = 109;
+            sP.taxel2Repr[i] = 109;
         }
-        sP.Taxel2Repr[114] = 109;
-        sP.Taxel2Repr[115] = 109;
-        sP.Taxel2Repr[118] = 109;
-        sP.Taxel2Repr[142] = 109;
-        sP.Taxel2Repr[143] = 109;
+        sP.taxel2Repr[114] = 109;
+        sP.taxel2Repr[115] = 109;
+        sP.taxel2Repr[118] = 109;
+        sP.taxel2Repr[142] = 109;
+        sP.taxel2Repr[143] = 109;
 
         // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
         taxels_list.clear(); 
@@ -1551,13 +1551,13 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         taxels_list.push_back(118);
         taxels_list.push_back(142);
         taxels_list.push_back(143);
-        sP.Repr2TaxelList[109] = taxels_list;
+        sP.repr2TaxelList[109] = taxels_list;
 
         // Lower part of the palm
-        sP.Taxel2Repr[119] = 134; // this one is thermal pad
+        sP.taxel2Repr[119] = 134; // this one is thermal pad
         for(i=132;i<=141;i++)
         {
-            sP.Taxel2Repr[i] = 134;
+            sP.taxel2Repr[i] = 134;
         }
 
         // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
@@ -1567,25 +1567,25 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[134] = taxels_list;
+        sP.repr2TaxelList[134] = taxels_list;
     }
-    else if(sP.name == SKIN_RIGHT_HAND)
+    else if(sP.name == SkinPart_s[SKIN_RIGHT_HAND])
     {
        for(i=0;i<sP.size;i++)
        {
-          sP.Taxel2Repr.push_back(-1); //let's fill all the 192 with -1 - half of the taxels don't exist and for fingertips, 
+          sP.taxel2Repr.push_back(-1); //let's fill all the 192 with -1 - half of the taxels don't exist and for fingertips, 
           //we don't have positions either
        }
        //upper left area - away from thumb on this hand
-        sP.Taxel2Repr[96] = 101;
-        sP.Taxel2Repr[97] = 101;
-        sP.Taxel2Repr[98] = 101;
-        sP.Taxel2Repr[100] = 101;
-        sP.Taxel2Repr[101] = 101;
-        sP.Taxel2Repr[107] = 101; //thermal pad
-        sP.Taxel2Repr[110] = 101;
-        sP.Taxel2Repr[111] = 101;
-        sP.Taxel2Repr[112] = 101;
+        sP.taxel2Repr[96] = 101;
+        sP.taxel2Repr[97] = 101;
+        sP.taxel2Repr[98] = 101;
+        sP.taxel2Repr[100] = 101;
+        sP.taxel2Repr[101] = 101;
+        sP.taxel2Repr[107] = 101; //thermal pad
+        sP.taxel2Repr[110] = 101;
+        sP.taxel2Repr[111] = 101;
+        sP.taxel2Repr[112] = 101;
         
         // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
         taxels_list.clear(); 
@@ -1598,17 +1598,17 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         taxels_list.push_back(110);
         taxels_list.push_back(111);
         taxels_list.push_back(112);
-        sP.Repr2TaxelList[101] = taxels_list;
+        sP.repr2TaxelList[101] = taxels_list;
         
         //upper center of the palm
-        sP.Taxel2Repr[99] = 103;
+        sP.taxel2Repr[99] = 103;
         for(i=102;i<=106;i++)
         {
-           sP.Taxel2Repr[i] = 103;
+           sP.taxel2Repr[i] = 103;
         }
-        sP.Taxel2Repr[127] = 103;
-        sP.Taxel2Repr[129] = 103;
-        sP.Taxel2Repr[130] = 103;
+        sP.taxel2Repr[127] = 103;
+        sP.taxel2Repr[129] = 103;
+        sP.taxel2Repr[130] = 103;
         
         // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
         taxels_list.clear(); 
@@ -1620,16 +1620,16 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         taxels_list.push_back(127);
         taxels_list.push_back(129);
         taxels_list.push_back(130);
-        sP.Repr2TaxelList[103] = taxels_list;
+        sP.repr2TaxelList[103] = taxels_list;
         
         
         //upper right center of the palm - at thumb
         for(i=120;i<=126;i++)
         {
-           sP.Taxel2Repr[i] = 124;
+           sP.taxel2Repr[i] = 124;
         }
-        sP.Taxel2Repr[128] = 124;
-        sP.Taxel2Repr[131] = 124; //thermal pad
+        sP.taxel2Repr[128] = 124;
+        sP.taxel2Repr[131] = 124; //thermal pad
         
         // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
         taxels_list.clear(); 
@@ -1639,18 +1639,18 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         }
         taxels_list.push_back(128);
         taxels_list.push_back(131);
-        sP.Repr2TaxelList[124] = taxels_list;
+        sP.repr2TaxelList[124] = taxels_list;
         
         
         //center of palm
-        sP.Taxel2Repr[108] = 118;
-        sP.Taxel2Repr[109] = 118;
+        sP.taxel2Repr[108] = 118;
+        sP.taxel2Repr[109] = 118;
         for(i=113;i<=118;i++)
         {
-            sP.Taxel2Repr[i] = 118;
+            sP.taxel2Repr[i] = 118;
         }
-        sP.Taxel2Repr[142] = 118;
-        sP.Taxel2Repr[143] = 118;
+        sP.taxel2Repr[142] = 118;
+        sP.taxel2Repr[143] = 118;
         
         // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
         taxels_list.clear(); 
@@ -1662,13 +1662,13 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         }
         taxels_list.push_back(142);
         taxels_list.push_back(143);
-        sP.Repr2TaxelList[118] = taxels_list;
+        sP.repr2TaxelList[118] = taxels_list;
             
         //lower palm
-        sP.Taxel2Repr[119] = 137; //thermal pad
+        sP.taxel2Repr[119] = 137; //thermal pad
         for(i=132;i<=141;i++)
         {
-            sP.Taxel2Repr[i] = 137; //139 is another thermal pad
+            sP.taxel2Repr[i] = 137; //139 is another thermal pad
         }
         
         // Set up the mapping in the other direction - from every representative taxel to list of taxels it is representing
@@ -1678,7 +1678,7 @@ void vtRFThread::initRepresentativeTaxels(skinPart &sP)
         {
             taxels_list.push_back(i);
         }
-        sP.Repr2TaxelList[137] = taxels_list;
+        sP.repr2TaxelList[137] = taxels_list;
     }
 }
 
@@ -1687,7 +1687,7 @@ bool vtRFThread::getRepresentativeTaxels(const std::vector<unsigned int> IDv, co
     //unordered_set would be better, but that is only experimentally supported by some compilers.
     std::set<unsigned int> rep_taxel_IDs_set;
     
-    if (iCubSkin[IDx].Taxel2Repr.empty())
+    if (iCubSkin[IDx].taxel2Repr.empty())
     {
         v = IDv; //we simply copy the activated taxels
         return false;
@@ -1696,13 +1696,13 @@ bool vtRFThread::getRepresentativeTaxels(const std::vector<unsigned int> IDv, co
     {
         for (std::vector<unsigned int>::const_iterator it = IDv.begin() ; it != IDv.end(); ++it)
         {
-            if (iCubSkin[IDx].Taxel2Repr[*it] == -1)
+            if (iCubSkin[IDx].taxel2Repr[*it] == -1)
             {
                 yWarning("[%s] taxel %u activated, but representative taxel undefined - ignoring.",SkinPart_s[iCubSkin[IDx].name].c_str(),*it);
             }
             else
             {
-                rep_taxel_IDs_set.insert(iCubSkin[IDx].Taxel2Repr[*it]); //add all the representatives that were activated to the set
+                rep_taxel_IDs_set.insert(iCubSkin[IDx].taxel2Repr[*it]); //add all the representatives that were activated to the set
             }
         }
 
@@ -1756,13 +1756,13 @@ void vtRFThread::threadRelease()
     yDebug("[vtRF::threadRelease]Deallocating iCubSkin..\n");
         for (size_t i = 0; i < iCubSkin.size(); i++)
         {
-            while(!iCubSkin[i].txls.empty())
+            while(!iCubSkin[i].taxels.empty())
             {
-                if (iCubSkin[i].txls.back())
+                if (iCubSkin[i].taxels.back())
                 {
-                    delete iCubSkin[i].txls.back();
+                    delete iCubSkin[i].taxels.back();
                 }
-                iCubSkin[i].txls.pop_back();
+                iCubSkin[i].taxels.pop_back();
             }
         }
     
