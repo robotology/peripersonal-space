@@ -12,6 +12,6 @@ set(sources demoAvoidance.cpp)
 source_group("Source Files" FILES ${sources})
 
 add_executable(demoAvoidance ${sources})
-target_link_libraries(demoAvoidance ${YARP_LIBRARIES} ctrlLib icubmod)
+target_link_libraries(demoAvoidance ${YARP_LIBRARIES} ctrlLib)
 install(TARGETS demoAvoidance DESTINATION bin)
 
