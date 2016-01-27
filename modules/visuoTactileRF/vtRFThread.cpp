@@ -464,8 +464,10 @@ void vtRFThread::run()
 
 void vtRFThread::manageSkinEvents()
 {
+    // main/src/modules/skinManager/src/compensationThread.cpp:250
     vector <int> taxelsIDs; 
-    SkinPart part = SKIN_PART_UNKNOWN;
+    string part = SkinPart_s[SKIN_PART_UNKNOWN];
+    int iCubSkinID=-1;
     bool isThereAnEvent = false;
 
     Bottle out; out.clear();
@@ -480,9 +482,9 @@ void vtRFThread::manageSkinEvents()
 
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++) // cycle through the taxels
             {
-                if (iCubSkin[i].taxels[j]->Resp > 50)
+                if (dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp > 50)
                 {
-                    taxelsIDs.push_back(iCubSkin[i].taxels[j]->ID);
+                    taxelsIDs.push_back(iCubSkin[i].taxels[j]->getID());
                     isThereAnEvent = true;
                 }
             }
@@ -492,17 +494,24 @@ void vtRFThread::manageSkinEvents()
                 int w = 0, w_sum = 0;
                 part  = iCubSkin[i].name;
 
-                b.addString(SkinPart_s[iCubSkin[i].name]);
+                if (part == SkinPart_s[SKIN_LEFT_FOREARM] || part == SkinPart_s[SKIN_LEFT_HAND])
+                {
+                    b.addString("left");
+                }
+                else if (part == SkinPart_s[SKIN_RIGHT_FOREARM] || part == SkinPart_s[SKIN_RIGHT_HAND])
+                {
+                    b.addString("right");
+                }
 
                 for (size_t k = 0; k < taxelsIDs.size(); k++)
                 {
                     for (size_t p = 0; p < iCubSkin[i].taxels.size(); p++)
                     {
-                        if (iCubSkin[i].taxels[p]->ID == taxelsIDs[k])
+                        if (iCubSkin[i].taxels[p]->getID() == taxelsIDs[k])
                         {
-                            w = iCubSkin[i].taxels[p]->Resp;
-                            geoCenter += iCubSkin[i].taxels[p]->WRFPos*w;
-                            normalDir += locateTaxel(iCubSkin[i].taxels[p]->Norm,part)*w;
+                            w = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[p])->Resp;
+                            geoCenter += iCubSkin[i].taxels[p]->getWRFPosition()*w;
+                            normalDir += locateTaxel(iCubSkin[i].taxels[p]->getNormal(),part)*w;
                             w_sum += w;
                         }
                     }
@@ -891,7 +900,7 @@ bool vtRFThread::projectIncomingEvent()
 
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
             {
-                iCubSkin[i].taxels[j]->Evnt=projectIntoTaxelRF(iCubSkin[i].taxels[j]->FoR,T_a,
+                dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt=projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,
                                                              incomingEvents[k]);
 
             // There's a reason behind this choice
@@ -902,7 +911,6 @@ bool vtRFThread::projectIncomingEvent()
             printMessage(5,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.toString().c_str());
         }
     }
-
     return true;
 }
 
