@@ -5,7 +5,11 @@
 #include <IpIpoptApplication.hpp>
 #include <iCub/iKin/iKinFwd.h>
 
+using namespace yarp::sig;
+using namespace yarp::math;
+using namespace iCub::ctrl;
 using namespace iCub::iKin;
+using namespace std;
 
 /************************************************************************/
 /* DOUBLETOUCH_VARIABLES
@@ -282,8 +286,7 @@ using namespace iCub::iKin;
             {
                 if (i < offs)
                 {
-                    g_l[i]=0;
-                    g_u[i]=1e-6; // This seems to me a big margin, isn't it?
+                    g_l[i]=g_u[i]=0.0;
                 }
                 else if (i < lenLower+offs)
                 {

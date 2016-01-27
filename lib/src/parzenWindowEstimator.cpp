@@ -1,5 +1,11 @@
 #include "iCub/periPersonalSpace/parzenWindowEstimator.h"
 
+using namespace yarp;
+using namespace yarp::os;
+using namespace yarp::sig;
+
+using namespace std;
+
 double gauss(const double x_0, const double sigma, const double val)
 {
     double res = (1/(sqrt(2*M_PI)*sigma))*
@@ -22,6 +28,35 @@ double gauss2D(const double x_0, const double y_0,
 /****************************************************************/
 /* PARZEN WINDOW ESTIMATOR
 *****************************************************************/
+    parzenWindowEstimator::parzenWindowEstimator(const yarp::sig::Matrix _ext, const std::vector<int> _binsNum)
+    {
+        resize(_ext, _binsNum);
+    }
+
+    parzenWindowEstimator::parzenWindowEstimator(const parzenWindowEstimator &_pwe)
+    {
+        (*this) = _pwe;
+    }
+
+    parzenWindowEstimator & parzenWindowEstimator::operator=(const parzenWindowEstimator &_pwe)
+    {
+        dim = _pwe.dim;
+        ext = _pwe.ext;
+
+        binsNum  = _pwe.binsNum;
+        binWidth = _pwe.binWidth;
+
+        firstPosBin      = _pwe.firstPosBin;
+        firstPosBinShift = _pwe.firstPosBinShift;
+
+        sigm = _pwe.sigm;
+
+        posHist = _pwe.posHist;
+        negHist = _pwe.negHist;
+
+        return *this;
+    }
+
     bool parzenWindowEstimator::resize(const Matrix _ext, std::vector<int> _binsNum)
     {
         if (_binsNum.size()==1 && dim==1)
@@ -118,7 +153,7 @@ double gauss2D(const double x_0, const double y_0,
         
         if (getIndexes(x,b))
         {
-            printf("adding sample %i %i from %g %g\n",b[0],b[1],x[0],x[1]);
+            // printf("adding sample %i %i from %g %g\n",b[0],b[1],x[0],x[1]);
             posHist(b[0],b[1]) += 1;
             return true;
         }
@@ -155,27 +190,64 @@ double gauss2D(const double x_0, const double y_0,
     {
         if (dim==1)
         {
-            yInfo("Extension (X1 X2): %g %g",ext[0,0],ext[0,1]);
-            yInfo("binsNum(X) %i\nbinWidth(X) %g",binsNum[0],binWidth[0]);
-            yInfo("sigma(X) %g",sigm[0]);
+            yInfo("Extension [X1 X2]: %g %g",ext(0,0),ext(0,1));
+            yInfo("binsNum[X]: %i",binsNum[0]);
+            yInfo("binWidth[X]: %g",binWidth[0]);
+            yInfo("sigma[X]: %g",sigm[0]);
+
+            yInfo("Positive histogram:\t%s",posHist.transposed().toString(3,3).c_str());
+            yInfo("Negative histogram:\t%s",negHist.transposed().toString(3,3).c_str());
         }
         else if (dim==2)
         {
-            yInfo("Extension (X1 X2 Y1 Y2): %g %g %g %g",ext[0,0],ext[0,1],ext[1,0],ext[1,1]);
-            yInfo("binsNum(X Y) %i %i\nbinWidth(X Y) %g %g",binsNum[0],binsNum[1],binWidth[0],binWidth[1]);
-            yInfo("sigma(X Y) %g %g\n",sigm[0],sigm[1]);
-        }
+            yInfo("Extension [X1 X2 Y1 Y2]: %g %g %g %g",ext(0,0),ext(0,1),ext(1,0),ext(1,1));
+            yInfo("binsNum[X Y]: %i %i",binsNum[0],binsNum[1]);
+            yInfo("binWidth[X Y]: %g %g",binWidth[0],binWidth[1]);
+            yInfo("sigma[X Y]: %g %g\n",sigm[0],sigm[1]);
 
-        yInfo("Positive histogram:\n");
-        yInfo("%s\n",posHist.toString().c_str());
-        yInfo("Negative histogram:\n");
-        yInfo("%s\n",negHist.toString().c_str());
+            yInfo("Positive histogram:\n");
+            printf("%s\n",posHist.transposed().toString(3,3).c_str());
+            yInfo("Negative histogram:\n");
+            printf("%s\n",negHist.transposed().toString(3,3).c_str());
+        }
+    }
+
+    std::string parzenWindowEstimator::toString(int verbosity)
+    {
+        std::stringstream res;
+        if (dim==1)
+        {
+            res << "Extension [X1 X2]: "     << ext(0,0) << " " << ext(0,1);
+            res << "\tbinsNum[X]: "          << binsNum[0];
+            res << "\tbinWidth[X]: "         << binWidth[0];
+            res << "\tsigma[X]: "            << sigm[0];
+
+            if (verbosity)
+            {
+                res << "\nPositive histogram:\t" << posHist.transposed().toString(3,3);
+                res << "\nNegative histogram:\t" << negHist.transposed().toString(3,3);
+            }
+        }
+        else if (dim==2)
+        {
+            res << "Extension [X1 X2 Y1 Y2]: " << ext(0,0) << " " << ext(0,1);
+            res                         << " " << ext(1,0) << " " << ext(1,1);
+            res << "\tbinsNum[X Y]: "          << binsNum[0]  << " " << binsNum[1];
+            res << "\tbinWidth[X Y]: "         << binWidth[0] << " " << binWidth[1];
+            res << "\tsigma[X Y]: "            << sigm[0]     << " " << sigm[1];
+
+            if (verbosity)
+            {
+                res << "\nPositive histogram:\n" << posHist.transposed().toString(3,3);
+                res << "\nNegative histogram:\n" << negHist.transposed().toString(3,3);
+            }
+        }
+        return res.str();
     }
 
 /****************************************************************/
 /* PARZEN WINDOW ESTIMATOR 1D
 *****************************************************************/
-
     parzenWindowEstimator1D::parzenWindowEstimator1D()
     {
         dim = 1;
@@ -185,13 +257,18 @@ double gauss2D(const double x_0, const double y_0,
 
         std::vector<int> bN; bN.push_back(20);
 
-        resize(eX,bN);
+        parzenWindowEstimator::resize(eX,bN);
     }
 
     parzenWindowEstimator1D::parzenWindowEstimator1D(const Matrix _ext, const std::vector<int> _binsNum)
     {
         dim = 1;
-        resize(_ext,_binsNum);
+        parzenWindowEstimator::resize(_ext,_binsNum);
+    }
+
+    parzenWindowEstimator1D::parzenWindowEstimator1D(const parzenWindowEstimator1D &_pwe)
+    {
+        (*this) = _pwe;
     }
 
     double parzenWindowEstimator1D::getF_X(const std::vector<double> x)

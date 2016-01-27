@@ -58,7 +58,6 @@
 
 #include <yarp/os/Property.h>
 #include <yarp/os/Log.h>
-#include <yarp/dev/ControlBoardInterfaces.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/sig/Matrix.h>
 #include <yarp/math/Math.h>
@@ -66,8 +65,6 @@
 #include <iCub/iKin/iKinSlv.h>
 
 #include <iCub/ctrl/math.h>
-
-using namespace iCub::iKin;
 
 /**
 * \ingroup iKinFwdModLib
@@ -447,7 +444,7 @@ class iKinFixedRTLink : public iKinLinkFather
 * It's basically the same as iKinChain.
 *
 */
-class iKinChainMod : public iKinChain
+class iKinChainMod : public iCub::iKin::iKinChain
 {
     protected:
         std::deque<iKinLinkFather*> allList;
@@ -942,7 +939,7 @@ class iKinChainMod : public iKinChain
         * @return a pointer to a Chain object with the same Links of
         *         ChainMod.
         */
-        iKinChain *asChain() { return static_cast<iKinChain*>(this); }
+        iCub::iKin::iKinChain *asChain() { return static_cast<iKinChain*>(this); }
 
         /**
         * Destructor. 
@@ -1031,7 +1028,7 @@ class iKinLimbMod : public iKinChainMod
         std::string getType() const { return type; }
 
         /**
-        * Alignes the Limb joints bounds with current values set aboard 
+        * Aligns the Limb joints bounds with current values set aboard 
         * the robot. 
         * @param lim is the ordered list of control interfaces that 
         *            allows to access the Limb limits.
@@ -1040,7 +1037,11 @@ class iKinLimbMod : public iKinChainMod
         * @note This method is empty in iKinLimbMod because it's 
         * limb-specific: see the implementations for iCubLimbs. 
         */
-        virtual bool alignJointsBounds(const std::deque<yarp::dev::IControlLimits*>&) { notImplemented(verbose); return true; }
+        virtual bool alignJointsBounds(const std::deque<yarp::dev::IControlLimits*>&)
+        {
+            iCub::iKin::notImplemented(verbose);
+            return true;
+        }
 
         /**
         * Destructor. 
@@ -1179,7 +1180,7 @@ class iCubCustomLimb : public iKinLimbMod
 * It automatically modifies the shoulder's constraints according to the fact that
 * the shoulder is "inverted" or "direct"
 */
-class iCubShoulderConstrMod : public iKinLinIneqConstr
+class iCubShoulderConstrMod : public iCub::iKin::iKinLinIneqConstr
 {
     protected:    
         double        shou_m, shou_n;
@@ -1188,7 +1189,7 @@ class iCubShoulderConstrMod : public iKinLinIneqConstr
         char          readingmode;  // either direct or inverse
         int           sh;           // index of the first joint of the shoulder
 
-        void clone(const iKinLinIneqConstr *obj);
+        void clone(const iCub::iKin::iKinLinIneqConstr *obj);
         void appendMatrixRow(yarp::sig::Matrix &dest, const yarp::sig::Vector &row);
         void appendVectorValue(yarp::sig::Vector &dest, double val);
 
