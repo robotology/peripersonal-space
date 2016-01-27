@@ -12,8 +12,8 @@
 
 // enum SkinPart { 
 //     SKIN_PART_UNKNOWN=0, 
-//     SkinPart_s[SKIN_LEFT_HAND], SkinPart_s[SKIN_LEFT_FOREARM], SKIN_LEFT_UPPER_ARM, 
-//     SkinPart_s[SKIN_RIGHT_HAND], SkinPart_s[SKIN_RIGHT_FOREARM], SKIN_RIGHT_UPPER_ARM, 
+//     SKIN_LEFT_HAND, SKIN_LEFT_FOREARM, SKIN_LEFT_UPPER_ARM, 
+//     SKIN_RIGHT_HAND, SKIN_RIGHT_FOREARM, SKIN_RIGHT_UPPER_ARM, 
 //     SKIN_FRONT_TORSO, 
 //     SKIN_PART_ALL, SKIN_PART_SIZE
 // };
@@ -243,7 +243,7 @@ bool vtRFThread::threadInit()
         {
             for (size_t i = 0; i < iCubSkin.size(); i++)
             {
-                iCubSkin[i].print();
+                iCubSkin[i].print(verbosity);
             }
         }
         iCubSkinSize = iCubSkin.size();
@@ -339,8 +339,8 @@ void vtRFThread::run()
                 else
                 {
                     yWarning("No Learning has been put in place.");
-                    size_t txlsize = iCubSkin[0].taxels.size();
-                    for (size_t j = 0; j < txlsize; j++)
+                    size_t taxelsize = iCubSkin[0].taxels.size();
+                    for (size_t j = 0; j < taxelsize; j++)
                     {
                         dumpedVector.push_back(0.0);
                     }
@@ -349,8 +349,8 @@ void vtRFThread::run()
             }
             else
             {
-                size_t txlsize = iCubSkin[0].taxels.size();
-                for (size_t j = 0; j < txlsize; j++)
+                size_t taxelsize = iCubSkin[0].taxels.size();
+                for (size_t j = 0; j < taxelsize; j++)
                 {
                     dumpedVector.push_back(0.0);
                 }
@@ -358,8 +358,8 @@ void vtRFThread::run()
         }
         else
         {
-            size_t txlsize = iCubSkin[0].taxels.size();
-            for (size_t j = 0; j < txlsize; j++)
+            size_t taxelsize = iCubSkin[0].taxels.size();
+            for (size_t j = 0; j < taxelsize; j++)
             {
                 dumpedVector.push_back(0.0);
             }
@@ -490,24 +490,24 @@ void vtRFThread::sendContactsToSkinGui()
                 if(iCubSkin[i].repr2TaxelList.empty())
                 {  
                     //we simply light up the taxels themselves
-                    respToSkin[iCubSkin[i].taxels[j]->ID] = iCubSkin[i].taxels[j]->Resp;
+                    respToSkin[iCubSkin[i].taxels[j]->getID()] = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp;
                 }
                 else
                 { 
                     //we light up all the taxels represented by the particular taxel
-                    list<unsigned int> l = iCubSkin[i].repr2TaxelList[iCubSkin[i].taxels[j]->ID];
+                    list<unsigned int> l = iCubSkin[i].repr2TaxelList[iCubSkin[i].taxels[j]->getID()];
 
                     if (l.empty())
                     {
-                        yWarning("skinPart %d Taxel %d : no list of represented taxels is available, even if repr2TaxelList is not empty",i,iCubSkin[i].taxels[j]->ID);
-                        respToSkin[iCubSkin[i].taxels[j]->ID] = iCubSkin[i].taxels[j]->Resp;
+                        yWarning("skinPart %d Taxel %d : no list of represented taxels is available, even if repr2TaxelList is not empty",i,iCubSkin[i].taxels[j]->getID());
+                        respToSkin[iCubSkin[i].taxels[j]->getID()] = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp;
                     }
                     else
                     {
                         for(list<unsigned int>::const_iterator iter_list = l.begin(); iter_list != l.end(); iter_list++)
                         {
                             //for all the represented taxels, we assign the activation of the super-taxel
-                            respToSkin[*iter_list] =  iCubSkin[i].taxels[j]->Resp;
+                            respToSkin[*iter_list] =  dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp;
                         } 
                     }
                 }
@@ -580,7 +580,7 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
         {
             for (size_t i = 0; i < iCubSkinSize; i++)
             {
-                if (it -> getSkinPart() == iCubSkin[i].name)
+                if (SkinPart_s[it -> getSkinPart()] == iCubSkin[i].name)
                 {
                     idx = i;
                     std::vector <unsigned int> txlList = it -> getTaxelList();
@@ -598,7 +598,7 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
                     {
                         if (verbosity>=1)
                         {
-                            printMessage(1,"Contact! Skin part: %s\tTaxels' ID: ",SkinPart_s[iCubSkin[i].name].c_str());
+                            printMessage(1,"Contact! Skin part: %s\tTaxels' ID: ",iCubSkin[i].name.c_str());
                             for (size_t i = 0; i < idv.size(); i++)
                                 printf("\t%i",idv[i]);
 
@@ -633,7 +633,7 @@ string vtRFThread::load()
 
     for (size_t i = 0; i < iCubSkinSize; i++)
     {
-        Bottle bb = b.findGroup(SkinPart_s[iCubSkin[i].name].c_str());
+        Bottle bb = b.findGroup(iCubSkin[i].name.c_str());
 
         if (bb.size() > 0)
         {
@@ -664,7 +664,7 @@ string vtRFThread::load()
             bNum.push_back(bbb->get(1).asInt());
             
             bbb = bb.find("Mapping").asList();
-            yDebug("[vtRF::load][%s] size %i\tnTaxels %i\text %s\tbinsNum %i %i",SkinPart_s[iCubSkin[i].name].c_str(),size,
+            yDebug("[vtRF::load][%s] size %i\tnTaxels %i\text %s\tbinsNum %i %i",iCubSkin[i].name.c_str(),size,
                                                   nTaxels,toVector(ext).toString(3,3).c_str(),bNum[0],bNum[1]);
             printMessage(3,"Mapping\n");
             for (size_t j = 0; j < size; j++)
@@ -686,12 +686,12 @@ string vtRFThread::load()
 
                 for (int k = 0; k < iCubSkin[i].taxels.size(); k++)
                 {
-                    if (iCubSkin[i].taxels[k]->ID == bbb->get(0).asInt())
+                    if (iCubSkin[i].taxels[k]->getID() == bbb->get(0).asInt())
                     {
-                        if (iCubSkin[i].taxels[k]->pwe->resize(ext,bNum))
+                        if (dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[k])->pwe->resize(ext,bNum))
                         {
-                            iCubSkin[i].taxels[k]->pwe->setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],bNum[1]));
-                            iCubSkin[i].taxels[k]->pwe->setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],bNum[1]));
+                            dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[k])->pwe->setPosHist(matrixFromBottle(*bbb->get(1).asList(),0,bNum[0],bNum[1]));
+                            dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[k])->pwe->setNegHist(matrixFromBottle(*bbb->get(2).asList(),0,bNum[0],bNum[1]));
                         }
                     }
                 }
@@ -719,12 +719,12 @@ string vtRFThread::save()
             Bottle data;
             data.clear();
 
-            Matrix           getExt = iCubSkin[i].taxels[0]->pwe->getExt();
+            Matrix           getExt = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[0])->pwe->getExt();
             matrixIntoBottle(getExt,data);
 
-            std::vector<int> bNum  = iCubSkin[i].taxels[0]->pwe->getHistSize();
+            std::vector<int> bNum  = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[0])->pwe->getHistSize();
 
-            myfile << "[" << SkinPart_s[iCubSkin[i].name] << "]" << endl;
+            myfile << "[" << iCubSkin[i].name << "]" << endl;
             myfile << "modality\t"  << iCubSkin[i].modality << endl;
             myfile << "size    \t"  << iCubSkin[i].size << endl;    
             myfile << "nTaxels \t"  << iCubSkin[i].taxels.size() << endl;
@@ -788,7 +788,7 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
         bool itHasBeenTouched = false;
         for (size_t w = 0; w < v.size(); w++)
         {
-            if (iCubSkin[IDx].taxels[j]->ID == v[w])
+            if (iCubSkin[IDx].taxels[j]->getID() == v[w])
             {
                 itHasBeenTouched = true;
             }
@@ -796,11 +796,11 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
 
         for (size_t k = 0; k < eventsBuffer.size(); k++)
         {
-            IncomingEvent4TaxelPWE projection = projectIntoTaxelRF(iCubSkin[IDx].taxels[j]->FoR,T_a,eventsBuffer[k]);
-            printMessage(3,"Training Taxels: skinPart %d ID %i k %i NORM %g TTC %g\n",IDx,iCubSkin[IDx].taxels[j]->ID,k,projection.NRM,projection.TTC);
+            IncomingEvent4TaxelPWE projection = projectIntoTaxelRF(iCubSkin[IDx].taxels[j]->getFoR(),T_a,eventsBuffer[k]);
+            printMessage(3,"Training Taxels: skinPart %d ID %i k %i NORM %g TTC %g\n",IDx,iCubSkin[IDx].taxels[j]->getID(),k,projection.NRM,projection.TTC);
 
-            if (itHasBeenTouched == true)   iCubSkin[IDx].taxels[j]->addSample(projection);
-            else                            iCubSkin[IDx].taxels[j]->removeSample(projection);
+            if (itHasBeenTouched == true)  dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->addSample(projection);
+            else                           dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->removeSample(projection);
         }
 
         if (itHasBeenTouched == true)   dumpedVector.push_back(1.0);
@@ -847,13 +847,12 @@ bool vtRFThread::projectIncomingEvent()
                 iCubSkin[i].taxels[j]->Evnt=projectIntoTaxelRF(iCubSkin[i].taxels[j]->FoR,T_a,
                                                              incomingEvents[k]);
 
-                // There's a reason behind this choice
-                dumpedVector.push_back(iCubSkin[i].taxels[j]->Evnt.Pos[0]);
-                dumpedVector.push_back(iCubSkin[i].taxels[j]->Evnt.Pos[1]);
-                dumpedVector.push_back(iCubSkin[i].taxels[j]->Evnt.Pos[2]);
+            // There's a reason behind this choice
+            dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[0]);
+            dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[1]);
+            dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[2]);
 
-                printMessage(5,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,iCubSkin[i].taxels[j]->Evnt.toString().c_str());
-            }
+            printMessage(5,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.toString().c_str());
         }
     }
 
@@ -888,7 +887,7 @@ void vtRFThread::resetParzenWindows()
     {
         for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
-            iCubSkin[i].taxels[j]->resetParzenWindowEstimator();
+            dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->resetParzenWindowEstimator();
         }
     }
 }
@@ -899,8 +898,8 @@ bool vtRFThread::computeResponse()
     {
         for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
-            iCubSkin[i].taxels[j]->computeResponse();
-            printMessage(4,"\tID %i\tResponse %i\n",j,iCubSkin[i].taxels[j]->Resp);
+            dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->computeResponse();
+            printMessage(4,"\tID %i\tResponse %i\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp);
         }
     }
 
@@ -959,8 +958,8 @@ void vtRFThread::drawTaxels(string _eye)
     {
         for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
-            drawTaxel(imgOut,iCubSkin[i].taxels[j]->px,iCubSkin[i].name,iCubSkin[i].taxels[j]->Resp);
-            printMessage(6,"iCubSkin[%i].taxels[%i].px %s\n",i,j,iCubSkin[i].taxels[j]->px.toString().c_str());
+            drawTaxel(imgOut,iCubSkin[i].taxels[j]->getPx(),iCubSkin[i].name,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp);
+            printMessage(6,"iCubSkin[%i].taxels[%i].px %s\n",i,j,iCubSkin[i].taxels[j]->getPx().toString().c_str());
         }
     }
 
@@ -970,7 +969,7 @@ void vtRFThread::drawTaxels(string _eye)
 
 
 void vtRFThread::drawTaxel(ImageOf<PixelRgb> &Im, const yarp::sig::Vector &px,
-                           const iCub::skinDynLib::SkinPart &part, const int act)
+                           const string &part, const int act)
 {
     int u = (int)px(0);
     int v = (int)px(1);
@@ -1082,7 +1081,7 @@ bool vtRFThread::projectPoint(const yarp::sig::Vector &x,
     }
 }
 
-yarp::sig::Vector vtRFThread::locateTaxel(const yarp::sig::Vector &_pos, const iCub::skinDynLib::SkinPart &part)
+yarp::sig::Vector vtRFThread::locateTaxel(const yarp::sig::Vector &_pos, const string &part)
 {
     yarp::sig::Vector pos=_pos;
     yarp::sig::Vector WRFpos(4,0.0);
@@ -1124,13 +1123,12 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
     string line;
     ifstream posFile;
     yarp::sig::Vector taxelPos(3,0.0);
-    yarp::sig::Vector taxelNorm(3,0.0);
+    yarp::sig::Vector taxelNrm(3,0.0);
+    yarp::sig::Vector taxelPosNrm(6,0.0);
 
-    // Remove Path (Linux Only)
     string filename = strrchr(filePath.c_str(), '/');
     filename = filename.c_str() ? filename.c_str() + 1 : filePath.c_str();
 
-    // Remove "_mesh.txt"
     if      (filename == "left_forearm_mesh.txt")    { sP.name = SkinPart_s[SKIN_LEFT_FOREARM]; }
     else if (filename == "left_forearm_nomesh.txt")  { sP.name = SkinPart_s[SKIN_LEFT_FOREARM]; }
     else if (filename == "right_forearm_mesh.txt")   { sP.name = SkinPart_s[SKIN_RIGHT_FOREARM]; }
@@ -1198,11 +1196,11 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
                 sP.size++;
                 if (modality=="1D")
                 {
-                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNorm,i));
+                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNrm,i));
                 }
                 else
                 {
-                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNorm,i));
+                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNrm,i));
                 }
             }
             else
@@ -1218,11 +1216,11 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
                 sP.size++;
                 if (modality=="1D")
                 {
-                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNorm,i));
+                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNrm,i));
                 }
                 else
                 {
-                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNorm,i));
+                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNrm,i));
                 }
             }
             else
@@ -1238,11 +1236,11 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
                 sP.size++;
                 if (modality=="1D")
                 {
-                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNorm,i));
+                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNrm,i));
                 }
                 else
                 {
-                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNorm,i));
+                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNrm,i));
                 }
             }
             else
@@ -1698,7 +1696,7 @@ bool vtRFThread::getRepresentativeTaxels(const std::vector<unsigned int> IDv, co
         {
             if (iCubSkin[IDx].taxel2Repr[*it] == -1)
             {
-                yWarning("[%s] taxel %u activated, but representative taxel undefined - ignoring.",SkinPart_s[iCubSkin[IDx].name].c_str(),*it);
+                yWarning("[%s] taxel %u activated, but representative taxel undefined - ignoring.",iCubSkin[IDx].name.c_str(),*it);
             }
             else
             {
@@ -1753,18 +1751,6 @@ void vtRFThread::threadRelease()
     yDebug("[vtRF::threadRelease]Saving taxels..\n");
         save();
 
-    yDebug("[vtRF::threadRelease]Deallocating iCubSkin..\n");
-        for (size_t i = 0; i < iCubSkin.size(); i++)
-        {
-            while(!iCubSkin[i].taxels.empty())
-            {
-                if (iCubSkin[i].taxels.back())
-                {
-                    delete iCubSkin[i].taxels.back();
-                }
-                iCubSkin[i].taxels.pop_back();
-            }
-        }
     
     yDebug("[vtRF::threadRelease]Closing controllers..\n");
         ddR.close();
