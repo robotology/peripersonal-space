@@ -909,6 +909,7 @@ bool vtRFThread::projectIncomingEvent()
             dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[2]);
 
             printMessage(5,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.toString().c_str());
+            }
         }
     }
     return true;
@@ -1222,9 +1223,9 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
         for(unsigned int j = 0; iss >> number; j++ )
         {
             if(j<3)
-                taxelPos[j]    = strtod(number.c_str(),NULL);
+                taxelPos[j]   = strtod(number.c_str(),NULL);
             else
-                taxelNorm[j-3] = strtod(number.c_str(),NULL);
+                taxelNrm[j-3] = strtod(number.c_str(),NULL);
         }
 
         if (sP.name == SkinPart_s[SKIN_LEFT_FOREARM] || sP.name == SkinPart_s[SKIN_RIGHT_FOREARM])
