@@ -265,7 +265,7 @@ void vtWThread::run()
                     
                     currentTask = doubleTouchBottle->get(3).asString();
                     doubleTouchStep = doubleTouchBottle->get(0).asInt();
-                    fingertipPos = matrixFromBottle(*doubleTouchBottle,20,4,4).subcol(0,3,3); // fixed translation from the palm
+                    fingertipPos = iCub::skinDynLib::matrixFromBottle(*doubleTouchBottle,20,4,4).subcol(0,3,3); // fixed translation from the palm
                     fingertipPos.push_back(1.0);
 
                     if(doubleTouchStep<=1)

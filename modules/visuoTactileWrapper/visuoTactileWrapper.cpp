@@ -100,7 +100,6 @@ Linux (Ubuntu 12.04, Debian Squeeze).
 #include "vtWThread.h"
 #include "iCub/periPersonalSpace/parzenWindowEstimator.h"
 
-YARP_DECLARE_DEVICES(icubmod)
 
 using namespace yarp;
 using namespace yarp::os;
@@ -243,8 +242,7 @@ int main(int argc, char * argv[])
 
     return true;*/
 
-    YARP_REGISTER_DEVICES(icubmod)
-
+    
     ResourceFinder moduleRF;
     moduleRF.setVerbose(true);
     moduleRF.setDefaultContext("periPersonalSpace");
