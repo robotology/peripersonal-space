@@ -43,7 +43,7 @@ YARP, ICUB libraries
 - The name of the module (default virtualContactGeneration).
 
 --robot         \e rob
-- The name of the robot (either "icub" or "icub"). Default icubSim.
+- The name of the robot (either "icub" or "icubSim"). Default icubSim.
 
 --rate          \e rate
 - The period used by the thread. Default 100ms, i.e. 10 Hz.
