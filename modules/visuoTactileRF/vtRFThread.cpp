@@ -1201,33 +1201,33 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
     }
     //filename = filename.substr(0, filename.find_last_of("_"));
        
-    // Open File
-    posFile.open(filePath.c_str());  
-    if (!posFile.is_open())
+    yarp::os::ResourceFinder rf;
+    rf.setVerbose(false);
+    rf.setDefaultContext("skinGui");            //overridden by --context parameter
+    rf.setDefaultConfigFile(filePath.c_str()); //overridden by --from parameter
+    if (!rf.configure(0,NULL))
     {
-        yWarning("[vtRFThread] File %s has not been opened!",filePath.c_str());
+        yError("[vtRFThread] ResourceFinder was not configured correctly! Filename:");
+        yError("%s",filename.c_str());
         return false;
     }
+    rf.setVerbose(true);
 
-    // Acquire taxels (different for 1D and 2D only because the 2D case cannot handle all of the taxels,
-    // so a subset of them [i.e. the representative taxels] has been used)
-    posFile.clear(); 
-    posFile.seekg(0, std::ios::beg);//rewind iterator
-    for(unsigned int i= 0; getline(posFile,line); i++)
+    yarp::os::Bottle &calibration = rf.findGroup("calibration");
+    if (calibration.isNull())
     {
-        line.erase(line.find_last_not_of(" \n\r\t")+1);
-        if(line.empty())
-                continue;
-        string number;
-        istringstream iss(line, istringstream::in);
-        for(unsigned int j = 0; iss >> number; j++ )
-        {
-            if(j<3)
-                taxelPos[j]   = strtod(number.c_str(),NULL);
-            else
-                taxelNrm[j-3] = strtod(number.c_str(),NULL);
-        }
+        yError("[vtRFThread::setTaxelPosesFromFile] No calibration group found!");
+        return false;
+    }
+    printMessage(6,"[vtRFThread::setTaxelPosesFromFile] found %i taxels (not all of them are valid taxels).\n", calibration.size()-1);
 
+    // First item of the bottle is "calibration", so we should not use it
+    for (int i = 1; i < calibration.size()-1; i++)
+    {
+        taxelPosNrm = vectorFromBottle(*(calibration.get(i).asList()),0,6);
+        taxelPos = taxelPosNrm.subVector(0,2);
+        taxelNrm = taxelPosNrm.subVector(3,5);
+        
         if (sP.name == SkinPart_s[SKIN_LEFT_FOREARM] || sP.name == SkinPart_s[SKIN_RIGHT_FOREARM])
         {
             // the taxels at the centers of respective triangles [note that i == taxelID == (line in the .txt file +1)]
@@ -1316,6 +1316,7 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
 
 void vtRFThread::initRepresentativeTaxels(skinPart &sP)
 {
+    printMessage(6,"[vtRFThread::initRepresentativeTaxels] Initializing representative taxels for %s\n",sP.name.c_str());
     int i=0;
     list<unsigned int> taxels_list;
     if (sP.name == SkinPart_s[SKIN_LEFT_FOREARM] || sP.name == SkinPart_s[SKIN_RIGHT_FOREARM])
