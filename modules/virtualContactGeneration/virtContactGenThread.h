@@ -101,7 +101,7 @@ protected:
     
     /**
     * Prints a message according to the verbosity level:
-    * @param l is the level of verbosity: if level > verbosity, something is printed
+    * @param l will be checked against the global var verbosity: if verbosity >= l, something is printed
     * @param f is the text. Please use c standard (like printf)
     */
     int printMessage(const int l, const char *f, ...) const;
