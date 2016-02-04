@@ -251,8 +251,9 @@ public:
          skinRF.setVerbose(false);
          skinRF.setDefaultContext("skinGui");                //overridden by --context parameter
          skinRF.setDefaultConfigFile("skinManAll.ini"); //overridden by --from parameter
+         skinRF.setVerbose(true);
          skinRF.configure(0,NULL);
-
+            
          Bottle &skinEventsConf = skinRF.findGroup("SKIN_EVENTS");
          if(!skinEventsConf.isNull())
          {
