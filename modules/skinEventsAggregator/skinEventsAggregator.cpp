@@ -117,7 +117,7 @@ public:
     bool configure(ResourceFinder &rf)
     {
         
-        name = "skinEventsAggregation";
+        name = "skinEventsAggregator";
         robot =  "icubSim";
         threadPeriod = 20; //period of the virtContactGenThread in ms
         verbosity = 0;

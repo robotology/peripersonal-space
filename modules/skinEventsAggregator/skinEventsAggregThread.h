@@ -33,21 +33,29 @@
 #include <yarp/os/Stamp.h>
 
 #include <iCub/skinDynLib/skinContact.h>
- #include <iCub/skinDynLib/skinPart.h>
+#include <iCub/skinDynLib/skinPart.h>
 #include <iCub/skinDynLib/skinContactList.h>
 
 #include <iCub/periPersonalSpace/utils.h>
 
 using namespace std;
 
-using namespace yarp;
-using namespace yarp::os;
-using namespace yarp::sig;
-
-using namespace iCub::skinDynLib;
-
-class skinEventsAggregThread: public RateThread
+class skinEventsAggregThread: public yarp::os::RateThread
 {
+    
+    
+public:
+    // CONSTRUCTOR
+    skinEventsAggregThread(int _rate, const string &_name, const string &_robot,
+                      int _v, const map<iCub::skinDynLib::SkinPart,string> &_skinPartPosFilePaths);
+    // INIT
+    virtual bool threadInit();
+    // RUN
+    virtual void run();
+    // RELEASE
+    virtual void threadRelease();
+ 
+    
 protected:
     /***************************************************************************/
     // EXTERNAL VARIABLES: change them from command line or through .ini file
@@ -58,11 +66,11 @@ protected:
     // Name of the robot (to address the module toward icub or icubSim):
     string robot;
     // Resource finder used to find for files and configurations:
-    ResourceFinder* rf;
+    yarp::os::ResourceFinder* rf;
     //the period used by the thread. 
     int threadPeriod; 
     
-    map<SkinPart,string> skinPartPosFilePaths;
+    map<iCub::skinDynLib::SkinPart,string> skinPartPosFilePaths;
        
     /***************************************************************************/
     // INTERNAL VARIABLES
@@ -70,9 +78,14 @@ protected:
     // Stamp for the setEnvelope for the ports
     yarp::os::Stamp ts;
     
-    BufferedPort<iCub::skinDynLib::skinContactList> skinEventsPortIn;  // input from the skinManager - skin_events port
-    Port skinEvAggregPortOut;                                // output for the transformed skin events
+    yarp::os::BufferedPort<iCub::skinDynLib::skinContactList> skinEventsPortIn;  // input from the skinManager - skin_events port
+    yarp::os::Port skinEvAggregPortOut;                                // output for the transformed skin events
    
+    double SKIN_ACTIVATION_MAX;
+ 
+    int getIndexOfBiggestContactInList(iCub::skinDynLib::skinContactList &sCL);
+   
+    
     /**
     * Prints a message according to the verbosity level:
     * @param l will be checked against the global var verbosity: if verbosity >= l, something is printed
@@ -80,17 +93,6 @@ protected:
     */
     int printMessage(const int l, const char *f, ...) const;
 
-    
-public:
-    // CONSTRUCTOR
-    skinEventsAggregThread(int _rate, const string &_name, const string &_robot,
-                      int _v, const map<SkinPart,string> &_skinPartPosFilePaths);
-    // INIT
-    virtual bool threadInit();
-    // RUN
-    virtual void run();
-    // RELEASE
-    virtual void threadRelease();
 
 };
 
