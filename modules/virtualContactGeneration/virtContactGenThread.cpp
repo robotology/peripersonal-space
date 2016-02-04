@@ -207,16 +207,26 @@ bool virtContactGenerationThread::threadInit()
         yError("[virtContactGenerationThread] activeSkinPartsNames and activeSkinParts have different size (%d vs. %d).\n",activeSkinPartsNames.size(),activeSkinParts.size());
         return false;    
     }
+    
+    taxelIDinList.clear();
+    skinPartIndexInVector = rand() % activeSkinPartsNames.size(); //so e.g. for size 3, this should give 0, 1, or 2, which is right
+    skinPartPickedName = activeSkinPartsNames[skinPartIndexInVector];
+    skinPartPicked = activeSkinParts[skinPartPickedName];
+    taxelPickedIndex = rand() % skinPartPicked.taxels.size(); 
+    taxelPicked = *(skinPartPicked.taxels[taxelPickedIndex]);
+    taxelIDinList.push_back(taxelPicked.getID()); //there will be only a single taxel in the list, but we want to keep the information which taxel it was
+    printMessage(3,"Randomly selecting taxel ID: %d, from %s. Pose in local FoR (pos,norm): %f %f %f; norm:%f %f %f.\n",taxelPicked.getID(),SkinPart_s[skinPartPickedName].c_str(),taxelPicked.getPosition()[0],taxelPicked.getPosition()[1],taxelPicked.getPosition()[2],taxelPicked.getNormal()[0],taxelPicked.getNormal()[1],taxelPicked.getNormal()[2]);  
         
+    
     return true;
 }
 
 void virtContactGenerationThread::run()
 {
     ts.update();
-    taxelIDinList.clear();
      
     if (type == "random"){
+        taxelIDinList.clear();
         skinPartIndexInVector = rand() % activeSkinPartsNames.size(); //so e.g. for size 3, this should give 0, 1, or 2, which is right
         skinPartPickedName = activeSkinPartsNames[skinPartIndexInVector];
         skinPartPicked = activeSkinParts[skinPartPickedName];
@@ -224,20 +234,24 @@ void virtContactGenerationThread::run()
         taxelPicked = *(skinPartPicked.taxels[taxelPickedIndex]);
         taxelIDinList.push_back(taxelPicked.getID()); //there will be only a single taxel in the list, but we want to keep the information which taxel it was
         printMessage(3,"Randomly selecting taxel ID: %d, from %s. Pose in local FoR (pos,norm): %f %f %f; norm:%f %f %f.\n",taxelPicked.getID(),SkinPart_s[skinPartPickedName].c_str(),taxelPicked.getPosition()[0],taxelPicked.getPosition()[1],taxelPicked.getPosition()[2],taxelPicked.getNormal()[0],taxelPicked.getNormal()[1],taxelPicked.getNormal()[2]);  
-            
-        skinContact c(getBodyPart(skinPartPickedName), skinPartPickedName, getLinkNum(skinPartPickedName), taxelPicked.getPosition(), taxelPicked.getPosition(),taxelIDinList,VIRT_CONTACT_PRESSURE,taxelPicked.getNormal());  
-        //   skinContact(const BodyPart &_bodyPart, const SkinPart &_skinPart, unsigned int _linkNumber, const yarp::sig::Vector &_CoP, 
-        //  const yarp::sig::Vector &_geoCenter, std::vector<unsigned int> _taxelList, double _pressure, const yarp::sig::Vector &_normalDir);
-        printMessage(3,"Creating skin contact as follows: %s.\n",c.toString().c_str());
-        
-       //see also void SimulatorModule::sendSkinEvents(iCub::skinDynLib::skinContactList& skinContactListReport)
-       //and compensationThread.cpp void CompensationThread::sendSkinEvents() 
-       skinContactList &listWithPickedSkinContact = skinEventsOutPort->prepare();
-       listWithPickedSkinContact.clear();;
-       listWithPickedSkinContact.push_back(c);
-       skinEventsOutPort->setEnvelope(ts);
-       skinEventsOutPort->write();
     }
+    else if(type == "randomThenFixed"){
+            ; //do nothing - taxel and body parts were picked in thread_init()
+    }
+    
+    skinContact c(getBodyPart(skinPartPickedName), skinPartPickedName, getLinkNum(skinPartPickedName), taxelPicked.getPosition(), taxelPicked.getPosition(),taxelIDinList,VIRT_CONTACT_PRESSURE,taxelPicked.getNormal());  
+    //   skinContact(const BodyPart &_bodyPart, const SkinPart &_skinPart, unsigned int _linkNumber, const yarp::sig::Vector &_CoP, 
+    //  const yarp::sig::Vector &_geoCenter, std::vector<unsigned int> _taxelList, double _pressure, const yarp::sig::Vector &_normalDir);
+    printMessage(3,"Creating skin contact as follows: %s.\n",c.toString().c_str());
+        
+    //see also void SimulatorModule::sendSkinEvents(iCub::skinDynLib::skinContactList& skinContactListReport)
+    //and compensationThread.cpp void CompensationThread::sendSkinEvents() 
+    skinContactList &listWithPickedSkinContact = skinEventsOutPort->prepare();
+    listWithPickedSkinContact.clear();;
+    listWithPickedSkinContact.push_back(c);
+    skinEventsOutPort->setEnvelope(ts);
+    skinEventsOutPort->write();
+    
 }
 
 int virtContactGenerationThread::printMessage(const int l, const char *f, ...) const
