@@ -317,6 +317,8 @@ public:
             delete virtContactGenThrd;
             virtContactGenThrd =  0;
         }
+        activeSkinPartsNamesVector.clear();
+        skinPartsPositionsFilePaths.clear();
         
         return true;
     }

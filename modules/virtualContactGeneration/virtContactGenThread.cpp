@@ -257,6 +257,11 @@ int virtContactGenerationThread::printMessage(const int l, const char *f, ...) c
 
 void virtContactGenerationThread::threadRelease()
 {
+    activeSkinPartsNames.clear();
+    skinPartPosFilePaths.clear();
+    activeSkinParts.clear();   
+    taxelIDinList.clear(); 
+    
     printMessage(0,"Closing ports..\n");
     closePort(skinEventsOutPort);
     printMessage(1,"skinEventsOutPort successfully closed!\n");
