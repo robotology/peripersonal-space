@@ -62,10 +62,11 @@ void skinEventsAggregThread::run()
                     b.clear();
                     biggestContactInSkinPart = (it->second)[indexOfBiggestContact];
                     //the output prepared should have identical format to the one prepared in  void vtRFThread::manageSkinEvents()    
-                    b.addString(biggestContactInSkinPart.getSkinPartName());
+                    b.addInt(biggestContactInSkinPart.getSkinPart());
                     vectorIntoBottle(biggestContactInSkinPart.getGeoCenter(),b);
                     vectorIntoBottle(biggestContactInSkinPart.getNormalDir(),b);
                     b.addDouble(min(1.0,(biggestContactInSkinPart.getPressure()/SKIN_ACTIVATION_MAX))); // % pressure "normalized" with ad hoc constant
+                    b.addString(biggestContactInSkinPart.getSkinPartName()); //this one just for readability
                     out.addList().read(b);
                 }
             }
