@@ -43,7 +43,7 @@ void skinEventsAggregThread::run()
     skinContact biggestContactInSkinPart;
     Vector geoCenter(3,0.0), normalDir(3,0.0);
     double activation = 0.0;
-    Bottle out; out.clear();
+    Bottle & out = skinEvAggregPortOut.prepare(); out.clear();
     Bottle b;     b.clear();
         
     ts.update();
@@ -71,8 +71,8 @@ void skinEventsAggregThread::run()
                 }
             }
             skinEvAggregPortOut.setEnvelope(ts);
-            skinEvAggregPortOut.write(out);     // send something anyway (if there is no contact the bottle is empty)
-        }
+            skinEvAggregPortOut.write();     // send something anyway (if there is no contact the bottle is empty)
+      }
     }
 }
   

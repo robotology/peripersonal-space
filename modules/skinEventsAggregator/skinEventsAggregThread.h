@@ -79,7 +79,7 @@ protected:
     yarp::os::Stamp ts;
     
     yarp::os::BufferedPort<iCub::skinDynLib::skinContactList> skinEventsPortIn;  // input from the skinManager - skin_events port
-    yarp::os::Port skinEvAggregPortOut;                                // output for the transformed skin events
+    yarp::os::BufferedPort<yarp::os::Bottle> skinEvAggregPortOut;                                // output for the transformed skin events
    
     double SKIN_ACTIVATION_MAX;
  
