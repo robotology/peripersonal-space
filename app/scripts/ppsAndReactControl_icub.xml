@@ -16,7 +16,7 @@
 
     <module>
         <name>skinEventsAggregator</name>
-        <parameters></parameters>
+        <parameters>general::robot icub</parameters>
         <node>localhost</node>
         <stdio></stdio>
         <tag>skinEventsAggreg</tag>
