@@ -47,7 +47,7 @@ class skinEventsAggregThread: public yarp::os::RateThread
 public:
     // CONSTRUCTOR
     skinEventsAggregThread(int _rate, const string &_name, const string &_robot,
-                      int _v, const map<iCub::skinDynLib::SkinPart,string> &_skinPartPosFilePaths);
+                      int _v);
     // INIT
     virtual bool threadInit();
     // RUN
@@ -69,8 +69,6 @@ protected:
     yarp::os::ResourceFinder* rf;
     //the period used by the thread. 
     int threadPeriod; 
-    
-    map<iCub::skinDynLib::SkinPart,string> skinPartPosFilePaths;
        
     /***************************************************************************/
     // INTERNAL VARIABLES

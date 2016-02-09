@@ -12,8 +12,8 @@ using namespace iCub::skinDynLib;
 
 /*************** public methods section ********************************************/
 
-skinEventsAggregThread::skinEventsAggregThread(int _rate, const string &_name, const string &_robot, int _v, const map<SkinPart,string> &_skinPartPosFilePaths): 
-RateThread(_rate),name(_name), robot(_robot), verbosity(_v), skinPartPosFilePaths(_skinPartPosFilePaths)
+skinEventsAggregThread::skinEventsAggregThread(int _rate, const string &_name, const string &_robot, int _v): 
+RateThread(_rate),name(_name), robot(_robot), verbosity(_v) 
 {
    ;
     

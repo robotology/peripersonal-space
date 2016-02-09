@@ -165,49 +165,9 @@ public:
             
            
            
-        //*************** SKIN PARTS FILENAMES FROM SKIN MANAGER INI FILES ****************  
-        
-         ResourceFinder skinRF;
-         int partNum;
-         skinRF.setVerbose(false);
-         skinRF.setDefaultContext("skinGui");                //overridden by --context parameter
-         skinRF.setDefaultConfigFile("skinManAll.ini"); //overridden by --from parameter
-         skinRF.configure(0,NULL);
-
-         Bottle &skinEventsConf = skinRF.findGroup("SKIN_EVENTS");
-         if(!skinEventsConf.isNull())
-         {
-            yInfo("SKIN_EVENTS section found\n");
-            if(skinEventsConf.check("skinParts"))
-            {
-                Bottle* skinPartList = skinEventsConf.find("skinParts").asList();
-                partNum=skinPartList->size();
-            }
-            if(skinEventsConf.check("taxelPositionFiles"))
-            {
-                Bottle *taxelPosFiles = skinEventsConf.find("taxelPositionFiles").asList();
-                for(int i=0;i<partNum;i++)     // all of the skinparts
-                {
-                    string taxelPosFile = taxelPosFiles->get(i).asString().c_str();
-                    string filePath(skinRF.findFile(taxelPosFile.c_str()));
-                    if (filePath!="")
-                    {
-                        if(verbosity>0) yInfo("[skin_event] filePath [%i in bottle] %s; setting under %s in skinPartsPositionsFilePath.\n",i,filePath.c_str(),SkinPart_s[i+1].c_str());
-                        skinPartsPositionsFilePaths[(SkinPart)(i+1)] = filePath;    //! Importantly, this is relying on the fact that the skin parts are in the 
-                        //right order in the .ini file, matching with SkinPart enum, and starting with 1 for left hand
-                    }
-                }
-            }
-            else
-            {
-                yError(" No skin's configuration files found.");
-                return 0;
-            }
-        }
-           
         //******************************************************
         //*********************** THREAD **********************
-        skinEvAggThrd = new skinEventsAggregThread(threadPeriod,name,robot,verbosity,skinPartsPositionsFilePaths);
+        skinEvAggThrd = new skinEventsAggregThread(threadPeriod,name,robot,verbosity);
         if (!skinEvAggThrd -> start())
         {
               delete skinEvAggThrd;
