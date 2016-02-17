@@ -217,45 +217,43 @@ private:
     {
         SkinPart sp = SKIN_PART_UNKNOWN;
         //all in the link FoR
-        Vector CoP(3,0.0); //center of pressure
+        Vector geocenter(3,0.0); //geocenter from skin / average activation locus from the pps
         Vector normal(3,0.0);
         Vector moment(3,0.0); // we leave it as zero
-        double force_module = 0.0; //magnitude of the force; we will assume it acts along the normal    
-        
+        double normalized_activation = 0.0;
+        std::vector<unsigned int> taxel_list;
+        taxel_list.clear(); //we will be always passing empty list
+
         Bottle* collPointsMultiBottle = inPort.read(false);
         if(collPointsMultiBottle != NULL){
             //printf("fillSkinContactFromAggregPort(): There were %d bottles on the port.\n",collPointsMultiBottle->size());
             for(int i=0; i< collPointsMultiBottle->size();i++){
                 sp = SKIN_PART_UNKNOWN;
-                CoP.zero(); normal.zero();  force_module = 0.0;
+                geocenter.zero(); normal.zero();  normalized_activation = 0.0;
                 Bottle* collPointBottle = collPointsMultiBottle->get(i).asList();
                 //printf("Bottle %d contains %s \n", i,collPointBottle->toString().c_str());
                 sp =  (SkinPart)(collPointBottle->get(0).asInt());
-                CoP(0) = collPointBottle->get(1).asDouble();
-                CoP(1) = collPointBottle->get(2).asDouble();
-                CoP(2) = collPointBottle->get(3).asDouble();
+                geocenter(0) = collPointBottle->get(1).asDouble();
+                geocenter(1) = collPointBottle->get(2).asDouble();
+                geocenter(2) = collPointBottle->get(3).asDouble();
                 normal(0) = collPointBottle->get(4).asDouble();
                 normal(1) = collPointBottle->get(5).asDouble();
                 normal(2) =  collPointBottle->get(6).asDouble();
-                force_module = collPointBottle->get(7).asDouble();
+                normalized_activation = collPointBottle->get(7).asDouble();
                 //printf("Testing Skin_2_Body with skinPart %s: body part: %s \n", SkinPart_s[sp].c_str(),BodyPart_s[(SkinPart_2_BodyPart[sp])].c_str());
                 
-                //we fill a dynContact but then convert to skinContact- iCubGui is using only force info, but is reading a skinContactList nevertheless
                 //see  iCubGui/src/objectsthread.h    ObjectsManager::manage(iCub::skinDynLib::skinContactList &forces)
                 //printf("fillDynContactFromAggregPort: setting dynContact: Body part: %s Linknum: %d CoP: %s F: %s M: %s\n",
                   //     BodyPart_s[SkinPart_2_BodyPart[sp].body].c_str(),getLinkNum(sp),geoCenter.toString(3,3).c_str(),(-1.0*normal).toString(3,3).c_str(),moment.toString(3,3).c_str());
-                //Note that the dynContact constructor will only set the force_direction, leaving the magnitude 0
-                //normal is set as the force vector direction, but with -1 to point to the skin
-                 dynContact d(SkinPart_2_BodyPart[sp].body, getLinkNum(sp), CoP,moment,-1.0*normal);
-                //printf("fillDynContactFromAggregPort: set dynContact: \n %s \n",d.toString(3).c_str());
-                //printf("fillDynContactFromAggregPort: getForceDirection:  %s \n",d.getForceDirection().toString(3).c_str());
+
+                //skinContact(const BodyPart &_bodyPart, const SkinPart &_skinPart, unsigned int _linkNumber, const yarp::sig::Vector &_CoP,
+                //        const yarp::sig::Vector &_geoCenter, std::vector<unsigned int> _taxelList, double _pressure, const yarp::sig::Vector &_normalDir,
+                //    const yarp::sig::Vector &_F, const yarp::sig::Vector &_Mu);
+                skinContact sc(SkinPart_2_BodyPart[sp].body,sp,getLinkNum(sp),geocenter,geocenter,taxel_list,
+                               amplification*normalized_activation,normal,-1.0*amplification*normalized_activation*normal,moment);
                 //in skinManager/src/compensator.cpp, Compensator::getContacts()there was:
                 // set an estimate of the force that is with normal direction and intensity equal to the pressure
                 //d.setForceModule(-0.05*activeTaxels*pressure*normal);
-                d.setForceModule(amplification*force_module);
-                //printf("fillDynContactFromAggregPort: dynContact after setting force module: \n %s \n",d.toString(3).c_str());
-                skinContact sc(d); //we create a skin contact out of a dyn contact
-
                 sCL.push_back(sc);
             }
             return true;
