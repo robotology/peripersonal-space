@@ -75,6 +75,7 @@ Linux (Ubuntu 12.04)
 
 #include <yarp/os/all.h>
 #include <yarp/sig/all.h>
+#include <yarp/math/Math.h>
 
 #include <iCub/skinDynLib/dynContact.h>
 #include <iCub/skinDynLib/dynContactList.h>
@@ -83,6 +84,7 @@ Linux (Ubuntu 12.04)
 using namespace std;
 using namespace yarp::os;
 using namespace yarp::sig;
+using namespace yarp::math;
 using namespace iCub::skinDynLib;
 
 /**
@@ -112,7 +114,8 @@ public:
         pps=rf.check("pps",Value("on")).asString()=="on"?true:false; // on | off
         gain=rf.check("gain",Value(100.0)).asDouble();
     
-        yInfo("Starting with the following parameters: \n context: %s \n from: %s \n name: %s \n verbosity: %d \n autoconect : %d \n tactile: %d \n pps: %d \n, gain: %f \n",context.c_str(),from.c_str(),name.c_str(),verbosity,autoconnect,tactile,pps,gain);
+        yInfo("Starting with the following parameters: \n context: %s \n from: %s \n name: %s \n verbosity: %d \n autoconnect : %d \n tactile: %d \n pps: %d \n gain: %f \n",
+              context.c_str(),from.c_str(),name.c_str(),verbosity,autoconnect,tactile,pps,gain);
     
         //open ports 
         if(tactile){
@@ -220,12 +223,12 @@ private:
         
         Bottle* collPointsMultiBottle = inPort.read(false);
         if(collPointsMultiBottle != NULL){
-            printf("fillSkinContactFromAggregPort(): There were %d bottles on the port.\n",collPointsMultiBottle->size());
+            //printf("fillSkinContactFromAggregPort(): There were %d bottles on the port.\n",collPointsMultiBottle->size());
             for(int i=0; i< collPointsMultiBottle->size();i++){
                 sp = SKIN_PART_UNKNOWN;
                 geoCenter.zero(); normal.zero();  force_module = 0.0;
                 Bottle* collPointBottle = collPointsMultiBottle->get(i).asList();
-                printf("Bottle %d contains %s", i,collPointBottle->toString().c_str());
+                //printf("Bottle %d contains %s \n", i,collPointBottle->toString().c_str());
                 sp =  (SkinPart)(collPointBottle->get(0).asInt());
                 geoCenter(0) = collPointBottle->get(1).asDouble();
                 geoCenter(1) = collPointBottle->get(2).asDouble();
@@ -238,20 +241,25 @@ private:
                 
                 //we just fill a dContact (no need for more info - like skinContact) - iCubGui is using only this information 
                 //see  iCubGui/src/objectsthread.h    ObjectsManager::manage(iCub::skinDynLib::skinContactList &forces)
-                
-                dynContact d(SkinPart_2_BodyPart[sp].body, getLinkNum(sp), geoCenter,moment,normal);
-                //normal is set as the force vector - so far thus unit length
-                //in skinManager/src/compensator.cpp, Compensator::getContacts()there was: 
+                //printf("fillDynContactFromAggregPort: setting dynContact: Body part: %s Linknum: %d CoP: %s F: %s M: %s\n",
+                  //     BodyPart_s[SkinPart_2_BodyPart[sp].body].c_str(),getLinkNum(sp),geoCenter.toString(3,3).c_str(),(-1.0*normal).toString(3,3).c_str(),moment.toString(3,3).c_str());
+                //Note that the dynContact constructor will only set the force_direction, leaving the magnitude 0
+                //normal is set as the force vector direction, but with -1 to point to the skin
+                 dynContact d(SkinPart_2_BodyPart[sp].body, getLinkNum(sp), geoCenter,moment,-1.0*normal);
+                //printf("fillDynContactFromAggregPort: set dynContact: \n %s \n",d.toString(3).c_str());
+                //printf("fillDynContactFromAggregPort: getForceDirection:  %s \n",d.getForceDirection().toString(3).c_str());
+                //in skinManager/src/compensator.cpp, Compensator::getContacts()there was:
                 // set an estimate of the force that is with normal direction and intensity equal to the pressure
                 //d.setForceModule(-0.05*activeTaxels*pressure*normal);
-                d.setForceModule(-1.0*amplification*force_module);
-                
+                d.setForceModule(amplification*force_module);
+                //printf("fillDynContactFromAggregPort: dynContact after setting force module: \n %s \n",d.toString(3).c_str());
+
                 dCL.push_back(d); 
             }
             return true;
         }
         else{
-            printf("fillDynContactFromAggregPort(): no tactile/pps vectors on the port.\n") ;
+            //printf("fillDynContactFromAggregPort(): no tactile/pps vectors on the port.\n") ;
             return false;
         };   
     }
