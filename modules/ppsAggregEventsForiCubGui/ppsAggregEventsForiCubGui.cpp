@@ -113,7 +113,7 @@ public:
         autoconnect=rf.check("autoconnect",Value("off")).asString()=="on"?true:false; // on | off
         tactile=rf.check("tactile",Value("on")).asString()=="on"?true:false; // on | off
         pps=rf.check("pps",Value("on")).asString()=="on"?true:false; // on | off
-        gain=rf.check("gain",Value(100.0)).asDouble();
+        gain=rf.check("gain",Value(70.0)).asDouble();
     
         yInfo("Starting with the following parameters: \n context: %s \n from: %s \n name: %s \n verbosity: %d \n autoconnect : %d \n tactile: %d \n pps: %d \n gain: %f \n",
               context.c_str(),from.c_str(),name.c_str(),verbosity,autoconnect,tactile,pps,gain);
@@ -182,7 +182,7 @@ public:
         if(pps)
             fillSkinContactFromAggregPort(aggregPPSeventsInPort,gain,mySkinContactList);
         
-       // if (! (myDynContactList.))
+       // if (! (mySkinContactList.))
         sendContacts(aggregEventsForiCubGuiPort,mySkinContactList);
         
         return true;
@@ -208,7 +208,6 @@ private:
     yarp::os::Stamp ts;
     
     skinContactList mySkinContactList;
-    
 
 
     // reading modified from react-control reactCtrlThread::getCollisionPointsFromPort
