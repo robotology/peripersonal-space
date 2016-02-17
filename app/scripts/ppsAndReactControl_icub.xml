@@ -43,6 +43,23 @@
        <protocol>udp</protocol>
     </connection>
 
+    <connection>
+        <from>/skinEventsAggregator/skin_events_aggreg:o</from>
+	<to>ppsAggregEventsForiCubGui/skin_events_aggreg:i</to>
+        <protocol>udp</protocol>
+    </connection>	
+
+    <connection>
+        <from>/visuoTactileRF/pps_events_aggreg:o</from>
+	<to>ppsAggregEventsForiCubGui/pps_events_aggreg:i</to>
+        <protocol>udp</protocol>
+    </connection>
+
+    <connection>
+        <from>ppsAggregEventsForiCubGui/contacts:o</from>
+	<to>/iCubGui/forces</to>
+        <protocol>udp</protocol>
+    </connection>
         
     <!--connection>
         <from></from>
