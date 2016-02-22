@@ -351,7 +351,7 @@ bool utManagerThread::getPointFromStereo()
 
         SFMPos = SFMtmp;
 
-        printMessage(3,"3D point from stereo vision: %s",SFMPos.toString());
+        printMessage(3,"3D point from stereo vision: %s",SFMPos.toString().c_str());
         return true;
     } 
 
