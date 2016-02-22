@@ -350,6 +350,8 @@ bool utManagerThread::getPointFromStereo()
         }
 
         SFMPos = SFMtmp;
+
+        printMessage(3,"3D point from stereo vision: %s",SFMPos.toString());
         return true;
     } 
 
@@ -400,7 +402,7 @@ int utManagerThread::printMessage(const int l, const char *f, ...) const
 {
     if (verbosity>=l)
     {
-        fprintf(stdout,"*** %s: ",name.c_str());
+        fprintf(stdout,"[%s] ",name.c_str());
 
         va_list ap;
         va_start(ap,f);
