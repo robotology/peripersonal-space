@@ -1,6 +1,6 @@
 #include "utManagerThread.h"
 
-utManagerThread::utManagerThread(int _rate, const string &_name, const string &_robot, int _v, kalmanThread *_kT, bool _useDispBlobber) :
+utManagerThread::utManagerThread(int _rate, const string &_name, const string &_robot, int _v, KalmanThread *_kT, bool _useDispBlobber) :
                        RateThread(_rate), name(_name), robot(_robot), verbosity(_v), useDispBlobber(_useDispBlobber)
 {
     kalThrd   = _kT;
@@ -54,7 +54,7 @@ void utManagerThread::run()
     }
     
     kalThrd -> getKalmanOutput(kalOut);
-    printMessage(1,"stateFlag %i kalState %i kalmanPos: %s\n",stateFlag,kalState,kalOut.toString().c_str());
+    printMessage(1,"stateFlag %i kalState %i KalmanPos: %s\n",stateFlag,kalState,kalOut.toString().c_str());
 
     if (stateFlag == 3)
     {
@@ -88,19 +88,24 @@ int utManagerThread::run_with_templateTracker_SFM()
             break;
         case 2:
             // state #02: read data from the Tracker and use the SFM to retrieve a 3D point.
-            // with that, initialize the kalman filter, and then step up.
+            // with that, initialize the Kalman filter, and then step up.
             readFromTracker();
             if (getPointFromStereo())
             {
                 yDebug("Initializing Kalman filter...\n");
-                kalThrd -> setKalmanState(KALMAN_INIT);
-                kalThrd -> kalmanInit(SFMPos);
+                kalThrd -> setKalmanState(Kalman_INIT);
+                kalThrd -> KalmanInit(SFMPos);
                 stateFlag++;
+            }
+            else
+            {
+                yError("No valid 3D point has been obtained from stereo vision! Stopping.")
+                stateFlag = 0;
             }
             break;
         case 3:
             // state #03: keep reading data from the Tracker and retrieving the 3D point from the SFM
-            // With this info, keep feeding the kalman filter until it thinks that the object is still
+            // With this info, keep feeding the Kalman filter until it thinks that the object is still
             // tracked. If not, go back from the initial state.
             printMessage(2,"Reading from tracker and SFM...\n");
             readFromTracker();
@@ -108,12 +113,17 @@ int utManagerThread::run_with_templateTracker_SFM()
             {
                 kalThrd -> setKalmanInput(SFMPos);
             }
+            else
+            {
+                yError("No valid 3D point has been obtained from stereo vision! Stopping.")
+                stateFlag = 0;
+            }
             
             kalThrd -> getKalmanState(kalState);
             sendGuiTarget();
-            if (kalState == KALMAN_STOPPED)
+            if (kalState == Kalman_STOPPED)
             {
-                yDebug("For some reasons, the kalman filters stopped. Going back to initial state.\n");
+                yDebug("For some reasons, the Kalman filters stopped. Going back to initial state.");
                 stateFlag = 0;
             }
             break;
@@ -151,12 +161,12 @@ int utManagerThread::run_with_dispBlobber()
             break;
         case 2:
             // state #02: read data from the dispBlobber and retrieve the 3D point of the center of the nearest blob
-            // with that, initialize the kalman filter, and then step up.
+            // with that, initialize the Kalman filter, and then step up.
             if (getPointFromDispBlobber())
             {
                 yDebug("Initializing Kalman filter...\n");
-                kalThrd -> setKalmanState(KALMAN_INIT);
-                kalThrd -> kalmanInit(dispBlobberPos);
+                kalThrd -> setKalmanState(Kalman_INIT);
+                kalThrd -> KalmanInit(dispBlobberPos);
                 stateFlag++;
             }
             break;
@@ -169,9 +179,9 @@ int utManagerThread::run_with_dispBlobber()
             
             kalThrd -> getKalmanState(kalState);
             sendGuiTarget();
-            if (kalState == KALMAN_STOPPED)
+            if (kalState == Kalman_STOPPED)
             {
-                yInfo("For some reasons, the kalman filters stopped. Going back to initial state.\n");
+                yInfo("For some reasons, the Kalman filters stopped. Going back to initial state.\n");
                 stateFlag = 0;
             }
             break;
