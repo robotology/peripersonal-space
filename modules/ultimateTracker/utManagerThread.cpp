@@ -1,6 +1,6 @@
 #include "utManagerThread.h"
 
-utManagerThread::utManagerThread(int _rate, const string &_name, const string &_robot, int _v, KalmanThread *_kT, bool _useDispBlobber) :
+utManagerThread::utManagerThread(int _rate, const string &_name, const string &_robot, int _v, kalmanThread *_kT, bool _useDispBlobber) :
                        RateThread(_rate), name(_name), robot(_robot), verbosity(_v), useDispBlobber(_useDispBlobber)
 {
     kalThrd   = _kT;
@@ -93,13 +93,13 @@ int utManagerThread::run_with_templateTracker_SFM()
             if (getPointFromStereo())
             {
                 yDebug("Initializing Kalman filter...\n");
-                kalThrd -> setKalmanState(Kalman_INIT);
-                kalThrd -> KalmanInit(SFMPos);
+                kalThrd -> setKalmanState(KALMAN_INIT);
+                kalThrd -> kalmanInit(SFMPos);
                 stateFlag++;
             }
             else
             {
-                yError("No valid 3D point has been obtained from stereo vision! Stopping.")
+                yError("No valid 3D point has been obtained from stereo vision! Stopping.");
                 stateFlag = 0;
             }
             break;
@@ -115,13 +115,13 @@ int utManagerThread::run_with_templateTracker_SFM()
             }
             else
             {
-                yError("No valid 3D point has been obtained from stereo vision! Stopping.")
+                yError("No valid 3D point has been obtained from stereo vision! Stopping.");
                 stateFlag = 0;
             }
             
             kalThrd -> getKalmanState(kalState);
             sendGuiTarget();
-            if (kalState == Kalman_STOPPED)
+            if (kalState == KALMAN_STOPPED)
             {
                 yDebug("For some reasons, the Kalman filters stopped. Going back to initial state.");
                 stateFlag = 0;
@@ -165,8 +165,8 @@ int utManagerThread::run_with_dispBlobber()
             if (getPointFromDispBlobber())
             {
                 yDebug("Initializing Kalman filter...\n");
-                kalThrd -> setKalmanState(Kalman_INIT);
-                kalThrd -> KalmanInit(dispBlobberPos);
+                kalThrd -> setKalmanState(KALMAN_INIT);
+                kalThrd -> kalmanInit(dispBlobberPos);
                 stateFlag++;
             }
             break;
@@ -179,7 +179,7 @@ int utManagerThread::run_with_dispBlobber()
             
             kalThrd -> getKalmanState(kalState);
             sendGuiTarget();
-            if (kalState == Kalman_STOPPED)
+            if (kalState == KALMAN_STOPPED)
             {
                 yInfo("For some reasons, the Kalman filters stopped. Going back to initial state.\n");
                 stateFlag = 0;
