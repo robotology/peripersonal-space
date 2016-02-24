@@ -78,13 +78,13 @@ bool vtRFThread::threadInit()
     skinGuiPortHandL.open(("/"+name+"/skinGuiHandL:o").c_str());
     skinGuiPortHandR.open(("/"+name+"/skinGuiHandR:o").c_str());
     skinPortIn          -> open(("/"+name+"/skin_events:i").c_str());
-    skinPortOut.open(("/"+name+"/skin_events:o").c_str());
+    ppsEventsPortOut.open(("/"+name+"/pps_events_aggreg:o").c_str());
     dataDumperPortOut.open(("/"+name+"/dataDumper:o").c_str());
 
     /**
     * I know that I should remove this but it's harmless (and I'm overly lazy)
     **/
-        if (robot=="icub")
+     /*   if (robot=="icub")
         {
             Network::connect("/icub/camcalib/left/out",("/"+name+"/imageL:i").c_str());
             Network::connect("/icub/camcalib/right/out",("/"+name+"/imageR:i").c_str());
@@ -107,7 +107,8 @@ bool vtRFThread::threadInit()
         Network::connect(("/"+name+"/skinGuiHandR:o").c_str(),"/skinGui/right_hand_virtual:i");
            
         Network::connect("/skinManager/skin_events:o",("/"+name+"/skin_events:i").c_str());
-
+       */
+        
         ts.update();
 
     /**************************/
@@ -469,8 +470,8 @@ void vtRFThread::manageSkinEvents()
     string part = SkinPart_s[SKIN_PART_UNKNOWN];
     int iCubSkinID=-1;
     bool isThereAnEvent = false;
-
-    Bottle out; out.clear();
+  
+    Bottle & out = ppsEventsPortOut.prepare();     out.clear();
     Bottle b;     b.clear();
 
     if (incomingEvents.size()>0)  // if there's an event
@@ -491,18 +492,15 @@ void vtRFThread::manageSkinEvents()
             if (isThereAnEvent && taxelsIDs.size()>0)
             {
                 Vector geoCenter(3,0.0), normalDir(3,0.0);
-                int w = 0, w_sum = 0;
+                int w = 0, w_max = 0;
                 part  = iCubSkin[i].name;
 
-                if (part == SkinPart_s[SKIN_LEFT_FOREARM] || part == SkinPart_s[SKIN_LEFT_HAND])
-                {
-                    b.addString("left");
-                }
-                else if (part == SkinPart_s[SKIN_RIGHT_FOREARM] || part == SkinPart_s[SKIN_RIGHT_HAND])
-                {
-                    b.addString("right");
-                }
-
+                //the output format on the port will be:
+                //(SkinPart_enum x y z n1 n2 n3 magnitude SkinPart_string)
+                //paralleling the one produced in skinEventsAggregator skinEventsAggregThread::run()
+               
+                b.addInt(getSkinPartFromString(iCubSkin[i].name));
+                
                 for (size_t k = 0; k < taxelsIDs.size(); k++)
                 {
                     for (size_t p = 0; p < iCubSkin[i].taxels.size(); p++)
@@ -510,25 +508,31 @@ void vtRFThread::manageSkinEvents()
                         if (iCubSkin[i].taxels[p]->getID() == taxelsIDs[k])
                         {
                             w = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[p])->Resp;
-                            geoCenter += iCubSkin[i].taxels[p]->getWRFPosition()*w;
+                            //geoCenter += iCubSkin[i].taxels[p]->getWRFPosition()*w; //original code
+                            geoCenter += iCubSkin[i].taxels[p]->getPosition()*w; //Matej, 24.2., changing convention -? link not root FoR
                             normalDir += locateTaxel(iCubSkin[i].taxels[p]->getNormal(),part)*w;
-                            w_sum += w;
+                            //w_sum += w;
+                            if (w>w_max)
+                                w_max = w;
                         }
                     }
                 }
 
-                geoCenter /= w_sum;
-                normalDir /= w_sum;
+                //geoCenter /= w_sum;
+                //normalDir /= w_sum;
                 vectorIntoBottle(geoCenter,b);
                 vectorIntoBottle(normalDir,b);
-                b.addInt(w_sum);
+                b.addInt(w_max);
+                b.addString(part);
                 out.addList().read(b);
             }
         }
+   
+         ppsEventsPortOut.setEnvelope(ts);
+         ppsEventsPortOut.write();     // let's send only if there was en event
     }
 
-    skinPortOut.setEnvelope(ts);
-    skinPortOut.write(out);     // send something anyway (if there is no contact the bottle is empty)
+   
 }
 
 void vtRFThread::sendContactsToSkinGui()
@@ -1851,6 +1855,10 @@ void vtRFThread::threadRelease()
         closePort(skinPortIn);
         yDebug("  skinPortIn successfully closed!\n");
 
+        ppsEventsPortOut.interrupt();
+        ppsEventsPortOut.close();
+        yDebug("ppsEventsPortOut successfully closed!\n");
+        
         // closePort(skinGuiPortForearmL);
         skinGuiPortForearmL.interrupt();
         skinGuiPortForearmL.close();
