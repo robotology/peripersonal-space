@@ -492,7 +492,9 @@ void vtRFThread::manageSkinEvents()
             if (isThereAnEvent && taxelsIDs.size()>0)
             {
                 Vector geoCenter(3,0.0), normalDir(3,0.0);
-                int w = 0, w_max = 0;
+                int w = 0;
+                int w_max = 0;
+                int w_sum = 0;
                 part  = iCubSkin[i].name;
 
                 //the output format on the port will be:
@@ -509,17 +511,18 @@ void vtRFThread::manageSkinEvents()
                         {
                             w = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[p])->Resp;
                             //geoCenter += iCubSkin[i].taxels[p]->getWRFPosition()*w; //original code
-                            geoCenter += iCubSkin[i].taxels[p]->getPosition()*w; //Matej, 24.2., changing convention -? link not root FoR
+                            //The final geoCenter and normalDir will be a weighted average of the activations
+                            geoCenter += iCubSkin[i].taxels[p]->getPosition()*w; //Matej, 24.2., changing convention - link not root FoR
                             normalDir += locateTaxel(iCubSkin[i].taxels[p]->getNormal(),part)*w;
-                            //w_sum += w;
+                            w_sum += w;
                             if (w>w_max)
                                 w_max = w;
                         }
                     }
                 }
 
-                //geoCenter /= w_sum;
-                //normalDir /= w_sum;
+                geoCenter /= w_sum;
+                normalDir /= w_sum;
                 vectorIntoBottle(geoCenter,b);
                 vectorIntoBottle(normalDir,b);
                 b.addInt(w_max);
