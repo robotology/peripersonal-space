@@ -296,10 +296,14 @@ double gauss2D(const double x_0, const double y_0,
         for (size_t i = 0; i < binsNum[0]*granularity; i++)
         {
             std::vector<double> xx;
-            xx.push_back(ext(0,0)+i*binWidth[0]*granularity);
+            //xx.push_back(ext(0,0)+i*binWidth[0]*granularity);
+            xx.push_back(ext(0,0)+i*binWidth[0]/granularity);
             double func = getF_X(xx);
 
             max  = func>max?func:max;
+            //printf("xx[0] %f, getF_X(xx) %f, max %f, ext(0,0) %f, binsNum[0] %d, binWidth[0] %f\n",
+                             //   xx[0], func, max, ext(0,0), binsNum[0],binWidth[0]);
+            //printf("binsNum[0]: %d binWidth[0]: %f\n",binsNum[0],binWidth[0]);
         }
 
         double scalingfactor_max = 255/max;
@@ -309,6 +313,7 @@ double gauss2D(const double x_0, const double y_0,
         {
             return max;
         }
+       // printf("scalingfactor_max %g f_X %gmax %g\n", getF_X(x), scalingfactor_max,max);
 
         return getF_X(x)*scalingfactor_max;
     }
@@ -368,8 +373,8 @@ double gauss2D(const double x_0, const double y_0,
             for (size_t j = 0; j < binsNum[1]*granularity; j++)
             {
                 std::vector<double> xx;
-                xx.push_back(ext(0,0)+i*binWidth[0]*granularity);
-                xx.push_back(ext(1,0)+j*binWidth[1]*granularity);
+                xx.push_back(ext(0,0)+i*binWidth[0]/granularity);
+                xx.push_back(ext(1,0)+j*binWidth[1]/granularity);
                 double func = getF_X(xx);
 
                 max  = func>max?func:max;
