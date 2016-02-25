@@ -351,7 +351,7 @@ void vtRFThread::run()
         for (size_t i = 0; i < inputEvents.size(); i++)
         {
             incomingEvents.push_back(IncomingEvent(*(inputEvents.get(i).asList())));
-            printMessage(3,"[EVENT] %s", incomingEvents.back().toString().c_str());
+            printMessage(3,"[EVENT] %s\n", incomingEvents.back().toString().c_str());
         }
 
         // manage the buffer
@@ -472,7 +472,7 @@ void vtRFThread::manageSkinEvents()
     string part = SkinPart_s[SKIN_PART_UNKNOWN];
     int iCubSkinID=-1;
     bool isThereAnEvent = false;
-  
+
     Bottle & out = ppsEventsPortOut.prepare();     out.clear();
     Bottle b;     b.clear();
 
@@ -480,7 +480,8 @@ void vtRFThread::manageSkinEvents()
     {
         for (size_t i = 0; i < iCubSkinSize; i++) // cycle through the skinparts
         {
-            b.clear();
+            b.clear(); //so there will be one bottle per skin part (if there was a significant event)
+            taxelsIDs.clear();
             isThereAnEvent = false;
 
             //take only highly activated "taxels"
@@ -513,7 +514,7 @@ void vtRFThread::manageSkinEvents()
                         if (iCubSkin[i].taxels[p]->getID() == taxelsIDs[k])
                         {
                             w = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[p])->Resp;
-                            printMessage(4,"part %s: pps taxel ID %d, pos (%s), activation: \n",part.c_str(),taxelsIDs[k],iCubSkin[i].taxels[p]->getPosition().toString().c_str(),w);
+                            printMessage(4,"part %s: pps taxel ID %d, pos (%s), activation: %d\n",part.c_str(),taxelsIDs[k],iCubSkin[i].taxels[p]->getPosition().toString().c_str(),w);
                             //geoCenter += iCubSkin[i].taxels[p]->getWRFPosition()*w; //original code
                             //The final geoCenter and normalDir will be a weighted average of the activations
                             geoCenter += iCubSkin[i].taxels[p]->getPosition()*w; //Matej, 24.2., changing convention - link not root FoR
