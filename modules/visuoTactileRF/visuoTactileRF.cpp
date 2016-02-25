@@ -274,7 +274,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                yInfo("[skin_event] filePath [%i] %s\n",0,filePath.c_str());
+                                yInfo("[visuoTactileRF] filePath [%i] %s\n",0,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
@@ -284,7 +284,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                yInfo("[skin_event] filePath [%i] %s\n",1,filePath.c_str());
+                                yInfo("[visuoTactileRF] filePath [%i] %s\n",1,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
@@ -294,7 +294,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                yInfo("[skin_event] filePath [%i] %s\n",2,filePath.c_str());
+                                yInfo("[visuoTactileRF] filePath [%i] %s\n",2,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
@@ -304,7 +304,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                yInfo("[skin_event] filePath [%i] %s\n",3,filePath.c_str());
+                                yInfo("[visuoTactileRF] filePath [%i] %s\n",3,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
@@ -317,7 +317,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                yInfo("[skin_event] filePath [%i] %s\n",i,filePath.c_str());
+                                yInfo("[visuoTactileRF] filePath [%i] %s\n",i,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
