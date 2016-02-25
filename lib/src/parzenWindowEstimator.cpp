@@ -302,7 +302,7 @@ double gauss2D(const double x_0, const double y_0,
             max  = func>max?func:max;
         }
 
-        double scalingfactor_max = 100/max;
+        double scalingfactor_max = 255/max;
 
         // if the histogram is empty, the maximum value is 0
         if (max == 0)

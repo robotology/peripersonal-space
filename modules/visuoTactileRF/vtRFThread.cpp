@@ -310,6 +310,8 @@ void vtRFThread::run()
 
     dumpedVector.resize(0,0.0);
 
+    //not used anymore
+    /*
     // project taxels in World Reference Frame
     for (size_t i = 0; i < iCubSkin.size(); i++)
     {
@@ -318,7 +320,7 @@ void vtRFThread::run()
             iCubSkin[i].taxels[j]->setWRFPosition(locateTaxel(iCubSkin[i].taxels[j]->getPosition(),iCubSkin[i].name));
             printMessage(7,"iCubSkin[%i].taxels[%i].WRFPos %s\n",i,j,iCubSkin[i].taxels[j]->getWRFPosition().toString().c_str());
         }
-    }
+    }*/
 
     Bottle inputEvents;
     inputEvents.clear();
@@ -481,6 +483,7 @@ void vtRFThread::manageSkinEvents()
             b.clear();
             isThereAnEvent = false;
 
+            //take only highly activated "taxels"
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++) // cycle through the taxels
             {
                 if (dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp > 50)
@@ -505,11 +508,12 @@ void vtRFThread::manageSkinEvents()
                 
                 for (size_t k = 0; k < taxelsIDs.size(); k++)
                 {
-                    for (size_t p = 0; p < iCubSkin[i].taxels.size(); p++)
+                    for (size_t p = 0; p < iCubSkin[i].taxels.size(); p++) //these two loops are not an efficient implementation
                     {
                         if (iCubSkin[i].taxels[p]->getID() == taxelsIDs[k])
                         {
                             w = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[p])->Resp;
+                            printMessage(4,"part %s: pps taxel ID %d, pos (%s), activation: \n",part.c_str(),taxelsIDs[k],iCubSkin[i].taxels[p]->getPosition().toString().c_str(),w);
                             //geoCenter += iCubSkin[i].taxels[p]->getWRFPosition()*w; //original code
                             //The final geoCenter and normalDir will be a weighted average of the activations
                             geoCenter += iCubSkin[i].taxels[p]->getPosition()*w; //Matej, 24.2., changing convention - link not root FoR
