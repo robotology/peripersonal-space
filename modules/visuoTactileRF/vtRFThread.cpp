@@ -518,7 +518,7 @@ void vtRFThread::manageSkinEvents()
                             //geoCenter += iCubSkin[i].taxels[p]->getWRFPosition()*w; //original code
                             //The final geoCenter and normalDir will be a weighted average of the activations
                             geoCenter += iCubSkin[i].taxels[p]->getPosition()*w; //Matej, 24.2., changing convention - link not root FoR
-                            normalDir += locateTaxel(iCubSkin[i].taxels[p]->getNormal(),part)*w;
+                            normalDir += iCubSkin[i].taxels[p]->getNormal()*w;
                             w_sum += w;
                             if (w>w_max)
                                 w_max = w;
@@ -530,7 +530,7 @@ void vtRFThread::manageSkinEvents()
                 normalDir /= w_sum;
                 vectorIntoBottle(geoCenter,b);
                 vectorIntoBottle(normalDir,b);
-                b.addInt(w_max);
+                b.addInt(w_max/255.0); //scaling - will be normalized in the end 
                 b.addString(part);
                 out.addList().read(b);
             }
