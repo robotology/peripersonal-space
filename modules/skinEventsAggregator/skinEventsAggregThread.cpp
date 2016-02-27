@@ -1,5 +1,6 @@
 #include "skinEventsAggregThread.h"
 
+#define MIN_NUMBER_OF_TAXELS_ACTIVATED 4 //to filter out phantoms
 #define SKIN_ACTIVATION_MAX_ICUB_SIM 100
 #define SKIN_ACTIVATION_MAX_ICUB 30
 
@@ -97,20 +98,20 @@ void skinEventsAggregThread::threadRelease()
 int skinEventsAggregThread::getIndexOfBiggestContactInList(iCub::skinDynLib::skinContactList &sCL)
 {
     int index = -1;
-    unsigned int maxActivatedTaxels = 0;
+    unsigned int maxActivatedTaxels = MIN_NUMBER_OF_TAXELS_ACTIVATED;
     if (! sCL.empty())
     {
         for(skinContactList::iterator c=sCL.begin(); c!=sCL.end(); c++)
         {
-             if( c->getActiveTaxels() > maxActivatedTaxels)
+             if( c->getActiveTaxels() >= maxActivatedTaxels)
              {
                 maxActivatedTaxels = c->getActiveTaxels();
                 index = std::distance( sCL.begin(), c);
              }
         }
     }
-    if (index == -1)
-       yError("skinEventsAggregThread::getIndexOfBiggestContactInList: returning index -1");
+    //if (index == -1)
+      // yError("skinEventsAggregThread::getIndexOfBiggestContactInList: returning index -1");
     
     return index;
 }
