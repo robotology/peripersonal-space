@@ -310,8 +310,6 @@ void vtRFThread::run()
 
     dumpedVector.resize(0,0.0);
 
-    //not used anymore
-    /*
     // project taxels in World Reference Frame
     for (size_t i = 0; i < iCubSkin.size(); i++)
     {
@@ -320,7 +318,7 @@ void vtRFThread::run()
             iCubSkin[i].taxels[j]->setWRFPosition(locateTaxel(iCubSkin[i].taxels[j]->getPosition(),iCubSkin[i].name));
             printMessage(7,"iCubSkin[%i].taxels[%i].WRFPos %s\n",i,j,iCubSkin[i].taxels[j]->getWRFPosition().toString().c_str());
         }
-    }*/
+    }
 
     Bottle inputEvents;
     inputEvents.clear();
@@ -496,6 +494,7 @@ void vtRFThread::manageSkinEvents()
             if (isThereAnEvent && taxelsIDs.size()>0)
             {
                 Vector geoCenter(3,0.0), normalDir(3,0.0);
+                Vector geoCenterWRF(3,0.0), normalDirWRF(3,0.0); //in world reference frame
                 int w = 0;
                 int w_max = 0;
                 int w_sum = 0;
@@ -515,10 +514,11 @@ void vtRFThread::manageSkinEvents()
                         {
                             w = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[p])->Resp;
                             printMessage(4,"part %s: pps taxel ID %d, pos (%s), activation: %d\n",part.c_str(),taxelsIDs[k],iCubSkin[i].taxels[p]->getPosition().toString().c_str(),w);
-                            //geoCenter += iCubSkin[i].taxels[p]->getWRFPosition()*w; //original code
                             //The final geoCenter and normalDir will be a weighted average of the activations
                             geoCenter += iCubSkin[i].taxels[p]->getPosition()*w; //Matej, 24.2., changing convention - link not root FoR
                             normalDir += iCubSkin[i].taxels[p]->getNormal()*w;
+                            geoCenterWRF += iCubSkin[i].taxels[p]->getWRFPosition()*w; //original code
+                            normalDirWRF += locateTaxel(iCubSkin[i].taxels[p]->getNormal(),part)*w;
                             w_sum += w;
                             if (w>w_max)
                                 w_max = w;
@@ -528,8 +528,12 @@ void vtRFThread::manageSkinEvents()
 
                 geoCenter /= w_sum;
                 normalDir /= w_sum;
+                geoCenterWRF /= w_sum;
+                normalDirWRF /= w_sum;
                 vectorIntoBottle(geoCenter,b);
                 vectorIntoBottle(normalDir,b);
+                vectorIntoBottle(geoCenterWRF,b);
+                vectorIntoBottle(normalDirWRF,b);
                 b.addInt(w_max/255.0); //scaling - will be normalized in the end 
                 b.addString(part);
                 out.addList().read(b);
