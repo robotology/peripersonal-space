@@ -238,7 +238,7 @@ private:
                 normal(0) = collPointBottle->get(4).asDouble();
                 normal(1) = collPointBottle->get(5).asDouble();
                 normal(2) =  collPointBottle->get(6).asDouble();
-                normalized_activation = collPointBottle->get(7).asDouble();
+                normalized_activation = collPointBottle->get(13).asDouble();
                 //printf("Testing Skin_2_Body with skinPart %s: body part: %s \n", SkinPart_s[sp].c_str(),BodyPart_s[(SkinPart_2_BodyPart[sp])].c_str());
                 
                 //see  iCubGui/src/objectsthread.h    ObjectsManager::manage(iCub::skinDynLib::skinContactList &forces)
