@@ -26,7 +26,7 @@ Date first release: 01/02/2016
 CopyPolicy: Released under the terms of the GNU GPL v2.0.
 
 \section intro_sec Description
-Aggregates skinContact events (aka skin_events) - into one aggregated output per skin part with average location, normal and magnitude as extracted from the skin positions files. Maximum 1 vector per skin part; format: (SkinPart_enum x y z o1 o2 o3 magnitude SkinPart_string) (...) - for a maximum of the number of skin parts active
+Aggregates skinContact events (aka skin_events) - into one aggregated output per skin part with average location, normal and magnitude as extracted from the skin positions files. Maximum 1 vector per skin part; format: (SkinPart_enum x y z n1 n2 n3 0.0 0.0 0.0 0.0 0.0 0.0 magnitude SkinPart_string) (...) - for a maximum of the number of skin parts active.   We add dummy geoCenter and normalDir in Root frame to keep same format as vtRFThread manageSkinEvents().
 
 \section lib_sec Libraries 
 YARP, ICUB libraries 
