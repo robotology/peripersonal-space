@@ -10,14 +10,6 @@
 #define RADIUS              2 // Radius in px of every taxel (in the images)
 #define SKIN_THRES	        7 // Threshold with which a contact is detected
 
-// enum SkinPart { 
-//     SKIN_PART_UNKNOWN=0, 
-//     SKIN_LEFT_HAND, SKIN_LEFT_FOREARM, SKIN_LEFT_UPPER_ARM, 
-//     SKIN_RIGHT_HAND, SKIN_RIGHT_FOREARM, SKIN_RIGHT_UPPER_ARM, 
-//     SKIN_FRONT_TORSO, 
-//     SKIN_PART_ALL, SKIN_PART_SIZE
-// };
-
 IncomingEvent eventFromBottle(const Bottle &b)
 {
     IncomingEvent ie;
@@ -38,7 +30,7 @@ vtRFThread::vtRFThread(int _rate, const string &_name, const string &_robot, con
         eventsPort    = new BufferedPort<Bottle>;
         skinPortIn    = new BufferedPort<iCub::skinDynLib::skinContactList>;
 
-    //******************* ARMS, EYEWRAPPERS, WHATEVER ******************
+    //******************* ARMS, EYEWRAPPERS ******************
         armR = new iCubArm("right");
         armL = new iCubArm("left");
 
@@ -82,7 +74,7 @@ bool vtRFThread::threadInit()
     dataDumperPortOut.open(("/"+name+"/dataDumper:o").c_str());
 
     /**
-    * I know that I should remove this but it's harmless (and I'm overly lazy)
+    * It is not recommended but it is fast practice as well
     **/
         if (robot=="icub")
         {
@@ -108,7 +100,7 @@ bool vtRFThread::threadInit()
            
         Network::connect("/skinManager/skin_events:o",("/"+name+"/skin_events:i").c_str());
 
-        ts.update();
+    ts.update();
 
     /**************************/
         if (rf->check("rightHand") || rf->check("rightForeArm") ||
@@ -222,41 +214,6 @@ bool vtRFThread::threadInit()
         iencsH->getAxes(&jntsH);
         encsH = new yarp::sig::Vector(jntsH,0.0);
 
-    /**************************/
-        // try
-        // {
-        //     Taxel *base = new Taxel();
-        //     Taxel *derived = new TaxelPWE1D();
-        //     TaxelPWE1D *casted;
-
-        //     casted = dynamic_cast<TaxelPWE1D*>(derived);
-        //     if (casted==0) cout << "Null pointer on first type-cast.\n";
-
-        //     casted = dynamic_cast<TaxelPWE1D*>(base);
-        //     if (casted==0) cout << "Null pointer on second type-cast.\n";
-        // }
-        // catch (exception& e)
-        // {
-        //     cout << "Exception: " << e.what() << endl;
-        // }
-    /**************************/
-        // Vector taxelPos(3,0.5);
-        // Vector taxelNrm(3,0.2);
-
-        // std::vector<Taxel*> taxels;
-        // taxels.push_back(new TaxelPWE1D(taxelPos,taxelNrm,2));
-
-        // printf("*********\n\n*********\n");
-        // taxels[0] -> print(10);
-        // printf("*********\n\n*********\n");
-        // TaxelPWE1D *t  = dynamic_cast<TaxelPWE1D*>(taxels[0]);
-        // t -> print();
-        // taxels[0] -> setID(199);
-        // printf("*********\n\n*********\n");
-        // t -> print(10);
-        // printf("*********\n\n*********\n");
-    /**************************/
-
         yDebug("Setting up iCubSkin...");
         iCubSkinSize = filenames.size();
 
@@ -272,22 +229,8 @@ bool vtRFThread::threadInit()
         }
         load();
 
-            // printf("*********\n\n*********\n");
-            // iCubSkin[0].print();
-            // printf("*********\n\n*********\n");
+        yInfo("iCubSkin correctly instantiated. Size: %lu",iCubSkin.size());
 
-            // TaxelPWE1D *tdc = dynamic_cast<TaxelPWE1D*>(iCubSkin[0].taxels[0]);
-            // cout << tdc << endl;
-            // if (tdc)
-            // {
-            //     cout << tdc->pwe << endl;
-            //     // cout << *tdc << endl;
-            //     tdc -> print(5);
-            //     // TaxelPWE1D *tpwe = dynamic_cast<TaxelPWE1D*>(iCubSkin[0].taxels[0]);
-            //     printf("\n\n\n\n\n");
-            // }
-
-        yInfo("iCubSkin correctly instantiated. Size: %i",iCubSkin.size());
         if (verbosity>= 2)
         {
             for (size_t i = 0; i < iCubSkin.size(); i++)
@@ -362,7 +305,7 @@ void vtRFThread::run()
         else
         {
             eventsBuffer.push_back(incomingEvents.back());
-            yDebug("I'm bufferizing! Size %i",eventsBuffer.size());
+            yDebug("I'm bufferizing! Size %lu",eventsBuffer.size());
         }
 
         // limit the size of the buffer to 80, i.e. 4 seconds of acquisition
@@ -561,7 +504,7 @@ void vtRFThread::sendContactsToSkinGui()
 
                     if (l.empty())
                     {
-                        yWarning("skinPart %d Taxel %d : no list of represented taxels is available, even if repr2TaxelList is not empty",i,iCubSkin[i].taxels[j]->getID());
+                        yWarning("skinPart %lu Taxel %i : no list of represented taxels is available, even if repr2TaxelList is not empty",i,iCubSkin[i].taxels[j]->getID());
                         respToSkin[iCubSkin[i].taxels[j]->getID()] = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp;
                     }
                     else
@@ -581,18 +524,6 @@ void vtRFThread::sendContactsToSkinGui()
         colorBottle.addInt(0);
         colorBottle.addInt(200);
         colorBottle.addInt(100);
-
-        // Bottle outputBottle=
-
-        // Bottle colorBottle,compensatedDataBottle;
-        // colorBottle.addList().read(color);
-        // compensatedDataBottle.addList().read(compensatedData2Send);
-
-        // Property& outputData = compensatedTactileDataPort.prepare();
-        // outputData.put("color",colorBottle.get(0));
-        // outputData.put("data",compensatedDataBottle.get(0));
-
-        // compensatedTactileDataPort.write();
 
         BufferedPort<Bottle> *outPort;
         if(iCubSkin[i].name == SkinPart_s[SKIN_LEFT_FOREARM])
