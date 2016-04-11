@@ -31,7 +31,7 @@
     <module>
         <name>pf3dTracker</name>
         <parameters>--from pf3dTracker.ini</parameters>
-        <node>icub19</node>
+        <node>localhost</node>
         <tag>PF3DTracker</tag>
     </module>
 
