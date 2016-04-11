@@ -203,7 +203,7 @@ bool virtContactGenerationThread::threadInit()
         printInitializedSkinParts();
     }
     if (activeSkinPartsNames.size() != activeSkinParts.size()){
-        yError("[virtContactGenerationThread] activeSkinPartsNames and activeSkinParts have different size (%d vs. %d).\n",activeSkinPartsNames.size(),activeSkinParts.size());
+        yError("[virtContactGenerationThread] activeSkinPartsNames and activeSkinParts have different size (%lu vs. %lu).\n",activeSkinPartsNames.size(),activeSkinParts.size());
         return false;    
     }
         

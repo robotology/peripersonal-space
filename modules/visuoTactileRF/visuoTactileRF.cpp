@@ -424,7 +424,7 @@ int main(int argc, char * argv[])
 
     if (moduleRF.check("help"))
     {    
-        yInfo("");
+        yInfo(" ");
         yInfo("Options:");
         yInfo("  --context    path:   where to find the called resource (default periPersonalSpace).");
         yInfo("  --from       from:   the name of the .ini file (default visuoTactileRF.ini).");
@@ -439,7 +439,7 @@ int main(int argc, char * argv[])
         yInfo("  --rightForeArm, --rightHand, --leftForeArm, --leftHand     flag: flag(s) to call if the module");
         yInfo("                       has to be run with either one of the 4 skin parts available.");
         yInfo("                       Not using any of them is equal to call all of them at the same time.");
-        yInfo("");
+        yInfo(" ");
         return 0;
     }
     

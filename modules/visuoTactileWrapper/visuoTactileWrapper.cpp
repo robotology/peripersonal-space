@@ -251,9 +251,9 @@ int main(int argc, char * argv[])
 
     if (moduleRF.check("help"))
     {    
-        yInfo("");
+        yInfo(" ");
         yInfo("Options:");
-        yInfo("");
+        yInfo(" ");
         yInfo("   --context       path:  where to find the called resource (default periPersonalSpace).");
         yInfo("   --from          from:  the name of the .ini file (default visuoTactileWrapper.ini).");
         yInfo("   --name          name:  the name of the module (default visuoTactileWrapper).");
@@ -262,7 +262,7 @@ int main(int argc, char * argv[])
         yInfo("   --verbosity     int:   verbosity level (default 0).");
         yInfo("   --noDoubleTouch flag:  disables the doubleTouch from the acquisition.");
         yInfo("                          The fingertipTracker acquisition is disabled as well.");
-        yInfo("");
+        yInfo(" ");
         return 0;
     }
     

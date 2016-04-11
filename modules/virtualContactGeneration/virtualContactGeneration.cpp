@@ -348,9 +348,9 @@ int main(int argc, char * argv[])
 
     if (rf.check("help"))
     {   
-        yInfo(""); 
+        yInfo(" "); 
         yInfo("Options:");
-        yInfo("");
+        yInfo(" ");
         yInfo("  --context    path:  where to find the called resource");
         yInfo("  --from       from:  the name of the .ini file.");
         yInfo("  --general::name      name:  the name of the module (default virtualContactGeneration).");
@@ -364,7 +364,7 @@ int main(int argc, char * argv[])
         yInfo("  --skin_parts::SKIN_LEFT_UPPER_ARM  on/off: if to enable the left  upper arm or not.");
         yInfo("  --skin_parts::SKIN_LEFT_FOREARM    on/off: if to enable the left  forearm   or not.");
         yInfo("  --skin_parts::SKIN_LEFT_HAND       on/off: if to enable the left  hand      or not.");
-        yInfo("");
+        yInfo(" ");
         return 0;
     }
     
