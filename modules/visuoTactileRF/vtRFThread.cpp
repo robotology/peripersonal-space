@@ -534,7 +534,7 @@ void vtRFThread::manageSkinEvents()
                 vectorIntoBottle(normalDir,b);
                 vectorIntoBottle(geoCenterWRF,b);
                 vectorIntoBottle(normalDirWRF,b);
-                b.addInt(w_max/255.0); //scaling - will be normalized in the end 
+                b.addDouble(w_max/255.0); //scaling - will be normalized in the end 
                 b.addString(part);
                 out.addList().read(b);
             }

@@ -69,7 +69,7 @@ void skinEventsAggregThread::run()
                     //we add dummy geoCenter and normalDir in Root frame to keep same format as vtRFThread manageSkinEvents 
                     b.addDouble(0.0); b.addDouble(0.0); b.addDouble(0.0);
                     b.addDouble(0.0); b.addDouble(0.0); b.addDouble(0.0);
-                    b.addDouble(min(1.0,(biggestContactInSkinPart.getPressure()/SKIN_ACTIVATION_MAX))); // % pressure "normalized" with ad hoc constant
+                    b.addDouble(max(1.0,(biggestContactInSkinPart.getPressure()/SKIN_ACTIVATION_MAX))); // % pressure "normalized" with ad hoc constant
                     b.addString(biggestContactInSkinPart.getSkinPartName()); //this one just for readability
                     out.addList().read(b);
                 }
