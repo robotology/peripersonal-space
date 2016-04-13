@@ -351,7 +351,7 @@ void vtWThread::sendGuiTarget()
     {
         Bottle obj;
         obj.addString("object");
-        obj.addString("Target");
+        obj.addString("obstacle");
      
         // size 
         obj.addDouble(50.0);
@@ -370,8 +370,8 @@ void vtWThread::sendGuiTarget()
     
         // color
         obj.addInt(255);
-        obj.addInt(125);
-        obj.addInt(125);
+        obj.addInt(0);
+        obj.addInt(0);
     
         // transparency
         obj.addDouble(0.9);
