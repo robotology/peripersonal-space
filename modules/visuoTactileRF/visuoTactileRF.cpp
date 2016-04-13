@@ -195,7 +195,7 @@ public:
         modality = "1D";
 
         verbosity  = 0;     // verbosity
-        rate       = 50;    // rate of the vtRFThread
+        rate       = 20;    // rate of the vtRFThread
 
         //******************************************************
         //********************** CONFIGS ***********************
