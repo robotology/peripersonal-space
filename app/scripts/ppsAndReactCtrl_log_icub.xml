@@ -37,7 +37,7 @@
     </module>
     
     <module>
-        <name>dataDumper</name>
+        <name>yarpdatadumper</name>
         <parameters>--name /data/visuoTactileRF --txTime --rxTime</parameters>
         <node>localhost</node>
         <stdio></stdio>
