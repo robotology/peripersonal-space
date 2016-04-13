@@ -6,7 +6,7 @@
   
     <module>
         <name>yarpdatadumper</name>
-	<parameters>--name /data/reactCtrl --txTime --rxTime</parameters>
+	    <parameters>--name /data/reactCtrl --txTime --rxTime</parameters>
         <node>localhost</node>
         <stdio></stdio>
         <tag>dataDumperReactCtrl</tag>
@@ -14,7 +14,7 @@
 
     <module>
         <name>yarpdatadumper</name>
-	<parameters>--name /data/skinEvAggreg --txTime --rxTime</parameters>
+	    <parameters>--name /data/skinEvAggreg --txTime --rxTime</parameters>
         <node>localhost</node>
         <stdio></stdio>
         <tag>dataDumperSkinEvAggreg</tag>
@@ -22,7 +22,7 @@
 
     <module>
         <name>yarpdatadumper</name>
-	<parameters>--name /data/iCubGuiObjects --txTime --rxTime</parameters>
+	    <parameters>--name /data/iCubGuiObjects --txTime --rxTime</parameters>
         <node>localhost</node>
         <stdio></stdio>
         <tag>dataDumperObjectsiCubGui</tag>
@@ -30,7 +30,7 @@
        
    <module>
         <name>yarpdatadumper</name>
-	<parameters>--name /data/ppsAggregEventsForiCubGui --txTime --rxTime</parameters>
+	    <parameters>--name /data/ppsAggregEventsForiCubGui --txTime --rxTime</parameters>
         <node>localhost</node>
         <stdio></stdio>
         <tag>dataDumperPPSeventsForiCubGui</tag>
@@ -293,7 +293,7 @@
         <from>/icub/right_arm/analog:o</from>
 	    <to>/data/forces_rightArm</to>
         <protocol>udp</protocol>
-    </connection>
+    </connection-->
     
     
 </application>
