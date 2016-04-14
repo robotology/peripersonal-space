@@ -238,6 +238,8 @@ private:
                 normal(0) = collPointBottle->get(4).asDouble();
                 normal(1) = collPointBottle->get(5).asDouble();
                 normal(2) =  collPointBottle->get(6).asDouble();
+                if (sp==SKIN_RIGHT_HAND)
+                    normal(2)*=-1.0; //:KLUDGE - I think my vector is correct and iCubGui has the reference frame for right hand wrong
                 normalized_activation = collPointBottle->get(13).asDouble();
                 //printf("Testing Skin_2_Body with skinPart %s: body part: %s \n", SkinPart_s[sp].c_str(),BodyPart_s[(SkinPart_2_BodyPart[sp])].c_str());
                 
