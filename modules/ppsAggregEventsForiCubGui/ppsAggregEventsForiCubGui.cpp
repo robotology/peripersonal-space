@@ -238,8 +238,6 @@ private:
                 normal(0) = collPointBottle->get(4).asDouble();
                 normal(1) = collPointBottle->get(5).asDouble();
                 normal(2) =  collPointBottle->get(6).asDouble();
-                if (sp==SKIN_RIGHT_HAND)
-                    normal(2)*=-1.0; //:KLUDGE - I think my vector is correct and iCubGui has the reference frame for right hand wrong
                 normalized_activation = collPointBottle->get(13).asDouble();
                 //printf("Testing Skin_2_Body with skinPart %s: body part: %s \n", SkinPart_s[sp].c_str(),BodyPart_s[(SkinPart_2_BodyPart[sp])].c_str());
                 
@@ -250,7 +248,11 @@ private:
                 //skinContact(const BodyPart &_bodyPart, const SkinPart &_skinPart, unsigned int _linkNumber, const yarp::sig::Vector &_CoP,
                 //        const yarp::sig::Vector &_geoCenter, std::vector<unsigned int> _taxelList, double _pressure, const yarp::sig::Vector &_normalDir,
                 //    const yarp::sig::Vector &_F, const yarp::sig::Vector &_Mu);
-                skinContact sc(SkinPart_2_BodyPart[sp].body,sp,getLinkNum(sp),geocenter,geocenter,taxel_list,
+                if (sp==SKIN_RIGHT_HAND) //for right hand, the direction of the force is opposite
+                    skinContact sc(SkinPart_2_BodyPart[sp].body,sp,getLinkNum(sp),geocenter,geocenter,taxel_list,
+                               amplification*normalized_activation,normal,1.0*amplification*normalized_activation*normal,moment);
+                else
+                    skinContact sc(SkinPart_2_BodyPart[sp].body,sp,getLinkNum(sp),geocenter,geocenter,taxel_list,
                                amplification*normalized_activation,normal,-1.0*amplification*normalized_activation*normal,moment);
                 //in skinManager/src/compensator.cpp, Compensator::getContacts()there was:
                 // set an estimate of the force that is with normal direction and intensity equal to the pressure
