@@ -133,6 +133,57 @@
         <tag>dataDumperRightArmJoints</tag>
     </module>
    
+    <module>
+        <name>yarpdatadumper</name>
+	<parameters>--name /data/pps_dumper --txTime --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperPPS</tag>
+    </module>
+    <module>
+        <name>yarpdatadumper</name>
+	<parameters>--name /data/pps_avoidance_dumper --txTime --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperPPSavoidance</tag>
+    </module>
+    <module>
+        <name>yarpdatadumper</name>
+	<parameters>--name /data/pps_skinGui_leftHand_dumper --txTime --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperPPSlefttHandSkinGui</tag>
+    </module>	
+    <module>
+        <name>yarpdatadumper</name>
+	<parameters>--name /data/pps_skinGui_rightHand_dumper --txTime --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperPPSrightHandSkinGui</tag>
+    </module>	
+    <module>
+        <name>yarpdatadumper</name>
+	<parameters>--name /data/pps_skinGui_leftForearm_dumper --txTime --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperPPSleftForearmSkinGui</tag>
+    </module>
+    <module>
+        <name>yarpdatadumper</name>
+	<parameters>--name /data/pps_skinGui_rightForearm_dumper --txTime --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperPPSrightForearmSkinGui</tag>
+    </module>
+     
+
+
+	<to>/data/pps_skinGui_leftHand_dumper</to>
+	<to>/data/pps_skinGui_rightHand_dumper</to>
+	<to>/data/pps_skinGui_leftForearm_dumper</to>
+	<to>/data/pps_skinGui_rightForearm_dumper</to>
+
+
     <!--module>
         <name>yarpdatadumper</name>
         <parameters>--name /data/inertial --txTime --rxTime</parameters>
@@ -266,6 +317,38 @@
         <protocol>udp</protocol>
     </connection>
    
+    <connection>
+	<from>/visuoTactileRF/dataDumper:o</from>
+	<to>/data/pps_dumper</to>
+	<protocol>udp</protocol>
+    </connection>
+    <connection>
+	<from>/visuoTactileRF/skin_events:o</from>
+	<to>/data/pps_avoidance_dumper</to>
+	<protocol>udp</protocol>
+    </connection>
+    <connection>
+	<from>/visuoTactileRF/skinGuiHandL:o</from>
+	<to>/data/pps_skinGui_leftHand_dumper</to>
+	<protocol>udp</protocol>
+    </connection>
+    <connection>
+	<from>/visuoTactileRF/skinGuiHandR:o</from>
+	<to>/data/pps_skinGui_rightHand_dumper</to>
+	<protocol>udp</protocol>
+    </connection>
+    <connection>
+	<from>/visuoTactileRF/skinGuiForearmL:o</from>
+	<to>/data/pps_skinGui_leftForearm_dumper</to>
+	<protocol>udp</protocol>
+    </connection>
+    <connection>
+	<from>/visuoTactileRF/skinGuiForearmR:o</from>
+	<to>/data/pps_skinGui_rightForearm_dumper</to>
+	<protocol>udp</protocol>
+    </connection>
+ 
+
 
     <!--connection>
         <from>/icub/inertial</from>
