@@ -78,19 +78,19 @@
 
    <connection>
       <from>/reactController/gui:o</from>
-	  <to>/iCubGui/objects</to>
+      <to>/iCubGui/objects</to>
       <protocol>udp</protocol>
     </connection>
 
     <connection>
       <from>/skinManager/skin_events:o</from>
-	  <to>/skinEventsAggregator/skin_events:i</to>
+      <to>/skinEventsAggregator/skin_events:i</to>
       <protocol>udp</protocol>
     </connection>
 
     <connection>
        <from>/skinEventsAggregator/skin_events_aggreg:o</from>
-	   <to>/reactController/skin_events_aggreg:i</to>
+       <to>/reactController/skin_events_aggreg:i</to>
        <protocol>udp</protocol>
     </connection>
 
@@ -127,12 +127,12 @@
     <connection>
         <from>/icub/camcalib/left/out</from>
         <to>/pf3dTracker/video:i</to>
-        <protocol>udp</protocol>
+        <protocol>tcp</protocol>
     </connection>
     <connection>
         <from>/pf3dTracker/video:o</from>
         <to>/PF3DT_viewer</to>
-        <protocol>udp</protocol>
+        <protocol>tcp</protocol>
     </connection>
     <connection>
         <from>/pf3dTracker/data:o</from>
