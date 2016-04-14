@@ -218,6 +218,7 @@ private:
         //all in the link FoR
         Vector geocenter(3,0.0); //geocenter from skin / average activation locus from the pps
         Vector normal(3,0.0);
+        Vector force(3,0.0);
         Vector moment(3,0.0); // we leave it as zero
         double normalized_activation = 0.0;
         std::vector<unsigned int> taxel_list;
@@ -248,12 +249,12 @@ private:
                 //skinContact(const BodyPart &_bodyPart, const SkinPart &_skinPart, unsigned int _linkNumber, const yarp::sig::Vector &_CoP,
                 //        const yarp::sig::Vector &_geoCenter, std::vector<unsigned int> _taxelList, double _pressure, const yarp::sig::Vector &_normalDir,
                 //    const yarp::sig::Vector &_F, const yarp::sig::Vector &_Mu);
+                force = -1.0*amplification*normalized_activation*normal;
                 if (sp==SKIN_RIGHT_HAND) //for right hand, the direction of the force is opposite
-                    skinContact sc(SkinPart_2_BodyPart[sp].body,sp,getLinkNum(sp),geocenter,geocenter,taxel_list,
-                               amplification*normalized_activation,normal,1.0*amplification*normalized_activation*normal,moment);
-                else
-                    skinContact sc(SkinPart_2_BodyPart[sp].body,sp,getLinkNum(sp),geocenter,geocenter,taxel_list,
-                               amplification*normalized_activation,normal,-1.0*amplification*normalized_activation*normal,moment);
+                    force(2)*=-1;
+
+                skinContact sc(SkinPart_2_BodyPart[sp].body,sp,getLinkNum(sp),geocenter,geocenter,taxel_list,
+                               amplification*normalized_activation,normal,force,moment);
                 //in skinManager/src/compensator.cpp, Compensator::getContacts()there was:
                 // set an estimate of the force that is with normal direction and intensity equal to the pressure
                 //d.setForceModule(-0.05*activeTaxels*pressure*normal);
