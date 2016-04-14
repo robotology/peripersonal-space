@@ -38,16 +38,6 @@
     
     <module>
         <name>yarpdatadumper</name>
-        <parameters>--name /data/visuoTactileRF --txTime --rxTime</parameters>
-        <node>localhost</node>
-        <stdio></stdio>
-        <tag>visuoTactileRFdumper</tag>
-    </module>
-
-
-
-    <module>
-        <name>yarpdatadumper</name>
 	<parameters>--name /data/skin_events --txTime --rxTime</parameters>
         <node>localhost</node>
         <stdio></stdio>
@@ -132,7 +122,7 @@
         <stdio></stdio>
         <tag>dataDumperRightArmJoints</tag>
     </module>
-   
+       
     <module>
         <name>yarpdatadumper</name>
 	<parameters>--name /data/pps_dumper --txTime --rxTime</parameters>
@@ -142,11 +132,14 @@
     </module>
     <module>
         <name>yarpdatadumper</name>
-	<parameters>--name /data/pps_avoidance_dumper --txTime --rxTime</parameters>
+	<parameters>--name /data/ppsEvAggreg --txTime --rxTime</parameters>
         <node>localhost</node>
         <stdio></stdio>
-        <tag>dataDumperPPSavoidance</tag>
+        <tag>dataDumperPPSevAggreg</tag>
     </module>
+     
+     <from>/visuoTactileRF/pps_events_aggreg:o</from>
+  
     <module>
         <name>yarpdatadumper</name>
 	<parameters>--name /data/pps_skinGui_leftHand_dumper --txTime --rxTime</parameters>
@@ -176,12 +169,15 @@
         <tag>dataDumperPPSrightForearmSkinGui</tag>
     </module>
      
+    <module>
+        <name>yarpdatadumper</name>
+	<parameters>--name /data/pps_wrapper_icubGui --txTime --rxTime</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>dataDumperPPSwrapperiCubGui</tag>
+    </module>
+     
 
-
-	<to>/data/pps_skinGui_leftHand_dumper</to>
-	<to>/data/pps_skinGui_rightHand_dumper</to>
-	<to>/data/pps_skinGui_leftForearm_dumper</to>
-	<to>/data/pps_skinGui_rightForearm_dumper</to>
 
 
     <!--module>
@@ -247,13 +243,6 @@
 	<to>/data/ppsAggregEventsForiCubGui</to>
         <protocol>udp</protocol>
     </connection>
-
-   <connection>
-        <from>/visuoTactileRF/dataDumper:o</from>
-	    <to>/data/visuoTactileRF</to>
-        <protocol>udp</protocol>
-    </connection>
-
 
     <connection>
         <from>/skinManager/skin_events:o</from>
@@ -323,10 +312,12 @@
 	<protocol>udp</protocol>
     </connection>
     <connection>
-	<from>/visuoTactileRF/skin_events:o</from>
-	<to>/data/pps_avoidance_dumper</to>
+	<from>/visuoTactileRF/pps_events_aggreg:o</from>
+	<to>/data/ppsEvAggreg</to>
 	<protocol>udp</protocol>
     </connection>
+
+
     <connection>
 	<from>/visuoTactileRF/skinGuiHandL:o</from>
 	<to>/data/pps_skinGui_leftHand_dumper</to>
@@ -347,7 +338,14 @@
 	<to>/data/pps_skinGui_rightForearm_dumper</to>
 	<protocol>udp</protocol>
     </connection>
- 
+    <connection>
+	<from>/visuoTactileWrapper/gui:o</from>
+	<to>/data/pps_wrapper_icubGui</to>
+	<protocol>udp</protocol>
+    </connection>
+	 
+
+
 
 
     <!--connection>

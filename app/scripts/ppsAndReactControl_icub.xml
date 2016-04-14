@@ -78,19 +78,19 @@
 
    <connection>
       <from>/reactController/gui:o</from>
-	  <to>/iCubGui/objects</to>
+      <to>/iCubGui/objects</to>
       <protocol>udp</protocol>
     </connection>
 
     <connection>
       <from>/skinManager/skin_events:o</from>
-	  <to>/skinEventsAggregator/skin_events:i</to>
+      <to>/skinEventsAggregator/skin_events:i</to>
       <protocol>udp</protocol>
     </connection>
 
     <connection>
        <from>/skinEventsAggregator/skin_events_aggreg:o</from>
-	   <to>/reactController/skin_events_aggreg:i</to>
+       <to>/reactController/skin_events_aggreg:i</to>
        <protocol>udp</protocol>
     </connection>
 
