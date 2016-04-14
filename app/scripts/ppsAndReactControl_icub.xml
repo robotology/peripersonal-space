@@ -127,12 +127,12 @@
     <connection>
         <from>/icub/camcalib/left/out</from>
         <to>/pf3dTracker/video:i</to>
-        <protocol>udp</protocol>
+        <protocol>tcp</protocol>
     </connection>
     <connection>
         <from>/pf3dTracker/video:o</from>
         <to>/PF3DT_viewer</to>
-        <protocol>udp</protocol>
+        <protocol>tcp</protocol>
     </connection>
     <connection>
         <from>/pf3dTracker/data:o</from>
