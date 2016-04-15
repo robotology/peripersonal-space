@@ -218,7 +218,8 @@ private:
         //all in the link FoR
         Vector geocenter(3,0.0); //geocenter from skin / average activation locus from the pps
         Vector normal(3,0.0);
-        Vector moment(3,0.0); // we leave it as zero
+        Vector force(3,0.0);
+        Vector moment(3,0.0); //will remain zero
         double normalized_activation = 0.0;
         std::vector<unsigned int> taxel_list;
         taxel_list.clear(); //we will be always passing empty list
@@ -239,7 +240,9 @@ private:
                 normal(1) = collPointBottle->get(5).asDouble();
                 normal(2) =  collPointBottle->get(6).asDouble();
                 normalized_activation = collPointBottle->get(13).asDouble();
-                //printf("Testing Skin_2_Body with skinPart %s: body part: %s \n", SkinPart_s[sp].c_str(),BodyPart_s[(SkinPart_2_BodyPart[sp])].c_str());
+                force(0)=0.000001; force(1)=0.000001; //hack - in current iCubGui version, in bvhnode.h, ForceArrow, there is an atan that gives a wrong direction for force vectors of the form (0 0 1)   
+                force(2) = -1.0*amplification*normalized_activation*normal(2);
+                 //printf("Testing Skin_2_Body with skinPart %s: body part: %s \n", SkinPart_s[sp].c_str(),BodyPart_s[(SkinPart_2_BodyPart[sp])].c_str());
                 
                 //see  iCubGui/src/objectsthread.h    ObjectsManager::manage(iCub::skinDynLib::skinContactList &forces)
                 //printf("fillDynContactFromAggregPort: setting dynContact: Body part: %s Linknum: %d CoP: %s F: %s M: %s\n",
@@ -249,7 +252,7 @@ private:
                 //        const yarp::sig::Vector &_geoCenter, std::vector<unsigned int> _taxelList, double _pressure, const yarp::sig::Vector &_normalDir,
                 //    const yarp::sig::Vector &_F, const yarp::sig::Vector &_Mu);
                 skinContact sc(SkinPart_2_BodyPart[sp].body,sp,getLinkNum(sp),geocenter,geocenter,taxel_list,
-                               amplification*normalized_activation,normal,-1.0*amplification*normalized_activation*normal,moment);
+                               amplification*normalized_activation,normal,force,moment);
                 //in skinManager/src/compensator.cpp, Compensator::getContacts()there was:
                 // set an estimate of the force that is with normal direction and intensity equal to the pressure
                 //d.setForceModule(-0.05*activeTaxels*pressure*normal);
