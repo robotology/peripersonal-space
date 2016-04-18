@@ -1,0 +1,123 @@
+<application>
+    <name>PPS_skiunAndiCubGuis_Lyon</name>
+
+    <dependencies>
+    </dependencies>
+
+
+    <module>
+   	 <name>skinManager</name>
+  	  <parameters>--from skinManAll.ini --context skinGui</parameters>
+    	<node>console1</node>
+    	<tag>skinMan</tag>
+    </module>
+ 
+   <module>
+      <name>skinManagerGui</name>
+      <parameters>--from skinManGui.ini --context skinGui --xpos 1020 --ypos 350</parameters>
+      <node>console1</node>
+      <tag>skinManGui</tag>
+   </module>
+       
+    <module>
+    <name>iCubSkinGui</name>
+    <!-- Remember to use the proper configuration files (i.e. "_V2.ini" for V2 robots) -->
+    <parameters>--from right_arm.ini --useCalibration --xpos 1750 --ypos 0 --width 250 --height 250</parameters>
+    <node>rococo</node>
+    <tag>skinGuiRA</tag>
+  </module>
+  <module>
+    <name>iCubSkinGui</name>
+    <!-- Remember to use the proper configuration files (i.e. "_V2.ini" for V2 robots) -->
+    <parameters>--from right_forearm.ini --useCalibration --xpos 1750 --ypos 250 --width 250 --height 250</parameters>
+    <node>rococo</node>
+    <tag>skinGuiRF</tag>
+  </module>
+  <module>
+    <name>iCubSkinGui</name>
+    <!-- Remember to use the proper configuration files (i.e. "_V2.ini" for V2 robots) --> 
+    <parameters>--from right_hand_V2_1.ini --useCalibration --xpos 1750 --ypos 500 --width 250 --height 250</parameters>
+    <node>rococo</node>
+    <tag>skinGuiRH</tag>
+  </module>
+
+   <module>
+        <name>iCubGui</name>
+        <parameters>--xpos 2000 --width 500 --height 700</parameters>
+        <node>rococo</node>
+        <stdio></stdio>
+        <tag>iCubGui</tag>
+    </module>
+   
+   
+
+   
+
+    <connection>
+    <from>/skinManager/skin_events:o</from>
+    <to>/wholeBodyDynamics/skin_contacts:i</to>
+    <protocol>udp</protocol>
+  </connection>
+  <connection>
+    <from>/skinManagerGui/rpc:o</from>
+    <to>/skinManager/rpc</to>
+    <protocol>tcp</protocol>
+  </connection>
+  <connection>
+    <from>/skinManager/monitor:o</from>
+    <to>/skinManagerGui/monitor:i</to>
+    <protocol>udp</protocol>
+  </connection>
+  <connection>
+    <from>/skinManager/info:o</from>
+    <to>/skinManagerGui/info:i</to>
+    <protocol>tcp</protocol>
+  </connection>
+  
+  <connection>
+    <from>/icub/skin/right_hand_comp</from>
+    <to>/skinGui/right_hand:i</to>
+    <protocol>udp</protocol>
+  </connection>
+  <connection>
+    <from>/icub/skin/right_forearm_comp</from>
+    <to>/skinGui/right_forearm:i</to>
+    <protocol>udp</protocol>
+  </connection>
+  <connection>
+    <from>/icub/skin/right_arm_comp</from>
+    <to>/skinGui/right_arm:i</to>
+    <protocol>udp</protocol>
+  </connection>
+ 
+
+
+
+    <connection>
+        <from>/icub/head/state:o</from>
+        <to>/iCubGui/head:i</to>
+        <protocol>udp</protocol>
+    </connection>
+   
+    <connection>
+        <from>/icub/left_arm/state:o</from>
+        <to>/iCubGui/left_arm:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/right_arm/state:o</from>
+        <to>/iCubGui/right_arm:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/torso/state:o</from>
+        <to>/iCubGui/torso:i</to>
+        <protocol>udp</protocol>
+    </connection>
+
+    <!--connection>
+        <from></from>
+	<to></to>
+        <protocol>udp</protocol>
+    </connection-->
+</application>
