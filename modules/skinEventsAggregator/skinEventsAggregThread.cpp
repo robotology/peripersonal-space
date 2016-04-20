@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "skinEventsAggregThread.h"
 
 #define MIN_NUMBER_OF_TAXELS_ACTIVATED 3 //to filter out phantoms
@@ -16,13 +17,10 @@ using namespace iCub::skinDynLib;
 skinEventsAggregThread::skinEventsAggregThread(int _rate, const string &_name, const string &_robot, int _v): 
 RateThread(_rate),name(_name), robot(_robot), verbosity(_v) 
 {
-   ;
-    
 }
 
 bool skinEventsAggregThread::threadInit()
 {
-       
     ts.update();
     skinEventsPortIn.open(("/"+name+"/skin_events:i").c_str());
     skinEvAggregPortOut.open(("/"+name+"/skin_events_aggreg:o").c_str());
@@ -34,7 +32,6 @@ bool skinEventsAggregThread::threadInit()
     else
         yError("skinEventsAggregThread::threadInit(): unknown robot type");
     
-        
     return true;
 }
 
@@ -69,7 +66,7 @@ void skinEventsAggregThread::run()
                     //we add dummy geoCenter and normalDir in Root frame to keep same format as vtRFThread manageSkinEvents 
                     b.addDouble(0.0); b.addDouble(0.0); b.addDouble(0.0);
                     b.addDouble(0.0); b.addDouble(0.0); b.addDouble(0.0);
-                    b.addDouble(max(1.0,(biggestContactInSkinPart.getPressure()/SKIN_ACTIVATION_MAX))); // % pressure "normalized" with ad hoc constant
+                    b.addDouble(std::max(1.0,(biggestContactInSkinPart.getPressure()/SKIN_ACTIVATION_MAX))); // % pressure "normalized" with ad hoc constant
                     b.addString(biggestContactInSkinPart.getSkinPartName()); //this one just for readability
                     out.addList().read(b);
                 }

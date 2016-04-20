@@ -122,7 +122,6 @@ public:
         threadPeriod = 20; //period of the virtContactGenThread in ms
         verbosity = 0;
         
-        SkinPart partOfSkin;
         //******************************************************
         //********************** CONFIGS ***********************
 

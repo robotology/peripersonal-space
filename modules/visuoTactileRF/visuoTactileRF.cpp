@@ -332,7 +332,7 @@ public:
 
         //*************** eyes' Resource finder ****************
             ResourceFinder gazeRF;
-            gazeRF.setVerbose(bool(verbosity));
+            gazeRF.setVerbose(verbosity!=0);
             gazeRF.setDefaultContext("iKinGazeCtrl");
             robot=="icub"?gazeRF.setDefaultConfigFile("config.ini"):gazeRF.setDefaultConfigFile("configSim.ini");
             gazeRF.configure(0,NULL);
@@ -344,7 +344,7 @@ public:
 
             if(!camerasGroup.isNull())
             {
-                eyeAlignRF.setVerbose(bool(verbosity));
+                eyeAlignRF.setVerbose(verbosity!=0);
                 camerasGroup.check("context")?
                 eyeAlignRF.setDefaultContext(camerasGroup.find("context").asString().c_str()):
                 eyeAlignRF.setDefaultContext(gazeRF.getContext().c_str());

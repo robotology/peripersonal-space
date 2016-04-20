@@ -33,7 +33,7 @@ int virtContactGenerationThread::initSkinParts()
         switch(skin_part_name){
             case SKIN_LEFT_HAND:
             case SKIN_RIGHT_HAND:
-                for(unsigned int i= 0; getline(posFile,line); i++)
+                for(int i= 0; getline(posFile,line); i++)
                 {
                     line.erase(line.find_last_not_of(" \n\r\t")+1);
                     if((line.empty()) || (i<OFFSET)) //skip empty lines and first 4 lines
@@ -71,7 +71,7 @@ int virtContactGenerationThread::initSkinParts()
                 
             case SKIN_LEFT_FOREARM:
             case SKIN_RIGHT_FOREARM:
-                for(unsigned int i= 0; getline(posFile,line); i++)
+                for(int i= 0; getline(posFile,line); i++)
                 {
                     line.erase(line.find_last_not_of(" \n\r\t")+1);
                     if(line.empty() || (i<OFFSET)) //skip empty lines and first 4 lines
@@ -193,7 +193,7 @@ bool virtContactGenerationThread::threadInit()
     skinEventsOutPort->open(("/"+name+"/virtualContacts:o").c_str());
     
      /* initialize random seed: */
-    srand (time(NULL));
+    srand ((unsigned int)time(NULL));
     
     int returnValue = initSkinParts();
     if(returnValue == -1){

@@ -1798,11 +1798,11 @@ using namespace iCub::ctrl;
         if (lim.size()<2)
             return false;
 
-        unsigned int iLeft;
-        unsigned int iRight;
+        int iLeft;
+        int iRight;
         double min, max;
 
-        double slaveDOF=-1;
+        int slaveDOF=-1;
         if (getType() == "LtoR" || getType() == "RtoL")
         {
             slaveDOF = 5;
@@ -1826,7 +1826,7 @@ using namespace iCub::ctrl;
                 // printf("new lims %g %g \n", (*this)[4-iLeft].getMin()*CTRL_RAD2DEG, (*this)[4-iLeft].getMax()*CTRL_RAD2DEG);
             }
 
-            for (iRight=0; iRight<getN()-iLeft-1; iRight++)
+            for (iRight=0; iRight<(int)getN()-iLeft-1; iRight++)
             {   
                 if (!limRight.getLimits(iRight,&min,&max))
                     return false;
@@ -1851,7 +1851,7 @@ using namespace iCub::ctrl;
                 // printf("new lims %g %g \n", (*this)[4-iLeft].getMin()*CTRL_RAD2DEG, (*this)[4-iLeft].getMax()*CTRL_RAD2DEG);
             }
 
-            for (iLeft=0; iLeft<getN()-iRight-1; iLeft++)
+            for (iLeft=0; iLeft<(int)getN()-iRight-1; iLeft++)
             {   
                 if (!limLeft.getLimits(iLeft,&min,&max))
                     return false;
