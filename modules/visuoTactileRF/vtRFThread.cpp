@@ -346,7 +346,7 @@ void vtRFThread::run()
     if (inputEvents.size() != 0)
     {
         // read the events
-        for (size_t i = 0; i < inputEvents.size(); i++)
+        for (int i = 0; i < inputEvents.size(); i++)
         {
             incomingEvents.push_back(IncomingEvent(*(inputEvents.get(i).asList())));
             printMessage(3,"[EVENT] %s\n", incomingEvents.back().toString().c_str());
@@ -476,7 +476,7 @@ void vtRFThread::manageSkinEvents()
 
     if (incomingEvents.size()>0)  // if there's an event
     {
-        for (size_t i = 0; i < iCubSkinSize; i++) // cycle through the skinparts
+        for (int i = 0; i < iCubSkinSize; i++) // cycle through the skinparts
         {
             b.clear(); //so there will be one bottle per skin part (if there was a significant event)
             taxelsIDs.clear();
@@ -551,7 +551,7 @@ void vtRFThread::sendContactsToSkinGui()
 {
     Vector respToSkin;
 
-    for(size_t i=0; i<iCubSkinSize; i++)
+    for(int i=0; i<iCubSkinSize; i++)
     {
         respToSkin.resize(iCubSkin[i].size,0.0);   // resize the vector to the skinPart
 
@@ -650,7 +650,7 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
         idv.clear();
         if( it -> getPressure() > SKIN_THRES && (it -> getTaxelList()).size() > 2 )
         {
-            for (size_t i = 0; i < iCubSkinSize; i++)
+            for (int i = 0; i < iCubSkinSize; i++)
             {
                 if (SkinPart_s[it -> getSkinPart()] == iCubSkin[i].name)
                 {
@@ -703,7 +703,7 @@ string vtRFThread::load()
     Bottle b; b.read(data);
     yDebug("[vtRF::load] iCubSkinSize %i",iCubSkinSize);
 
-    for (size_t i = 0; i < iCubSkinSize; i++)
+    for (int i = 0; i < iCubSkinSize; i++)
     {
         Bottle bb = b.findGroup(iCubSkin[i].name.c_str());
 
@@ -739,7 +739,7 @@ string vtRFThread::load()
             yDebug("[vtRF::load][%s] size %i\tnTaxels %i\text %s\tbinsNum %i %i",iCubSkin[i].name.c_str(),size,
                                                   nTaxels,toVector(ext).toString(3,3).c_str(),bNum[0],bNum[1]);
             printMessage(3,"Mapping\n");
-            for (size_t j = 0; j < size; j++)
+            for (int j = 0; j < size; j++)
             {
                 mapp.push_back(bbb->get(j).asInt());
                 if (verbosity>=3)
@@ -750,13 +750,13 @@ string vtRFThread::load()
             if (verbosity>=3) printf("\n");
             iCubSkin[i].taxel2Repr = mapp;
 
-            for (size_t j = 0; j < nTaxels; j++)
+            for (int j = 0; j < nTaxels; j++)
             {
                 // 7 are the number of lines in the skinpart group that are not taxels
                 bbb = bb.get(j+7).asList();
                 printMessage(3,"Reading taxel %s\n",bbb->toString().c_str());
 
-                for (int k = 0; k < iCubSkin[i].taxels.size(); k++)
+                for (size_t k = 0; k < iCubSkin[i].taxels.size(); k++)
                 {
                     if (iCubSkin[i].taxels[k]->getID() == bbb->get(0).asInt())
                     {
@@ -786,7 +786,7 @@ string vtRFThread::save()
 
     if (myfile.is_open())
     {
-        for (size_t i = 0; i < iCubSkinSize; i++)
+        for (int i = 0; i < iCubSkinSize; i++)
         {
             Bottle data;
             data.clear();
@@ -886,7 +886,7 @@ bool vtRFThread::projectIncomingEvent()
 {
     for (size_t k = 0; k < incomingEvents.size(); k++)
     {
-        for (size_t i = 0; i < iCubSkinSize; i++)
+        for (int i = 0; i < iCubSkinSize; i++)
         {
             Matrix T_a = eye(4);               // transform matrix relative to the arm
             if ((iCubSkin[i].name == SkinPart_s[SKIN_LEFT_FOREARM]) || (iCubSkin[i].name == SkinPart_s[SKIN_LEFT_HAND]))
@@ -955,7 +955,7 @@ IncomingEvent4TaxelPWE vtRFThread::projectIntoTaxelRF(const Matrix &RF,const Mat
 
 void vtRFThread::resetParzenWindows()
 {
-    for (size_t i = 0; i < iCubSkinSize; i++)
+    for (int i = 0; i < iCubSkinSize; i++)
     {
         for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
@@ -966,7 +966,7 @@ void vtRFThread::resetParzenWindows()
 
 bool vtRFThread::computeResponse()
 {
-    for (size_t i = 0; i < iCubSkinSize; i++)
+    for (int i = 0; i < iCubSkinSize; i++)
     {
         for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
@@ -1026,7 +1026,7 @@ void vtRFThread::drawTaxels(string _eye)
         return;
     }
 
-    for (size_t i = 0; i < iCubSkinSize; i++)
+    for (int i = 0; i < iCubSkinSize; i++)
     {
         for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
@@ -1052,9 +1052,9 @@ void vtRFThread::drawTaxel(ImageOf<PixelRgb> &Im, const yarp::sig::Vector &px,
 
     if ((u >= r) && (u <= 320 - r) && (v >= r) && (v <= 240 - r))
     {
-        for (size_t x=0; x<2*r; x++)
+        for (int x=0; x<2*r; x++)
         {
-            for (size_t y=0; y<2*r; y++)
+            for (int y=0; y<2*r; y++)
             {
                 if (part == SkinPart_s[SKIN_LEFT_FOREARM] || part == SkinPart_s[SKIN_RIGHT_FOREARM] ||
                     part == SkinPart_s[SKIN_LEFT_HAND]    || part == SkinPart_s[SKIN_RIGHT_HAND])

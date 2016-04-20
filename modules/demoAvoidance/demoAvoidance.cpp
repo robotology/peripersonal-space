@@ -51,7 +51,7 @@ protected:
     PolyDriver driverJointL,driverJointR;
     int contextL,contextR;
     Port dataPort;
-    int motionGain;
+    double motionGain;
 
     bool useLeftArm;
     bool useRightArm;
