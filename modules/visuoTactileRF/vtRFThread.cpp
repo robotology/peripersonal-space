@@ -501,7 +501,7 @@ void vtRFThread::manageSkinEvents()
                 part  = iCubSkin[i].name;
 
                 //the output format on the port will be:
-                //(SkinPart_enum x y z n1 n2 n3 magnitude SkinPart_string)
+                //(SkinPart_enum x_linkFoR y_linkFoR z_linkFoR n1_linkFoR n2_linkFoR n3_linkFoR x_RootFoR y_RootFoR z_RootFoR n1_RootFoR n2_RootFoR n3_RootFoR magnitude SkinPart_string)
                 //paralleling the one produced in skinEventsAggregator skinEventsAggregThread::run()
                
                 b.addInt(getSkinPartFromString(iCubSkin[i].name));
@@ -515,7 +515,7 @@ void vtRFThread::manageSkinEvents()
                             w = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[p])->Resp;
                             printMessage(4,"part %s: pps taxel ID %d, pos (%s), activation: %d\n",part.c_str(),taxelsIDs[k],iCubSkin[i].taxels[p]->getPosition().toString().c_str(),w);
                             //The final geoCenter and normalDir will be a weighted average of the activations
-                            geoCenter += iCubSkin[i].taxels[p]->getPosition()*w; //Matej, 24.2., changing convention - link not root FoR
+                            geoCenter += iCubSkin[i].taxels[p]->getPosition()*w; //Matej, 24.2., changing convention - link not Root FoR
                             normalDir += iCubSkin[i].taxels[p]->getNormal()*w;
                             geoCenterWRF += iCubSkin[i].taxels[p]->getWRFPosition()*w; //original code
                             normalDirWRF += locateTaxel(iCubSkin[i].taxels[p]->getNormal(),part)*w;
