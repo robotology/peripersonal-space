@@ -777,7 +777,7 @@ unsigned int factorial(unsigned int n)
                         int j=0;
 
                         Matrix HN(4,4); HN=0.0;
-                        for (size_t cnt=0; (cnt<bH->size()) && (cnt<HN.rows()*HN.cols()); cnt++)
+                        for (int cnt=0; (cnt<bH->size()) && (cnt<HN.rows()*HN.cols()); cnt++)
                         {
                             HN(i,j)=bH->get(cnt).asDouble();
                             if (++j>=HN.cols())

@@ -77,7 +77,7 @@ double gauss2D(const double x_0, const double y_0,
         firstPosBin.clear();
         firstPosBinShift.clear();
 
-        for (size_t i = 0; i < dim; i++)
+        for (int i = 0; i < dim; i++)
         {
             binWidth.push_back((ext(i,1)-ext(i,0))/binsNum[i]);
 
@@ -109,9 +109,9 @@ double gauss2D(const double x_0, const double y_0,
         yarp::sig::Matrix Hist(binsNum[0],binsNum[1]);
         Hist.zero();
 
-        for (size_t i = 0; i < binsNum[0]; i++)
+        for (int i = 0; i < binsNum[0]; i++)
         {
-            for (size_t j = 0; j < binsNum[1]; j++)
+            for (int j = 0; j < binsNum[1]; j++)
             {
                 Hist(i,j)=getHist(i,j);
             }
@@ -132,7 +132,7 @@ double gauss2D(const double x_0, const double y_0,
     {
         b.clear();
 
-        for (size_t i = 0; i < dim; i++)
+        for (int i = 0; i < dim; i++)
         {
             if (x[i] < ext(i,0) || x[i] > ext(i,1)) return false;
 
@@ -275,7 +275,7 @@ double gauss2D(const double x_0, const double y_0,
     {
         double f_x = 0;
 
-        for (size_t i = 0; i < posHist.rows(); i++)
+        for (int i = 0; i < posHist.rows(); i++)
         {
             if ( posHist(i,0)>=0 )
             {
@@ -293,22 +293,27 @@ double gauss2D(const double x_0, const double y_0,
         int granularity = 10;        
 
         // the granularity has been introduced to increase the precision of the process.
-        for (size_t i = 0; i < binsNum[0]*granularity; i++)
+        for (int i = 0; i < binsNum[0]*granularity; i++)
         {
             std::vector<double> xx;
-            xx.push_back(ext(0,0)+i*binWidth[0]*granularity);
+            //xx.push_back(ext(0,0)+i*binWidth[0]*granularity);
+            xx.push_back(ext(0,0)+i*binWidth[0]/granularity);
             double func = getF_X(xx);
 
             max  = func>max?func:max;
+            //printf("xx[0] %f, getF_X(xx) %f, max %f, ext(0,0) %f, binsNum[0] %d, binWidth[0] %f\n",
+                             //   xx[0], func, max, ext(0,0), binsNum[0],binWidth[0]);
+            //printf("binsNum[0]: %d binWidth[0]: %f\n",binsNum[0],binWidth[0]);
         }
 
-        double scalingfactor_max = 100/max;
+        double scalingfactor_max = 255/max;
 
         // if the histogram is empty, the maximum value is 0
         if (max == 0)
         {
             return max;
         }
+       // printf("scalingfactor_max %g f_X %gmax %g\n", getF_X(x), scalingfactor_max,max);
 
         return getF_X(x)*scalingfactor_max;
     }
@@ -340,9 +345,9 @@ double gauss2D(const double x_0, const double y_0,
     {
         double f_x = 0;
 
-        for (size_t i = 0; i < posHist.rows(); i++)
+        for (int i = 0; i < posHist.rows(); i++)
         {
-            for (size_t j = 0; j < posHist.cols(); j++)
+            for (int j = 0; j < posHist.cols(); j++)
             {
                 if ( posHist(i,j)>=0 )
                 {
@@ -363,13 +368,13 @@ double gauss2D(const double x_0, const double y_0,
         // int cnt     = 0;
 
         // the granularity has been introduced to increase the precision of the process.
-        for (size_t i = 0; i < binsNum[0]*granularity; i++)
+        for (int i = 0; i < binsNum[0]*granularity; i++)
         {
-            for (size_t j = 0; j < binsNum[1]*granularity; j++)
+            for (int j = 0; j < binsNum[1]*granularity; j++)
             {
                 std::vector<double> xx;
-                xx.push_back(ext(0,0)+i*binWidth[0]*granularity);
-                xx.push_back(ext(1,0)+j*binWidth[1]*granularity);
+                xx.push_back(ext(0,0)+i*binWidth[0]/granularity);
+                xx.push_back(ext(1,0)+j*binWidth[1]/granularity);
                 double func = getF_X(xx);
 
                 max  = func>max?func:max;
