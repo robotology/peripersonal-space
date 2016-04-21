@@ -540,11 +540,9 @@ void vtRFThread::manageSkinEvents()
             }
         }
    
-         ppsEventsPortOut.setEnvelope(ts);
-         ppsEventsPortOut.write();     // let's send only if there was en event
-    }
-
-   
+        ppsEventsPortOut.setEnvelope(ts);
+        ppsEventsPortOut.write();     // let's send only if there was en event
+    }   
 }
 
 void vtRFThread::sendContactsToSkinGui()

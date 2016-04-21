@@ -28,6 +28,7 @@
 #include <yarp/math/Math.h>
 
 #include <iCub/ctrl/math.h>
+#include <iCub/skinDynLib/common.h>
 
 #define PPS_AVOIDANCE_RADIUS        0.2     // [m]
 #define PPS_AVOIDANCE_VELOCITY      0.10    // [m/s]
@@ -84,13 +85,13 @@ protected:
             if (input.size()>=7)
             {
                 yDebug("[demoAvoidance] got command (%s)",input.toString().c_str());
-                string arm=input.get(0).asString().c_str();
+                string arm=iCub::skinDynLib::SkinPart_s[input.get(0).asInt()];
 
-                if (arm == "skin_right_hand" || arm == "skin_right_forearm")
+                if (arm == "r_hand" || arm == "r_forearm")
                 {
                     arm = "right";
                 }
-                else if (arm == "skin_left_hand" || arm == "skin_left_forearm")
+                else if (arm == "l_hand" || arm == "l_forearm")
                 {
                     arm = "left";
                 }
@@ -101,12 +102,12 @@ protected:
                 if (it!=data.end())
                 {
                     Data &d=it->second;
-                    d.point[0]=input.get(1).asDouble();
-                    d.point[1]=input.get(2).asDouble();
-                    d.point[2]=input.get(3).asDouble();
-                    d.dir[0]=input.get(4).asDouble();
-                    d.dir[1]=input.get(5).asDouble();
-                    d.dir[2]=input.get(6).asDouble();
+                    d.point[0]=input.get(7).asDouble();
+                    d.point[1]=input.get(8).asDouble();
+                    d.point[2]=input.get(9).asDouble();
+                    d.dir[0]=input.get(10).asDouble();
+                    d.dir[1]=input.get(11).asDouble();
+                    d.dir[2]=input.get(12).asDouble();
                     d.persistence=PPS_AVOIDANCE_PERSISTENCE;
                     d.timeout=PPS_AVOIDANCE_TIMEOUT;
                 }
