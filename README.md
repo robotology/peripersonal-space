@@ -15,6 +15,9 @@ For a video on the peripersonal space, click on the image below (you will be red
 
 [![peripersonal space video](http://img.youtube.com/vi/3IaXxNwC_7E/0.jpg)](http://www.youtube.com/watch?v=3IaXxNwC_7E)
 
+## Publications
+Roncone, A.; Hoffmann, M.; Pattacini, U. & Metta, G. (2015), Learning peripersonal space representation through artificial skin for avoidance and reaching with whole body surface, in 'Intelligent Robots and Systems (IROS), 2015 IEEE/RSJ International Conference on', pp. 3366-3373.
+
 ## Repository Structure
 
 ### PeriPersonal Space Library
