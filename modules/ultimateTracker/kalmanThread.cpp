@@ -12,8 +12,8 @@ kalmanThread::kalmanThread(int _rate, const string &_name, const string &_robot,
 
     generateMatrices();
     printMessage(0,"MATRICES:\nkalTs:    %g\nkalA:\n%s\nkalH:\n%s\nkalQ:\n%s\nkalR:    %s\nkalThres: %g\n",
-                    kalTs, kalA.toString().c_str(),kalH.toString().c_str(),
-                    kalQ.toString().c_str(),kalR.toString().c_str(),kalThres);
+                    kalTs, kalA.toString(3).c_str(),kalH.toString(3).c_str(),
+                    kalQ.toString(3).c_str(),kalR.toString(3).c_str(),kalThres);
 
     for (size_t i = 0; i < 3; i++)
     {
