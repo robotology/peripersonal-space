@@ -195,7 +195,7 @@ public:
         modality = "1D";
 
         verbosity  = 0;     // verbosity
-        rate       = 50;    // rate of the vtRFThread
+        rate       = 20;    // rate of the vtRFThread
 
         //******************************************************
         //********************** CONFIGS ***********************
@@ -274,7 +274,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                yInfo("[skin_event] filePath [%i] %s\n",0,filePath.c_str());
+                                yInfo("[visuoTactileRF] filePath [%i] %s\n",0,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
@@ -284,7 +284,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                yInfo("[skin_event] filePath [%i] %s\n",1,filePath.c_str());
+                                yInfo("[visuoTactileRF] filePath [%i] %s\n",1,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
@@ -294,7 +294,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                yInfo("[skin_event] filePath [%i] %s\n",2,filePath.c_str());
+                                yInfo("[visuoTactileRF] filePath [%i] %s\n",2,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
@@ -304,7 +304,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                yInfo("[skin_event] filePath [%i] %s\n",3,filePath.c_str());
+                                yInfo("[visuoTactileRF] filePath [%i] %s\n",3,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
@@ -317,7 +317,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                yInfo("[skin_event] filePath [%i] %s\n",i,filePath.c_str());
+                                yInfo("[visuoTactileRF] filePath [%i] %s\n",i,filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
@@ -332,7 +332,7 @@ public:
 
         //*************** eyes' Resource finder ****************
             ResourceFinder gazeRF;
-            gazeRF.setVerbose(bool(verbosity));
+            gazeRF.setVerbose(verbosity!=0);
             gazeRF.setDefaultContext("iKinGazeCtrl");
             robot=="icub"?gazeRF.setDefaultConfigFile("config.ini"):gazeRF.setDefaultConfigFile("configSim.ini");
             gazeRF.configure(0,NULL);
@@ -344,7 +344,7 @@ public:
 
             if(!camerasGroup.isNull())
             {
-                eyeAlignRF.setVerbose(bool(verbosity));
+                eyeAlignRF.setVerbose(verbosity!=0);
                 camerasGroup.check("context")?
                 eyeAlignRF.setDefaultContext(camerasGroup.find("context").asString().c_str()):
                 eyeAlignRF.setDefaultContext(gazeRF.getContext().c_str());

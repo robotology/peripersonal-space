@@ -162,7 +162,7 @@
         <protocol>tcp</protocol>
     </connection>
     <connection>
-    <from>/visuoTactileRF/skin_events:o</from>
+    <from>/visuoTactileRF/pps_events_aggreg:o</from>
         <to>/avoidance/data:i</to>
         <protocol>tcp</protocol>
     </connection>

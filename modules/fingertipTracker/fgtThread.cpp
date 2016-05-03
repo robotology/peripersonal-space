@@ -1,3 +1,4 @@
+#include <cstdarg>
 #include "fgtThread.h"
 
 fgtThread::fgtThread(int _rate, const string &_name, const string &_robot, int _v,
@@ -139,16 +140,16 @@ bool fgtThread::processImages(ImageOf<PixelRgb> &_oL, ImageOf<PixelRgb> &_oR)
     ImageOf<PixelRgb> imageOL=*imageInL;
     ImageOf<PixelRgb> imageOR=*imageInR;
 
-    cv::Mat imgL((IplImage*)imageOL.getIplImage());
-    cv::Mat imgR((IplImage*)imageOR.getIplImage());
-    cv::Mat mskL((IplImage*)maskL.getIplImage());
-    cv::Mat mskR((IplImage*)maskR.getIplImage());
+    cv::Mat imgL=cv::cvarrToMat(imageOL.getIplImage());
+    cv::Mat imgR=cv::cvarrToMat(imageOR.getIplImage());
+    cv::Mat mskL=cv::cvarrToMat(maskL.getIplImage());
+    cv::Mat mskR=cv::cvarrToMat(maskR.getIplImage());
     cv::Mat imgLHSV;
     cv::Mat imgRHSV;
 
     yTrace("I'm converting the images to in HSV");
-    cvtColor(imgL,imgLHSV,CV_RGB2HSV);
-    cvtColor(imgR,imgRHSV,CV_BGR2HSV);
+    cv::cvtColor(imgL,imgLHSV,CV_RGB2HSV);
+    cv::cvtColor(imgR,imgRHSV,CV_RGB2HSV);
 
     yTrace("I'm filtering according to the HSV");
     cv::inRange(imgLHSV, cv::Scalar(HSVmin[0],HSVmin[1],HSVmin[2]), cv::Scalar(HSVmax[0],HSVmax[1],HSVmax[2]),mskL);
@@ -177,7 +178,7 @@ bool fgtThread::processImages(ImageOf<PixelRgb> &_oL, ImageOf<PixelRgb> &_oR)
             area=cv::contourArea(contours[i]);
             if (area>largestArea)
             {
-                largestArea=area;
+                largestArea=(int)area;
                 idx=i;
             }
         }
@@ -208,7 +209,7 @@ bool fgtThread::processImages(ImageOf<PixelRgb> &_oL, ImageOf<PixelRgb> &_oR)
             area=cv::contourArea(contours[i]);
             if (area>largestArea)
             {
-                largestArea=area;
+                largestArea=(int)area;
                 idx=i;
             }
         }

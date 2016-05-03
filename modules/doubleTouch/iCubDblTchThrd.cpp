@@ -705,7 +705,7 @@ bool doubleTouchThread::detectContact(skinContactList *_sCL)
         if( it -> getPressure() > 25 &&
             norm(it-> getNormalDir()) != 0.0)
         {
-            for (int i = 0; i < skinParts.size(); i++)
+            for (size_t i = 0; i < skinParts.size(); i++)
             {
                 if (skinParts[i] == it -> getSkinPart())
                 {

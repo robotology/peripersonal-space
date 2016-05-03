@@ -11,16 +11,16 @@ vtWThread::vtWThread(int _rate, const string &_name, const string &_robot, int _
                        RateThread(_rate), name(_name), robot(_robot), verbosity(_v)
 {
     optFlowPos.resize(3,0.0);
-    optFlowVelEstimate.resize(3,0.0);
+    optFlowVel.resize(3,0.0);
 
     pf3dTrackerPos.resize(3,0.0);
-    pf3dTrackerVelEstimate.resize(3,0.0);
+    pf3dTrackerVel.resize(3,0.0);
 
     doubleTouchPos.resize(3,0.0);
-    doubleTouchVelEstimate.resize(3,0.0);
+    doubleTouchVel.resize(3,0.0);
 
     fgtTrackerPos.resize(3,0.0);
-    fgtTrackerVelEstimate.resize(3,0.0);
+    fgtTrackerVel.resize(3,0.0);
     
     armR = new iCubArm("right");
     armL = new iCubArm("left");
@@ -36,6 +36,7 @@ bool vtWThread::threadInit()
     pf3dTrackerPort.open(("/"+name+"/pf3dTracker:i").c_str());
     doubleTouchPort.open(("/"+name+"/doubleTouch:i").c_str());
     fgtTrackerPort.open(("/"+name+"/fingertipTracker:i").c_str());
+    genericObjectsPort.open(("/"+name+"/genericObjects:i").c_str());
     outPortGui.open(("/"+name+"/gui:o").c_str());
     eventsPort.open(("/"+name+"/events:o").c_str());
     depth2kinPort.open(("/"+name+"/depth2kin:o").c_str());
@@ -44,6 +45,7 @@ bool vtWThread::threadInit()
     Network::connect("/pf3dTracker/data:o",("/"+name+"/pf3dTracker:i").c_str());
     Network::connect("/doubleTouch/status:o",("/"+name+"/doubleTouch:i").c_str());
     Network::connect("/fingertipTracker/out:o",("/"+name+"/fingertipTracker:i").c_str());
+    Network::connect("/objectGeneratorSim/obstacles:o",("/"+name+"/genericObjects:i").c_str());
     Network::connect(("/"+name+"/events:o").c_str(),"/visuoTactileRF/events:i");
     Network::connect(("/"+name+"/gui:o").c_str(),"/iCubGui/objects");
 
@@ -128,7 +130,6 @@ bool vtWThread::threadInit()
 
 void vtWThread::run()
 {
-
     optFlowPos.resize(3,0.0);
     pf3dTrackerPos.resize(3,0.0);
     doubleTouchPos.resize(3,0.0);
@@ -136,6 +137,28 @@ void vtWThread::run()
 
     bool isTarget = false;
     events.clear();
+
+    // process the generiObject port
+    if (genericObjectsBottle = genericObjectsPort.read(false))
+    {
+        for (int i = 0; i < genericObjectsBottle->size(); i++)
+        {
+            Bottle b = *(genericObjectsBottle->get(i).asList());
+            if (b.size()>=4)
+            {
+                Vector p(3,0.0);
+                double r=0;
+
+                p[0] = b.get(0).asDouble();
+                p[1] = b.get(1).asDouble();
+                p[2] = b.get(2).asDouble();
+                r    = b.get(3).asDouble();
+
+                events.push_back(IncomingEvent(p,Vector(3,0.0),r,"genericObjects"));
+                isTarget=true;
+            }
+        }
+    }
 
     // process the optFlow
     if (optFlowBottle = optFlowPort.read(false))
@@ -150,9 +173,9 @@ void vtWThread::run()
             optFlowPos[2]=optFlowBottle->get(2).asDouble();
 
             AWPolyElement el(optFlowPos,Time::now());
-            optFlowVelEstimate=linEst_optFlow->estimate(el);
+            optFlowVel=linEst_optFlow->estimate(el);
 
-            events.push_back(IncomingEvent(optFlowPos,optFlowVelEstimate,0.05,"optFlow"));
+            events.push_back(IncomingEvent(optFlowPos,optFlowVel,0.05,"optFlow"));
             isTarget=true;
         }
     }
@@ -185,9 +208,9 @@ void vtWThread::run()
                     pf3dTrackerPos.pop_back();
                     
                     AWPolyElement el(pf3dTrackerPos,Time::now());
-                    pf3dTrackerVelEstimate=linEst_pf3dTracker->estimate(el);
+                    pf3dTrackerVel=linEst_pf3dTracker->estimate(el);
                     
-                    events.push_back(IncomingEvent(pf3dTrackerPos,pf3dTrackerVelEstimate,0.05,"pf3dTracker"));
+                    events.push_back(IncomingEvent(pf3dTrackerPos,pf3dTrackerVel,0.05,"pf3dTracker"));
                     isTarget=true;
                 }
             }
@@ -211,7 +234,7 @@ void vtWThread::run()
                         fgtTrackerPos[1] = fgtTrackerBottle->get(2).asDouble();
                         fgtTrackerPos[2] = fgtTrackerBottle->get(3).asDouble();
                         AWPolyElement el2(fgtTrackerPos,Time::now());
-                        fgtTrackerVelEstimate=linEst_fgtTracker->estimate(el2);
+                        fgtTrackerVel=linEst_fgtTracker->estimate(el2);
 
                         if(doubleTouchStep<=1)
                         {
@@ -221,7 +244,7 @@ void vtWThread::run()
                         else if(doubleTouchStep>1 && doubleTouchStep<8)
                         {
                             events.clear();
-                            events.push_back(IncomingEvent(fgtTrackerPos,fgtTrackerVelEstimate,-1.0,"fingertipTracker"));
+                            events.push_back(IncomingEvent(fgtTrackerPos,fgtTrackerVel,-1.0,"fingertipTracker"));
                             isTarget=true;
                         }
                     }
@@ -281,8 +304,8 @@ void vtWThread::run()
                         
                         yDebug("Computing data from the doubleTouch %g\n",getEstUsed());
                         AWPolyElement el2(doubleTouchPos,Time::now());
-                        doubleTouchVelEstimate=linEst_doubleTouch->estimate(el2);
-                        events.push_back(IncomingEvent(doubleTouchPos,doubleTouchVelEstimate,-1.0,"doubleTouch"));
+                        doubleTouchVel=linEst_doubleTouch->estimate(el2);
+                        events.push_back(IncomingEvent(doubleTouchPos,doubleTouchVel,-1.0,"doubleTouch"));
                         isTarget=true;
                     }
                 }
@@ -328,7 +351,7 @@ void vtWThread::sendGuiTarget()
     {
         Bottle obj;
         obj.addString("object");
-        obj.addString("Target");
+        obj.addString("obstacle");
      
         // size 
         obj.addDouble(50.0);
@@ -347,8 +370,8 @@ void vtWThread::sendGuiTarget()
     
         // color
         obj.addInt(255);
-        obj.addInt(125);
-        obj.addInt(125);
+        obj.addInt(0);
+        obj.addInt(0);
     
         // transparency
         obj.addDouble(0.9);

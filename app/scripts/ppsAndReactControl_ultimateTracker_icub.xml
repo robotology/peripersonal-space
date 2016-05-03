@@ -1,0 +1,252 @@
+<application>
+    <name>PPS_and_Reactcontrol_ultimTracker</name>
+
+    <dependencies>
+    </dependencies>
+
+   <module>
+        <name>reactController</name>
+        <parameters></parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>reactController</tag>
+    </module>
+
+    <module>
+        <name>skinEventsAggregator</name>
+        <parameters>general::robot icub</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>skinEventsAggreg</tag>
+    </module>
+
+    <module>
+        <name>ppsAggregEventsForiCubGui</name>
+        <parameters></parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag>aggregEvForiCubGui</tag>
+    </module>
+
+    <module>
+        <name>visuoTactileWrapper</name>
+        <parameters>--noDoubleTouch</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+     </module>
+
+    <module>
+        <name>visuoTactileRF</name>
+        <parameters>--taxelsFile taxels1D_learnedAll.ini --rate 20</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+    </module>
+
+   <module>
+        <name>motionCUT</name>
+        <parameters>--recogThres 0.015 --blobMinSizeThres 20 --framesPersistence 3 --cropSize</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+    </module>
+    <module>
+        <name>templatePFTracker</name>
+        <parameters></parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+    </module>
+    <module>
+        <name>SFM</name>
+        <parameters></parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+    </module>
+    <module>
+        <name>ultimateTracker</name>
+        <parameters></parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+    </module>
+   
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /motionCUT_viewer --RefreshTime 33 --x 980 --y 340 --w 320 --h 260 --compact</parameters>
+        <node>localhost</node>
+    </module>
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /templatePFTracker_viewer --RefreshTime 33 --x 1280 --y 60 --w 320 --h 260 --compact</parameters>
+        <node>localhost</node>
+    </module>
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /dispViewer --RefreshTime 33 --x 1600 --y 60 --w 320 --h 260 --compact</parameters>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /vtRF/left --RefreshTime 33 --x 0 --y 0 --w 400 --h 400 --compact</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+    </module>
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /vtRF/right --RefreshTime 33 --x 420 --y 0 --w 400 --h 400 --compact</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+    </module>
+   
+    <!--module>
+        <name></name>
+        <parameters></parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+        <tag></tag>
+    </module-->
+
+   <connection>
+      <from>/reactController/gui:o</from>
+	  <to>/iCubGui/objects</to>
+      <protocol>udp</protocol>
+    </connection>
+
+    <connection>
+      <from>/skinManager/skin_events:o</from>
+	  <to>/skinEventsAggregator/skin_events:i</to>
+      <protocol>udp</protocol>
+    </connection>
+
+    <connection>
+       <from>/skinEventsAggregator/skin_events_aggreg:o</from>
+	   <to>/reactController/skin_events_aggreg:i</to>
+       <protocol>udp</protocol>
+    </connection>
+
+    <connection>
+       <from>/visuoTactileRF/pps_events_aggreg:o</from>
+       <to>/reactController/pps_events_aggreg:i</to>
+       <protocol>udp</protocol>
+    </connection>
+
+
+    <connection>
+        <from>/skinEventsAggregator/skin_events_aggreg:o</from>
+	    <to>/ppsAggregEventsForiCubGui/skin_events_aggreg:i</to>
+        <protocol>udp</protocol>
+    </connection>	
+
+    <connection>
+        <from>/visuoTactileRF/pps_events_aggreg:o</from>
+	<to>/ppsAggregEventsForiCubGui/pps_events_aggreg:i</to>
+        <protocol>udp</protocol>
+    </connection>
+
+    <connection>
+        <from>/ppsAggregEventsForiCubGui/contacts:o</from>
+	<to>/iCubGui/forces</to>
+        <protocol>udp</protocol>
+    </connection>
+        
+      <connection>
+        <from>/skinManager/skin_events:o</from>
+        <to>/visuoTactileRF/skin_events:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/visuoTactileWrapper/gui:o</from>
+        <to>/iCubGui/objects</to>
+        <protocol>tcp</protocol>
+    </connection>
+   
+    <connection>
+        <from>/icub/camcalib/left/out</from>
+        <to>/visuoTactileRF/imageL:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/camcalib/right/out</from>
+        <to>/visuoTactileRF/imageR:i</to>
+        <protocol>udp</protocol>
+    </connection>
+   
+    <connection>
+        <from>/visuoTactileWrapper/events:o</from>
+        <to>/visuoTactileRF/events:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+
+   <connection>
+        <from>/icub/camcalib/left/out</from>
+        <to>/motionCUT/img:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/motionCUT/img:o</from>
+        <to>/motionCUT_viewer</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/camcalib/right/out</from>
+        <to>/SFM/right:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/camcalib/left/out</from>
+        <to>/SFM/left:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/SFM/disp:o</from>
+        <to>/dispViewer</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/camcalib/left/out</from>
+        <to>/templatePFTracker/left/image:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/templatePFTracker/left/image:o</from>
+        <to>/templatePFTracker_viewer</to>
+        <protocol>udp</protocol>
+    </connection>
+    
+
+    <connection>
+    <from>/visuoTactileRF/skinGuiForearmL:o</from>
+        <to>/skinGui/left_forearm_virtual:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/visuoTactileRF/skinGuiForearmR:o</from>
+        <to>/skinGui/right_forearm_virtual:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/visuoTactileRF/skinGuiHandL:o</from>
+        <to>/skinGui/left_hand_virtual:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/visuoTactileRF/skinGuiHandR:o</from>
+        <to>/skinGui/right_hand_virtual:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/visuoTactileRF/imageL:o</from>
+        <to>/vtRF/left</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/visuoTactileRF/imageR:o</from>
+        <to>/vtRF/right</to>
+        <protocol>udp</protocol>
+    </connection>
+
+    <!--connection>
+        <from></from>
+	<to></to>
+        <protocol>udp</protocol>
+    </connection-->
+</application>

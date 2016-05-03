@@ -173,12 +173,14 @@ public:
 
         //*************** ACTIVE SKIN PARTS GROUP ****************
         Bottle &bSkinParts=rf.findGroup("skin_parts");
-        if (!bSkinParts.isNull()){
+        if (!bSkinParts.isNull())
+        {
             bSkinParts.setMonitor(rf.getMonitor());
             
             if (bSkinParts.check("SKIN_LEFT_HAND"))
             {
-                if(bSkinParts.find("SKIN_LEFT_HAND").asString()=="on"){
+                if(bSkinParts.find("SKIN_LEFT_HAND").asString()=="on")
+                {
                     partOfSkin = SKIN_LEFT_HAND;
                     activeSkinPartsNamesVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_LEFT_HAND to active skin parts.");
@@ -189,7 +191,8 @@ public:
             
             if (bSkinParts.check("SKIN_LEFT_FOREARM"))
             {
-                if(bSkinParts.find("SKIN_LEFT_FOREARM").asString()=="on"){
+                if(bSkinParts.find("SKIN_LEFT_FOREARM").asString()=="on")
+                {
                     partOfSkin = SKIN_LEFT_FOREARM;
                     activeSkinPartsNamesVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_LEFT_FOREARM to active skin parts.");
@@ -199,7 +202,8 @@ public:
                 
             if (bSkinParts.check("SKIN_LEFT_UPPER_ARM"))
             {
-                if(bSkinParts.find("SKIN_LEFT_UPPER_ARM").asString()=="on"){
+                if(bSkinParts.find("SKIN_LEFT_UPPER_ARM").asString()=="on")
+                {
                     partOfSkin = SKIN_LEFT_UPPER_ARM;
                     activeSkinPartsNamesVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_LEFT_UPPER_ARM to active skin parts.");
@@ -209,7 +213,8 @@ public:
             
             if (bSkinParts.check("SKIN_RIGHT_HAND"))
             {
-                if(bSkinParts.find("SKIN_RIGHT_HAND").asString()=="on"){
+                if(bSkinParts.find("SKIN_RIGHT_HAND").asString()=="on")
+                {
                     partOfSkin = SKIN_RIGHT_HAND;
                     activeSkinPartsNamesVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_RIGHT_HAND to active skin parts.");
@@ -220,7 +225,8 @@ public:
             
             if (bSkinParts.check("SKIN_RIGHT_FOREARM"))
             {
-                if(bSkinParts.find("SKIN_RIGHT_FOREARM").asString()=="on"){
+                if(bSkinParts.find("SKIN_RIGHT_FOREARM").asString()=="on")
+                {
                     partOfSkin = SKIN_RIGHT_FOREARM;
                     activeSkinPartsNamesVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_RIGHT_FOREARM to active skin parts.");
@@ -231,7 +237,8 @@ public:
                 
             if (bSkinParts.check("SKIN_RIGHT_UPPER_ARM"))
             {
-                if(bSkinParts.find("SKIN_RIGHT_UPPER_ARM").asString()=="on"){
+                if(bSkinParts.find("SKIN_RIGHT_UPPER_ARM").asString()=="on")
+                {
                     partOfSkin = SKIN_RIGHT_UPPER_ARM;
                     activeSkinPartsNamesVector.push_back(partOfSkin);
                     yInfo("Adding SKIN_RIGHT_UPPER_ARM to active skin parts.");
@@ -251,8 +258,9 @@ public:
          skinRF.setVerbose(false);
          skinRF.setDefaultContext("skinGui");                //overridden by --context parameter
          skinRF.setDefaultConfigFile("skinManAll.ini"); //overridden by --from parameter
+         skinRF.setVerbose(true);
          skinRF.configure(0,NULL);
-
+            
          Bottle &skinEventsConf = skinRF.findGroup("SKIN_EVENTS");
          if(!skinEventsConf.isNull())
          {
@@ -317,6 +325,8 @@ public:
             delete virtContactGenThrd;
             virtContactGenThrd =  0;
         }
+        activeSkinPartsNamesVector.clear();
+        skinPartsPositionsFilePaths.clear();
         
         return true;
     }

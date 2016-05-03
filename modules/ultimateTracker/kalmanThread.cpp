@@ -78,7 +78,7 @@ bool kalmanThread::generateMatrices()
     for (size_t i = 0; i < kalOrder; i++)
     {
         int k = 0;
-        for (int j = i+1; j < kalOrder; j++)
+        for (size_t j = i+1; j < kalOrder; j++)
         {
             kalA(i,j) = el(0,k);
             k += 1;

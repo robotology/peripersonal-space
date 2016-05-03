@@ -145,7 +145,7 @@ public:
         name     = "doubleTouch";
         type     = "LtoR";
         filename = ".txt";
-        color    = "";
+        color    = " ";
 
         verbosity =    0;    // verbosity
         rate      =  100;    // rate of the doubleTouchThread
@@ -496,9 +496,9 @@ int main(int argc, char * argv[])
 
     if (rf.check("help"))
     {   
-        yInfo(""); 
+        yInfo(" "); 
         yInfo("Options:");
-        yInfo("");
+        yInfo(" ");
         yInfo("   --context     path:  where to find the called resource");
         yInfo("   --from        from:  the name of the .ini file.");
         yInfo("   --name        name:  the name of the module (default doubleTouch).");
@@ -522,7 +522,7 @@ int main(int argc, char * argv[])
         yInfo("   --autoconnect flag: if or not to autoconnect to the skinManager");
         yInfo("   --jnt_vels    double: specify the joint level speed during the double touch. Default 4[deg/s].");
         yInfo("   --alignEyes   flag: if or not to use the rpc-thing and sync with alignEyes module.");
-        yInfo("");
+        yInfo(" ");
         return 0;
     }
     

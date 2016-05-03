@@ -182,7 +182,7 @@ public:
         //******************* VERBOSE ******************
             if (rf.check("useNearBlobber"))
             {
-                useNearBlobber = rf.find("useNearBlobber").asInt();
+                useNearBlobber = rf.find("useNearBlobber").asInt()!=0;
                 cout << "utManagerThread useNearBlobber set to " << useNearBlobber << endl;
             }
             else cout << "Could not find useNearBlobber option in " <<
