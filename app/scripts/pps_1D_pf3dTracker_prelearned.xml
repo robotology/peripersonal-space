@@ -60,12 +60,7 @@
         <tag></tag>
     </module-->
 
-    <connection>
-       <from>/visuoTactileRF/pps_events_aggreg:o</from>
-       <to>/reactController/pps_events_aggreg:i</to>
-       <protocol>udp</protocol>
-    </connection>
-
+   
     <connection>
         <from>/visuoTactileRF/pps_events_aggreg:o</from>
 	<to>/ppsAggregEventsForiCubGui/pps_events_aggreg:i</to>
