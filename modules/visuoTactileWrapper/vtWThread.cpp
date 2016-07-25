@@ -16,6 +16,9 @@ vtWThread::vtWThread(int _rate, const string &_name, const string &_robot, int _
     pf3dTrackerPos.resize(3,0.0);
     pf3dTrackerVel.resize(3,0.0);
 
+    sensManagerPos.resize(3,0.0);
+    sensManagerVel.resize(3,0.0);
+    
     doubleTouchPos.resize(3,0.0);
     doubleTouchVel.resize(3,0.0);
 
@@ -34,6 +37,7 @@ bool vtWThread::threadInit()
 {
     optFlowPort.open(("/"+name+"/optFlow:i").c_str());
     pf3dTrackerPort.open(("/"+name+"/pf3dTracker:i").c_str());
+    sensManagerPort.open(("/"+name+"/sensManager:i").c_str());
     doubleTouchPort.open(("/"+name+"/doubleTouch:i").c_str());
     fgtTrackerPort.open(("/"+name+"/fingertipTracker:i").c_str());
     genericObjectsPort.open(("/"+name+"/genericObjects:i").c_str());
@@ -43,9 +47,10 @@ bool vtWThread::threadInit()
     
     Network::connect("/ultimateTracker/Manager/events:o",("/"+name+"/optFlow:i").c_str());
     Network::connect("/pf3dTracker/data:o",("/"+name+"/pf3dTracker:i").c_str());
+    //Network::connect("/SensationManager/objects:o",("/"+name+"/sensManager:i").c_str());
     Network::connect("/doubleTouch/status:o",("/"+name+"/doubleTouch:i").c_str());
     Network::connect("/fingertipTracker/out:o",("/"+name+"/fingertipTracker:i").c_str());
-    Network::connect("/objectGeneratorSim/obstacles:o",("/"+name+"/genericObjects:i").c_str());
+    //Network::connect("/objectGeneratorSim/obstacles:o",("/"+name+"/genericObjects:i").c_str());
     Network::connect(("/"+name+"/events:o").c_str(),"/visuoTactileRF/events:i");
     Network::connect(("/"+name+"/gui:o").c_str(),"/iCubGui/objects");
 
@@ -120,6 +125,7 @@ bool vtWThread::threadInit()
 
     linEst_optFlow     = new AWLinEstimator(16,0.05);
     linEst_pf3dTracker = new AWLinEstimator(16,0.05);
+    linEst_sensManager = new AWLinEstimator(16,0.05);
     linEst_doubleTouch = new AWLinEstimator(16,0.05);
     linEst_fgtTracker  = new AWLinEstimator(16,0.05);
 
@@ -132,6 +138,7 @@ void vtWThread::run()
 {
     optFlowPos.resize(3,0.0);
     pf3dTrackerPos.resize(3,0.0);
+    sensManagerPos.resize(3,0.0);
     doubleTouchPos.resize(3,0.0);
     fgtTrackerPos.resize(3,0.0);
 
@@ -216,6 +223,29 @@ void vtWThread::run()
             }
         }
     }
+    
+    // process the SensationManager port
+    if (sensManagerBottle = sensManagerPort.read(false))
+    {
+        for (int i = 0; i < sensManagerBottle->size(); i++)
+        {
+            Bottle b = *(sensManagerBottle->get(i).asList());
+            if (b.size()>=4)
+            {
+                Vector p(3,0.0);
+                double r=0;
+
+                p[0] = b.get(0).asDouble();
+                p[1] = b.get(1).asDouble();
+                p[2] = b.get(2).asDouble();
+                r    = b.get(3).asDouble();
+
+                events.push_back(IncomingEvent(p,Vector(3,0.0),r,"sensManager"));
+                isTarget=true;
+            }
+        }
+    }
+    
 
     if (!rf->check("noDoubleTouch"))
     {

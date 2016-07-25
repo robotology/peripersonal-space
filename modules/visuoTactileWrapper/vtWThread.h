@@ -99,6 +99,12 @@ protected:
         Vector                optFlowPos;
         Vector                optFlowVel;
 
+        //collaboration with Jordi Ysard, UPF - WYSIWYD. Will be reading objects with "valence" - e.g. threat
+        BufferedPort<Bottle>  sensManagerPort;
+        Bottle               *sensManagerBottle;
+        Vector                sensManagerPos;
+        Vector                sensManagerVel;
+        
         BufferedPort<Bottle>  doubleTouchPort;           
         Bottle               *doubleTouchBottle;
         Vector                doubleTouchPos;
@@ -118,6 +124,7 @@ protected:
     // Velocity Estimators (using adaptive window linear fitting)
         AWLinEstimator       *linEst_optFlow;
         AWLinEstimator       *linEst_pf3dTracker;
+        AWLinEstimator       *linEst_sensManager;
         AWLinEstimator       *linEst_doubleTouch;
         AWLinEstimator       *linEst_fgtTracker;
 
