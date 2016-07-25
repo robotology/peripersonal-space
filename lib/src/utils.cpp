@@ -67,7 +67,7 @@ unsigned int factorial(unsigned int n)
         threat = 0.0;
     }
     
-    IncomingEvent::IncomingEvent(const Vector &p, const Vector &v, const double r, const std::string &s, const double _threat)
+    IncomingEvent::IncomingEvent(const Vector &p, const Vector &v, const double r, const double _threat, const std::string &s)
     {
         Pos = p;
         Vel = v;

@@ -230,7 +230,7 @@ void vtWThread::run()
         for (int i = 0; i < sensManagerBottle->size(); i++)
         {
             Bottle b = *(sensManagerBottle->get(i).asList());
-            if (b.size()>=4)
+            if (b.size()>=5)
             {
                 Vector p(3,0.0);
                 double r=0;

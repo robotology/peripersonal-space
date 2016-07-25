@@ -99,7 +99,7 @@ struct IncomingEvent
     IncomingEvent(const yarp::sig::Vector &p, const yarp::sig::Vector &v,
                   const double r, const std::string &s);
     IncomingEvent(const yarp::sig::Vector &p, const yarp::sig::Vector &v,
-                  const double r, const std::string &s, const double _threat); 
+                  const double r, const double _threat, const std::string &s); 
     IncomingEvent(const yarp::os::Bottle &b);
     IncomingEvent(const IncomingEvent &e);
 
