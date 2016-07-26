@@ -284,7 +284,7 @@ class TaxelPWE : public iCub::skinDynLib::Taxel
     /**
     * Computes the response of the taxel.
     **/
-    bool computeResponse();
+    bool computeResponse(double stress_modulation);
 
     /**
     * Convert the taxel into a bottle in order to be saved on file

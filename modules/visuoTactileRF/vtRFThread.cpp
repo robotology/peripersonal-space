@@ -27,6 +27,7 @@ vtRFThread::vtRFThread(int _rate, const string &_name, const string &_robot, con
         imagePortInR  = new BufferedPort<ImageOf<PixelRgb> >;
         imagePortInL  = new BufferedPort<ImageOf<PixelRgb> >;
         dTPort        = new BufferedPort<Bottle>;
+        stressPort    = new BufferedPort<Bottle>;
         eventsPort    = new BufferedPort<Bottle>;
         skinPortIn    = new BufferedPort<iCub::skinDynLib::skinContactList>;
 
@@ -64,6 +65,7 @@ bool vtRFThread::threadInit()
     imagePortOutR.open(("/"+name+"/imageR:o").c_str());
     imagePortOutL.open(("/"+name+"/imageL:o").c_str());
     dTPort              -> open(("/"+name+"/input:i").c_str());
+    stressPort          -> open(("/"+name+"/stress:i").c_str());
     eventsPort          -> open(("/"+name+"/events:i").c_str());
     skinGuiPortForearmL.open(("/"+name+"/skinGuiForearmL:o").c_str());
     skinGuiPortForearmR.open(("/"+name+"/skinGuiForearmR:o").c_str());
@@ -101,6 +103,8 @@ bool vtRFThread::threadInit()
         // Network::connect("/skinManager/skin_events:o",("/"+name+"/skin_events:i").c_str());
         
         ts.update();
+        
+        stress = 0.0;
 
     /**************************/
         if (rf->check("rightHand") || rf->check("rightForeArm") ||
@@ -247,12 +251,22 @@ void vtRFThread::run()
 {
     // read from the input ports
     dTBottle                       = dTPort       -> read(false);
+    stressBottle                   = stressPort   -> read(false);
     event                          = eventsPort   -> read(false);
     imageInR                       = imagePortInR -> read(false);
     imageInL                       = imagePortInL -> read(false); 
     skinContactList *skinContacts  = skinPortIn   -> read(false);
 
     dumpedVector.resize(0,0.0);
+    
+    if (stressBottle !=NULL){
+        stress = stressBottle->get(0).asDouble();
+        yAssert((stress>=0.0) && (stress<=1.0));
+        yDebug("vtRFThread::run() reading %f stress value from port.\n",stress);
+    }
+    else{
+        stress = 0.0;
+    }
 
     // project taxels in World Reference Frame
     for (size_t i = 0; i < iCubSkin.size(); i++)
@@ -389,7 +403,7 @@ void vtRFThread::run()
     if (incomingEvents.size()>0)
     {
         projectIncomingEvent();     // project event onto the taxels' RF
-        computeResponse();          // compute the response of each taxel
+        computeResponse(stress);          // compute the response of each taxel
     }
  
     sendContactsToSkinGui();        // self explicative
@@ -480,7 +494,7 @@ void vtRFThread::manageSkinEvents()
                 vectorIntoBottle(normalDir,b);
                 vectorIntoBottle(geoCenterWRF,b);
                 vectorIntoBottle(normalDirWRF,b);
-                b.addDouble(w_max/255.0); //scaling - will be normalized in the end 
+                b.addDouble(w_max/255.0); //scaling - will be normalized in the end, but if the event has a >0 threat value, response is amplified and may exceed 1
                 b.addString(part);
                 out.addList().read(b);
             }
@@ -896,13 +910,13 @@ void vtRFThread::resetParzenWindows()
     }
 }
 
-bool vtRFThread::computeResponse()
+bool vtRFThread::computeResponse(double stress_modulation)
 {
     for (int i = 0; i < iCubSkinSize; i++)
     {
         for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
-            dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->computeResponse();
+            dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->computeResponse(stress_modulation);
             printMessage(4,"\tID %i\tResponse %i\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp);
         }
     }
@@ -1790,6 +1804,10 @@ void vtRFThread::threadRelease()
 
         closePort(dTPort);
         yDebug("  dTPort successfully closed!\n");
+
+        closePort(stressPort);
+        yDebug("    stressPort successfully closed!\n");
+        
         closePort(eventsPort);
         yDebug("  eventsPort successfully closed!\n");
 

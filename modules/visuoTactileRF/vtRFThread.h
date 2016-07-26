@@ -98,6 +98,9 @@ protected:
     Bottle                 *event;
     vector <IncomingEvent>  incomingEvents;
 
+    BufferedPort<Bottle> *stressPort; //global stress value from allostatic controller
+    Bottle *stressBottle;
+    
     BufferedPort<Bottle> skinGuiPortForearmL;     // output to the skinGui
     BufferedPort<Bottle> skinGuiPortForearmR;    
     BufferedPort<Bottle> skinGuiPortHandL;     
@@ -137,6 +140,8 @@ protected:
     bool learningFlag;
 
     double timeNow;
+    
+    double stress; //obtained from allostatic controller - will globally modify PPS activations (0 ~ no modulation)
 
     // Driver for "classical" interfaces
     PolyDriver       ddR; // right arm device driver
@@ -285,7 +290,7 @@ protected:
     /**
     *
     **/
-    bool computeResponse();
+    bool computeResponse(double stress_modulation);
 
     /**
     * Prints a message according to the verbosity level:
