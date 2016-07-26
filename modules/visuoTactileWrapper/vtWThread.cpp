@@ -16,9 +16,6 @@ vtWThread::vtWThread(int _rate, const string &_name, const string &_robot, int _
     pf3dTrackerPos.resize(3,0.0);
     pf3dTrackerVel.resize(3,0.0);
 
-    sensManagerPos.resize(3,0.0);
-    sensManagerVel.resize(3,0.0);
-    
     doubleTouchPos.resize(3,0.0);
     doubleTouchVel.resize(3,0.0);
 
@@ -45,14 +42,14 @@ bool vtWThread::threadInit()
     eventsPort.open(("/"+name+"/events:o").c_str());
     depth2kinPort.open(("/"+name+"/depth2kin:o").c_str());
     
-    Network::connect("/ultimateTracker/Manager/events:o",("/"+name+"/optFlow:i").c_str());
-    Network::connect("/pf3dTracker/data:o",("/"+name+"/pf3dTracker:i").c_str());
+    //Network::connect("/ultimateTracker/Manager/events:o",("/"+name+"/optFlow:i").c_str());
+    //Network::connect("/pf3dTracker/data:o",("/"+name+"/pf3dTracker:i").c_str());
     //Network::connect("/SensationManager/objects:o",("/"+name+"/sensManager:i").c_str());
-    Network::connect("/doubleTouch/status:o",("/"+name+"/doubleTouch:i").c_str());
-    Network::connect("/fingertipTracker/out:o",("/"+name+"/fingertipTracker:i").c_str());
+    //Network::connect("/doubleTouch/status:o",("/"+name+"/doubleTouch:i").c_str());
+    //Network::connect("/fingertipTracker/out:o",("/"+name+"/fingertipTracker:i").c_str());
     //Network::connect("/objectGeneratorSim/obstacles:o",("/"+name+"/genericObjects:i").c_str());
-    Network::connect(("/"+name+"/events:o").c_str(),"/visuoTactileRF/events:i");
-    Network::connect(("/"+name+"/gui:o").c_str(),"/iCubGui/objects");
+    //Network::connect(("/"+name+"/events:o").c_str(),"/visuoTactileRF/events:i");
+    //Network::connect(("/"+name+"/gui:o").c_str(),"/iCubGui/objects");
 
     Property OptGaze;
     OptGaze.put("device","gazecontrollerclient");
@@ -125,7 +122,6 @@ bool vtWThread::threadInit()
 
     linEst_optFlow     = new AWLinEstimator(16,0.05);
     linEst_pf3dTracker = new AWLinEstimator(16,0.05);
-    linEst_sensManager = new AWLinEstimator(16,0.05);
     linEst_doubleTouch = new AWLinEstimator(16,0.05);
     linEst_fgtTracker  = new AWLinEstimator(16,0.05);
 
@@ -138,14 +134,13 @@ void vtWThread::run()
 {
     optFlowPos.resize(3,0.0);
     pf3dTrackerPos.resize(3,0.0);
-    sensManagerPos.resize(3,0.0);
     doubleTouchPos.resize(3,0.0);
     fgtTrackerPos.resize(3,0.0);
 
-    bool isTarget = false;
+    bool isEvent = false;
     events.clear();
 
-    // process the generiObject port
+    // process the genericObject port
     if (genericObjectsBottle = genericObjectsPort.read(false))
     {
         for (int i = 0; i < genericObjectsBottle->size(); i++)
@@ -162,7 +157,7 @@ void vtWThread::run()
                 r    = b.get(3).asDouble();
 
                 events.push_back(IncomingEvent(p,Vector(3,0.0),r,"genericObjects"));
-                isTarget=true;
+                isEvent=true;
             }
         }
     }
@@ -183,7 +178,7 @@ void vtWThread::run()
             optFlowVel=linEst_optFlow->estimate(el);
 
             events.push_back(IncomingEvent(optFlowPos,optFlowVel,0.05,"optFlow"));
-            isTarget=true;
+            isEvent=true;
         }
     }
 
@@ -218,7 +213,7 @@ void vtWThread::run()
                     pf3dTrackerVel=linEst_pf3dTracker->estimate(el);
                     
                     events.push_back(IncomingEvent(pf3dTrackerPos,pf3dTrackerVel,0.05,"pf3dTracker"));
-                    isTarget=true;
+                    isEvent=true;
                 }
             }
         }
@@ -233,20 +228,24 @@ void vtWThread::run()
             if (b.size()>=5)
             {
                 Vector p(3,0.0);
-                double r=0;
+                double r=0.0;
+                double threat = 0.0;
 
                 p[0] = b.get(0).asDouble();
                 p[1] = b.get(1).asDouble();
                 p[2] = b.get(2).asDouble();
-                r    = b.get(3).asDouble();
-
-                events.push_back(IncomingEvent(p,Vector(3,0.0),r,"sensManager"));
-                isTarget=true;
+                r = b.get(3).asDouble();
+                threat = b.get(4).asDouble();
+               
+                events.push_back(IncomingEvent(p,Vector(3,0.0),r,threat,"sensManager"));
+                isEvent=true;
+            }
+            else{
+                yWarning("vtWThread::run(): reading from sensManagerPort, but bottle contains < 5 elements: %s\n", sensManagerBottle->toString().c_str());
             }
         }
     }
-    
-
+   
     if (!rf->check("noDoubleTouch"))
     {
         // processes the fingertipTracker
@@ -275,7 +274,7 @@ void vtWThread::run()
                         {
                             events.clear();
                             events.push_back(IncomingEvent(fgtTrackerPos,fgtTrackerVel,-1.0,"fingertipTracker"));
-                            isTarget=true;
+                            isEvent=true;
                         }
                     }
                 }
@@ -336,7 +335,7 @@ void vtWThread::run()
                         AWPolyElement el2(doubleTouchPos,Time::now());
                         doubleTouchVel=linEst_doubleTouch->estimate(el2);
                         events.push_back(IncomingEvent(doubleTouchPos,doubleTouchVel,-1.0,"doubleTouch"));
-                        isTarget=true;
+                        isEvent=true;
                     }
                 }
             }
@@ -350,7 +349,7 @@ void vtWThread::run()
     else if (optFlowPos[0]!=0.0 && optFlowPos[1]!=0.0 && optFlowPos[2]!=0.0)
         igaze -> lookAtFixationPoint(optFlowPos);
     
-    if (isTarget)
+    if (isEvent)
     {        
         Bottle& eventsBottle = eventsPort.prepare();
         eventsBottle.clear();
@@ -360,7 +359,7 @@ void vtWThread::run()
         }
         eventsPort.write();
         timeNow = yarp::os::Time::now();
-        sendGuiTarget();
+        sendGuiEvents();
     }
     else if (yarp::os::Time::now() - timeNow > 1.0)
     {
@@ -371,52 +370,61 @@ void vtWThread::run()
         linEst_pf3dTracker -> reset();
         linEst_doubleTouch -> reset();
         linEst_fgtTracker  -> reset();
-        deleteGuiTarget();
+        deleteGuiEvents();
     }
 }
 
-void vtWThread::sendGuiTarget()
+void vtWThread::sendGuiEvents()
+{
+    if (outPortGui.getOutputCount()>0)
+    {
+        int counter = 1;
+        Bottle obj;
+        stringstream ss;
+        for (std::vector<IncomingEvent>::const_iterator it = events.begin() ; it != events.end(); ++it){
+         
+            obj.clear();
+            ss.clear();
+            obj.addString("object");
+            ss << "obstacle" << counter;
+            obj.addString(ss.str());
+        
+            // size 
+            obj.addDouble(50.0);
+            obj.addDouble(50.0);
+            obj.addDouble(50.0);
+        
+            // positions
+            obj.addDouble(1000.0 * (*it).Pos[0]);
+            obj.addDouble(1000.0 * (*it).Pos[1]);
+            obj.addDouble(1000.0 * (*it).Pos[2]);
+        
+            // orientation
+            obj.addDouble(0.0);
+            obj.addDouble(0.0);
+            obj.addDouble(0.0);
+        
+            // color
+            obj.addInt(50 + (*it).threat*200.0); //threatening objects will be more red
+            obj.addInt(50);
+            obj.addInt(50);
+        
+            // transparency
+            obj.addDouble(0.9);
+        
+            outPortGui.write(obj);
+       }
+    }
+}
+
+void vtWThread::deleteGuiEvents()
 {
     if (outPortGui.getOutputCount()>0)
     {
         Bottle obj;
-        obj.addString("object");
-        obj.addString("obstacle");
-     
-        // size 
-        obj.addDouble(50.0);
-        obj.addDouble(50.0);
-        obj.addDouble(50.0);
-    
-        // positions
-        obj.addDouble(1000.0*events[0].Pos[0]);
-        obj.addDouble(1000.0*events[0].Pos[1]);
-        obj.addDouble(1000.0*events[0].Pos[2]);
-    
-        // orientation
-        obj.addDouble(0.0);
-        obj.addDouble(0.0);
-        obj.addDouble(0.0);
-    
-        // color
-        obj.addInt(255);
-        obj.addInt(0);
-        obj.addInt(0);
-    
-        // transparency
-        obj.addDouble(0.9);
-    
-        outPortGui.write(obj);
-    }
-}
-
-void vtWThread::deleteGuiTarget()
-{
-    if (outPortGui.getOutputCount()>0)
-    {
-        Bottle obj;
-        obj.addString("delete");
-        obj.addString("Target");
+        //obj.addString("delete");
+        //obj.addString("Target");
+        obj.addString("reset");
         outPortGui.write(obj);
     }
 }
@@ -441,7 +449,7 @@ int vtWThread::printMessage(const int l, const char *f, ...) const
 void vtWThread::threadRelease()
 {
     printMessage(0,"Deleting target from the iCubGui..\n");
-        deleteGuiTarget();
+        deleteGuiEvents();
 
     yDebug("Closing gaze controller..");
         Vector ang(3,0.0);

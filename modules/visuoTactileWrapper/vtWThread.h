@@ -99,12 +99,6 @@ protected:
         Vector                optFlowPos;
         Vector                optFlowVel;
 
-        //collaboration with Jordi Ysard, UPF - WYSIWYD. Will be reading objects with "valence" - e.g. threat
-        BufferedPort<Bottle>  sensManagerPort;
-        Bottle               *sensManagerBottle;
-        Vector                sensManagerPos;
-        Vector                sensManagerVel;
-        
         BufferedPort<Bottle>  doubleTouchPort;           
         Bottle               *doubleTouchBottle;
         Vector                doubleTouchPos;
@@ -118,13 +112,16 @@ protected:
         Vector                fgtTrackerPos;
         Vector                fgtTrackerVel;
 
+       //The generic objects and sensManager ports are designed to handle multiple objects. For that reason, velocity estimation is not supported (keeping track of object IDs would be otherwise needed).        
         BufferedPort<Bottle>  genericObjectsPort;
         Bottle               *genericObjectsBottle;
-
+        //collaboration with Jordi Ysard, UPF - WYSIWYD. Will be reading objects with "valence" - e.g. threat
+        BufferedPort<Bottle>  sensManagerPort;
+        Bottle               *sensManagerBottle;
+       
     // Velocity Estimators (using adaptive window linear fitting)
         AWLinEstimator       *linEst_optFlow;
         AWLinEstimator       *linEst_pf3dTracker;
-        AWLinEstimator       *linEst_sensManager;
         AWLinEstimator       *linEst_doubleTouch;
         AWLinEstimator       *linEst_fgtTracker;
 
@@ -156,14 +153,14 @@ protected:
     Port outPortEvents;
 
     /**
-    * Handles the iCubGui, by drawing the tracked object on the screen.
+    * Handles the iCubGui, by drawing the perceived objects on the screen.
     **/
-    void sendGuiTarget();
+    void sendGuiEvents();
 
     /**
-    * Deletes the object from the gui if it is not tracked any more.
+    * Deletes the objects from the gui.
     **/
-    void deleteGuiTarget();
+    void deleteGuiEvents();
 
     /**
     * Prints a message according to the verbosity level:
