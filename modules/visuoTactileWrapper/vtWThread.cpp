@@ -475,15 +475,27 @@ void vtWThread::threadRelease()
         optFlowPort.interrupt();
         optFlowPort.close();
         yTrace("optFlowPort successfully closed!");
+        
         pf3dTrackerPort.interrupt();
         pf3dTrackerPort.close();
         yTrace("pf3dTrackerPort successfully closed!");
+        
         doubleTouchPort.interrupt();
         doubleTouchPort.close();
         yTrace("doubleTouchPort successfully closed!");
+                
+        genericObjectsPort.interrupt();
+        genericObjectsPort.close();
+        yTrace("genericObjectsPort successfully closed!");
+        
+        sensManagerPort.interrupt();
+        sensManagerPort.close();
+        yTrace("sensManagerPort successfully closed!");
+               
         eventsPort.interrupt();
         eventsPort.close();
         yTrace("eventsPort successfully closed!");
+       
         depth2kinPort.interrupt();
         depth2kinPort.close();
         yTrace("depth2kinPort successfully closed!");
