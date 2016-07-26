@@ -849,7 +849,7 @@ bool vtRFThread::projectIncomingEvent()
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
             {
                 dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt=projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,
-                                                             incomingEvents[k]);
+                    incomingEvents[k]); //here every taxel (TaxelPWE) is updated with the event - if it is relevant for it
 
             // There's a reason behind this choice
             dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[0]);
