@@ -222,26 +222,31 @@ void vtWThread::run()
     // process the SensationManager port
     if (sensManagerBottle = sensManagerPort.read(false))
     {
+        //yDebug("vtWThread::run(): reading from sensManagerPort, bottle with %d elements: %s\n", sensManagerBottle->size(),sensManagerBottle->toString().c_str());
         for (int i = 0; i < sensManagerBottle->size(); i++)
         {
-            Bottle b = *(sensManagerBottle->get(i).asList());
-            if (b.size()>=5)
-            {
-                Vector p(3,0.0);
-                double r=0.0;
-                double threat = 0.0;
+            Bottle bl = *(sensManagerBottle->get(i).asList());\
+            //yDebug("vtWThread::run(): bl has %d elements: %s\n", bl.size(),bl.toString().c_str());
+            for(int j=0;j<bl.size();j++){
+                Bottle b = *(bl.get(j).asList());
+                if (b.size()>=5)
+                {
+                    Vector p(3,0.0);
+                    double r=0.0;
+                    double threat = 0.0;
 
-                p[0] = b.get(0).asDouble();
-                p[1] = b.get(1).asDouble();
-                p[2] = b.get(2).asDouble();
-                r = b.get(3).asDouble();
-                threat = b.get(4).asDouble();
-               
-                events.push_back(IncomingEvent(p,Vector(3,0.0),r,threat,"sensManager"));
-                isEvent=true;
-            }
-            else{
-                yWarning("vtWThread::run(): reading from sensManagerPort, but bottle contains < 5 elements: %s\n", sensManagerBottle->toString().c_str());
+                    p[0] = b.get(0).asDouble();
+                    p[1] = b.get(1).asDouble();
+                    p[2] = b.get(2).asDouble();
+                    r = b.get(3).asDouble();
+                    threat = b.get(4).asDouble();
+                    //yDebug("Pushing event: %s, 0 0 0, %f, %f \n",p.toString().c_str(),r,threat);
+                    events.push_back(IncomingEvent(p,Vector(3,0.0),r,threat,"sensManager"));
+                    isEvent=true;
+                }
+                else{
+                    yWarning("vtWThread::run(): reading from sensManagerPort, but bottle contains < 5 elements: %s\n", b.toString().c_str());
+                }
             }
         }
     }
