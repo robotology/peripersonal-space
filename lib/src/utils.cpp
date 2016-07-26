@@ -108,7 +108,7 @@ unsigned int factorial(unsigned int n)
         b.addDouble(Vel[2]);
         b.addDouble(Radius);
         b.addString(Src);
-        b.addDouble(threat);
+        b.addDouble(threat); //keep it last for now - for backward compatibility
 
         return b;
     }
