@@ -385,19 +385,19 @@ void vtWThread::sendGuiEvents()
     {
         int counter = 1;
         Bottle obj;
-        stringstream ss;
+
         for (std::vector<IncomingEvent>::const_iterator it = events.begin() ; it != events.end(); ++it){
          
+            stringstream ss;
             obj.clear();
-            ss.clear();
             obj.addString("object");
             ss << "obstacle" << counter;
             obj.addString(ss.str());
         
             // size 
-            obj.addDouble(50.0);
-            obj.addDouble(50.0);
-            obj.addDouble(50.0);
+            obj.addDouble(1000.0* (*it).Radius);
+            obj.addDouble(1000.0* (*it).Radius);
+            obj.addDouble(1000.0* (*it).Radius);
         
             // positions
             obj.addDouble(1000.0 * (*it).Pos[0]);
@@ -410,7 +410,7 @@ void vtWThread::sendGuiEvents()
             obj.addDouble(0.0);
         
             // color
-            obj.addInt(50 + (*it).threat*200.0); //threatening objects will be more red
+            obj.addInt(50 + (*it).Threat*200.0); //threatening objects will be more red
             obj.addInt(50);
             obj.addInt(50);
         
@@ -418,6 +418,7 @@ void vtWThread::sendGuiEvents()
             obj.addDouble(0.9);
         
             outPortGui.write(obj);
+            counter++;
        }
     }
 }

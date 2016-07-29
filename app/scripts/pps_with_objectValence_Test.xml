@@ -174,7 +174,7 @@
         <protocol>tcp</protocol>
     </connection>
  
-    
+  
     <connection>
         <from>/guiUpdater/gui:o</from>
         <to>/iCubGui/objects</to>

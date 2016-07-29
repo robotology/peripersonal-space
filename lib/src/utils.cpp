@@ -55,7 +55,7 @@ unsigned int factorial(unsigned int n)
         Vel.resize(3,0.0);
         Src="";
         Radius=-1.0;
-        threat = 0.0;
+        Threat = 0.0;
     }
 
     IncomingEvent::IncomingEvent(const Vector &p, const Vector &v, const double r, const string &s)
@@ -64,16 +64,16 @@ unsigned int factorial(unsigned int n)
         Vel = v;
         Src = s;
         Radius = r;
-        threat = 0.0;
+        Threat = 0.0;
     }
     
-    IncomingEvent::IncomingEvent(const Vector &p, const Vector &v, const double r, const double _threat, const std::string &s)
+    IncomingEvent::IncomingEvent(const Vector &p, const Vector &v, const double r, const double threat, const std::string &s)
     {
         Pos = p;
         Vel = v;
         Src = s;
         Radius = r;
-        threat = _threat;
+        Threat = threat;
     }
 
     IncomingEvent::IncomingEvent(const IncomingEvent &e)
@@ -92,6 +92,7 @@ unsigned int factorial(unsigned int n)
         Vel    = e.Vel;
         Src    = e.Src;
         Radius = e.Radius;
+        Threat = e.Threat;
         return *this;
     }
 
@@ -108,7 +109,7 @@ unsigned int factorial(unsigned int n)
         b.addDouble(Vel[2]);
         b.addDouble(Radius);
         b.addString(Src);
-        b.addDouble(threat); //keep it last for now - for backward compatibility
+        b.addDouble(Threat); //keep it last for now - for backward compatibility
 
         return b;
     }
@@ -119,6 +120,7 @@ unsigned int factorial(unsigned int n)
         Vel.resize(3,0.0);
         Src="";
         Radius=-1.0;
+        Threat = 0.0;
 
         Pos[0] = b.get(0).asDouble();
         Pos[1] = b.get(1).asDouble();
@@ -130,21 +132,21 @@ unsigned int factorial(unsigned int n)
 
         Radius = b.get(6).asDouble();
         Src    = b.get(7).asString();
-        threat = b.get(8).asDouble();
+        Threat = b.get(8).asDouble();
 
         return true;
     }
 
     void IncomingEvent::print()
     {
-        yDebug("\tPos: %s\t Vel: %s\t Radius %g\t Src %s Threat: %g\n",Pos.toString().c_str(),Vel.toString().c_str(),Radius,Src.c_str(),threat);
+        yDebug("\tPos: %s\t Vel: %s\t Radius %g\t Src %s Threat: %g\n",Pos.toString().c_str(),Vel.toString().c_str(),Radius,Src.c_str(),Threat);
     }
 
     string IncomingEvent::toString() const
     {
         stringstream res;
         res << "Pos: "<< Pos.toString(3,3) << "\t Vel: "<< Vel.toString(3,3)
-            << "\t Radius: "<< Radius << "\t Src: "<< Src << "\t threat: "<< threat ;
+            << "\t Radius: "<< Radius << "\t Src: "<< Src << "\t threat: "<< Threat ;
         return res.str();
     }
 
@@ -413,7 +415,7 @@ unsigned int factorial(unsigned int n)
         std::vector<double> In = Evnt.getNRMTTC();
         Resp = pwe->computeResponse(In);
         
-        Resp = Resp + (Resp * min(1.0,Evnt.threat + stress_modulation)); //with this amplification, may come out of the range (which should be <0,255>) 
+        Resp = Resp + (Resp * min(1.0,Evnt.Threat + stress_modulation)); //with this amplification, may come out of the range (which should be <0,255>)
         //- in fact double that. 
 
         return true;

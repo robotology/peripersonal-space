@@ -87,7 +87,7 @@ struct IncomingEvent
     yarp::sig::Vector Vel;
     double Radius;          // average radius of the object
     std::string Src;       // the source of information the event is coming from
-    double threat; //negative valence that may be associated with an object; range <0,1>; 0 should be treated like a neutral object; 1 maximum threat
+    double Threat; //negative valence that may be associated with an object; range <0,1>; 0 should be treated like a neutral object; 1 maximum threat
     
     double NRM;
     double TTC;
@@ -99,7 +99,7 @@ struct IncomingEvent
     IncomingEvent(const yarp::sig::Vector &p, const yarp::sig::Vector &v,
                   const double r, const std::string &s);
     IncomingEvent(const yarp::sig::Vector &p, const yarp::sig::Vector &v,
-                  const double r, const double _threat, const std::string &s); 
+                  const double r, const double threat, const std::string &s); 
     IncomingEvent(const yarp::os::Bottle &b);
     IncomingEvent(const IncomingEvent &e);
 
