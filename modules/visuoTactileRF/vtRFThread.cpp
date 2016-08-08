@@ -307,7 +307,7 @@ void vtRFThread::run()
         for (int i = 0; i < inputEvents.size(); i++)
         {
             incomingEvents.push_back(IncomingEvent(*(inputEvents.get(i).asList())));
-            printMessage(3,"[EVENT] %s\n", incomingEvents.back().toString().c_str());
+            printMessage(3,"\n[EVENT] %s\n", incomingEvents.back().toString().c_str());
         }
 
         // manage the buffer
@@ -859,18 +859,19 @@ bool vtRFThread::projectIncomingEvent()
                 yError("[vtRFThread] in projectIncomingEvent!\n");
 
             // yInfo("T_A:\n%s",T_a.toString().c_str());
+            printMessage(5,"\nProject incoming event onto %s taxels\n",iCubSkin[i].name.c_str());
 
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
             {
                 dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt=projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,
                     incomingEvents[k]); //here every taxel (TaxelPWE) is updated with the event - if it is relevant for it
 
-            // There's a reason behind this choice
-            dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[0]);
-            dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[1]);
-            dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[2]);
+                // There's a reason behind this choice
+                dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[0]);
+                dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[1]);
+                dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[2]);
 
-            printMessage(5,"Projection -> i: %i\tID %i\tEvent: %s\n",i,j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.toString().c_str());
+                printMessage(5,"Repr. taxel ID %i\tEvent: %s\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.toString().c_str());
             }
         }
     }
@@ -912,12 +913,14 @@ void vtRFThread::resetParzenWindows()
 
 bool vtRFThread::computeResponse(double stress_modulation)
 {
+    printMessage(4,"Taxel responses:\n");
     for (int i = 0; i < iCubSkinSize; i++)
     {
+        printMessage(4,"%s \n",iCubSkin[i].name.c_str());
         for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
             dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->computeResponse(stress_modulation);
-            printMessage(4,"\tID %i\tResponse %i\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp);
+            printMessage(4,"\t Representative ID %i\tResponse %i\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp);
         }
     }
 
