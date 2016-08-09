@@ -494,7 +494,9 @@ void vtRFThread::manageSkinEvents()
                 vectorIntoBottle(normalDir,b);
                 vectorIntoBottle(geoCenterWRF,b);
                 vectorIntoBottle(normalDirWRF,b);
-                b.addDouble(w_max/255.0); //scaling - will be normalized in the end, but if the event has a >0 threat value, response is amplified and may exceed 1
+                b.addDouble(w_max);
+                //b.addDouble(w_max/255.0); // used to be this before adapting parzenWindowEstimator1D::getF_X_scaled
+                //should be inside <0,1> but if the event has a >0 threat value, response is amplified and may exceed 1
                 b.addString(part);
                 out.addList().read(b);
             }

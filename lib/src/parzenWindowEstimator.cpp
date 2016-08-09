@@ -306,7 +306,8 @@ double gauss2D(const double x_0, const double y_0,
             //printf("binsNum[0]: %d binWidth[0]: %f\n",binsNum[0],binWidth[0]);
         }
 
-        double scalingfactor_max = 255/max;
+        //double scalingfactor_max = 255/max;
+        double scalingfactor_max = 1.0/max;
 
         // if the histogram is empty, the maximum value is 0
         if (max == 0)
@@ -384,8 +385,8 @@ double gauss2D(const double x_0, const double y_0,
         }
         // double avg = sum/cnt;
         // double scalingfactor_avg = 100/avg;
-
-        double scalingfactor_max = 255/max;
+        //double scalingfactor_max = 255/max;
+        double scalingfactor_max = 1.0/max;
 
         return getF_X(x)*scalingfactor_max;
     }

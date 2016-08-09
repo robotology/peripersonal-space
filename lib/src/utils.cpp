@@ -415,7 +415,8 @@ unsigned int factorial(unsigned int n)
         std::vector<double> In = Evnt.getNRMTTC();
         Resp = pwe->computeResponse(In);
         
-        Resp = Resp + (Resp * min(1.0,Evnt.Threat + stress_modulation)); //with this amplification, may come out of the range (which should be <0,255>)
+        Resp = Resp + (Resp * min(1.0,Evnt.Threat + stress_modulation)); //with this amplification,
+        //may come out of the range (which used to be <0,255>, now <0,1> after 9.8.2016)
         //- in fact double that. 
 
         return true;
