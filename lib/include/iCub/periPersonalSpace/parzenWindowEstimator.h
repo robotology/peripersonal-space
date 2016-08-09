@@ -113,14 +113,13 @@ class parzenWindowEstimator
     /**
     * Get the value of the receptive field at a certain x.
     * It differs from the previous because it's scaled
-    * (i.e. its max is set to 255, the other values accordingly)
     **/
     virtual double getF_X_scaled(const std::vector<double> x) = 0;
 
     /**
     * Compute the response for a specific input sample
     **/
-    int computeResponse(const std::vector<double> x);
+    double computeResponse(const std::vector<double> x);
 
     /**
     * Print Function
@@ -213,7 +212,6 @@ class parzenWindowEstimator2D : public parzenWindowEstimator
     /**
     * Get the value of the receptive field at a certain x.
     * It differs from the previous because it's scaled
-    * (i.e. its max is set to 255, the other values accordingly)
     **/
     double getF_X_scaled(const std::vector<double> x);
 

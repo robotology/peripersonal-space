@@ -232,7 +232,7 @@ struct IncomingEvent4TaxelPWE : public IncomingEvent
 class TaxelPWE : public iCub::skinDynLib::Taxel
 {
   public:
-    int       Resp;                 // taxels' activation level (0-255)
+    double       Resp;                 // taxels' activation level <0,1>
     double RFangle;                 // angle of the receptive field [rad]
 
     IncomingEvent4TaxelPWE Evnt;    // 

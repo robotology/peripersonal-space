@@ -311,14 +311,14 @@ unsigned int factorial(unsigned int n)
 
     TaxelPWE::TaxelPWE() : Taxel(), Evnt()
     {
-        Resp    = 0;
+        Resp    = 0.0;
         RFangle = 40*M_PI/180;
     }
 
     TaxelPWE::TaxelPWE(const Vector &p,
                        const Vector &n) : Taxel(p,n), Evnt()
     {
-        Resp    = 0;
+        Resp    = 0.0;
         RFangle = 40*M_PI/180;
     };
 
@@ -326,7 +326,7 @@ unsigned int factorial(unsigned int n)
                        const Vector &n,
                        const int &i) : Taxel(p,n,i), Evnt()
     {
-        Resp    = 0;
+        Resp    = 0.0;
         RFangle = 40*M_PI/180;
     };
 
@@ -408,7 +408,7 @@ unsigned int factorial(unsigned int n)
     {
         if (!insideFoRCheck(Evnt))
         {
-            Resp = 0;
+            Resp = 0.0;
             return false;
         }
 
@@ -417,7 +417,8 @@ unsigned int factorial(unsigned int n)
         
         Resp = Resp + (Resp * min(1.0,Evnt.Threat + stress_modulation)); //with this amplification,
         //may come out of the range (which used to be <0,255>, now <0,1> after 9.8.2016)
-        //- in fact double that. 
+        //- in fact double that range.
+        //printf("TaxelPWE::computeResponse: %f\n",Resp);
 
         return true;
     }

@@ -174,13 +174,13 @@ double gauss2D(const double x_0, const double y_0,
             return false;
     }
 
-    int parzenWindowEstimator::computeResponse(const std::vector<double> x)
+    double parzenWindowEstimator::computeResponse(const std::vector<double> x)
     {
         std::vector<int> b;
 
         if (getIndexes(x,b))
         {
-            return int(getF_X_scaled(x));
+            return getF_X_scaled(x);
         }
 
         return 0;

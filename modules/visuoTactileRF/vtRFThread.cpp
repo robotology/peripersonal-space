@@ -9,6 +9,8 @@
 
 #define RADIUS              2 // Radius in px of every taxel (in the images)
 #define SKIN_THRES	        7 // Threshold with which a contact is detected
+#define RESP_GAIN_FOR_SKINGUI 100 //To amplify PPS activations from <0,1> to <0,100>
+#define PPS_AGGREG_ACT_THRESHOLD 0.2 //Threshold for aggregated events per skin part
 
 IncomingEvent eventFromBottle(const Bottle &b)
 {
@@ -319,7 +321,7 @@ void vtRFThread::run()
         else
         {
             eventsBuffer.push_back(incomingEvents.back());
-            yDebug("I'm bufferizing! Size %lu",eventsBuffer.size());
+            yDebug("I'm buffering! Size %lu",eventsBuffer.size());
         }
 
         // limit the size of the buffer to 80, i.e. 4 seconds of acquisition
@@ -443,7 +445,7 @@ void vtRFThread::manageSkinEvents()
             //take only highly activated "taxels"
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++) // cycle through the taxels
             {
-                if (dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp > 50)
+                if (dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp > PPS_AGGREG_ACT_THRESHOLD)
 
                 {
                     taxelsIDs.push_back(iCubSkin[i].taxels[j]->getID());
@@ -455,9 +457,9 @@ void vtRFThread::manageSkinEvents()
             {
                 Vector geoCenter(3,0.0), normalDir(3,0.0);
                 Vector geoCenterWRF(3,0.0), normalDirWRF(3,0.0); //in world reference frame
-                int w = 0;
-                int w_max = 0;
-                int w_sum = 0;
+                double w = 0.0;
+                double w_max = 0.0;
+                double w_sum = 0.0;
                 part  = iCubSkin[i].name;
 
                 //the output format on the port will be:
@@ -473,7 +475,7 @@ void vtRFThread::manageSkinEvents()
                         if (iCubSkin[i].taxels[p]->getID() == taxelsIDs[k])
                         {
                             w = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[p])->Resp;
-                            printMessage(4,"part %s: pps taxel ID %d, pos (%s), activation: %d\n",part.c_str(),taxelsIDs[k],iCubSkin[i].taxels[p]->getPosition().toString().c_str(),w);
+                            printMessage(4,"part %s: pps taxel ID %d, pos (%s), activation: %f\n",part.c_str(),taxelsIDs[k],iCubSkin[i].taxels[p]->getPosition().toString().c_str(),w);
                             //The final geoCenter and normalDir will be a weighted average of the activations
                             geoCenter += iCubSkin[i].taxels[p]->getPosition()*w; //Matej, 24.2., changing convention - link not Root FoR
                             normalDir += iCubSkin[i].taxels[p]->getNormal()*w;
@@ -522,7 +524,7 @@ void vtRFThread::sendContactsToSkinGui()
                 if(iCubSkin[i].repr2TaxelList.empty())
                 {  
                     //we simply light up the taxels themselves
-                    respToSkin[iCubSkin[i].taxels[j]->getID()] = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp;
+                    respToSkin[iCubSkin[i].taxels[j]->getID()] = RESP_GAIN_FOR_SKINGUI * dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp;
                 }
                 else
                 { 
@@ -532,14 +534,14 @@ void vtRFThread::sendContactsToSkinGui()
                     if (l.empty())
                     {
                         yWarning("skinPart %d Taxel %d : no list of represented taxels is available, even if repr2TaxelList is not empty",i,iCubSkin[i].taxels[j]->getID());
-                        respToSkin[iCubSkin[i].taxels[j]->getID()] = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp;
+                        respToSkin[iCubSkin[i].taxels[j]->getID()] = RESP_GAIN_FOR_SKINGUI * dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp;
                     }
                     else
                     {
                         for(list<unsigned int>::const_iterator iter_list = l.begin(); iter_list != l.end(); iter_list++)
                         {
                             //for all the represented taxels, we assign the activation of the super-taxel
-                            respToSkin[*iter_list] =  dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp;
+                            respToSkin[*iter_list] =  RESP_GAIN_FOR_SKINGUI * dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp;
                         } 
                     }
                 }
@@ -922,7 +924,7 @@ bool vtRFThread::computeResponse(double stress_modulation)
         for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
             dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->computeResponse(stress_modulation);
-            printMessage(4,"\t Representative ID %i\tResponse %i\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp);
+            printMessage(4,"\t Representative ID %i\tResponse %f\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp);
         }
     }
 
