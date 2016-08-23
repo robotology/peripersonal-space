@@ -16,6 +16,7 @@ include_directories(${periPersonalSpace_INCLUDE_DIRS})
 add_executable(${PROJECT_NAME} ${source} ${header} )
 
 target_link_libraries(${PROJECT_NAME} periPersonalSpace ${YARP_LIBRARIES} ${IPOPT_LIBRARIES})
+message(${IPOPT_LIBRARIES})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 

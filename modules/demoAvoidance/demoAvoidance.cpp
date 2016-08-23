@@ -70,7 +70,7 @@ protected:
                 persistence(0.0), timeout(-1.0) { }
     };
     map<string,Data> data;
-    
+
     //********************************************
     bool read(ConnectionReader &connection)
     {
@@ -95,7 +95,7 @@ protected:
                 {
                     arm = "left";
                 }
-                
+
                 transform(arm.begin(),arm.end(),arm.begin(),::tolower);
                 mutex.lock();
                 map<string,Data>::iterator it=data.find(arm);
@@ -128,7 +128,7 @@ protected:
             if (norm(x-data.home_x)>PPS_AVOIDANCE_RADIUS)
                 data.iarm->stopControl();
             else
-                data.iarm->setTaskVelocities((motionGain*PPS_AVOIDANCE_VELOCITY/norm(data.dir))*data.dir,Vector(4,0.0)); 
+                data.iarm->setTaskVelocities((motionGain*PPS_AVOIDANCE_VELOCITY/norm(data.dir))*data.dir,Vector(4,0.0));
 
             data.persistence=std::max(data.persistence-getPeriod(),0.0);
             if (data.persistence==0.0)
@@ -144,7 +144,7 @@ protected:
             data.timeout=-1.0;
         }
     }
-    
+
 public:
     bool respond(const Bottle &command, Bottle &reply)
     {
@@ -288,7 +288,7 @@ public:
 
             if (!stiff)
             {
-                imode->setInteractionMode(0,VOCAB_IM_COMPLIANT); iimp->setImpedance(0,0.4,0.03); 
+                imode->setInteractionMode(0,VOCAB_IM_COMPLIANT); iimp->setImpedance(0,0.4,0.03);
                 imode->setInteractionMode(1,VOCAB_IM_COMPLIANT); iimp->setImpedance(1,0.4,0.03);
                 imode->setInteractionMode(2,VOCAB_IM_COMPLIANT); iimp->setImpedance(2,0.4,0.03);
                 imode->setInteractionMode(3,VOCAB_IM_COMPLIANT); iimp->setImpedance(3,0.2,0.01);
@@ -344,7 +344,7 @@ public:
 
             if (!stiff)
             {
-                imode->setInteractionMode(0,VOCAB_IM_COMPLIANT); iimp->setImpedance(0,0.4,0.03); 
+                imode->setInteractionMode(0,VOCAB_IM_COMPLIANT); iimp->setImpedance(0,0.4,0.03);
                 imode->setInteractionMode(1,VOCAB_IM_COMPLIANT); iimp->setImpedance(1,0.4,0.03);
                 imode->setInteractionMode(2,VOCAB_IM_COMPLIANT); iimp->setImpedance(2,0.4,0.03);
                 imode->setInteractionMode(3,VOCAB_IM_COMPLIANT); iimp->setImpedance(3,0.2,0.01);
@@ -362,7 +362,7 @@ public:
 
         rpcSrvr.open(("/"+name+"/rpc:i").c_str());
         attach(rpcSrvr);
-        return true; 
+        return true;
     }
 
     //********************************************
@@ -373,12 +373,12 @@ public:
         {
             manageArm(data["left"]);
         }
-        
+
         if (useRightArm)
         {
             manageArm(data["right"]);
         }
-        mutex.unlock(); 
+        mutex.unlock();
         return true;
     }
 
@@ -401,7 +401,7 @@ public:
             {
                 data["left"].iarm->stopControl();
                 data["left"].iarm->restoreContext(contextL);
-                driverCartL.close(); 
+                driverCartL.close();
             }
 
             if (driverJointL.isValid())
@@ -452,8 +452,8 @@ int main(int argc, char * argv[])
     moduleRF.configure(argc,argv);
 
     if (moduleRF.check("help"))
-    {    
-        yInfo("");
+    {
+        yInfo(" ");
         yInfo("Options:");
         yInfo("   --context     path:  where to find the called resource (default periPersonalSpace).");
         yInfo("   --from        from:  the name of the .ini file (default demoAvoidance.ini).");
@@ -463,7 +463,7 @@ int main(int argc, char * argv[])
         yInfo("   --stiff       flag:  if enabled, the robot will perform movements in stiff mode instead of compliant.");
         yInfo("   --noLeftArm   flag:  if enabled, the robot will perform movements without the left arm.");
         yInfo("   --noRightArm  flag:  if enabled, the robot will perform movements without the rihgt arm.");
-        yInfo("");
+        yInfo(" ");
         return 0;
     }
 
