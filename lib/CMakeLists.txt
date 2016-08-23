@@ -14,11 +14,15 @@ include_directories(${IPOPT_INCLUDE_DIRS})
 set(folder_source src/iCubDblTchSlv.cpp
 		          src/iKinFwdMod.cpp
                   src/utils.cpp
+                  src/taxelPWE.cpp
+                  src/skinPartPWE.cpp
                   src/parzenWindowEstimator.cpp)
 
 set(folder_header include/iCub/periPersonalSpace/iCubDblTchSlv.h
                   include/iCub/periPersonalSpace/iKinFwdMod.h
                   include/iCub/periPersonalSpace/utils.h
+                  include/iCub/periPersonalSpace/taxelPWE.h
+                  include/iCub/periPersonalSpace/skinPartPWE.h
                   include/iCub/periPersonalSpace/parzenWindowEstimator.h)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)

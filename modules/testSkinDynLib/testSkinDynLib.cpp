@@ -30,7 +30,7 @@ CopyPolicy: Released under the terms of the GNU GPL v2.0.
 \section intro_sec Description
 This is a module for implementing the VisuoTactile ReceptiveFields on the iCub.
 
-\section lib_sec Libraries 
+\section lib_sec Libraries
 YARP, ICUB libraries and OPENCV
 
 \section parameters_sec Parameters
@@ -64,13 +64,13 @@ YARP, ICUB libraries and OPENCV
 None.
 
 \section out_data_sec Output Data Files
-None. 
- 
+None.
+
 \section tested_os_sec Tested OS
 Linux (Ubuntu 12.04, Ubuntu 14.04, Debian Squeeze, Debian Wheezy).
 
 \author: Alessandro Roncone
-*/ 
+*/
 
 #include <yarp/os/all.h>
 
@@ -80,7 +80,7 @@ Linux (Ubuntu 12.04, Ubuntu 14.04, Debian Squeeze, Debian Wheezy).
 #include <yarp/math/Math.h>
 
 #include <iostream>
-#include <string> 
+#include <string>
 
 #include <iCub/skinDynLib/iCubSkin.h>
 
@@ -92,9 +92,9 @@ using namespace std;
 * \ingroup testSkinDynLibModule
 *
 * The module that achieves the testSkinDynLib task.
-*  
+*
 */
-class testSkinDynLib: public RFModule 
+class testSkinDynLib: public RFModule
 {
 private:
 
@@ -179,14 +179,14 @@ int main(int argc, char * argv[])
     moduleRF.configure(argc,argv);
 
     if (moduleRF.check("help"))
-    {    
-        yInfo("");
+    {
+        yInfo(" ");
         yInfo("Options:");
         yInfo("  --verbosity  int:    verbosity level (default 0).");
-        yInfo("");
+        yInfo(" ");
         return 0;
     }
-    
+
     testSkinDynLib visTacRF;
     return visTacRF.runModule(moduleRF);
 }
