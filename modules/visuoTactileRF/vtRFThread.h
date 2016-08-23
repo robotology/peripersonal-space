@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2010 RobotCub Consortium, European Commission FP6 Project IST-004370
  * Author: Alessandro Roncone
  * email:  alessandro.roncone@iit.it
@@ -52,7 +52,7 @@
 #include <cv.h>
 #include <highgui.h>
 #include <iCub/ctrl/math.h>
-#include <iCub/periPersonalSpace/utils.h>
+#include <iCub/periPersonalSpace/skinPartPWE.h>
 #include <iCub/skinDynLib/skinContact.h>
 #include <iCub/skinDynLib/skinContactList.h>
 
@@ -100,17 +100,17 @@ protected:
 
     BufferedPort<Bottle> *stressPort; //global stress value from allostatic controller
     Bottle *stressBottle;
-    
+
     BufferedPort<Bottle> skinGuiPortForearmL;     // output to the skinGui
-    BufferedPort<Bottle> skinGuiPortForearmR;    
-    BufferedPort<Bottle> skinGuiPortHandL;     
-    BufferedPort<Bottle> skinGuiPortHandR;    
+    BufferedPort<Bottle> skinGuiPortForearmR;
+    BufferedPort<Bottle>    skinGuiPortHandL;
+    BufferedPort<Bottle>    skinGuiPortHandR;
 
     BufferedPort<iCub::skinDynLib::skinContactList> *skinPortIn;  // input from the skinManager
     BufferedPort<yarp::os::Bottle> ppsEventsPortOut;                                             // output for the events
     Port dataDumperPortOut;                                       // output for the dataDumper (quick thing
     yarp::sig::Vector dumpedVector;
-    
+
     // iCubSkin
     vector <string>     filenames;
     vector <skinPartPWE> iCubSkin;
@@ -140,7 +140,7 @@ protected:
     bool learningFlag;
 
     double timeNow;
-    
+
     double stress; //obtained from allostatic controller - will globally modify PPS activations (0 ~ no modulation)
 
     // Driver for "classical" interfaces
@@ -196,7 +196,7 @@ protected:
     * @return true/false for success/failure
     **/
     bool projectIntoImagePlane(vector <skinPartPWE> &sP, const string &_eye);
-    
+
     /**
     * Projects a generic 3D point from its position in the WRF
     * into the image plane of an eye
@@ -238,17 +238,17 @@ protected:
     * and returns taxel IDs of their representatives - e.g. triangle centers.
     **/
     void initRepresentativeTaxels(skinPart &sP);
-   
+
     /**
-    * For all active taxels, it returns a set of "representative" active taxels if they were defined for the respective skin part 
-    * E.g. if at least one taxel from a triangle was active, the center of this triangle will be part of the output list 
+    * For all active taxels, it returns a set of "representative" active taxels if they were defined for the respective skin part
+    * E.g. if at least one taxel from a triangle was active, the center of this triangle will be part of the output list
     * @param IDv  is a vector of IDs of the taxels activated
     * @param IDx  is the index of the iCubSkin affected by the contact
                   (basically, the index of the skinPart that has been touched)
     * @param v    is a vector of IDs of the representative taxels activated
     **/
     bool getRepresentativeTaxels(const std::vector<unsigned int> IDv, const int IDx, std::vector<unsigned int> &v);
-        
+
     /**
     *
     **/
@@ -260,7 +260,7 @@ protected:
     void manageSkinEvents();
 
     /**
-    * For all the skinParts, process the response according to the inputEvent and parse them properly before sending them to the 
+    * For all the skinParts, process the response according to the inputEvent and parse them properly before sending them to the
     * skinGuis
     **/
     void sendContactsToSkinGui();
