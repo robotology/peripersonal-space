@@ -114,10 +114,14 @@ using namespace       std;
         std::vector<double> In = Evnt.getNRMTTC();
         Resp = pwe->computeResponse(In);
 
+        //yDebug("[TaxelPWE::computeResponse()] Resp = Resp  + Resp * min(1.0,Evnt.Threat + stress_modulation)\n");
+        //yDebug("    = %f  + %f * min(1.0,%f + %f)\n",Resp,Resp,Evnt.Threat,stress_modulation);
+
+
         Resp = Resp + (Resp * min(1.0,Evnt.Threat + stress_modulation)); //with this amplification,
         //may come out of the range (which used to be <0,255>, now <0,1> after 9.8.2016)
-        //- in fact double that range.
-        //printf("TaxelPWE::computeResponse: %f\n",Resp);
+        //- in fact double that range
+        //yDebug("  Resp  = %f  \n",Resp);
 
         return true;
     }

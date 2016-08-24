@@ -260,7 +260,7 @@ void vtRFThread::run()
     skinContactList *skinContacts  = skinPortIn   -> read(false);
 
     dumpedVector.resize(0,0.0);
-    
+    printMessage(4,"\n **************************vtRFThread::run() ************************\n");
     if (stressBottle !=NULL){
         stress = stressBottle->get(0).asDouble();
         yAssert((stress>=0.0) && (stress<=1.0));
@@ -863,7 +863,7 @@ bool vtRFThread::projectIncomingEvent()
                 yError("[vtRFThread] in projectIncomingEvent!\n");
 
             // yInfo("T_A:\n%s",T_a.toString().c_str());
-            printMessage(5,"\nProject incoming event onto %s taxels\n",iCubSkin[i].name.c_str());
+            printMessage(5,"\nProject incoming event %s onto %s taxels\n",incomingEvents.back().toString().c_str(),iCubSkin[i].name.c_str());
 
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
             {
@@ -924,7 +924,7 @@ bool vtRFThread::computeResponse(double stress_modulation)
         for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
             dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->computeResponse(stress_modulation);
-            printMessage(4,"\t Representative ID %i\tResponse %f\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp);
+            printMessage(4,"\t Representative ID %i\tResponse %f (with stress modulation:%f)\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp,stress_modulation);
         }
     }
 
