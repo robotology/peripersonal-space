@@ -167,11 +167,15 @@ protected:
     IEncoders         *iencsH;
     yarp::sig::Vector *encsH;
     int                jntsH;
-
     // Gaze controller interface
     IGazeControl       *igaze;
     int contextGaze;
 
+    //N.B. All angles in this thread are in degrees
+    yarp::sig::Vector qL; //current values of left arm joints (should be 7)
+    yarp::sig::Vector qR; //current values of right arm joints (should be 7)
+    yarp::sig::Vector qT; //current values of torso joints (3, in the order expected for iKin: yaw, roll, pitch)
+          
     // Stamp for the setEnvelope for the ports
     yarp::os::Stamp ts;
 
@@ -248,6 +252,13 @@ protected:
     **/
     bool getRepresentativeTaxels(const std::vector<unsigned int> IDv, const int IDx, std::vector<unsigned int> &v);
 
+    
+    /**
+    * Will read encoders (torso and arms) and update arm chains.
+    * @return true/false on success failure
+    **/
+    bool readEncodersAndUpdateArmChains();
+    
     /**
     *
     **/

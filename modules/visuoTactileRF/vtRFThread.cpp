@@ -11,6 +11,8 @@
 #define SKIN_THRES	        7 // Threshold with which a contact is detected
 #define RESP_GAIN_FOR_SKINGUI 100 //To amplify PPS activations from <0,1> to <0,100>
 #define PPS_AGGREG_ACT_THRESHOLD 0.2 //Threshold for aggregated events per skin part
+#define NR_ARM_JOINTS 7
+#define NR_TORSO_JOINTS 3 
 
 IncomingEvent eventFromBottle(const Bottle &b)
 {
@@ -62,6 +64,8 @@ vtRFThread::vtRFThread(int _rate, const string &_name, const string &_robot, con
 
 bool vtRFThread::threadInit()
 {
+    bool ok = 1;
+    
     imagePortInR        -> open(("/"+name+"/imageR:i").c_str());
     imagePortInL        -> open(("/"+name+"/imageL:i").c_str());
     imagePortOutR.open(("/"+name+"/imageR:o").c_str());
@@ -102,11 +106,14 @@ bool vtRFThread::threadInit()
         ts.update();
         
         stress = 0.0;
-
+  
     /****open right arm interfaces (if they are needed) **********************/
         if (rf->check("rightHand") || rf->check("rightForeArm") ||
            (!rf->check("rightHand") && !rf->check("rightForeArm") && !rf->check("leftHand") && !rf->check("leftForeArm")))
         {
+            for (int i = 0; i < NR_TORSO_JOINTS; i++)
+                armR->releaseLink(i); //torso will be enabled
+                        
             Property OptR;
             OptR.put("robot",  robot.c_str());
             OptR.put("part",   "right_arm");
@@ -119,7 +126,7 @@ bool vtRFThread::threadInit()
                 yError("[vtRFThread] : could not open right_arm PolyDriver!\n");
                 return false;
             }
-            bool ok = 1;
+            ok = 1;
             if (ddR.isValid())
             {
                 ok = ok && ddR.view(iencsR);
@@ -130,13 +137,17 @@ bool vtRFThread::threadInit()
                 return false;
             }
             iencsR->getAxes(&jntsR);
-            encsR = new yarp::sig::Vector(jntsR,0.0);
+            encsR = new yarp::sig::Vector(jntsR,0.0); //should be 16 - arm + fingers
+            qR.resize(NR_ARM_JOINTS,0.0); //current values of arm joints (should be 7)
         }
-
+  
     /**********open left arm interfaces (if they are needed) ****************/
         if (rf->check("leftHand") || rf->check("leftForeArm") ||
            (!rf->check("rightHand") && !rf->check("rightForeArm") && !rf->check("leftHand") && !rf->check("leftForeArm")))
         {
+            for (int i = 0; i < NR_TORSO_JOINTS; i++)
+                armL->releaseLink(i); //torso will be enabled
+            
             Property OptL;
             OptL.put("robot",  robot.c_str());
             OptL.put("part",   "left_arm");
@@ -149,7 +160,7 @@ bool vtRFThread::threadInit()
                 yError("[vtRFThread] : could not open left_arm PolyDriver!\n");
                 return false;
             }
-            bool ok = 1;
+            ok = 1;
             if (ddL.isValid())
             {
                 ok = ok && ddL.view(iencsL);
@@ -160,7 +171,8 @@ bool vtRFThread::threadInit()
                 return false;
             }
             iencsL->getAxes(&jntsL);
-            encsL = new yarp::sig::Vector(jntsL,0.0);
+            encsL = new yarp::sig::Vector(jntsL,0.0); //should be 16 - arm + fingers
+            qL.resize(NR_ARM_JOINTS,0.0); //current values of arm joints (should be 7)
         }
 
     /**************************/
@@ -176,7 +188,7 @@ bool vtRFThread::threadInit()
             yError("[vtRFThread] Could not open torso PolyDriver!");
             return false;
         }
-        bool ok = 1;
+        ok = 1;
         if (ddT.isValid())
         {
             ok = ok && ddT.view(iencsT);
@@ -188,6 +200,7 @@ bool vtRFThread::threadInit()
         }
         iencsT->getAxes(&jntsT);
         encsT = new yarp::sig::Vector(jntsT,0.0);
+        qT.resize(NR_TORSO_JOINTS,0.0); //current values of torso joints (3, in the order expected for iKin: yaw, roll, pitch)
 
     /**************************/
         Property OptH;
@@ -246,6 +259,7 @@ bool vtRFThread::threadInit()
 
 void vtRFThread::run()
 {
+    printMessage(4,"\n **************************vtRFThread::run() ************************\n");
     // read from the input ports
     dTBottle                       = dTPort       -> read(false);
     stressBottle                   = stressPort   -> read(false);
@@ -255,7 +269,8 @@ void vtRFThread::run()
     skinContactList *skinContacts  = skinPortIn   -> read(false);
 
     dumpedVector.resize(0,0.0);
-    printMessage(4,"\n **************************vtRFThread::run() ************************\n");
+    readEncodersAndUpdateArmChains();
+    
     if (stressBottle !=NULL)
     {
         stress = stressBottle->get(0).asDouble();
@@ -776,9 +791,6 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
     Matrix T_a = eye(4);                     // transform matrix relative to the arm
     if ((iCubSkin[IDx].name == SkinPart_s[SKIN_LEFT_FOREARM]) || (iCubSkin[IDx].name == SkinPart_s[SKIN_LEFT_HAND]))
     {
-        iencsL->getEncoders(encsL->data());
-        yarp::sig::Vector qL=encsL->subVector(0,6);
-        armL -> setAng(qL*CTRL_DEG2RAD);
         if (iCubSkin[IDx].name == SkinPart_s[SKIN_LEFT_FOREARM]) 
             T_a = armL -> getH(3+4, true);
         else //(iCubSkin[i].name == SkinPart_s[SKIN_LEFT_HAND]) 
@@ -786,9 +798,6 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
     }
     else if ((iCubSkin[IDx].name == SkinPart_s[SKIN_RIGHT_FOREARM]) || (iCubSkin[IDx].name == SkinPart_s[SKIN_RIGHT_HAND]))
     {
-        iencsR->getEncoders(encsR->data());
-        yarp::sig::Vector qR=encsR->subVector(0,6);
-        armR -> setAng(qR*CTRL_DEG2RAD);
         if (iCubSkin[IDx].name == SkinPart_s[SKIN_RIGHT_FOREARM])
             T_a = armR -> getH(3+4, true);
         else //(iCubSkin[i].name == SkinPart_s[SKIN_RIGHT_HAND]) 
@@ -827,6 +836,38 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
     return true;
 }
 
+bool vtRFThread::readEncodersAndUpdateArmChains()
+{    
+   Vector q1(NR_TORSO_JOINTS+NR_ARM_JOINTS,0.0);
+   Vector q2(NR_TORSO_JOINTS+NR_ARM_JOINTS,0.0);
+    
+   iencsT->getEncoders(encsT->data()); 
+   qT[0]=(*encsT)[2]; //reshuffling from motor to iKin order (yaw, roll, pitch)
+   qT[1]=(*encsT)[1];
+   qT[2]=(*encsT)[0];
+
+   if (rf->check("rightHand") || rf->check("rightForeArm") ||
+        (!rf->check("rightHand") && !rf->check("rightForeArm") && !rf->check("leftHand") && !rf->check("leftForeArm")))
+   {
+        iencsR->getEncoders(encsR->data());
+        qR=encsR->subVector(0,NR_ARM_JOINTS-1);
+        q1.setSubvector(0,qT);
+        q1.setSubvector(NR_TORSO_JOINTS,qR);
+        armR -> setAng(q1*CTRL_DEG2RAD);
+   }    
+   if (rf->check("leftHand") || rf->check("leftForeArm") ||
+           (!rf->check("rightHand") && !rf->check("rightForeArm") && !rf->check("leftHand") && !rf->check("leftForeArm")))
+   {      
+        iencsL->getEncoders(encsL->data());
+        qL=encsL->subVector(0,NR_ARM_JOINTS-1);
+        q2.setSubvector(0,qT);
+        q2.setSubvector(NR_TORSO_JOINTS,qL);
+        armL -> setAng(q2*CTRL_DEG2RAD);
+   }      
+   return true;
+}
+
+
 bool vtRFThread::projectIncomingEvent()
 {
     for (size_t k = 0; k < incomingEvents.size(); k++)
@@ -836,9 +877,6 @@ bool vtRFThread::projectIncomingEvent()
             Matrix T_a = eye(4);               // transform matrix relative to the arm
             if ((iCubSkin[i].name == SkinPart_s[SKIN_LEFT_FOREARM]) || (iCubSkin[i].name == SkinPart_s[SKIN_LEFT_HAND]))
             {
-                iencsL->getEncoders(encsL->data());
-                yarp::sig::Vector qL=encsL->subVector(0,6);
-                armL -> setAng(qL*CTRL_DEG2RAD);
                 if (iCubSkin[i].name == SkinPart_s[SKIN_LEFT_FOREARM]) 
                     T_a = armL -> getH(3+4, true);
                 else //(iCubSkin[i].name == SkinPart_s[SKIN_LEFT_HAND]) 
@@ -846,9 +884,6 @@ bool vtRFThread::projectIncomingEvent()
             }
             else if ((iCubSkin[i].name == SkinPart_s[SKIN_RIGHT_FOREARM]) || (iCubSkin[i].name == SkinPart_s[SKIN_RIGHT_HAND]))
             {
-                iencsR->getEncoders(encsR->data());
-                yarp::sig::Vector qR=encsR->subVector(0,6);
-                armR -> setAng(qR*CTRL_DEG2RAD);
                 if (iCubSkin[i].name == SkinPart_s[SKIN_RIGHT_FOREARM])
                     T_a = armR -> getH(3+4, true);
                 else //(iCubSkin[i].name == SkinPart_s[SKIN_RIGHT_HAND]) 
@@ -1064,7 +1099,7 @@ bool vtRFThread::projectPoint(const yarp::sig::Vector &x,
 
     if (Prj)
     {
-        iencsT->getEncoders(encsT->data());
+        // iencsT->getEncoders(encsT->data()); this has been moved to readEncodersAndUpdateArmChains()
         yarp::sig::Vector torso=*encsT;
         iencsH->getEncoders(encsH->data());
         yarp::sig::Vector  head=*encsH;
@@ -1108,23 +1143,10 @@ yarp::sig::Vector vtRFThread::locateTaxel(const yarp::sig::Vector &_pos, const s
     yarp::sig::Vector WRFpos(4,0.0);
     Matrix T = eye(4);
 
-    if (part == SkinPart_s[SKIN_LEFT_FOREARM] || part == SkinPart_s[SKIN_LEFT_HAND])
-    {
-        iencsL->getEncoders(encsL->data());
-        yarp::sig::Vector qL=encsL->subVector(0,6);
-        armL -> setAng(qL*CTRL_DEG2RAD);
-    }
-    else if (part == SkinPart_s[SKIN_RIGHT_FOREARM] || part == SkinPart_s[SKIN_RIGHT_HAND])
-    {
-        iencsR->getEncoders(encsR->data());
-        yarp::sig::Vector qR=encsR->subVector(0,6);
-        armR -> setAng(qR*CTRL_DEG2RAD);
-    }
-    else
-    {
-        yError("[vtRFThread] locateTaxel() failed!\n");
-    }
-
+    if (!((part == SkinPart_s[SKIN_LEFT_FOREARM]) || (part == SkinPart_s[SKIN_LEFT_HAND]) ||
+         (part == SkinPart_s[SKIN_RIGHT_FOREARM]) || (part == SkinPart_s[SKIN_RIGHT_HAND])))
+        yError("[vtRFThread] locateTaxel() failed - unknown skinPart!\n");
+    
     if      (part == SkinPart_s[SKIN_LEFT_FOREARM] ) { T = armL -> getH(3+4, true); } // torso + up to elbow
     else if (part == SkinPart_s[SKIN_RIGHT_FOREARM]) { T = armR -> getH(3+4, true); } // torso + up to elbow
     else if (part == SkinPart_s[SKIN_LEFT_HAND])     { T = armL -> getH(3+6, true); } // torso + up to wrist
