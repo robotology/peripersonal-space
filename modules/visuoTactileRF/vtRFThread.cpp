@@ -103,7 +103,7 @@ bool vtRFThread::threadInit()
         
         stress = 0.0;
 
-    /**************************/
+    /****open right arm interfaces (if they are needed) **********************/
         if (rf->check("rightHand") || rf->check("rightForeArm") ||
            (!rf->check("rightHand") && !rf->check("rightForeArm") && !rf->check("leftHand") && !rf->check("leftForeArm")))
         {
@@ -133,7 +133,7 @@ bool vtRFThread::threadInit()
             encsR = new yarp::sig::Vector(jntsR,0.0);
         }
 
-    /**************************/
+    /**********open left arm interfaces (if they are needed) ****************/
         if (rf->check("leftHand") || rf->check("leftForeArm") ||
            (!rf->check("rightHand") && !rf->check("rightForeArm") && !rf->check("leftHand") && !rf->check("leftForeArm")))
         {
@@ -1252,7 +1252,7 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
         else if (sP.name == SkinPart_s[SKIN_RIGHT_HAND])
         { //right hand has different taxel nr.s than left hand 
             // if((i==101) || (i==103) || (i==118) || (i==137)) // || (i==124)) remove one taxel
-            if((i==101) || (i==103) || (i==118) || (i==137)) // || (i==124)) remove one taxel
+            if((i==101) || (i==103) || (i==118) || (i==137) || (i==124)) 
             {
                 sP.size++;
                 if (modality=="1D")
