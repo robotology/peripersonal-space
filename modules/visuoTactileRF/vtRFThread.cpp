@@ -77,9 +77,8 @@ bool vtRFThread::threadInit()
     ppsEventsPortOut.open(("/"+name+"/pps_events_aggreg:o").c_str());
     dataDumperPortOut.open(("/"+name+"/dataDumper:o").c_str());
 
-    /**
-    * It is not recommended but it is fast practice as well
-    **/
+    
+    //Autoconnection is not recommended; the list below is not uptodate anymore
         // if (robot=="icub")
         // {
         //     Network::connect("/icub/camcalib/left/out",("/"+name+"/imageL:i").c_str());
@@ -90,18 +89,14 @@ bool vtRFThread::threadInit()
         //     Network::connect("/icubSim/cam/left",("/"+name+"/imageL:i").c_str());
         //     Network::connect("/icubSim/cam/right",("/"+name+"/imageR:i").c_str());
         // }
-
         // Network::connect(("/"+name+"/imageL:o").c_str(),"/vtRF/left");
         // Network::connect(("/"+name+"/imageR:o").c_str(),"/vtRF/right");
-
         // Network::connect("/doubleTouch/status:o",("/"+name+"/input:i").c_str());
         // Network::connect("/visuoTactileWrapper/events:o",("/"+name+"/events:i").c_str());
-
         // Network::connect(("/"+name+"/skinGuiForearmL:o").c_str(),"/skinGui/left_forearm_virtual:i");
         // Network::connect(("/"+name+"/skinGuiForearmR:o").c_str(),"/skinGui/right_forearm_virtual:i");
         // Network::connect(("/"+name+"/skinGuiHandL:o").c_str(),"/skinGui/left_hand_virtual:i");
         // Network::connect(("/"+name+"/skinGuiHandR:o").c_str(),"/skinGui/right_hand_virtual:i");
-           
         // Network::connect("/skinManager/skin_events:o",("/"+name+"/skin_events:i").c_str());
         
         ts.update();
@@ -261,15 +256,15 @@ void vtRFThread::run()
 
     dumpedVector.resize(0,0.0);
     printMessage(4,"\n **************************vtRFThread::run() ************************\n");
-    if (stressBottle !=NULL){
+    if (stressBottle !=NULL)
+    {
         stress = stressBottle->get(0).asDouble();
         yAssert((stress>=0.0) && (stress<=1.0));
         yDebug("vtRFThread::run() reading %f stress value from port.\n",stress);
     }
-    else{
+    else
         stress = 0.0;
-    }
-
+    
     // project taxels in World Reference Frame
     for (size_t i = 0; i < iCubSkin.size(); i++)
     {

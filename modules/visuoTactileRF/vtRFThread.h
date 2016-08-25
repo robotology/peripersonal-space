@@ -107,7 +107,7 @@ protected:
 
     BufferedPort<iCub::skinDynLib::skinContactList> *skinPortIn;  // input from the skinManager
     BufferedPort<yarp::os::Bottle> ppsEventsPortOut;                                             // output for the events
-    Port dataDumperPortOut;                                       // output for the dataDumper (quick thing
+    Port dataDumperPortOut;                                       // output for the dataDumper (quick thing)
     yarp::sig::Vector dumpedVector;
 
     // iCubSkin
