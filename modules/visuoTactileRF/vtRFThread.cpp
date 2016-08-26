@@ -11,7 +11,6 @@
 #define SKIN_THRES	        7 // Threshold with which a contact is detected
 #define RESP_GAIN_FOR_SKINGUI 100 //To amplify PPS activations from <0,1> to <0,100>
 #define PPS_AGGREG_ACT_THRESHOLD 0.2 //Threshold for aggregated events per skin part
-#define NR_ARM_JOINTS 7
 
 IncomingEvent eventFromBottle(const Bottle &b)
 {
@@ -137,7 +136,9 @@ bool vtRFThread::threadInit()
             }
             iencsR->getAxes(&jntsR);
             encsR = new yarp::sig::Vector(jntsR,0.0); //should be 16 - arm + fingers
-            qR.resize(NR_ARM_JOINTS,0.0); //current values of arm joints (should be 7)
+            jntsAR = 7; //nr. arm joints only - without fingers
+            qR.resize(jntsAR,0.0); //current values of arm joints (should be 7)
+            
         }
 
     /********** Open left arm interfaces (if they are needed) ****************/
@@ -171,7 +172,9 @@ bool vtRFThread::threadInit()
             }
             iencsL->getAxes(&jntsL);
             encsL = new yarp::sig::Vector(jntsL,0.0); //should be 16 - arm + fingers
-            qL.resize(NR_ARM_JOINTS,0.0); //current values of arm joints (should be 7)
+            jntsAL = 7; //nr. arm joints only - without fingers
+            qL.resize(jntsAL,0.0); //current values of arm joints (should be 7)
+            
         }
 
     /**************************/
@@ -837,8 +840,8 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
 
 bool vtRFThread::readEncodersAndUpdateArmChains()
 {    
-   Vector q1(jntsT+NR_ARM_JOINTS,0.0);
-   Vector q2(jntsT+NR_ARM_JOINTS,0.0);
+   Vector q1(jntsT+jntsAR,0.0);
+   Vector q2(jntsT+jntsAL,0.0);
    iencsT->getEncoders(encsT->data());
    qT[0]=(*encsT)[2]; //reshuffling from motor to iKin order (yaw, roll, pitch)
    qT[1]=(*encsT)[1];
@@ -848,7 +851,7 @@ bool vtRFThread::readEncodersAndUpdateArmChains()
         (!rf->check("rightHand") && !rf->check("rightForeArm") && !rf->check("leftHand") && !rf->check("leftForeArm")))
    {
         iencsR->getEncoders(encsR->data());
-        qR=encsR->subVector(0,NR_ARM_JOINTS-1);
+        qR=encsR->subVector(0,jntsAR-1);
         q1.setSubvector(0,qT);
         q1.setSubvector(jntsT,qR);
         armR -> setAng(q1*CTRL_DEG2RAD);
@@ -857,7 +860,7 @@ bool vtRFThread::readEncodersAndUpdateArmChains()
            (!rf->check("rightHand") && !rf->check("rightForeArm") && !rf->check("leftHand") && !rf->check("leftForeArm")))
    {
         iencsL->getEncoders(encsL->data());
-        qL=encsL->subVector(0,NR_ARM_JOINTS-1);
+        qL=encsL->subVector(0,jntsAL-1);
         q2.setSubvector(0,qT);
         q2.setSubvector(jntsT,qL);
         armL -> setAng(q2*CTRL_DEG2RAD);

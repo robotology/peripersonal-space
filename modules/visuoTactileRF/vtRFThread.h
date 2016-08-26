@@ -153,12 +153,14 @@ protected:
     IEncoders         *iencsR;
     yarp::sig::Vector *encsR;
     iCubArm           *armR;
-    int                jntsR;
+    int                jntsR; //all joints including fingers ~ 16
+    int                jntsAR; //arm joints only ~ 7
     // "Classical" interfaces - LEFT ARM
     IEncoders         *iencsL;
     yarp::sig::Vector *encsL;
     iCubArm           *armL;
-    int                jntsL;
+    int                jntsL; //all joints including fingers ~ 16
+    int                jntsAL; //arm joints only ~ 7
     // "Classical" interfaces - TORSO
     IEncoders         *iencsT;
     yarp::sig::Vector *encsT;
