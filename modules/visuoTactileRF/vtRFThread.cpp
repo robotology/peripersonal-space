@@ -417,11 +417,11 @@ void vtRFThread::run()
 
     if (incomingEvents.size()>0)
     {
-        projectIncomingEvent();     // project event onto the taxels' RF
-        computeResponse(stress);          // compute the response of each taxel
+        projectIncomingEvents();     // project event onto the taxels' RF
+        computeResponse(stress);    // compute the response of each taxel
     }
 
-    sendContactsToSkinGui();        // self explicative
+    sendContactsToSkinGui();       
     manageSkinEvents();
 
     // manage the dumped port
@@ -885,11 +885,13 @@ bool vtRFThread::readHeadEncodersAndUpdateEyeChains()
     //right eye
     q[7]=head[4]-head[5]/2.0;
     eWR->eye->setAng(q*CTRL_DEG2RAD);
+    
+    return true;
 }
 
-bool vtRFThread::projectIncomingEvent()
+bool vtRFThread::projectIncomingEvents()
 {
-    for (size_t k = 0; k < incomingEvents.size(); k++)
+    for (vector<IncomingEvent>::const_iterator it = incomingEvents.begin() ; it != incomingEvents.end(); ++it)
     {
         for (int i = 0; i < iCubSkinSize; i++)
         {
@@ -912,12 +914,11 @@ bool vtRFThread::projectIncomingEvent()
                 yError("[vtRFThread] in projectIncomingEvent!\n");
 
             // yInfo("T_A:\n%s",T_a.toString().c_str());
-            printMessage(5,"\nProject incoming event %s onto %s taxels\n",incomingEvents.back().toString().c_str(),iCubSkin[i].name.c_str());
-
+            printMessage(5,"\nProject incoming event %s onto %s taxels\n",it->toString().c_str(),iCubSkin[i].name.c_str());
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
             {
                 dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt=projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,
-                    incomingEvents[k]); //here every taxel (TaxelPWE) is updated with the event - if it is relevant for it
+                    (*it)); //here every taxel (TaxelPWE) is updated with the event - if it is relevant for it
 
                 // There's a reason behind this choice
                 dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[0]);

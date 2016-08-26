@@ -271,7 +271,7 @@ protected:
     /**
     *
     **/
-    bool projectIncomingEvent();
+    bool projectIncomingEvents();
 
     /**
     *
