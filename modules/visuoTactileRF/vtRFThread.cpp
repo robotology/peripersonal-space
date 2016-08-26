@@ -12,7 +12,6 @@
 #define RESP_GAIN_FOR_SKINGUI 100 //To amplify PPS activations from <0,1> to <0,100>
 #define PPS_AGGREG_ACT_THRESHOLD 0.2 //Threshold for aggregated events per skin part
 #define NR_ARM_JOINTS 7
-#define NR_TORSO_JOINTS 3 
 
 IncomingEvent eventFromBottle(const Bottle &b)
 {
@@ -111,7 +110,7 @@ bool vtRFThread::threadInit()
         if (rf->check("rightHand") || rf->check("rightForeArm") ||
            (!rf->check("rightHand") && !rf->check("rightForeArm") && !rf->check("leftHand") && !rf->check("leftForeArm")))
         {
-            for (int i = 0; i < NR_TORSO_JOINTS; i++)
+            for (int i = 0; i < jntsT; i++)
                 armR->releaseLink(i); //torso will be enabled
                         
             Property OptR;
@@ -145,7 +144,7 @@ bool vtRFThread::threadInit()
         if (rf->check("leftHand") || rf->check("leftForeArm") ||
            (!rf->check("rightHand") && !rf->check("rightForeArm") && !rf->check("leftHand") && !rf->check("leftForeArm")))
         {
-            for (int i = 0; i < NR_TORSO_JOINTS; i++)
+            for (int i = 0; i < jntsT; i++)
                 armL->releaseLink(i); //torso will be enabled
             
             Property OptL;
@@ -200,7 +199,7 @@ bool vtRFThread::threadInit()
         }
         iencsT->getAxes(&jntsT);
         encsT = new yarp::sig::Vector(jntsT,0.0);
-        qT.resize(NR_TORSO_JOINTS,0.0); //current values of torso joints (3, in the order expected for iKin: yaw, roll, pitch)
+        qT.resize(jntsT,0.0); //current values of torso joints (3, in the order expected for iKin: yaw, roll, pitch)
 
     /**************************/
         Property OptH;
@@ -838,8 +837,8 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
 
 bool vtRFThread::readEncodersAndUpdateArmChains()
 {    
-   Vector q1(NR_TORSO_JOINTS+NR_ARM_JOINTS,0.0);
-   Vector q2(NR_TORSO_JOINTS+NR_ARM_JOINTS,0.0);
+   Vector q1(jntsT+NR_ARM_JOINTS,0.0);
+   Vector q2(jntsT+NR_ARM_JOINTS,0.0);
     
    iencsT->getEncoders(encsT->data()); 
    qT[0]=(*encsT)[2]; //reshuffling from motor to iKin order (yaw, roll, pitch)
@@ -852,7 +851,7 @@ bool vtRFThread::readEncodersAndUpdateArmChains()
         iencsR->getEncoders(encsR->data());
         qR=encsR->subVector(0,NR_ARM_JOINTS-1);
         q1.setSubvector(0,qT);
-        q1.setSubvector(NR_TORSO_JOINTS,qR);
+        q1.setSubvector(jntsT,qR);
         armR -> setAng(q1*CTRL_DEG2RAD);
    }    
    if (rf->check("leftHand") || rf->check("leftForeArm") ||
@@ -861,7 +860,7 @@ bool vtRFThread::readEncodersAndUpdateArmChains()
         iencsL->getEncoders(encsL->data());
         qL=encsL->subVector(0,NR_ARM_JOINTS-1);
         q2.setSubvector(0,qT);
-        q2.setSubvector(NR_TORSO_JOINTS,qL);
+        q2.setSubvector(jntsT,qL);
         armL -> setAng(q2*CTRL_DEG2RAD);
    }      
    return true;
