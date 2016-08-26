@@ -1,8 +1,7 @@
 /**
  * Copyright (C) 2013 RobotCub Consortium, European Commission FP6 Project IST-004370
- * Author: Alessandro Roncone
- * email:  alessandro.roncone@iit.it
- * website: www.robotcub.org
+ * Author: Alessandro Roncone, Matej Hoffmann
+ * email:  alessandro.roncone@yale.edu, matej.hoffmann@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU General Public License, version 2 or any
  * later version published by the Free Software Foundation.
@@ -23,7 +22,7 @@
  *
  * Utilities used throughout the modules and libraries.
  *
- * \author Alessandro Roncone
+ * \author Alessandro Roncone, Matej Hoffmann
  *
  * Date: first release 30/10/2013
  *
@@ -41,10 +40,11 @@
 class TaxelPWE : public iCub::skinDynLib::Taxel
 {
   public:
-    double    Resp;                 // taxels' activation level <0,1>
-    double RFangle;                 // angle of the receptive field [rad]
+    double    Resp;  // Taxels' activation level <0,1>
+    double RFangle;  // Angle of the receptive field [rad] - from the taxel normal
+                     // The effective angle is thus double that
 
-    IncomingEvent4TaxelPWE Evnt;    //
+    IncomingEvent4TaxelPWE Evnt;    // Stimuli/events nearing the taxel in the taxel's FoR
     parzenWindowEstimator *pwe;     //
 
     /**

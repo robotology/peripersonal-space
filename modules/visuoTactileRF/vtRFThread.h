@@ -1,8 +1,7 @@
 /*
  * Copyright (C) 2010 RobotCub Consortium, European Commission FP6 Project IST-004370
- * Author: Alessandro Roncone
- * email:  alessandro.roncone@iit.it
- * website: www.robotcub.org
+ * Author: Alessandro Roncone, Matej Hoffmann
+ * email:  alessandro.roncone@yale.edu, matej.hoffmann@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU General Public License, version 2 or any
  * later version published by the Free Software Foundation.
@@ -108,7 +107,7 @@ protected:
 
     BufferedPort<iCub::skinDynLib::skinContactList> *skinPortIn;  // input from the skinManager
     BufferedPort<yarp::os::Bottle> ppsEventsPortOut;                                             // output for the events
-    Port dataDumperPortOut;                                       // output for the dataDumper (quick thing
+    Port dataDumperPortOut;                                       // output for the dataDumper (quick thing)
     yarp::sig::Vector dumpedVector;
 
     // iCubSkin
@@ -154,12 +153,14 @@ protected:
     IEncoders         *iencsR;
     yarp::sig::Vector *encsR;
     iCubArm           *armR;
-    int                jntsR;
+    int                jntsR; //all joints including fingers ~ 16
+    int                jntsAR; //arm joints only ~ 7
     // "Classical" interfaces - LEFT ARM
     IEncoders         *iencsL;
     yarp::sig::Vector *encsL;
     iCubArm           *armL;
-    int                jntsL;
+    int                jntsL; //all joints including fingers ~ 16
+    int                jntsAL; //arm joints only ~ 7
     // "Classical" interfaces - TORSO
     IEncoders         *iencsT;
     yarp::sig::Vector *encsT;
@@ -168,11 +169,15 @@ protected:
     IEncoders         *iencsH;
     yarp::sig::Vector *encsH;
     int                jntsH;
-
     // Gaze controller interface
     IGazeControl       *igaze;
     int contextGaze;
 
+    //N.B. All angles in this thread are in degrees
+    yarp::sig::Vector qL; //current values of left arm joints (should be 7)
+    yarp::sig::Vector qR; //current values of right arm joints (should be 7)
+    yarp::sig::Vector qT; //current values of torso joints (3, in the order expected for iKin: yaw, roll, pitch)
+          
     // Stamp for the setEnvelope for the ports
     yarp::os::Stamp ts;
 
@@ -249,6 +254,20 @@ protected:
     **/
     bool getRepresentativeTaxels(const std::vector<unsigned int> IDv, const int IDx, std::vector<unsigned int> &v);
 
+    
+    /**
+    * Will read encoders (torso and arms) and update arm chains.
+    * @return true/false on success failure
+    **/
+    bool readEncodersAndUpdateArmChains();
+    
+    /**
+    * Will read head encoders and update eye chains.
+    * Assumes that torso encoders have been read before. 
+    * @return true/false on success failure
+    **/
+    bool readHeadEncodersAndUpdateEyeChains();
+        
     /**
     *
     **/
