@@ -333,7 +333,8 @@ void vtRFThread::run()
         }
         else
         {
-            eventsBuffer.push_back(incomingEvents.back());
+            eventsBuffer.push_back(incomingEvents.back()); //! the buffering and hence the learning is working only for the last event in the vector
+            //!so learning should be done with one stimulus only
             yDebug("I'm buffering! Size %lu",eventsBuffer.size());
         }
 
@@ -891,7 +892,7 @@ bool vtRFThread::readHeadEncodersAndUpdateEyeChains()
 
 bool vtRFThread::projectIncomingEvents()
 {
-    for (vector<IncomingEvent>::const_iterator it = incomingEvents.begin() ; it != incomingEvents.end(); ++it)
+    for (vector<IncomingEvent>::const_iterator it = incomingEvents.begin() ; it != incomingEvents.end(); it++)
     {
         for (int i = 0; i < iCubSkinSize; i++)
         {
@@ -917,15 +918,15 @@ bool vtRFThread::projectIncomingEvents()
             printMessage(5,"\nProject incoming event %s onto %s taxels\n",it->toString().c_str(),iCubSkin[i].name.c_str());
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
             {
-                dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt=projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,
-                    (*it)); //here every taxel (TaxelPWE) is updated with the event - if it is relevant for it
+                dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnts.push_back(projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,
+                    (*it))); //here every taxel (TaxelPWE) is updated with the event - if it is relevant for it
 
                 // There's a reason behind this choice
-                dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[0]);
-                dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[1]);
-                dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[2]);
+                dumpedVector.push_back((dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j]))->Evnts.back().Pos[0]);
+                dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnts.back().Pos[1]);
+                dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnts.back().Pos[2]);
 
-                printMessage(5,"Repr. taxel ID %i\tEvent: %s\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.toString().c_str());
+                //printMessage(5,"Repr. taxel ID %i\tEvent: %s\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.toString().c_str());
             }
         }
     }

@@ -44,7 +44,7 @@ class TaxelPWE : public iCub::skinDynLib::Taxel
     double RFangle;  // Angle of the receptive field [rad] - from the taxel normal
                      // The effective angle is thus double that
 
-    IncomingEvent4TaxelPWE Evnt;    // Stimuli/events nearing the taxel in the taxel's FoR
+    std::vector<IncomingEvent4TaxelPWE> Evnts;    // Stimuli/events nearing the taxel in the taxel's FoR
     parzenWindowEstimator *pwe;     //
 
     /**
@@ -67,7 +67,7 @@ class TaxelPWE : public iCub::skinDynLib::Taxel
     /**
     * Add or remove a sample from the pwe's histogram
     **/
-    bool    addSample(IncomingEvent4TaxelPWE ie);
+    bool addSample(IncomingEvent4TaxelPWE ie);
     bool removeSample(IncomingEvent4TaxelPWE ie);
 
     /**

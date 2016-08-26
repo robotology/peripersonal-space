@@ -197,25 +197,31 @@ unsigned int factorial(unsigned int n)
         int sgn = Pos[2]>=0?1:-1;
         NRM = sgn * norm(Pos);
 
-        // if (norm(Vel) < 0.38 && norm(Vel) > 0.34)
-        // {
-        //     TTC = 10000.0;
-        // }
-        // else
-        //
-        if (dot(Pos,Vel)==0) TTC = 0;
-        else                 TTC = -norm(Pos)*norm(Pos)/dot(Pos,Vel);
+        if (dot(Pos,Vel)==0)
+            TTC = 0;
+        else
+            TTC = -norm(Pos)*norm(Pos)/dot(Pos,Vel);
     }
 
     std::vector<double> IncomingEvent4TaxelPWE::getNRMTTC()
     {
-        std::vector<double> x;
+        std::vector<double> x(2);
         x.push_back(NRM);
         x.push_back(TTC);
 
         return x;
     }
+    
+    double IncomingEvent4TaxelPWE::getNRM()
+    {
+        return NRM;
+    }
 
+    double IncomingEvent4TaxelPWE::getTTC()
+    {
+        return TTC;
+    }
+    
     void IncomingEvent4TaxelPWE::print()
     {
         yDebug("\tNRM: %g\t TTC: %g \t %s", NRM, TTC, IncomingEvent::toString().c_str());

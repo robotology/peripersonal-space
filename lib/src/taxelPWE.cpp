@@ -8,14 +8,14 @@ using namespace       std;
 /* TAXEL WRAPPER FOR PWE
 *****************************************************************/
 
-    TaxelPWE::TaxelPWE() : Taxel(), Evnt()
+    TaxelPWE::TaxelPWE() : Taxel()
     {
         Resp    = 0.0;
         RFangle = 40*M_PI/180;
     }
 
     TaxelPWE::TaxelPWE(const Vector &p,
-                       const Vector &n) : Taxel(p,n), Evnt()
+                       const Vector &n) : Taxel(p,n)
     {
         Resp    = 0.0;
         RFangle = 40*M_PI/180;
@@ -23,7 +23,7 @@ using namespace       std;
 
     TaxelPWE::TaxelPWE(const Vector &p,
                        const Vector &n,
-                       const int &i) : Taxel(p,n,i), Evnt()
+                       const int &i) : Taxel(p,n,i)
     {
         Resp    = 0.0;
         RFangle = 40*M_PI/180;
@@ -105,26 +105,42 @@ using namespace       std;
 
     bool TaxelPWE::computeResponse(double stress_modulation)
     {
-        if (!insideFoRCheck(Evnt))
+        double locResp = 0.0;
+        double maxResp = 0.0;
+        std::vector<double> In(2);
+        Resp = 0.0;
+        for(vector<IncomingEvent4TaxelPWE>::iterator it = Evnts.begin(); it!=Evnts.end(); it++) 
         {
-            Resp = 0.0;
+            if (insideFoRCheck(*it))
+            {
+               In[0] = it->getNRM(); 
+               In[1] = it->getTTC(); 
+               locResp = pwe->computeResponse(In);
+               yDebug("[TaxelPWE::computeResponse()] event %s inside RF\n",it->toString().c_str());
+               yDebug("locResp = locResp  + locResp * min(1.0,Evnt.Threat + stress_modulation)\n");
+               yDebug("    = %f  + %f * min(1.0,%f + %f)\n",locResp,locResp,it->Threat,stress_modulation);
+               locResp = locResp + (locResp * min(1.0,it->Threat + stress_modulation)); //with this amplification,
+               //may come out of the range (which used to be <0,255>, now <0,1> after 9.8.2016)
+               //- in fact up to double that range
+               yDebug(" locResp  = %f  \n",locResp);
+               if (locResp > maxResp)
+                   maxResp = locResp;
+            }
+            else
+                yDebug("[TaxelPWE::computeResponse()] event %s outside RF\n",it->toString().c_str());
+        }
+        In.clear(); 
+        if (maxResp > 0.0)
+        {
+            yDebug(" Setting taxel response to maxResp: %f\n",maxResp);
+            Resp = maxResp;
+            return true;
+        }
+        else{
+            yDebug(" maxResp was <=0 (%f) - Leaving taxel response 0, returning false.\n",maxResp);
             return false;
         }
-
-        std::vector<double> In = Evnt.getNRMTTC();
-        Resp = pwe->computeResponse(In);
-
-        //yDebug("[TaxelPWE::computeResponse()] Resp = Resp  + Resp * min(1.0,Evnt.Threat + stress_modulation)\n");
-        //yDebug("    = %f  + %f * min(1.0,%f + %f)\n",Resp,Resp,Evnt.Threat,stress_modulation);
-
-
-        Resp = Resp + (Resp * min(1.0,Evnt.Threat + stress_modulation)); //with this amplification,
-        //may come out of the range (which used to be <0,255>, now <0,1> after 9.8.2016)
-        //- in fact double that range
-        //yDebug("  Resp  = %f  \n",Resp);
-
-        return true;
-    }
+     }
 
     Bottle TaxelPWE::TaxelPWEIntoBottle()
     {
@@ -208,7 +224,7 @@ using namespace       std;
 
         iCub::skinDynLib::Taxel::operator=(t);
 
-        Evnt = t.Evnt;
+        Evnts = t.Evnts;
 
         if (pwe)
         {
@@ -281,7 +297,7 @@ using namespace       std;
 
         iCub::skinDynLib::Taxel::operator=(t);
 
-        Evnt = t.Evnt;
+        Evnts = t.Evnts;
 
         if (pwe)
         {
