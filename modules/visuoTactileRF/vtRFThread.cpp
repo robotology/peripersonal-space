@@ -272,6 +272,7 @@ void vtRFThread::run()
 
     dumpedVector.resize(0,0.0);
     readEncodersAndUpdateArmChains();
+    readHeadEncodersAndUpdateEyeChains(); //has to be called after readEncodersAndUpdateArmChains(), which reads torso encoders
 
     if (stressBottle !=NULL)
     {
@@ -868,6 +869,23 @@ bool vtRFThread::readEncodersAndUpdateArmChains()
    return true;
 }
 
+bool vtRFThread::readHeadEncodersAndUpdateEyeChains()
+{
+    iencsH->getEncoders(encsH->data());
+    yarp::sig::Vector  head=*encsH;
+
+    yarp::sig::Vector q(8);
+    q[0]=qT[0];       q[1]=qT[1];        q[2]=qT[2];
+    q[3]=head[0];        q[4]=head[1];
+    q[5]=head[2];        q[6]=head[3];
+   
+    //left eye
+    q[7]=head[4]+head[5]/2.0;
+    eWL->eye->setAng(q*CTRL_DEG2RAD);  
+    //right eye
+    q[7]=head[4]-head[5]/2.0;
+    eWR->eye->setAng(q*CTRL_DEG2RAD);
+}
 
 bool vtRFThread::projectIncomingEvent()
 {
@@ -1100,26 +1118,9 @@ bool vtRFThread::projectPoint(const yarp::sig::Vector &x,
 
     if (Prj)
     {
-        // iencsT->getEncoders(encsT->data()); this has been moved to readEncodersAndUpdateArmChains()
-        yarp::sig::Vector torso=*encsT;
-        iencsH->getEncoders(encsH->data());
-        yarp::sig::Vector  head=*encsH;
-
-        yarp::sig::Vector q(8);
-        q[0]=torso[2];       q[1]=torso[1];        q[2]=torso[0];
-        q[3]=head[0];        q[4]=head[1];
-        q[5]=head[2];        q[6]=head[3];
-        if (isLeft)
-            q[7]=head[4]+head[5]/2.0;
-        else
-            q[7]=head[4]-head[5]/2.0;
-        q=CTRL_DEG2RAD*q;
-
         yarp::sig::Vector xo=x;
         if (xo.length()<4)
             xo.push_back(1.0);  // impose homogeneous coordinates
-
-        eye->setAng(q);
         yarp::sig::Vector xe;
         // find position wrt the camera frame
         xe=SE3inv(eye->getH())*xo;

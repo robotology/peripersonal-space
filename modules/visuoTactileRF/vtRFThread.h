@@ -262,6 +262,13 @@ protected:
     bool readEncodersAndUpdateArmChains();
     
     /**
+    * Will read head encoders and update eye chains.
+    * Assumes that torso encoders have been read before. 
+    * @return true/false on success failure
+    **/
+    bool readHeadEncodersAndUpdateEyeChains();
+        
+    /**
     *
     **/
     bool projectIncomingEvent();
