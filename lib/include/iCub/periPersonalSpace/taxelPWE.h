@@ -40,11 +40,11 @@
 class TaxelPWE : public iCub::skinDynLib::Taxel
 {
   public:
-    double    Resp;                 // taxels' activation level <0,1>
-    double RFangle;                 // angle of the receptive field [rad] - from the taxel normal
-    //the effective angle is thus double that 
+    double    Resp;  // Taxels' activation level <0,1>
+    double RFangle;  // Angle of the receptive field [rad] - from the taxel normal
+                     // The effective angle is thus double that
 
-    IncomingEvent4TaxelPWE Evnt;    // //stimuli/events nearing the taxel in the taxel frame of reference
+    IncomingEvent4TaxelPWE Evnt;    // Stimuli/events nearing the taxel in the taxel's FoR
     parzenWindowEstimator *pwe;     //
 
     /**
