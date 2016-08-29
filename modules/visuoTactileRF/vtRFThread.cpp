@@ -919,7 +919,8 @@ bool vtRFThread::projectIncomingEvents()
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
             {
                 dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnts.push_back(projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,
-                    (*it))); //here every taxel (TaxelPWE) is updated with the event - if it is relevant for it
+                    (*it))); //here every taxel (TaxelPWE) is updated with the event
+                //future work - would be better to check if it is inside the RF and only those that pass push to the taxel's events
 
                 // There's a reason behind this choice
                 dumpedVector.push_back((dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j]))->Evnts.back().Pos[0]);
@@ -975,7 +976,7 @@ bool vtRFThread::computeResponse(double stress_modulation)
         for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
             dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->computeResponse(stress_modulation);
-            printMessage(4,"\t Representative ID %i\tResponse %f (with stress modulation:%f)\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp,stress_modulation);
+            printMessage(4,"\t Representative ID %i\tResponse %.2f (with stress modulation:%.2f)\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp,stress_modulation);
         }
     }
 
