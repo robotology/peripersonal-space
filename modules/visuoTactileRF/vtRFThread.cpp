@@ -314,7 +314,8 @@ void vtRFThread::run()
 
     ts.update();
     incomingEvents.clear();
-
+    resetTaxelEventVectors();
+    
     // process the port coming from the visuoTactileWrapper
     if (inputEvents.size() != 0)
     {
@@ -418,7 +419,7 @@ void vtRFThread::run()
 
     if (incomingEvents.size()>0)
     {
-        projectIncomingEvents();     // project event onto the taxels' RF
+        projectIncomingEvents();     // project event onto the taxels' RF and add them to taxels' representation
         computeResponse(stress);    // compute the response of each taxel
     }
 
@@ -916,11 +917,13 @@ bool vtRFThread::projectIncomingEvents()
 
             // yInfo("T_A:\n%s",T_a.toString().c_str());
             printMessage(5,"\nProject incoming event %s onto %s taxels\n",it->toString().c_str(),iCubSkin[i].name.c_str());
+            IncomingEvent4TaxelPWE projEvent; 
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
             {
-                dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnts.push_back(projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,
-                    (*it))); //here every taxel (TaxelPWE) is updated with the event
-                //future work - would be better to check if it is inside the RF and only those that pass push to the taxel's events
+                projEvent = projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,(*it));
+                if(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->insideFoRCheck(projEvent))
+                    dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnts.push_back(projEvent); //here every taxel (TaxelPWE) is updated with the events
+               //events outside of taxel's RF will not be added
 
                 // There's a reason behind this choice
                 dumpedVector.push_back((dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j]))->Evnts.back().Pos[0]);
@@ -954,6 +957,13 @@ IncomingEvent4TaxelPWE vtRFThread::projectIntoTaxelRF(const Matrix &RF,const Mat
     Event_projected.computeNRMTTC();
 
     return Event_projected;
+}
+
+void vtRFThread::resetTaxelEventVectors()
+{
+    for (int i = 0; i < iCubSkinSize; i++)
+        for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
+            (dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j]))->Evnts.clear();        
 }
 
 void vtRFThread::resetParzenWindows()

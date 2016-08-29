@@ -127,7 +127,7 @@ using namespace       std;
                    maxResp = locResp;
             }
             else
-                ;//yDebug("[TaxelPWE::computeResponse()] Taxel ID: %d, event outside RF - event in Taxel FoR\n %s \n",this->getID(), it->toString().c_str());
+                yWarning("[TaxelPWE::computeResponse()] Taxel ID: %d, event outside RF - should not be happening in current implementation. Event in Taxel FoR\n %s \n",this->getID(), it->toString().c_str());
         }
         In.clear(); 
         if (maxResp > 0.0)

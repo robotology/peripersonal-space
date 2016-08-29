@@ -84,7 +84,7 @@ class TaxelPWE : public iCub::skinDynLib::Taxel
     * toString Method
     **/
     std::string toString(int verbosity=0);
-
+    
     /**
     * Resets the parzen window estimator
     **/

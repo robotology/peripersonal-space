@@ -256,6 +256,11 @@ protected:
 
     
     /**
+    * Resets vector of remapped events pertaining to the taxel
+    **/
+    void resetTaxelEventVectors();
+    
+    /**
     * Will read encoders (torso and arms) and update arm chains.
     * @return true/false on success failure
     **/
