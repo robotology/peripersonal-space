@@ -116,13 +116,13 @@ using namespace       std;
                In[0] = it->getNRM(); 
                In[1] = it->getTTC(); 
                locResp = pwe->computeResponse(In);
-               //yDebug("[TaxelPWE::computeResponse()] Taxel ID: %d, event inside RF - event in Taxel FoR: \n %s \n",this->getID(), it->toString().c_str());
-               //yDebug("locResp = locResp  + locResp * min(1.0,Evnt.Threat + stress_modulation)\n");
-               //yDebug("    = %.2f  + %.2f * min(1.0,%.2f + %.2f)\n",locResp,locResp,it->Threat,stress_modulation);
+               yDebug("[TaxelPWE::computeResponse()] Taxel ID: %d, event inside RF - event in Taxel FoR: \n %s \n",this->getID(), it->toString().c_str());
+               yDebug("locResp = locResp  + locResp * min(1.0,Evnt.Threat + stress_modulation)\n");
+               yDebug("    = %.2f  + %.2f * min(1.0,%.2f + %.2f)\n",locResp,locResp,it->Threat,stress_modulation);
                locResp = locResp + (locResp * min(1.0,it->Threat + stress_modulation)); //with this amplification,
                //may come out of the range (which used to be <0,255>, now <0,1> after 9.8.2016)
                //- in fact up to double that range
-               //yDebug(" locResp  = %.2f  \n",locResp);
+               yDebug(" locResp  = %.2f  \n",locResp);
                if (locResp > maxResp)
                    maxResp = locResp;
             }
@@ -132,12 +132,12 @@ using namespace       std;
         In.clear(); 
         if (maxResp > 0.0)
         {
-            //yDebug(" Setting taxel response to maxResp: %.2f\n",maxResp);
+            yDebug(" Setting taxel response to maxResp: %.2f\n",maxResp);
             Resp = maxResp;
             return true;
         }
         else{
-            //yDebug(" maxResp was <=0 (%.2f) - Leaving taxel response 0, returning false.\n",maxResp);
+            yDebug(" maxResp was <=0 (%.2f) - Leaving taxel response 0, returning false.\n",maxResp);
             return false;
         }
      }

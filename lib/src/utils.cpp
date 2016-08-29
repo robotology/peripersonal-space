@@ -145,8 +145,8 @@ unsigned int factorial(unsigned int n)
     string IncomingEvent::toString() const
     {
         stringstream res;
-        res << "Pos: "<< Pos.toString(3,3) << "\t Vel: "<< Vel.toString(3,3)
-            << "\t Radius: "<< Radius << "\t Src: "<< Src << "\t threat: "<< Threat ;
+        res << "Pos: "<< Pos.toString(3,3) << " Vel: "<< Vel.toString(3,3)
+            << " Radius:"<< Radius << " Src:"<< Src << " threat:"<< Threat ;
         return res.str();
     }
 
@@ -230,7 +230,7 @@ unsigned int factorial(unsigned int n)
     string IncomingEvent4TaxelPWE::toString() const
     {
         stringstream res;
-        res << "NRM: "<< NRM << "\t TTC: " << TTC << "\t "<< IncomingEvent::toString();
+        res << setprecision(3) << "NRM:"<< NRM << " TTC:" << TTC << " "<< IncomingEvent::toString();
         return res.str();
     }
 
