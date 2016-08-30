@@ -146,7 +146,7 @@ using namespace       std;
             }
             else
                 printf("\t maxResp was <=0 (%.2f) - Leaving taxel Resp 0.\n",maxResp);
-            In.clear();
+            
             return true;
         }
      }
