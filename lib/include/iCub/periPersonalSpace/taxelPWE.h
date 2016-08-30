@@ -92,6 +92,7 @@ class TaxelPWE : public iCub::skinDynLib::Taxel
 
     /**
     * Computes the response of the taxel.
+    * The computed response is stored inside the taxel Resp field.
     **/
     bool computeResponse(double stress_modulation);
 

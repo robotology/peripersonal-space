@@ -997,14 +997,14 @@ void vtRFThread::resetParzenWindows()
 
 bool vtRFThread::computeResponse(double stress_modulation)
 {
-    printMessage(4,"[vtRFThread::computeResponse] Taxel responses:\n");
+    printMessage(4,"\n\n *** [vtRFThread::computeResponse] Taxel responses ***:\n");
     for (int i = 0; i < iCubSkinSize; i++)
     {
-        printMessage(4,"%s \n",iCubSkin[i].name.c_str());
+        printMessage(4,"\n ** %s ** \n",iCubSkin[i].name.c_str());
         for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
             dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->computeResponse(stress_modulation);
-            printMessage(4,"\t %ith %s taxel response %.2f (with stress modulation:%.2f)\n",j,iCubSkin[i].name.c_str(),dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp,stress_modulation);
+            printMessage(4,"\t %ith (ID: %d) %s taxel response %.2f (with stress modulation:%.2f)\n",j,iCubSkin[i].taxels[j]->getID(),iCubSkin[i].name.c_str(),dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp,stress_modulation);
         }
     }
 

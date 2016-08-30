@@ -105,40 +105,49 @@ using namespace       std;
 
     bool TaxelPWE::computeResponse(double stress_modulation)
     {
-        double locResp = 0.0;
-        double maxResp = 0.0;
-        std::vector<double> In(2);
+
         Resp = 0.0;
-        for(vector<IncomingEvent4TaxelPWE>::iterator it = Evnts.begin(); it!=Evnts.end(); it++) 
+        if(Evnts.empty())
         {
-            if (insideFoRCheck(*it))
-            {
-               In[0] = it->getNRM(); 
-               In[1] = it->getTTC(); 
-               locResp = pwe->computeResponse(In);
-               yDebug("[TaxelPWE::computeResponse()] Taxel ID: %d, event inside RF - event in Taxel FoR: \n %s \n",this->getID(), it->toString().c_str());
-               yDebug("locResp = locResp  + locResp * min(1.0,Evnt.Threat + stress_modulation)\n");
-               yDebug("    = %.2f  + %.2f * min(1.0,%.2f + %.2f)\n",locResp,locResp,it->Threat,stress_modulation);
-               locResp = locResp + (locResp * min(1.0,it->Threat + stress_modulation)); //with this amplification,
-               //may come out of the range (which used to be <0,255>, now <0,1> after 9.8.2016)
-               //- in fact up to double that range
-               yDebug(" locResp  = %.2f  \n",locResp);
-               if (locResp > maxResp)
-                   maxResp = locResp;
-            }
-            else
-                yWarning("[TaxelPWE::computeResponse()] Taxel ID: %d, event outside RF - should not be happening in current implementation. Event in Taxel FoR\n %s \n",this->getID(), it->toString().c_str());
-        }
-        In.clear(); 
-        if (maxResp > 0.0)
-        {
-            yDebug(" Setting taxel response to maxResp: %.2f\n",maxResp);
-            Resp = maxResp;
+            printf("[TaxelPWE::computeResponse()] Taxel ID: %d, no events for this taxel - Resp=0 and exiting.\n",this->getID());
             return true;
         }
-        else{
-            yDebug(" maxResp was <=0 (%.2f) - Leaving taxel response 0, returning false.\n",maxResp);
-            return false;
+        else
+        {
+            printf("[TaxelPWE::computeResponse()] Taxel ID: %d, there are %u events to process.\n",this->getID(),Evnts.size());
+            double locResp = 0.0;
+            double maxResp = 0.0;
+            std::vector<double> In(2);
+            for(vector<IncomingEvent4TaxelPWE>::iterator it = Evnts.begin(); it!=Evnts.end(); it++)
+            {
+                if (insideFoRCheck(*it))
+                {
+                   In[0] = it->getNRM();
+                   In[1] = it->getTTC();
+                   locResp = pwe->computeResponse(In);
+                   printf("  event: %s \n",it->toString().c_str());
+                   printf("\t locResp = locResp  + locResp * min(1.0,Evnt.Threat + stress_modulation)\n");
+                   printf("\t    = %.2f  + %.2f * min(1.0,%.2f + %.2f)\n",locResp,locResp,it->Threat,stress_modulation);
+                   locResp = locResp + (locResp * min(1.0,it->Threat + stress_modulation)); //with this amplification,
+                   //may come out of the range (which used to be <0,255>, now <0,1> after 9.8.2016)
+                   //- in fact up to double that range
+                   printf("\t locResp  = %.2f  \n",locResp);
+                   if (locResp > maxResp)
+                       maxResp = locResp;
+                }
+                else
+                    yWarning("[TaxelPWE::computeResponse()] Taxel ID: %d, event outside RF - should not be happening in current implementation. Event in Taxel FoR\n %s \n",this->getID(), it->toString().c_str());
+            }
+            if (maxResp > 0.0)
+            {
+                printf(" Setting taxel response to maxResp: %.2f\n",maxResp);
+                Resp = maxResp;
+
+            }
+            else
+                printf("\t maxResp was <=0 (%.2f) - Leaving taxel Resp 0.\n",maxResp);
+            In.clear();
+            return true;
         }
      }
 
