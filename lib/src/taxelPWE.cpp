@@ -4,7 +4,7 @@ using namespace  yarp::os;
 using namespace yarp::sig;
 using namespace       std;
 
-#define TAXEL_RF_ANGLE_DEG 40
+#define TAXEL_RF_ANGLE_DEG 40.0
 #define DESIRED_RADIUS_XY_AT_RF_APEX 0.05 // meters; we don't want the RF spherical sector to start at the apex,
 //but we want to truncate it such that it starts at the height with this radius;
 
@@ -15,8 +15,8 @@ using namespace       std;
     TaxelPWE::TaxelPWE() : Taxel()
     {
         Resp    = 0.0;
-        RFangle = TAXEL_RF_ANGLE_DEG*M_PI/180;
-        sphericalSectorShiftOffset = DESIRED_RADIUS_XY_AT_RF_APEX / tan(TAXEL_RF_ANGLE_DEG*M_PI/180); 
+        RFangle = TAXEL_RF_ANGLE_DEG*M_PI/180.0;
+        sphericalSectorShiftOffset = DESIRED_RADIUS_XY_AT_RF_APEX / tan(TAXEL_RF_ANGLE_DEG*M_PI/180.0); 
         //With a cone having the apex at the taxel, we calculate the height at which it has a desired radius
         //This will be the RF offset
     }
@@ -25,8 +25,8 @@ using namespace       std;
                        const Vector &n) : Taxel(p,n)
     {
         Resp    = 0.0;
-        RFangle = TAXEL_RF_ANGLE_DEG*M_PI/180;
-        sphericalSectorShiftOffset = DESIRED_RADIUS_XY_AT_RF_APEX / tan(TAXEL_RF_ANGLE_DEG*M_PI/180); 
+        RFangle = TAXEL_RF_ANGLE_DEG*M_PI/180.0;
+        sphericalSectorShiftOffset = DESIRED_RADIUS_XY_AT_RF_APEX / tan(TAXEL_RF_ANGLE_DEG*M_PI/180.0); 
         //With a cone having the apex at the taxel, we calculate the height at which it has a desired radius
     };
 
@@ -35,8 +35,8 @@ using namespace       std;
                        const int &i) : Taxel(p,n,i)
     {
         Resp    = 0.0;
-        RFangle = TAXEL_RF_ANGLE_DEG*M_PI/180;
-        sphericalSectorShiftOffset = DESIRED_RADIUS_XY_AT_RF_APEX / tan(TAXEL_RF_ANGLE_DEG*M_PI/180); 
+        RFangle = TAXEL_RF_ANGLE_DEG*M_PI/180.0;
+        sphericalSectorShiftOffset = DESIRED_RADIUS_XY_AT_RF_APEX / tan(TAXEL_RF_ANGLE_DEG*M_PI/180.0); 
         //With a cone having the apex at the taxel, we calculate the height at which it has a desired radius
     };
 
@@ -68,12 +68,14 @@ using namespace       std;
         {        
             if(ie.Pos(2) <= (pwe->getExt())(0,1) ) //is z-coordinate within limit? if not, it surely is not inside the spherical sector 
             {
+                printf("[TaxelPWE::insideRFCheck]: positive z-coordinate %.3f inside limit (%.3f)\n",ie.Pos(2),(pwe->getExt())(0,1));
                 Vector sphericalSectorCenter(3,0.0); 
                 sphericalSectorCenter(2) = -sphericalSectorShiftOffset;
                 double maxRadiusZ = (pwe->getExt())(0,1) + sphericalSectorShiftOffset; //max radius from shifted origin of sph. sector
                 distanceSquared = pow(ie.Pos(0)-sphericalSectorCenter(0),2) + pow(ie.Pos(1)-sphericalSectorCenter(1),2) + pow(ie.Pos(2)- sphericalSectorCenter(2),2);  
                 if (distanceSquared <= maxRadiusZ * maxRadiusZ)
                 {
+                    printf("[TaxelPWE::insideRFCheck]: distanceSquared: %.4f <= maxRadiusZ^2: %.4f\n",distanceSquared,maxRadiusZ*maxRadiusZ);
                     double a = tan(RFangle) * (sphericalSectorShiftOffset + ie.Pos(2)); //radius of RF sector at specific height 
                     if( (abs(ie.Pos(0)) <= a) && (abs(ie.Pos(1)) <= a) ) //stimulus x and y is within the sector at that height
                     {
@@ -86,24 +88,28 @@ using namespace       std;
                 }
                 else
                 {
+                    printf("[TaxelPWE::insideRFCheck]: distanceSquared: %.4f > maxRadiusZ^2: %.4f\n",distanceSquared,maxRadiusZ*maxRadiusZ);
                     return false;
                 }
             }
             else
             {
+                printf("[TaxelPWE::insideRFCheck]: positive z-coordinate %.3f outside limit (%.3f)\n",ie.Pos(2),(pwe->getExt())(0,1));
                 return false; 
             }
         }
         else  //stimulus with negative z (along taxel normal) according to coordinate transform pipeline 
         {
-            if(ie.Pos(2) >= (pwe->getExt())(0,2) ) //is z-coordinate within limit? if not, it surely is not inside the spherical sector 
+            if(ie.Pos(2) >= (pwe->getExt())(0,0) ) //is z-coordinate within limit? if not, it surely is not inside the spherical sector 
             {
+                printf("[TaxelPWE::insideRFCheck]: negative z-coordinate %.3f inside limit (%.3f)\n",ie.Pos(2),(pwe->getExt())(0,0));
                 Vector sphericalSectorNegativeCenter(3,0.0); 
                 sphericalSectorNegativeCenter(2) = sphericalSectorShiftOffset;
-                double maxRadiusNegZ = abs((pwe->getExt())(0,2)) + sphericalSectorShiftOffset; //max radius from shifted origin of sph. sector
+                double maxRadiusNegZ = abs((pwe->getExt())(0,0)) + sphericalSectorShiftOffset; //max radius from shifted origin of sph. sector
                 distanceSquared = pow(ie.Pos(0)-sphericalSectorNegativeCenter(0),2) + pow(ie.Pos(1)-sphericalSectorNegativeCenter(1),2) + pow(ie.Pos(2)-sphericalSectorNegativeCenter(2),2);  
                 if (distanceSquared <= maxRadiusNegZ * maxRadiusNegZ)
                 {
+                    printf("[TaxelPWE::insideRFCheck]: distanceSquared: %.4f <= maxRadiusNegZ^2: %.4f\n",distanceSquared,maxRadiusNegZ*maxRadiusNegZ);
                     double a = tan(RFangle) * (sphericalSectorShiftOffset + abs(ie.Pos(2))); //radius of RF sector at specific height 
                     if( (abs(ie.Pos(0)) <= a) && (abs(ie.Pos(1)) <= a) ) //stimulus x and y is within the sector at that height
                     {
@@ -116,11 +122,13 @@ using namespace       std;
                 }
                 else
                 {
+                    printf("[TaxelPWE::insideRFCheck]: distanceSquared: %.4f > maxRadiusNegZ^2: %.4f\n",distanceSquared,maxRadiusNegZ*maxRadiusNegZ);
                     return false;
                 }
             }
             else
             {
+                printf("[TaxelPWE::insideRFCheck]: negative z-coordinate %.3f outside limit (%.3f)\n",ie.Pos(2),(pwe->getExt())(0,0));
                 return false; 
             }
         }
