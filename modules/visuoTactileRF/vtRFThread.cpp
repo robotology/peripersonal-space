@@ -243,7 +243,7 @@ bool vtRFThread::threadInit()
                 iCubSkin.push_back(sP);
             }
         }
-        load();
+        load(); //here the representation params (bins, extent etc.) will be loaded and set to the pwe of every taxel
 
         yInfo("iCubSkin correctly instantiated. Size: %lu",iCubSkin.size());
 
@@ -704,11 +704,12 @@ string vtRFThread::load()
             bbb = bb.find("ext").asList();
             if (modality=="1D")
             {
-                ext = matrixFromBottle(*bbb,0,1,2);
+                ext = matrixFromBottle(*bbb,0,1,2); //e.g.  ext  (-0.1 0.2) ~ (min max) will become [-0.1 0.2]
             }
             else
             {
-                ext = matrixFromBottle(*bbb,0,2,2);
+                ext = matrixFromBottle(*bbb,0,2,2); //e.g. (-0.1 0.2 0.0 1.2) ~ (min_distance max_distance min_TTC max_TTC) 
+                //will become [min_distance max_distance ; min_TTC max_TTC] 
             }
 
             bbb = bb.find("binsNum").asList();
@@ -938,7 +939,7 @@ bool vtRFThread::projectIncomingEvents()
                 printMessage(6,"    Projecting onto taxel %d.\n",iCubSkin[i].taxels[j]->getID());
                 projEvent = projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,(*it));
                 printMessage(6,"\tProjected event: %s\n",projEvent.toString().c_str());
-                if(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->insideFoRCheck(projEvent))
+                if(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->insideRFCheck(projEvent))
                 {
                     dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnts.push_back(projEvent); //here every taxel (TaxelPWE) is updated with the events
                //events outside of taxel's RF will not be added

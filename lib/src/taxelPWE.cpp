@@ -4,6 +4,10 @@ using namespace  yarp::os;
 using namespace yarp::sig;
 using namespace       std;
 
+#define TAXEL_RF_ANGLE_DEG 40
+#define DESIRED_RADIUS_XY_AT_RF_APEX 0.05 // meters; we don't want the RF spherical sector to start at the apex,
+//but we want to truncate it such that it starts at the height with this radius;
+
 /****************************************************************/
 /* TAXEL WRAPPER FOR PWE
 *****************************************************************/
@@ -11,14 +15,19 @@ using namespace       std;
     TaxelPWE::TaxelPWE() : Taxel()
     {
         Resp    = 0.0;
-        RFangle = 40*M_PI/180;
+        RFangle = TAXEL_RF_ANGLE_DEG*M_PI/180;
+        sphericalSectorShiftOffset = DESIRED_RADIUS_XY_AT_RF_APEX / tan(TAXEL_RF_ANGLE_DEG*M_PI/180); 
+        //With a cone having the apex at the taxel, we calculate the height at which it has a desired radius
+        //This will be the RF offset
     }
 
     TaxelPWE::TaxelPWE(const Vector &p,
                        const Vector &n) : Taxel(p,n)
     {
         Resp    = 0.0;
-        RFangle = 40*M_PI/180;
+        RFangle = TAXEL_RF_ANGLE_DEG*M_PI/180;
+        sphericalSectorShiftOffset = DESIRED_RADIUS_XY_AT_RF_APEX / tan(TAXEL_RF_ANGLE_DEG*M_PI/180); 
+        //With a cone having the apex at the taxel, we calculate the height at which it has a desired radius
     };
 
     TaxelPWE::TaxelPWE(const Vector &p,
@@ -26,12 +35,14 @@ using namespace       std;
                        const int &i) : Taxel(p,n,i)
     {
         Resp    = 0.0;
-        RFangle = 40*M_PI/180;
+        RFangle = TAXEL_RF_ANGLE_DEG*M_PI/180;
+        sphericalSectorShiftOffset = DESIRED_RADIUS_XY_AT_RF_APEX / tan(TAXEL_RF_ANGLE_DEG*M_PI/180); 
+        //With a cone having the apex at the taxel, we calculate the height at which it has a desired radius
     };
 
     bool TaxelPWE::addSample(IncomingEvent4TaxelPWE ie)
     {
-        if (!insideFoRCheck(ie))
+        if (!insideRFCheck(ie))
             return false;
 
         std::vector <double> x = ie.getNRMTTC();
@@ -42,38 +53,77 @@ using namespace       std;
 
     bool TaxelPWE::removeSample(IncomingEvent4TaxelPWE ie)
     {
-        if (!insideFoRCheck(ie))
+        if (!insideRFCheck(ie))
             return false;
 
         std::vector <double> x = ie.getNRMTTC();
         return pwe->removeSample(x);
     }
 
-    bool TaxelPWE::insideFoRCheck(const IncomingEvent4TaxelPWE ie)
+    bool TaxelPWE::insideRFCheck(const IncomingEvent4TaxelPWE ie)
     {
-        std::vector<double> binWidth = pwe->getBinWidth();
-        double binLimit = 8*binWidth[0];
-
-        // the x,y limit of the receptive field at the incoming event's Z
-        double RFlimit = ie.Pos(2)/tan(RFangle);
-
-        // the x,y limit of the receptive field in the first bin
-        double RFlimit_cyl = binLimit/tan(RFangle);
-
-        // yDebug("binLimit: %g RFlimit_cyl: %g RFangle: %g \n", binLimit, RFlimit_cyl, RFangle);
-        // yDebug("ie.Pos\t%s\n", ie.Pos.toString(3,3).c_str());
-        // yDebug("Hist:\n%s\n", pwe->getHist().toString(3,3).c_str());
-
-        if (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit*RFlimit )
-        {
-            return true;
+        double distanceSquared; //squaread Euclidean distance of stimulus from taxel 
+        //the assumption is that max extension is >=0 and min extension is <=0 
+        if(ie.Pos(2)>0)  //stimulus with positive z (along taxel normal)
+        {        
+            if(ie.Pos(2) <= (pwe->getExt())(0,1) ) //is z-coordinate within limit? if not, it surely is not inside the spherical sector 
+            {
+                Vector sphericalSectorCenter(3,0.0); 
+                sphericalSectorCenter(2) = -sphericalSectorShiftOffset;
+                double maxRadiusZ = (pwe->getExt())(0,1) + sphericalSectorShiftOffset; //max radius from shifted origin of sph. sector
+                distanceSquared = pow(ie.Pos(0)-sphericalSectorCenter(0),2) + pow(ie.Pos(1)-sphericalSectorCenter(1),2) + pow(ie.Pos(2)- sphericalSectorCenter(2),2);  
+                if (distanceSquared <= maxRadiusZ * maxRadiusZ)
+                {
+                    double a = tan(RFangle) * (sphericalSectorShiftOffset + ie.Pos(2)); //radius of RF sector at specific height 
+                    if( (abs(ie.Pos(0)) <= a) && (abs(ie.Pos(1)) <= a) ) //stimulus x and y is within the sector at that height
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false; 
+            }
         }
-        // There are two ifs only to let me debug things
-        if ( (abs(ie.Pos(2))<=binLimit) && (ie.Pos(0)*ie.Pos(0)+ie.Pos(1)*ie.Pos(1) < RFlimit_cyl*RFlimit_cyl) )
+        else  //stimulus with negative z (along taxel normal) according to coordinate transform pipeline 
         {
-            return true;
+            if(ie.Pos(2) >= (pwe->getExt())(0,2) ) //is z-coordinate within limit? if not, it surely is not inside the spherical sector 
+            {
+                Vector sphericalSectorNegativeCenter(3,0.0); 
+                sphericalSectorNegativeCenter(2) = sphericalSectorShiftOffset;
+                double maxRadiusNegZ = abs((pwe->getExt())(0,2)) + sphericalSectorShiftOffset; //max radius from shifted origin of sph. sector
+                distanceSquared = pow(ie.Pos(0)-sphericalSectorNegativeCenter(0),2) + pow(ie.Pos(1)-sphericalSectorNegativeCenter(1),2) + pow(ie.Pos(2)-sphericalSectorNegativeCenter(2),2);  
+                if (distanceSquared <= maxRadiusNegZ * maxRadiusNegZ)
+                {
+                    double a = tan(RFangle) * (sphericalSectorShiftOffset + abs(ie.Pos(2))); //radius of RF sector at specific height 
+                    if( (abs(ie.Pos(0)) <= a) && (abs(ie.Pos(1)) <= a) ) //stimulus x and y is within the sector at that height
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false; 
+            }
         }
-        return false;
     }
 
     void TaxelPWE::print(int verbosity)
@@ -102,7 +152,7 @@ using namespace       std;
         pwe->resetAllHist();
         return true;
     }
-
+    
     bool TaxelPWE::computeResponse(double stress_modulation)
     {
 
@@ -114,13 +164,13 @@ using namespace       std;
         }
         else
         {
-            printf("[TaxelPWE::computeResponse()] Taxel ID: %d, there are %u events to process.\n",this->getID(),Evnts.size());
+            printf("[TaxelPWE::computeResponse()] Taxel ID: %u, there are %u events to process.\n",this->getID(),Evnts.size());
             double locResp = 0.0;
             double maxResp = 0.0;
             std::vector<double> In(2);
             for(vector<IncomingEvent4TaxelPWE>::iterator it = Evnts.begin(); it!=Evnts.end(); it++)
             {
-                if (insideFoRCheck(*it))
+                if (insideRFCheck(*it))
                 {
                    In[0] = it->getNRM();
                    In[1] = it->getTTC();
