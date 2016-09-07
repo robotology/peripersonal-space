@@ -159,7 +159,7 @@ using namespace       std;
         Resp = 0.0;
         if(Evnts.empty())
         {
-            printf("[TaxelPWE::computeResponse()] Taxel ID: %d, no events for this taxel - Resp=0 and exiting.\n",this->getID());
+            //printf("[TaxelPWE::computeResponse()] Taxel ID: %d, no events for this taxel - Resp=0 and exiting.\n",this->getID());
             return true;
         }
         else
