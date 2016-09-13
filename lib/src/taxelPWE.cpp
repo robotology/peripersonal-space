@@ -4,8 +4,8 @@ using namespace  yarp::os;
 using namespace yarp::sig;
 using namespace       std;
 
-#define TAXEL_RF_ANGLE_DEG 40.0
-#define DESIRED_RADIUS_XY_AT_RF_APEX 0.05 // meters; we don't want the RF spherical sector to start at the apex,
+#define TAXEL_RF_ANGLE_DEG 50.0
+#define DESIRED_RADIUS_XY_AT_RF_APEX 0.07 // meters; we don't want the RF spherical sector to start at the apex,
 //but we want to truncate it such that it starts at the height with this radius;
 
 /****************************************************************/
@@ -62,7 +62,7 @@ using namespace       std;
 
     bool TaxelPWE::insideRFCheck(const IncomingEvent4TaxelPWE ie)
     {
-        double distanceSquared; //squaread Euclidean distance of stimulus from taxel 
+        double distanceSquared; //squared Euclidean distance of stimulus from taxel 
         //the assumption is that max extension is >=0 and min extension is <=0 
         if(ie.Pos(2)>0)  //stimulus with positive z (along taxel normal)
         {        
@@ -72,17 +72,19 @@ using namespace       std;
                 Vector sphericalSectorCenter(3,0.0); 
                 sphericalSectorCenter(2) = -sphericalSectorShiftOffset;
                 double maxRadiusZ = (pwe->getExt())(0,1) + sphericalSectorShiftOffset; //max radius from shifted origin of sph. sector
-                distanceSquared = pow(ie.Pos(0)-sphericalSectorCenter(0),2) + pow(ie.Pos(1)-sphericalSectorCenter(1),2) + pow(ie.Pos(2)- sphericalSectorCenter(2),2);  
+                distanceSquared = pow(ie.Pos(0)-sphericalSectorCenter(0),2) + pow(ie.Pos(1)-sphericalSectorCenter(1),2) + pow(ie.Pos(2)- sphericalSectorCenter(2),2); //checking distance for full sphere, prior to considering the sector 
                 if (distanceSquared <= maxRadiusZ * maxRadiusZ)
                 {
                     printf("[TaxelPWE::insideRFCheck]: distanceSquared: %.4f <= maxRadiusZ^2: %.4f\n",distanceSquared,maxRadiusZ*maxRadiusZ);
                     double a = tan(RFangle) * (sphericalSectorShiftOffset + ie.Pos(2)); //radius of RF sector at specific height 
                     if( (abs(ie.Pos(0)) <= a) && (abs(ie.Pos(1)) <= a) ) //stimulus x and y is within the sector at that height
                     {
+                        printf("[TaxelPWE::insideRFCheck]: Both, x and y coordinates (%.3f,%.3f) are inside the radius a %.3f.\n",ie.Pos(0),ie.Pos(1),a);
                         return true;
                     }
                     else
                     {
+                        printf("[TaxelPWE::insideRFCheck]: At least one of, x and y coordinates (%.3f,%.3f) is outside the radius a %.3f.\n",ie.Pos(0),ie.Pos(1),a);
                         return false;
                     }
                 }
@@ -107,16 +109,19 @@ using namespace       std;
                 sphericalSectorNegativeCenter(2) = sphericalSectorShiftOffset;
                 double maxRadiusNegZ = abs((pwe->getExt())(0,0)) + sphericalSectorShiftOffset; //max radius from shifted origin of sph. sector
                 distanceSquared = pow(ie.Pos(0)-sphericalSectorNegativeCenter(0),2) + pow(ie.Pos(1)-sphericalSectorNegativeCenter(1),2) + pow(ie.Pos(2)-sphericalSectorNegativeCenter(2),2);  
+                //checking distance for full sphere, prior to considering the sector
                 if (distanceSquared <= maxRadiusNegZ * maxRadiusNegZ)
                 {
                     printf("[TaxelPWE::insideRFCheck]: distanceSquared: %.4f <= maxRadiusNegZ^2: %.4f\n",distanceSquared,maxRadiusNegZ*maxRadiusNegZ);
                     double a = tan(RFangle) * (sphericalSectorShiftOffset + abs(ie.Pos(2))); //radius of RF sector at specific height 
                     if( (abs(ie.Pos(0)) <= a) && (abs(ie.Pos(1)) <= a) ) //stimulus x and y is within the sector at that height
                     {
+                        printf("[TaxelPWE::insideRFCheck]: Both, x and y coordinates (%.3f,%.3f) are inside the radius a %.3f.\n",ie.Pos(0),ie.Pos(1),a);
                         return true;
                     }
                     else
                     {
+                        printf("[TaxelPWE::insideRFCheck]: At least one of, x and y coordinates (%.3f,%.3f) is outside the radius a %.3f.\n",ie.Pos(0),ie.Pos(1),a);
                         return false;
                     }
                 }

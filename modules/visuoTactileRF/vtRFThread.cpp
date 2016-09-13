@@ -969,7 +969,8 @@ IncomingEvent4TaxelPWE vtRFThread::projectIntoTaxelRF(const Matrix &RF,const Mat
 
     if (e.Radius != -1.0)
     {
-        Event_projected.Pos(2) -= Event_projected.Radius;
+        Event_projected.Pos(2) -= Event_projected.Radius; //considering the radius, this brings the object closer in z  by the radius
+        //for the rest of the calculations (in particular in x,y), the object is treated as a point
     }
 
     Event_projected.computeNRMTTC();
