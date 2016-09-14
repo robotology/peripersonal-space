@@ -278,7 +278,7 @@ void vtRFThread::run()
     {
         stress = stressBottle->get(0).asDouble();
         yAssert((stress>=0.0) && (stress<=1.0));
-        yDebug("vtRFThread::run() reading %f stress value from port.\n",stress);
+        printMessage(3,"vtRFThread::run() reading %f stress value from port.\n",stress);
     }
     else
         stress = 0.0;
@@ -336,7 +336,7 @@ void vtRFThread::run()
         {
             eventsBuffer.push_back(incomingEvents.back()); //! the buffering and hence the learning is working only for the last event in the vector
             //!so learning should be done with one stimulus only
-            yDebug("I'm buffering! Size %lu",eventsBuffer.size());
+            printMessage(2,"I'm buffering inputs (there are events)! Buffer size %lu",eventsBuffer.size());
         }
 
         // limit the size of the buffer to 80, i.e. 4 seconds of acquisition

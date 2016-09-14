@@ -68,35 +68,35 @@ using namespace       std;
         {        
             if(ie.Pos(2) <= (pwe->getExt())(0,1) ) //is z-coordinate within limit? if not, it surely is not inside the spherical sector 
             {
-                printf("[TaxelPWE::insideRFCheck]: positive z-coordinate %.3f inside limit (%.3f)\n",ie.Pos(2),(pwe->getExt())(0,1));
+                //printf("[TaxelPWE::insideRFCheck]: positive z-coordinate %.3f inside limit (%.3f)\n",ie.Pos(2),(pwe->getExt())(0,1));
                 Vector sphericalSectorCenter(3,0.0); 
                 sphericalSectorCenter(2) = -sphericalSectorShiftOffset;
                 double maxRadiusZ = (pwe->getExt())(0,1) + sphericalSectorShiftOffset; //max radius from shifted origin of sph. sector
                 distanceSquared = pow(ie.Pos(0)-sphericalSectorCenter(0),2) + pow(ie.Pos(1)-sphericalSectorCenter(1),2) + pow(ie.Pos(2)- sphericalSectorCenter(2),2); //checking distance for full sphere, prior to considering the sector 
                 if (distanceSquared <= maxRadiusZ * maxRadiusZ)
                 {
-                    printf("[TaxelPWE::insideRFCheck]: distanceSquared: %.4f <= maxRadiusZ^2: %.4f\n",distanceSquared,maxRadiusZ*maxRadiusZ);
+                    //printf("[TaxelPWE::insideRFCheck]: distanceSquared: %.4f <= maxRadiusZ^2: %.4f\n",distanceSquared,maxRadiusZ*maxRadiusZ);
                     double a = tan(RFangle) * (sphericalSectorShiftOffset + ie.Pos(2)); //radius of RF sector at specific height 
                     if( (abs(ie.Pos(0)) <= a) && (abs(ie.Pos(1)) <= a) ) //stimulus x and y is within the sector at that height
                     {
-                        printf("[TaxelPWE::insideRFCheck]: Both, x and y coordinates (%.3f,%.3f) are inside the radius a %.3f.\n",ie.Pos(0),ie.Pos(1),a);
+                        //printf("[TaxelPWE::insideRFCheck]: Both, x and y coordinates (%.3f,%.3f) are inside the radius a %.3f.\n",ie.Pos(0),ie.Pos(1),a);
                         return true;
                     }
                     else
                     {
-                        printf("[TaxelPWE::insideRFCheck]: At least one of, x and y coordinates (%.3f,%.3f) is outside the radius a %.3f.\n",ie.Pos(0),ie.Pos(1),a);
+                        //printf("[TaxelPWE::insideRFCheck]: At least one of, x and y coordinates (%.3f,%.3f) is outside the radius a %.3f.\n",ie.Pos(0),ie.Pos(1),a);
                         return false;
                     }
                 }
                 else
                 {
-                    printf("[TaxelPWE::insideRFCheck]: distanceSquared: %.4f > maxRadiusZ^2: %.4f\n",distanceSquared,maxRadiusZ*maxRadiusZ);
+                   // printf("[TaxelPWE::insideRFCheck]: distanceSquared: %.4f > maxRadiusZ^2: %.4f\n",distanceSquared,maxRadiusZ*maxRadiusZ);
                     return false;
                 }
             }
             else
             {
-                printf("[TaxelPWE::insideRFCheck]: positive z-coordinate %.3f outside limit (%.3f)\n",ie.Pos(2),(pwe->getExt())(0,1));
+                //printf("[TaxelPWE::insideRFCheck]: positive z-coordinate %.3f outside limit (%.3f)\n",ie.Pos(2),(pwe->getExt())(0,1));
                 return false; 
             }
         }
@@ -104,7 +104,7 @@ using namespace       std;
         {
             if(ie.Pos(2) >= (pwe->getExt())(0,0) ) //is z-coordinate within limit? if not, it surely is not inside the spherical sector 
             {
-                printf("[TaxelPWE::insideRFCheck]: negative z-coordinate %.3f inside limit (%.3f)\n",ie.Pos(2),(pwe->getExt())(0,0));
+                //printf("[TaxelPWE::insideRFCheck]: negative z-coordinate %.3f inside limit (%.3f)\n",ie.Pos(2),(pwe->getExt())(0,0));
                 Vector sphericalSectorNegativeCenter(3,0.0); 
                 sphericalSectorNegativeCenter(2) = sphericalSectorShiftOffset;
                 double maxRadiusNegZ = abs((pwe->getExt())(0,0)) + sphericalSectorShiftOffset; //max radius from shifted origin of sph. sector
@@ -112,28 +112,28 @@ using namespace       std;
                 //checking distance for full sphere, prior to considering the sector
                 if (distanceSquared <= maxRadiusNegZ * maxRadiusNegZ)
                 {
-                    printf("[TaxelPWE::insideRFCheck]: distanceSquared: %.4f <= maxRadiusNegZ^2: %.4f\n",distanceSquared,maxRadiusNegZ*maxRadiusNegZ);
+                    //printf("[TaxelPWE::insideRFCheck]: distanceSquared: %.4f <= maxRadiusNegZ^2: %.4f\n",distanceSquared,maxRadiusNegZ*maxRadiusNegZ);
                     double a = tan(RFangle) * (sphericalSectorShiftOffset + abs(ie.Pos(2))); //radius of RF sector at specific height 
                     if( (abs(ie.Pos(0)) <= a) && (abs(ie.Pos(1)) <= a) ) //stimulus x and y is within the sector at that height
                     {
-                        printf("[TaxelPWE::insideRFCheck]: Both, x and y coordinates (%.3f,%.3f) are inside the radius a %.3f.\n",ie.Pos(0),ie.Pos(1),a);
+                       // printf("[TaxelPWE::insideRFCheck]: Both, x and y coordinates (%.3f,%.3f) are inside the radius a %.3f.\n",ie.Pos(0),ie.Pos(1),a);
                         return true;
                     }
                     else
                     {
-                        printf("[TaxelPWE::insideRFCheck]: At least one of, x and y coordinates (%.3f,%.3f) is outside the radius a %.3f.\n",ie.Pos(0),ie.Pos(1),a);
+                       //printf("[TaxelPWE::insideRFCheck]: At least one of, x and y coordinates (%.3f,%.3f) is outside the radius a %.3f.\n",ie.Pos(0),ie.Pos(1),a);
                         return false;
                     }
                 }
                 else
                 {
-                    printf("[TaxelPWE::insideRFCheck]: distanceSquared: %.4f > maxRadiusNegZ^2: %.4f\n",distanceSquared,maxRadiusNegZ*maxRadiusNegZ);
+                    //printf("[TaxelPWE::insideRFCheck]: distanceSquared: %.4f > maxRadiusNegZ^2: %.4f\n",distanceSquared,maxRadiusNegZ*maxRadiusNegZ);
                     return false;
                 }
             }
             else
             {
-                printf("[TaxelPWE::insideRFCheck]: negative z-coordinate %.3f outside limit (%.3f)\n",ie.Pos(2),(pwe->getExt())(0,0));
+               // printf("[TaxelPWE::insideRFCheck]: negative z-coordinate %.3f outside limit (%.3f)\n",ie.Pos(2),(pwe->getExt())(0,0));
                 return false; 
             }
         }
@@ -177,7 +177,7 @@ using namespace       std;
         }
         else
         {
-            printf("[TaxelPWE::computeResponse()] Taxel ID: %u, there are %u events to process.\n",this->getID(),Evnts.size());
+            //printf("[TaxelPWE::computeResponse()] Taxel ID: %u, there are %u events to process.\n",this->getID(),Evnts.size());
             double locResp = 0.0;
             double maxResp = 0.0;
             std::vector<double> In(2);
@@ -188,13 +188,13 @@ using namespace       std;
                    In[0] = it->getNRM();
                    In[1] = it->getTTC();
                    locResp = pwe->computeResponse(In);
-                   printf("  event: %s \n",it->toString().c_str());
-                   printf("\t locResp = locResp  + locResp * min(1.0,Evnt.Threat + stress_modulation)\n");
-                   printf("\t    = %.2f  + %.2f * min(1.0,%.2f + %.2f)\n",locResp,locResp,it->Threat,stress_modulation);
+                   //printf("  event: %s \n",it->toString().c_str());
+                   //printf("\t locResp = locResp  + locResp * min(1.0,Evnt.Threat + stress_modulation)\n");
+                   //printf("\t    = %.2f  + %.2f * min(1.0,%.2f + %.2f)\n",locResp,locResp,it->Threat,stress_modulation);
                    locResp = locResp + (locResp * min(1.0,it->Threat + stress_modulation)); //with this amplification,
                    //may come out of the range (which used to be <0,255>, now <0,1> after 9.8.2016)
                    //- in fact up to double that range
-                   printf("\t locResp  = %.2f  \n",locResp);
+                   //printf("\t locResp  = %.2f  \n",locResp);
                    if (locResp > maxResp)
                        maxResp = locResp;
                 }
@@ -203,12 +203,12 @@ using namespace       std;
             }
             if (maxResp > 0.0)
             {
-                printf(" Setting taxel response to maxResp: %.2f\n",maxResp);
+                //printf(" Setting taxel response to maxResp: %.2f\n",maxResp);
                 Resp = maxResp;
 
             }
             else
-                printf("\t maxResp was <=0 (%.2f) - Leaving taxel Resp 0.\n",maxResp);
+                //printf("\t maxResp was <=0 (%.2f) - Leaving taxel Resp 0.\n",maxResp);
             
             return true;
         }

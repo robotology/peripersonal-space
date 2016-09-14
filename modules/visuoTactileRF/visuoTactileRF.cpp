@@ -368,7 +368,7 @@ public:
                     yError("vtRFThread wasn't instantiated!!");
                     return false;
                 }
-                yInfo("VISUO TACTILE RECEPTIVE FIELDS: vtRFThread istantiated...");
+                yInfo("VISUO TACTILE RECEPTIVE FIELDS: vtRFThread instantiated...");
             }
             else {
                 vtRFThrd = 0;
