@@ -4,35 +4,15 @@
     <dependencies>
     </dependencies>
 
-   <module>
-        <name>reactController</name>
-        <parameters></parameters>
-        <node>localhost</node>
-        <stdio></stdio>
-        <tag>reactController</tag>
-    </module>
-
-    <module>
-        <name>skinEventsAggregator</name>
-        <parameters>general::robot icub</parameters>
-        <node>localhost</node>
-        <stdio></stdio>
-        <tag>skinEventsAggreg</tag>
-    </module>
-
-    <module>
-        <name>ppsAggregEventsForiCubGui</name>
-        <parameters></parameters>
-        <node>localhost</node>
-        <stdio></stdio>
-        <tag>aggregEvForiCubGui</tag>
-    </module>
-
     <module>
         <name>pf3dTracker</name>
         <parameters>--from pf3dTracker.ini</parameters>
         <node>localhost</node>
-        <tag>PF3DTracker</tag>
+    </module>    
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /PF3DT_viewer --RefreshTime 33 --x 980 --y 620 --w 320 --h 260 --compact</parameters>
+        <node>localhost</node>
     </module>
 
     <module>
@@ -40,16 +20,70 @@
         <parameters>--noDoubleTouch</parameters>
         <node>localhost</node>
         <stdio></stdio>
-     </module>
-
+    </module>
     <module>
         <name>visuoTactileRF</name>
         <parameters>--taxelsFile taxels1D_learnedAll.ini --rate 20</parameters>
         <node>localhost</node>
         <stdio></stdio>
     </module>
+    
+    <module>
+        <name>skinEventsAggregator</name>
+        <parameters>general::robot icub</parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+    </module>
+    <module>
+        <name>ppsAggregEventsForiCubGui</name>
+        <parameters></parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+    </module>
 
     <module>
+        <name>reactController</name>
+        <parameters></parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+    </module>
+
+    <module>
+        <name>iCubGui</name>
+        <parameters>--xpos 1300 --ypos 330 --width 450 --height 550</parameters>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>iCubSkinGui</name>
+        <!-- Remember to use the proper configuration files (i.e. "_V2.ini" for V2 robots) -->
+        <parameters>--from left_forearm.ini --useCalibration --xpos 0 --ypos 0 --width 300 --height 300</parameters>
+        <node>localhost</node>
+        <tag>skinGuiLF</tag>
+    </module>
+    <module>
+        <name>iCubSkinGui</name>
+        <!-- Remember to use the proper configuration files (i.e. "_V2.ini" for V2 robots) -->
+        <parameters>--from left_hand_V2_1.ini --useCalibration --xpos 320 --ypos 0 --width 300 --height 300</parameters>
+        <node>localhost</node>
+        <tag>skinGuiLH</tag>
+    </module>
+    <module>
+        <name>iCubSkinGui</name>
+        <!-- Remember to use the proper configuration files (i.e. "_V2.ini" for V2 robots) -->
+        <parameters>--from right_forearm.ini --useCalibration --xpos 640 --ypos 0 --width 300 --height 300</parameters>
+        <node>localhost</node>
+        <tag>skinGuiRF</tag>
+    </module>
+    <module>
+        <name>iCubSkinGui</name>
+        <!-- Remember to use the proper configuration files (i.e. "_V2.ini" for V2 robots) --> 
+        <parameters>--from right_hand_V2_1.ini --useCalibration --xpos 960 --ypos 0 --width 300 --height 300</parameters>
+        <node>localhost</node>
+        <tag>skinGuiRH</tag>
+    </module>
+
+    <!--module>
         <name>yarpview</name>
         <parameters>--name /vtRF/left --RefreshTime 33 --x 0 --y 0 --w 400 --h 400 --compact</parameters>
         <node>localhost</node>
@@ -60,14 +94,8 @@
         <parameters>--name /vtRF/right --RefreshTime 33 --x 420 --y 0 --w 400 --h 400 --compact</parameters>
         <node>localhost</node>
         <stdio></stdio>
-    </module>
-    <module>
-        <name>yarpview</name>
-        <parameters>--name /PF3DT_viewer --RefreshTime 33 --x 980 --y 620 --w 320 --h 260 --compact</parameters>
-        <node>localhost</node>
-        <tag>PF3DTracker_viewer</tag>
-    </module>
-
+    </module-->
+    
     <!--module>
         <name></name>
         <parameters></parameters>
@@ -76,10 +104,37 @@
         <tag></tag>
     </module-->
 
-   <connection>
-      <from>/reactController/gui:o</from>
-      <to>/iCubGui/objects</to>
-      <protocol>udp</protocol>
+    <connection>
+        <from>/pf3dTracker/data:o</from>
+        <to>/visuoTactileWrapper/pf3dTracker:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/camcalib/left/out</from>
+        <to>/pf3dTracker/video:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/pf3dTracker/video:o</from>
+        <to>/PF3DT_viewer</to>
+        <protocol>tcp</protocol>
+    </connection>    
+
+    <connection>
+        <from>/visuoTactileWrapper/events:o</from>
+        <to>/visuoTactileRF/events:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/skinManager/skin_events:o</from>
+        <to>/visuoTactileRF/skin_events:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+   
+    <connection>
+       <from>/visuoTactileRF/pps_events_aggreg:o</from>
+       <to>/reactController/pps_events_aggreg:i</to>
+       <protocol>udp</protocol>
     </connection>
 
     <connection>
@@ -95,51 +150,21 @@
     </connection>
 
     <connection>
-       <from>/visuoTactileRF/pps_events_aggreg:o</from>
-       <to>/reactController/pps_events_aggreg:i</to>
-       <protocol>udp</protocol>
-    </connection>
-
-
-    <connection>
         <from>/skinEventsAggregator/skin_events_aggreg:o</from>
-	<to>/ppsAggregEventsForiCubGui/skin_events_aggreg:i</to>
+    	<to>/ppsAggregEventsForiCubGui/skin_events_aggreg:i</to>
         <protocol>udp</protocol>
     </connection>	
-
     <connection>
         <from>/visuoTactileRF/pps_events_aggreg:o</from>
-	<to>/ppsAggregEventsForiCubGui/pps_events_aggreg:i</to>
+	    <to>/ppsAggregEventsForiCubGui/pps_events_aggreg:i</to>
         <protocol>udp</protocol>
-    </connection>
-
+    </connection>    
     <connection>
         <from>/ppsAggregEventsForiCubGui/contacts:o</from>
-	<to>/iCubGui/forces</to>
+    	<to>/iCubGui/forces</to>
         <protocol>udp</protocol>
-    </connection>
-        
-      <connection>
-        <from>/skinManager/skin_events:o</from>
-        <to>/visuoTactileRF/skin_events:i</to>
-        <protocol>tcp</protocol>
-    </connection>
-    <connection>
-        <from>/icub/camcalib/left/out</from>
-        <to>/pf3dTracker/video:i</to>
-        <protocol>tcp</protocol>
-    </connection>
-    <connection>
-        <from>/pf3dTracker/video:o</from>
-        <to>/PF3DT_viewer</to>
-        <protocol>tcp</protocol>
-    </connection>
-    <connection>
-        <from>/pf3dTracker/data:o</from>
-        <to>/visuoTactileWrapper/pf3dTracker:i</to>
-        <protocol>tcp</protocol>
-    </connection>
-   
+    </connection>    
+
     <connection>
         <from>/visuoTactileWrapper/gui:o</from>
         <to>/iCubGui/objects</to>
@@ -147,22 +172,47 @@
     </connection>
    
     <connection>
-        <from>/icub/camcalib/left/out</from>
-        <to>/visuoTactileRF/imageL:i</to>
+      <from>/reactController/gui:o</from>
+      <to>/iCubGui/objects</to>
+      <protocol>udp</protocol>
+    </connection>
+    
+    <connection>
+        <from>/icub/head/state:o</from>
+        <to>/iCubGui/head:i</to>
         <protocol>udp</protocol>
     </connection>
     <connection>
-        <from>/icub/camcalib/right/out</from>
-        <to>/visuoTactileRF/imageR:i</to>
+        <from>/icub/inertial</from>
+        <to>/iCubGui/inertial:i</to>
         <protocol>udp</protocol>
     </connection>
-   
     <connection>
-        <from>/visuoTactileWrapper/events:o</from>
-        <to>/visuoTactileRF/events:i</to>
-        <protocol>tcp</protocol>
+        <from>/icub/left_arm/state:o</from>
+        <to>/iCubGui/left_arm:i</to>
+        <protocol>udp</protocol>
     </connection>
-   
+    <connection>
+        <from>/icub/right_arm/state:o</from>
+        <to>/iCubGui/right_arm:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/left_leg/state:o</from>
+        <to>/iCubGui/left_leg:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/right_leg/state:o</from>
+        <to>/iCubGui/right_leg:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/torso/state:o</from>
+        <to>/iCubGui/torso:i</to>
+        <protocol>udp</protocol>
+    </connection>   
+
     <connection>
     <from>/visuoTactileRF/skinGuiForearmL:o</from>
         <to>/skinGui/left_forearm_virtual:i</to>
@@ -183,7 +233,17 @@
         <to>/skinGui/right_hand_virtual:i</to>
         <protocol>tcp</protocol>
     </connection>
+    <!--connection>
+        <from>/icub/camcalib/left/out</from>
+        <to>/visuoTactileRF/imageL:i</to>
+        <protocol>udp</protocol>
+    </connection>
     <connection>
+        <from>/icub/camcalib/right/out</from>
+        <to>/visuoTactileRF/imageR:i</to>
+        <protocol>udp</protocol>
+    </connection-->   
+    <!--connection>
         <from>/visuoTactileRF/imageL:o</from>
         <to>/vtRF/left</to>
         <protocol>udp</protocol>
@@ -192,7 +252,7 @@
         <from>/visuoTactileRF/imageR:o</from>
         <to>/vtRF/right</to>
         <protocol>udp</protocol>
-    </connection>
+    </connection-->
 
     <!--connection>
         <from></from>
