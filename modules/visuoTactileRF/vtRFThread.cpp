@@ -342,7 +342,7 @@ void vtRFThread::run()
         {
             eventsBuffer.push_back(incomingEvents.back()); //! the buffering and hence the learning is working only for the last event in the vector
             //!so learning should be done with one stimulus only
-            printMessage(2,"I'm buffering inputs (there are events)! Buffer size %lu \n",eventsBuffer.size());
+            printMessage(2,"I'm buffering inputs (taking last event from stack)! Buffer size %lu \n",eventsBuffer.size());
         }
 
         // limit the size of the buffer to 80, i.e. 4 seconds of acquisition
@@ -425,11 +425,12 @@ void vtRFThread::run()
 
     if (incomingEvents.size()>0)
     {
-        projectIncomingEvents();     // project event onto the taxels' RF and add them to taxels' representation
+        projectIncomingEvents();     // project event onto the taxels' FoR and add them to taxels' representation
+        // only if event lies inside taxel's RF 
 
         //should keep backwards compatibility with the dumpedVector format
         //it will currently dump only the last event of the possibly multiple events
-        //TODO check whether this should be preserved
+        //TODO check whether this should be preserved or modified - output is cryptic, order of taxels needs to be known
         for (int i = 0; i < iCubSkinSize; i++)
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
                 if(!(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j]))->Evnts.empty())
@@ -945,10 +946,9 @@ bool vtRFThread::projectIncomingEvents()
                 printMessage(6,"    Projecting onto taxel %d.\n",iCubSkin[i].taxels[j]->getID());
                 projEvent = projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,(*it));
                 printMessage(6,"\tProjected event: %s\n",projEvent.toString().c_str());
-                if(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->insideRFCheck(projEvent))
+                if(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->insideRFCheck(projEvent)) ////events outside of taxel's RF will not be added
                 {
                     dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnts.push_back(projEvent); //here every taxel (TaxelPWE) is updated with the events
-                    //events outside of taxel's RF will not be added
                     printMessage(6,"\tLies inside RF - pushing to taxelPWE.Events.\n");
                 }
                 else
@@ -1833,8 +1833,8 @@ int vtRFThread::printMessage(const int l, const char *f, ...) const
 
 void vtRFThread::threadRelease()
 {
-    yDebug("[vtRF::threadRelease]Saving taxels..\n");
-        save();
+    //yDebug("[vtRF::threadRelease]Saving taxels..\n");
+      //  save();
 
     yDebug("[vtRF::threadRelease]Closing controllers..\n");
         ddR.close();
