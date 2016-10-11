@@ -302,16 +302,22 @@ void vtRFThread::run()
         // and it did not pass more than 0.2 seconds from the last data, let's use that
         if ((yarp::os::Time::now() - timeNow <= 0.2) && incomingEvents.size()>0)
         {
-            Bottle &b = inputEvents.addList();
-            b = incomingEvents.back().toBottle();
+            for(std::vector<IncomingEvent>::iterator it = incomingEvents.begin(); it!=incomingEvents.end(); it++)
+            {
+                Bottle &b = inputEvents.addList();
+                b = it->toBottle(); 
+            }
+            printMessage(4,"Assigned %s to inputEvents from memory.\n",inputEvents.toString().c_str());    
         }
     }
     else
     {
         timeNow     = yarp::os::Time::now();
-        inputEvents = *event;
+        inputEvents = *event; //we assign what we just read from the port 
+        printMessage(4,"Read %s from events port.\n",event->toString().c_str());
     }
-
+    //otherwise, inputEvents remains empty
+    
     ts.update();
     incomingEvents.clear();
     resetTaxelEventVectors();
@@ -336,7 +342,7 @@ void vtRFThread::run()
         {
             eventsBuffer.push_back(incomingEvents.back()); //! the buffering and hence the learning is working only for the last event in the vector
             //!so learning should be done with one stimulus only
-            printMessage(2,"I'm buffering inputs (there are events)! Buffer size %lu",eventsBuffer.size());
+            printMessage(2,"I'm buffering inputs (there are events)! Buffer size %lu \n",eventsBuffer.size());
         }
 
         // limit the size of the buffer to 80, i.e. 4 seconds of acquisition
@@ -942,7 +948,7 @@ bool vtRFThread::projectIncomingEvents()
                 if(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->insideRFCheck(projEvent))
                 {
                     dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnts.push_back(projEvent); //here every taxel (TaxelPWE) is updated with the events
-               //events outside of taxel's RF will not be added
+                    //events outside of taxel's RF will not be added
                     printMessage(6,"\tLies inside RF - pushing to taxelPWE.Events.\n");
                 }
                 else
