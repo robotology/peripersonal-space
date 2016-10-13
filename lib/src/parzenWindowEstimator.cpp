@@ -134,8 +134,11 @@ double gauss2D(const double x_0, const double y_0,
 
         for (int i = 0; i < dim; i++)
         {
-            if (x[i] < ext(i,0) || x[i] > ext(i,1)) return false;
-
+            if (x[i] < ext(i,0) || x[i] > ext(i,1))
+            {
+                //printf("PWE:getIndexes(): x[%d] = %f is outside the range <%f,%f> \n",i,x[i],ext(i,0),ext(i,1));                
+                return false;
+            }
             b.push_back(int((x[i]-firstPosBinShift[i])/binWidth[i]+firstPosBin[i]));
         }
 
@@ -144,6 +147,7 @@ double gauss2D(const double x_0, const double y_0,
             b.push_back(0);
         }
 
+        //printf("PWE:getIndexes(): got %d %d for %f %f \n",b[0],b[1],x[0],x[1]);                
         return true;
     }
 
@@ -153,7 +157,7 @@ double gauss2D(const double x_0, const double y_0,
         
         if (getIndexes(x,b))
         {
-            printf("adding sample %i %i from %g %g\n",b[0],b[1],x[0],x[1]);
+            //printf("Adding positive sample at bins %d %d from %f %f\n",b[0],b[1],x[0],x[1]);
             posHist(b[0],b[1]) += 1;
             return true;
         }
@@ -167,6 +171,7 @@ double gauss2D(const double x_0, const double y_0,
         
         if (getIndexes(x,b))
         {
+            //printf("Adding negative sample at bins %d %d from %f %f\n",b[0],b[1],x[0],x[1]);            
             negHist(b[0],b[1]) += 1;
             return true;
         }

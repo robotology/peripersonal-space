@@ -850,18 +850,19 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
         {
             IncomingEvent4TaxelPWE projection = projectIntoTaxelRF(iCubSkin[IDx].taxels[j]->getFoR(),T_a,eventsBuffer[k]); //project's into taxel RF and subtracts object radius from z pos in the new frame
             if(dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->insideRFCheck(projection)){ //events outside of taxel's RF will not be used for learning
-                printMessage(3,"Training taxel: skinPart %d ID %i k (index in buffer) %i NORM %g TTC %g\n",IDx,iCubSkin[IDx].taxels[j]->getID(),k,projection.NRM,projection.TTC);
                 if (itHasBeenTouched == true){ 
+                    printMessage(2,"Training taxel - positive sample: skinPart %d ID %i k (index in buffer) %i NORM %g TTC %g\n",IDx,iCubSkin[IDx].taxels[j]->getID(),k,projection.NRM,projection.TTC);
                     dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->addSample(projection);
                     dumpedVector.push_back(1.0);
                 }
                 else{
+                    printMessage(2,"Training taxel - negative sample: skinPart %d ID %i k (index in buffer) %i NORM %g TTC %g\n",IDx,iCubSkin[IDx].taxels[j]->getID(),k,projection.NRM,projection.TTC);
                     dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->removeSample(projection);  
                     dumpedVector.push_back(-1.0);
                 }
             }
             else
-                printMessage(4,"Not training taxel: event outside RF\n");
+                printMessage(3,"Not training taxel: event outside RF\n");
         }
     }
 

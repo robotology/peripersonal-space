@@ -206,8 +206,8 @@ unsigned int factorial(unsigned int n)
     std::vector<double> IncomingEvent4TaxelPWE::getNRMTTC()
     {
         std::vector<double> x(2);
-        x.push_back(NRM);
-        x.push_back(TTC);
+        x[0] = NRM;
+        x[1] = TTC;
 
         return x;
     }
