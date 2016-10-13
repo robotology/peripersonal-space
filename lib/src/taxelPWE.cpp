@@ -205,9 +205,8 @@ using namespace       std;
             {
                 //printf(" Setting taxel response to maxResp: %.2f\n",maxResp);
                 Resp = maxResp;
-
             }
-            else
+            //else
                 //printf("\t maxResp was <=0 (%.2f) - Leaving taxel Resp 0.\n",maxResp);
             
             return true;

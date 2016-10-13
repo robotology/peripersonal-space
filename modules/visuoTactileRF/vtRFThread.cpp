@@ -104,14 +104,13 @@ bool vtRFThread::threadInit()
         ts.update();
 
         stress = 0.0;
-
+        jntsT = 3; //nr torso joints
     /********** Open right arm interfaces (if they are needed) ***************/
         if (rf->check("rightHand") || rf->check("rightForeArm") ||
            (!rf->check("rightHand") && !rf->check("rightForeArm") && !rf->check("leftHand") && !rf->check("leftForeArm")))
         {
             for (int i = 0; i < jntsT; i++)
                 armR->releaseLink(i); //torso will be enabled
-
             Property OptR;
             OptR.put("robot",  robot.c_str());
             OptR.put("part",   "right_arm");
@@ -147,7 +146,6 @@ bool vtRFThread::threadInit()
         {
             for (int i = 0; i < jntsT; i++)
                 armL->releaseLink(i); //torso will be enabled
-
             Property OptL;
             OptL.put("robot",  robot.c_str());
             OptL.put("part",   "left_arm");
@@ -868,6 +866,7 @@ bool vtRFThread::readEncodersAndUpdateArmChains()
 {    
    Vector q1(jntsT+jntsAR,0.0);
    Vector q2(jntsT+jntsAL,0.0);
+       
    iencsT->getEncoders(encsT->data());
    qT[0]=(*encsT)[2]; //reshuffling from motor to iKin order (yaw, roll, pitch)
    qT[1]=(*encsT)[1];
@@ -891,6 +890,7 @@ bool vtRFThread::readEncodersAndUpdateArmChains()
         q2.setSubvector(jntsT,qL);
         armL -> setAng(q2*CTRL_DEG2RAD);
    }
+     
    return true;
 }
 
@@ -943,8 +943,10 @@ bool vtRFThread::projectIncomingEvents()
             IncomingEvent4TaxelPWE projEvent; 
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
             {
-                printMessage(6,"    Projecting onto taxel %d.\n",iCubSkin[i].taxels[j]->getID());
-                projEvent = projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,(*it));
+                printMessage(6,"    Projecting onto taxel %d (Pos in Root FoR: %s Pos in local FoR: %s).\n",iCubSkin[i].taxels[j]->getID(),
+                             iCubSkin[i].taxels[j]->getWRFPosition().toString().c_str(),
+                             iCubSkin[i].taxels[j]->getPosition().toString().c_str());
+                projEvent = projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,(*it)); //project's into taxel RF and subtracts object radius from z pos in the new frame
                 printMessage(6,"\tProjected event: %s\n",projEvent.toString().c_str());
                 if(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->insideRFCheck(projEvent)) ////events outside of taxel's RF will not be added
                 {
@@ -1184,6 +1186,7 @@ yarp::sig::Vector vtRFThread::locateTaxel(const yarp::sig::Vector &_pos, const s
     yarp::sig::Vector WRFpos(4,0.0);
     Matrix T = eye(4);
 
+    //printMessage(7,"locateTaxel(): Pos local frame: %s, skin part name: %s\n",_pos.toString(3,3).c_str(),part.c_str());
     if (!((part == SkinPart_s[SKIN_LEFT_FOREARM]) || (part == SkinPart_s[SKIN_LEFT_HAND]) ||
          (part == SkinPart_s[SKIN_RIGHT_FOREARM]) || (part == SkinPart_s[SKIN_RIGHT_HAND])))
         yError("[vtRFThread] locateTaxel() failed - unknown skinPart!\n");
@@ -1194,6 +1197,7 @@ yarp::sig::Vector vtRFThread::locateTaxel(const yarp::sig::Vector &_pos, const s
     else if (part == SkinPart_s[SKIN_RIGHT_HAND])    { T = armR -> getH(3+6, true); } // torso + up to wrist
     else    {  yError("[vtRFThread] locateTaxel() failed!\n"); }
 
+    //printMessage(8,"    T Matrix: \n %s \n ",T.toString(3,3).c_str());
     pos.push_back(1);
     WRFpos = T * pos;
     WRFpos.pop_back();
