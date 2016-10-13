@@ -444,7 +444,7 @@ void vtRFThread::run()
     }
 
     sendContactsToSkinGui();       
-    manageSkinEvents();
+    managePPSevents();
 
     // manage the dumped port
     if (dumpedVector.size()>0)
@@ -458,7 +458,7 @@ void vtRFThread::run()
     }
 }
 
-void vtRFThread::manageSkinEvents()
+void vtRFThread::managePPSevents()
 {
     // main/src/modules/skinManager/src/compensationThread.cpp:250
     vector <int> taxelsIDs;

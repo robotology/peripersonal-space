@@ -279,9 +279,9 @@ protected:
     bool projectIncomingEvents();
 
     /**
-    *
+    * Creates aggregated PPS activation for every skin part and sends it out to pps event out port.
     **/
-    void manageSkinEvents();
+    void managePPSevents();
 
     /**
     * For all the skinParts, process the response according to the inputEvent and parse them properly before sending them to the
