@@ -42,8 +42,10 @@ using namespace       std;
 
     bool TaxelPWE::addSample(IncomingEvent4TaxelPWE ie)
     {
-        if (!insideRFCheck(ie))
+        if (!insideRFCheck(ie)){ //should be now redundant and can be removed - is checked before
+            printf("Warning: TaxelPWE::addSample() - called with event outside of taxel RF.\n");
             return false;
+        }
 
         std::vector <double> x = ie.getNRMTTC();
         // printf("[TaxelPWE::addSample] x %g %g\n",x[0],x[1]);
@@ -53,9 +55,11 @@ using namespace       std;
 
     bool TaxelPWE::removeSample(IncomingEvent4TaxelPWE ie)
     {
-        if (!insideRFCheck(ie))
+        if (!insideRFCheck(ie)){ //should be now redundant and can be removed -  - is checked before
+            printf("Warning: TaxelPWE::removeSample() - called with event outside of taxel RF.\n");
             return false;
-
+        }
+        
         std::vector <double> x = ie.getNRMTTC();
         return pwe->removeSample(x);
     }
