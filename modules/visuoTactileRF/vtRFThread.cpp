@@ -848,15 +848,21 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
 
         for (size_t k = 0; k < eventsBuffer.size(); k++)
         {
-            IncomingEvent4TaxelPWE projection = projectIntoTaxelRF(iCubSkin[IDx].taxels[j]->getFoR(),T_a,eventsBuffer[k]);
-            printMessage(3,"Training Taxels: skinPart %d ID %i k %i NORM %g TTC %g\n",IDx,iCubSkin[IDx].taxels[j]->getID(),k,projection.NRM,projection.TTC);
-
-            if (itHasBeenTouched == true)  dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->addSample(projection);
-            else                           dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->removeSample(projection);
+            IncomingEvent4TaxelPWE projection = projectIntoTaxelRF(iCubSkin[IDx].taxels[j]->getFoR(),T_a,eventsBuffer[k]); //project's into taxel RF and subtracts object radius from z pos in the new frame
+            if(dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->insideRFCheck(projection)){ //events outside of taxel's RF will not be used for learning
+                printMessage(3,"Training taxel: skinPart %d ID %i k (index in buffer) %i NORM %g TTC %g\n",IDx,iCubSkin[IDx].taxels[j]->getID(),k,projection.NRM,projection.TTC);
+                if (itHasBeenTouched == true){ 
+                    dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->addSample(projection);
+                    dumpedVector.push_back(1.0);
+                }
+                else{
+                    dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->removeSample(projection);  
+                    dumpedVector.push_back(-1.0);
+                }
+            }
+            else
+                printMessage(4,"Not training taxel: event outside RF\n");
         }
-
-        if (itHasBeenTouched == true)   dumpedVector.push_back(1.0);
-        else                            dumpedVector.push_back(-1.0);
     }
 
     return true;
