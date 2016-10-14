@@ -74,7 +74,7 @@ class TaxelPWE : public iCub::skinDynLib::Taxel
     bool removeSample(IncomingEvent4TaxelPWE ie);
 
     /**
-    * Check if the input sample is inside the Receptive field (composed of a cone and a cylinder)
+    * Check if the input sample is inside the Receptive field (a shifted spherical sector)
     **/
     bool insideRFCheck(const IncomingEvent4TaxelPWE ie);
 
