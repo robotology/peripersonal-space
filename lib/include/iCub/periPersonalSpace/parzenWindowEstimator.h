@@ -21,7 +21,7 @@
  *  
  * @ingroup periPersonalSpace
  *  
- * Utilities used throughout the modules and libraries.
+ * Discrete representation of peripersonal space + interpolation (smoothing) using Parzen windows.
  *
  * \author Alessandro Roncone
  *  
@@ -58,7 +58,7 @@ class parzenWindowEstimator
 {
   protected:
     int dim;                                // the dimension of the pwe (either 1[D] or 2[D])
-    yarp::sig::Matrix ext;                             // the extension of the Receptive field (dim*2)
+    yarp::sig::Matrix ext;                  // the extension of the Receptive field (dim*2)
 
     std::vector<int>    binsNum;            // the number of partitions of the input space (x and y dimensions)
     std::vector<double> binWidth;           // the extension of the single sampling unit (x and y dimensions)

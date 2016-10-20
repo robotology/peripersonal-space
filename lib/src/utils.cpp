@@ -145,8 +145,8 @@ unsigned int factorial(unsigned int n)
     string IncomingEvent::toString() const
     {
         stringstream res;
-        res << "Pos: "<< Pos.toString(3,3) << "\t Vel: "<< Vel.toString(3,3)
-            << "\t Radius: "<< Radius << "\t Src: "<< Src << "\t threat: "<< Threat ;
+        res << "Pos: "<< Pos.toString(3,3) << " Vel: "<< Vel.toString(3,3)
+            << " Radius:"<< Radius << " Src:"<< Src << " threat:"<< Threat ;
         return res.str();
     }
 
@@ -197,25 +197,31 @@ unsigned int factorial(unsigned int n)
         int sgn = Pos[2]>=0?1:-1;
         NRM = sgn * norm(Pos);
 
-        // if (norm(Vel) < 0.38 && norm(Vel) > 0.34)
-        // {
-        //     TTC = 10000.0;
-        // }
-        // else
-        //
-        if (dot(Pos,Vel)==0) TTC = 0;
-        else                 TTC = -norm(Pos)*norm(Pos)/dot(Pos,Vel);
+        if (dot(Pos,Vel)==0)
+            TTC = 0;
+        else
+            TTC = -norm(Pos)*norm(Pos)/dot(Pos,Vel);
     }
 
     std::vector<double> IncomingEvent4TaxelPWE::getNRMTTC()
     {
-        std::vector<double> x;
-        x.push_back(NRM);
-        x.push_back(TTC);
+        std::vector<double> x(2);
+        x[0] = NRM;
+        x[1] = TTC;
 
         return x;
     }
+    
+    double IncomingEvent4TaxelPWE::getNRM()
+    {
+        return NRM;
+    }
 
+    double IncomingEvent4TaxelPWE::getTTC()
+    {
+        return TTC;
+    }
+    
     void IncomingEvent4TaxelPWE::print()
     {
         yDebug("\tNRM: %g\t TTC: %g \t %s", NRM, TTC, IncomingEvent::toString().c_str());
@@ -224,7 +230,7 @@ unsigned int factorial(unsigned int n)
     string IncomingEvent4TaxelPWE::toString() const
     {
         stringstream res;
-        res << "NRM: "<< NRM << "\t TTC: " << TTC << "\t "<< IncomingEvent::toString();
+        res << setprecision(3) << "NRM:"<< NRM << " TTC:" << TTC << " "<< IncomingEvent::toString();
         return res.str();
     }
 

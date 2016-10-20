@@ -1,8 +1,7 @@
 /* VISUO TACTILE RECEPTIVE FIELDS v. 1.0
  * Copyright (C) 2013 RobotCub Consortium
  * Author:  Alessandro Roncone & Matej Hoffmann
- * email:   alessandro.roncone@iit.it
- * website: www.robotcub.org
+ * email:    alessandro.roncone@yale.edu, matej.hoffmann@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU General Public License, version 2 or any
  * later version published by the Free Software Foundation.
@@ -369,7 +368,7 @@ public:
                     yError("vtRFThread wasn't instantiated!!");
                     return false;
                 }
-                yInfo("VISUO TACTILE RECEPTIVE FIELDS: vtRFThread istantiated...");
+                yInfo("VISUO TACTILE RECEPTIVE FIELDS: vtRFThread instantiated...");
             }
             else {
                 vtRFThrd = 0;
@@ -433,7 +432,7 @@ int main(int argc, char * argv[])
         yInfo("  --rate       rate:   the period used by the thread. Default 50ms.");
         yInfo("  --verbosity  int:    verbosity level (default 0).");
         yInfo("  --modality   string: which modality to use (either 1D or 2D, default 1D).");
-        yInfo("  --taxelsFile string: the file from which load and save taxels. Defaults:");
+        yInfo("  --taxelsFile string: the file from which load and save taxels' PPS representations. Defaults:");
         yInfo("                       'taxels1D.ini' if modality==1D");
         yInfo("                       'taxels2D.ini' if modality==2D");
         yInfo("  --rightForeArm, --rightHand, --leftForeArm, --leftHand     flag: flag(s) to call if the module");

@@ -42,9 +42,12 @@ class TaxelPWE : public iCub::skinDynLib::Taxel
   public:
     double    Resp;  // Taxels' activation level <0,1>
     double RFangle;  // Angle of the receptive field [rad] - from the taxel normal
-                     // The effective angle is thus double that
-
-    IncomingEvent4TaxelPWE Evnt;    // Stimuli/events nearing the taxel in the taxel's FoR
+                     // The effective angle (also called aperture of a spherical sector) is thus double that 
+    double sphericalSectorShiftOffset;  //offset by which the RF (spherical sector) will be shifted down along the z-axis (taxel normal)
+    //we don't want to start with the apex at the taxel (where it would have 0 volume)
+    //but we want to truncate it such that it starts at the height with a specified radius;  
+                     
+    std::vector<IncomingEvent4TaxelPWE> Evnts;    // Stimuli/events nearing the taxel in the taxel's FoR
     parzenWindowEstimator *pwe;     //
 
     /**
@@ -67,13 +70,13 @@ class TaxelPWE : public iCub::skinDynLib::Taxel
     /**
     * Add or remove a sample from the pwe's histogram
     **/
-    bool    addSample(IncomingEvent4TaxelPWE ie);
+    bool addSample(IncomingEvent4TaxelPWE ie);
     bool removeSample(IncomingEvent4TaxelPWE ie);
 
     /**
-    * Check if the input sample is inside the Receptive field (i.e. the cone)
+    * Check if the input sample is inside the Receptive field (a shifted spherical sector)
     **/
-    bool insideFoRCheck(const IncomingEvent4TaxelPWE ie);
+    bool insideRFCheck(const IncomingEvent4TaxelPWE ie);
 
     /**
     * Print Method
@@ -84,14 +87,15 @@ class TaxelPWE : public iCub::skinDynLib::Taxel
     * toString Method
     **/
     std::string toString(int verbosity=0);
-
+    
     /**
     * Resets the parzen window estimator
     **/
     bool resetParzenWindowEstimator();
-
+    
     /**
     * Computes the response of the taxel.
+    * The computed response is stored inside the taxel Resp field.
     **/
     bool computeResponse(double stress_modulation);
 

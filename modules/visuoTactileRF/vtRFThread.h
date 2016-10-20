@@ -106,7 +106,7 @@ protected:
     BufferedPort<Bottle>    skinGuiPortHandR;
 
     BufferedPort<iCub::skinDynLib::skinContactList> *skinPortIn;  // input from the skinManager
-    BufferedPort<yarp::os::Bottle> ppsEventsPortOut;                                             // output for the events
+    BufferedPort<yarp::os::Bottle> ppsEventsPortOut;              // output for the events
     Port dataDumperPortOut;                                       // output for the dataDumper (quick thing)
     yarp::sig::Vector dumpedVector;
 
@@ -256,6 +256,11 @@ protected:
 
     
     /**
+    * Resets vector of remapped events pertaining to the taxel
+    **/
+    void resetTaxelEventVectors();
+    
+    /**
     * Will read encoders (torso and arms) and update arm chains.
     * @return true/false on success failure
     **/
@@ -271,12 +276,12 @@ protected:
     /**
     *
     **/
-    bool projectIncomingEvent();
+    bool projectIncomingEvents();
 
     /**
-    *
+    * Creates aggregated PPS activation for every skin part and sends it out to pps event out port.
     **/
-    void manageSkinEvents();
+    void managePPSevents();
 
     /**
     * For all the skinParts, process the response according to the inputEvent and parse them properly before sending them to the

@@ -104,14 +104,13 @@ bool vtRFThread::threadInit()
         ts.update();
 
         stress = 0.0;
-
+        jntsT = 3; //nr torso joints
     /********** Open right arm interfaces (if they are needed) ***************/
         if (rf->check("rightHand") || rf->check("rightForeArm") ||
            (!rf->check("rightHand") && !rf->check("rightForeArm") && !rf->check("leftHand") && !rf->check("leftForeArm")))
         {
             for (int i = 0; i < jntsT; i++)
                 armR->releaseLink(i); //torso will be enabled
-
             Property OptR;
             OptR.put("robot",  robot.c_str());
             OptR.put("part",   "right_arm");
@@ -147,7 +146,6 @@ bool vtRFThread::threadInit()
         {
             for (int i = 0; i < jntsT; i++)
                 armL->releaseLink(i); //torso will be enabled
-
             Property OptL;
             OptL.put("robot",  robot.c_str());
             OptL.put("part",   "left_arm");
@@ -243,7 +241,7 @@ bool vtRFThread::threadInit()
                 iCubSkin.push_back(sP);
             }
         }
-        load();
+        load(); //here the representation params (bins, extent etc.) will be loaded and set to the pwe of every taxel
 
         yInfo("iCubSkin correctly instantiated. Size: %lu",iCubSkin.size());
 
@@ -278,7 +276,7 @@ void vtRFThread::run()
     {
         stress = stressBottle->get(0).asDouble();
         yAssert((stress>=0.0) && (stress<=1.0));
-        yDebug("vtRFThread::run() reading %f stress value from port.\n",stress);
+        printMessage(3,"vtRFThread::run() reading %f stress value from port.\n",stress);
     }
     else
         stress = 0.0;
@@ -302,19 +300,26 @@ void vtRFThread::run()
         // and it did not pass more than 0.2 seconds from the last data, let's use that
         if ((yarp::os::Time::now() - timeNow <= 0.2) && incomingEvents.size()>0)
         {
-            Bottle &b = inputEvents.addList();
-            b = incomingEvents.back().toBottle();
+            for(std::vector<IncomingEvent>::iterator it = incomingEvents.begin(); it!=incomingEvents.end(); it++)
+            {
+                Bottle &b = inputEvents.addList();
+                b = it->toBottle(); 
+            }
+            printMessage(4,"Assigned %s to inputEvents from memory.\n",inputEvents.toString().c_str());    
         }
     }
     else
     {
         timeNow     = yarp::os::Time::now();
-        inputEvents = *event;
+        inputEvents = *event; //we assign what we just read from the port 
+        printMessage(4,"Read %s from events port.\n",event->toString().c_str());
     }
-
+    //otherwise, inputEvents remains empty
+    
     ts.update();
     incomingEvents.clear();
-
+    resetTaxelEventVectors();
+    
     // process the port coming from the visuoTactileWrapper
     if (inputEvents.size() != 0)
     {
@@ -333,8 +338,9 @@ void vtRFThread::run()
         }
         else
         {
-            eventsBuffer.push_back(incomingEvents.back());
-            yDebug("I'm buffering! Size %lu",eventsBuffer.size());
+            eventsBuffer.push_back(incomingEvents.back()); //! the buffering and hence the learning is working only for the last event in the vector
+            //!so learning should be done with one stimulus only
+            printMessage(2,"I'm buffering inputs (taking last event from stack)! Buffer size %lu \n",eventsBuffer.size());
         }
 
         // limit the size of the buffer to 80, i.e. 4 seconds of acquisition
@@ -417,12 +423,28 @@ void vtRFThread::run()
 
     if (incomingEvents.size()>0)
     {
-        projectIncomingEvent();     // project event onto the taxels' RF
-        computeResponse(stress);          // compute the response of each taxel
+        projectIncomingEvents();     // project event onto the taxels' FoR and add them to taxels' representation
+        // only if event lies inside taxel's RF 
+
+        //should keep backwards compatibility with the dumpedVector format
+        //it will currently dump only the last event of the possibly multiple events
+        //TODO check whether this should be preserved or modified - output is cryptic, order of taxels needs to be known
+        for (int i = 0; i < iCubSkinSize; i++)
+            for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
+                if(!(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j]))->Evnts.empty())
+                {
+                    //Ale: There's a reason behind this choice
+                    //Matej: What does that mean?
+                    dumpedVector.push_back((dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j]))->Evnts.back().Pos[0]);
+                    dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnts.back().Pos[1]);
+                    dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnts.back().Pos[2]);
+                }
+
+        computeResponse(stress);    // compute the response of each taxel
     }
 
-    sendContactsToSkinGui();        // self explicative
-    manageSkinEvents();
+    sendContactsToSkinGui();       
+    managePPSevents();
 
     // manage the dumped port
     if (dumpedVector.size()>0)
@@ -436,7 +458,7 @@ void vtRFThread::run()
     }
 }
 
-void vtRFThread::manageSkinEvents()
+void vtRFThread::managePPSevents()
 {
     // main/src/modules/skinManager/src/compensationThread.cpp:250
     vector <int> taxelsIDs;
@@ -488,7 +510,7 @@ void vtRFThread::manageSkinEvents()
                         if (iCubSkin[i].taxels[p]->getID() == taxelsIDs[k])
                         {
                             w = dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[p])->Resp;
-                            printMessage(4,"part %s: pps taxel ID %d, pos (%s), activation: %f\n",part.c_str(),taxelsIDs[k],iCubSkin[i].taxels[p]->getPosition().toString().c_str(),w);
+                            printMessage(4,"part %s: pps taxel ID %d, pos (%s), activation: %.2f\n",part.c_str(),taxelsIDs[k],iCubSkin[i].taxels[p]->getPosition().toString(3,3).c_str(),w);
                             //The final geoCenter and normalDir will be a weighted average of the activations
                             geoCenter += iCubSkin[i].taxels[p]->getPosition()*w; //Matej, 24.2., changing convention - link not Root FoR
                             normalDir += iCubSkin[i].taxels[p]->getNormal()*w;
@@ -687,11 +709,12 @@ string vtRFThread::load()
             bbb = bb.find("ext").asList();
             if (modality=="1D")
             {
-                ext = matrixFromBottle(*bbb,0,1,2);
+                ext = matrixFromBottle(*bbb,0,1,2); //e.g.  ext  (-0.1 0.2) ~ (min max) will become [-0.1 0.2]
             }
             else
             {
-                ext = matrixFromBottle(*bbb,0,2,2);
+                ext = matrixFromBottle(*bbb,0,2,2); //e.g. (-0.1 0.2 0.0 1.2) ~ (min_distance max_distance min_TTC max_TTC) 
+                //will become [min_distance max_distance ; min_TTC max_TTC] 
             }
 
             bbb = bb.find("binsNum").asList();
@@ -825,15 +848,22 @@ bool vtRFThread::trainTaxels(const std::vector<unsigned int> IDv, const int IDx)
 
         for (size_t k = 0; k < eventsBuffer.size(); k++)
         {
-            IncomingEvent4TaxelPWE projection = projectIntoTaxelRF(iCubSkin[IDx].taxels[j]->getFoR(),T_a,eventsBuffer[k]);
-            printMessage(3,"Training Taxels: skinPart %d ID %i k %i NORM %g TTC %g\n",IDx,iCubSkin[IDx].taxels[j]->getID(),k,projection.NRM,projection.TTC);
-
-            if (itHasBeenTouched == true)  dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->addSample(projection);
-            else                           dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->removeSample(projection);
+            IncomingEvent4TaxelPWE projection = projectIntoTaxelRF(iCubSkin[IDx].taxels[j]->getFoR(),T_a,eventsBuffer[k]); //project's into taxel RF and subtracts object radius from z pos in the new frame
+            if(dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->insideRFCheck(projection)){ //events outside of taxel's RF will not be used for learning
+                if (itHasBeenTouched == true){ 
+                    printMessage(2,"Training taxel - positive sample: skinPart %d ID %i k (index in buffer) %i NORM %g TTC %g\n",IDx,iCubSkin[IDx].taxels[j]->getID(),k,projection.NRM,projection.TTC);
+                    dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->addSample(projection);
+                    dumpedVector.push_back(1.0);
+                }
+                else{
+                    printMessage(2,"Training taxel - negative sample: skinPart %d ID %i k (index in buffer) %i NORM %g TTC %g\n",IDx,iCubSkin[IDx].taxels[j]->getID(),k,projection.NRM,projection.TTC);
+                    dynamic_cast<TaxelPWE*>(iCubSkin[IDx].taxels[j])->removeSample(projection);  
+                    dumpedVector.push_back(-1.0);
+                }
+            }
+            else
+                printMessage(3,"Not training taxel: event outside RF\n");
         }
-
-        if (itHasBeenTouched == true)   dumpedVector.push_back(1.0);
-        else                            dumpedVector.push_back(-1.0);
     }
 
     return true;
@@ -843,6 +873,7 @@ bool vtRFThread::readEncodersAndUpdateArmChains()
 {    
    Vector q1(jntsT+jntsAR,0.0);
    Vector q2(jntsT+jntsAL,0.0);
+       
    iencsT->getEncoders(encsT->data());
    qT[0]=(*encsT)[2]; //reshuffling from motor to iKin order (yaw, roll, pitch)
    qT[1]=(*encsT)[1];
@@ -866,6 +897,7 @@ bool vtRFThread::readEncodersAndUpdateArmChains()
         q2.setSubvector(jntsT,qL);
         armL -> setAng(q2*CTRL_DEG2RAD);
    }
+     
    return true;
 }
 
@@ -885,11 +917,13 @@ bool vtRFThread::readHeadEncodersAndUpdateEyeChains()
     //right eye
     q[7]=head[4]-head[5]/2.0;
     eWR->eye->setAng(q*CTRL_DEG2RAD);
+    
+    return true;
 }
 
-bool vtRFThread::projectIncomingEvent()
+bool vtRFThread::projectIncomingEvents()
 {
-    for (size_t k = 0; k < incomingEvents.size(); k++)
+    for (vector<IncomingEvent>::const_iterator it = incomingEvents.begin() ; it != incomingEvents.end(); it++)
     {
         for (int i = 0; i < iCubSkinSize; i++)
         {
@@ -912,19 +946,24 @@ bool vtRFThread::projectIncomingEvent()
                 yError("[vtRFThread] in projectIncomingEvent!\n");
 
             // yInfo("T_A:\n%s",T_a.toString().c_str());
-            printMessage(5,"\nProject incoming event %s onto %s taxels\n",incomingEvents.back().toString().c_str(),iCubSkin[i].name.c_str());
-
+            printMessage(5,"\nProject incoming event %s \t onto %s taxels\n",it->toString().c_str(),iCubSkin[i].name.c_str());
+            IncomingEvent4TaxelPWE projEvent; 
             for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
             {
-                dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt=projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,
-                    incomingEvents[k]); //here every taxel (TaxelPWE) is updated with the event - if it is relevant for it
+                printMessage(6,"    Projecting onto taxel %d (Pos in Root FoR: %s Pos in local FoR: %s).\n",iCubSkin[i].taxels[j]->getID(),
+                             iCubSkin[i].taxels[j]->getWRFPosition().toString().c_str(),
+                             iCubSkin[i].taxels[j]->getPosition().toString().c_str());
+                projEvent = projectIntoTaxelRF(iCubSkin[i].taxels[j]->getFoR(),T_a,(*it)); //project's into taxel RF and subtracts object radius from z pos in the new frame
+                printMessage(6,"\tProjected event: %s\n",projEvent.toString().c_str());
+                if(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->insideRFCheck(projEvent)) ////events outside of taxel's RF will not be added
+                {
+                    dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnts.push_back(projEvent); //here every taxel (TaxelPWE) is updated with the events
+                    printMessage(6,"\tLies inside RF - pushing to taxelPWE.Events.\n");
+                }
+                else
+                    printMessage(6,"\tLies outside RF.\n");
 
-                // There's a reason behind this choice
-                dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[0]);
-                dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[1]);
-                dumpedVector.push_back(dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.Pos[2]);
-
-                printMessage(5,"Repr. taxel ID %i\tEvent: %s\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.toString().c_str());
+                //printMessage(5,"Repr. taxel ID %i\tEvent: %s\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Evnt.toString().c_str());
             }
         }
     }
@@ -945,12 +984,21 @@ IncomingEvent4TaxelPWE vtRFThread::projectIntoTaxelRF(const Matrix &RF,const Mat
 
     if (e.Radius != -1.0)
     {
-        Event_projected.Pos(2) -= Event_projected.Radius;
+        Event_projected.Pos(2) -= Event_projected.Radius; //considering the radius, this brings the object closer in z  by the radius
+        //for the rest of the calculations (in particular in x,y), the object is treated as a point
     }
 
     Event_projected.computeNRMTTC();
 
     return Event_projected;
+}
+
+void vtRFThread::resetTaxelEventVectors()
+{
+    printMessage(4,"[vtRFThread::resetTaxelEventVectors()]\n");
+    for (int i = 0; i < iCubSkinSize; i++)
+        for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
+            (dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j]))->Evnts.clear();        
 }
 
 void vtRFThread::resetParzenWindows()
@@ -966,14 +1014,14 @@ void vtRFThread::resetParzenWindows()
 
 bool vtRFThread::computeResponse(double stress_modulation)
 {
-    printMessage(4,"Taxel responses:\n");
+    printMessage(4,"\n\n *** [vtRFThread::computeResponse] Taxel responses ***:\n");
     for (int i = 0; i < iCubSkinSize; i++)
     {
-        printMessage(4,"%s \n",iCubSkin[i].name.c_str());
+        printMessage(4,"\n ** %s ** \n",iCubSkin[i].name.c_str());
         for (size_t j = 0; j < iCubSkin[i].taxels.size(); j++)
         {
             dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->computeResponse(stress_modulation);
-            printMessage(4,"\t Representative ID %i\tResponse %f (with stress modulation:%f)\n",j,dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp,stress_modulation);
+            printMessage(4,"\t %ith (ID: %d) %s taxel response %.2f (with stress modulation:%.2f)\n",j,iCubSkin[i].taxels[j]->getID(),iCubSkin[i].name.c_str(),dynamic_cast<TaxelPWE*>(iCubSkin[i].taxels[j])->Resp,stress_modulation);
         }
     }
 
@@ -1145,6 +1193,7 @@ yarp::sig::Vector vtRFThread::locateTaxel(const yarp::sig::Vector &_pos, const s
     yarp::sig::Vector WRFpos(4,0.0);
     Matrix T = eye(4);
 
+    //printMessage(7,"locateTaxel(): Pos local frame: %s, skin part name: %s\n",_pos.toString(3,3).c_str(),part.c_str());
     if (!((part == SkinPart_s[SKIN_LEFT_FOREARM]) || (part == SkinPart_s[SKIN_LEFT_HAND]) ||
          (part == SkinPart_s[SKIN_RIGHT_FOREARM]) || (part == SkinPart_s[SKIN_RIGHT_HAND])))
         yError("[vtRFThread] locateTaxel() failed - unknown skinPart!\n");
@@ -1155,6 +1204,7 @@ yarp::sig::Vector vtRFThread::locateTaxel(const yarp::sig::Vector &_pos, const s
     else if (part == SkinPart_s[SKIN_RIGHT_HAND])    { T = armR -> getH(3+6, true); } // torso + up to wrist
     else    {  yError("[vtRFThread] locateTaxel() failed!\n"); }
 
+    //printMessage(8,"    T Matrix: \n %s \n ",T.toString(3,3).c_str());
     pos.push_back(1);
     WRFpos = T * pos;
     WRFpos.pop_back();
@@ -1794,8 +1844,8 @@ int vtRFThread::printMessage(const int l, const char *f, ...) const
 
 void vtRFThread::threadRelease()
 {
-    yDebug("[vtRF::threadRelease]Saving taxels..\n");
-        save();
+    //yDebug("[vtRF::threadRelease]Saving taxels..\n");
+      //  save();
 
     yDebug("[vtRF::threadRelease]Closing controllers..\n");
         ddR.close();

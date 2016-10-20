@@ -89,8 +89,8 @@ struct IncomingEvent
     std::string Src;       // the source of information the event is coming from
     double Threat; //negative valence that may be associated with an object; range <0,1>; 0 should be treated like a neutral object; 1 maximum threat
 
-    double NRM;
-    double TTC;
+    double NRM; // distance of event from taxel with sign (meters) 
+    double TTC; //time to contact (seconds)
 
     /**
     * Constructors
@@ -134,8 +134,8 @@ struct IncomingEvent
 **/
 struct IncomingEvent4TaxelPWE : public IncomingEvent
 {
-    double NRM;
-    double TTC;
+    double NRM; // distance of event from taxel with sign (meters)
+    double TTC; //time to contact (seconds)
 
     /**
     * Constructors
@@ -162,6 +162,17 @@ struct IncomingEvent4TaxelPWE : public IncomingEvent
     */
     std::vector<double> getNRMTTC();
 
+    /**
+     * Return norm (~ distance in meters with sign)
+    */
+    double getNRM();
+
+    /**
+     * Return time to contact (in seconds)
+    */
+    double getTTC();
+
+    
     /**
     * Print Method
     **/
