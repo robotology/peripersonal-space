@@ -1922,8 +1922,8 @@ int vtRFThread::printMessage(const int l, const char *f, ...) const
 
 void vtRFThread::threadRelease()
 {
-    //yDebug("[vtRF::threadRelease]Saving taxels..\n");
-      //  save();
+    yDebug("[vtRF::threadRelease]Saving taxels..\n");
+        save();
 
     yDebug("[vtRF::threadRelease]Closing controllers..\n");
         ddR.close();
