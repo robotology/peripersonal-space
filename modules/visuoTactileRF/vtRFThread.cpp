@@ -1224,12 +1224,15 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
     string filename = strrchr(filePath.c_str(), '/');
     filename = filename.c_str() ? filename.c_str() + 1 : filePath.c_str();
 
-    if      (filename == "left_forearm_mesh.txt")    { sP.name = SkinPart_s[SKIN_LEFT_FOREARM]; }
-    else if (filename == "left_forearm_nomesh.txt")  { sP.name = SkinPart_s[SKIN_LEFT_FOREARM]; }
-    else if (filename == "right_forearm_mesh.txt")   { sP.name = SkinPart_s[SKIN_RIGHT_FOREARM]; }
-    else if (filename == "right_forearm_nomesh.txt") { sP.name = SkinPart_s[SKIN_RIGHT_FOREARM]; }
-    else if (filename == "left_hand_V2_1.txt")       { sP.name = SkinPart_s[SKIN_LEFT_HAND]; }
-    else if (filename == "right_hand_V2_1.txt")      { sP.name = SkinPart_s[SKIN_RIGHT_HAND]; }
+    // Assign the name and version of the skinPart according to the filename (hardcoded)
+    if      (filename == "left_forearm_mesh.txt")    { sP.setName(SkinPart_s[SKIN_LEFT_FOREARM]);  sP.setVersion("V1");   }
+    else if (filename == "left_forearm_nomesh.txt")  { sP.setName(SkinPart_s[SKIN_LEFT_FOREARM]);  sP.setVersion("V1");   }
+    else if (filename == "left_forearm_V2.txt")      { sP.setName(SkinPart_s[SKIN_LEFT_FOREARM]);  sP.setVersion("V2");   }
+    else if (filename == "right_forearm_mesh.txt")   { sP.setName(SkinPart_s[SKIN_RIGHT_FOREARM]); sP.setVersion("V1");   }
+    else if (filename == "right_forearm_nomesh.txt") { sP.setName(SkinPart_s[SKIN_RIGHT_FOREARM]); sP.setVersion("V1");   }
+    else if (filename == "right_forearm_V2.txt")     { sP.setName(SkinPart_s[SKIN_RIGHT_FOREARM]); sP.setVersion("V2");   }
+    else if (filename == "left_hand_V2_1.txt")       { sP.setName(SkinPart_s[SKIN_LEFT_HAND]);     sP.setVersion("V2_1"); }
+    else if (filename == "right_hand_V2_1.txt")      { sP.setName(SkinPart_s[SKIN_RIGHT_HAND]);    sP.setVersion("V2_1"); }
     else
     {
         yError("[vtRFThread] Unexpected skin part file name: %s.\n",filename.c_str());
@@ -1257,45 +1260,49 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
     }
     printMessage(6,"[vtRFThread::setTaxelPosesFromFile] found %i taxels (not all of them are valid taxels).\n", calibration.size()-1);
 
+    sP.spatial_sampling = "triangle";
     // First item of the bottle is "calibration", so we should not use it
-    for (int i = 1; i < calibration.size()-1; i++)
+    int j = 0; //this will be for the taxel IDs
+    for (int i = 1; i < calibration.size(); i++)
     {
         taxelPosNrm = vectorFromBottle(*(calibration.get(i).asList()),0,6);
         taxelPos = taxelPosNrm.subVector(0,2);
         taxelNrm = taxelPosNrm.subVector(3,5);
-
+        j = i-1;   //! note that i == line in the calibration group of .txt file;  taxel_ID (j) == line nr (i) - 1 
+        printMessage(10,"[vtRFThread::setTaxelPosesFromFile] reading %i th row: taxelPos: %s\n", i,taxelPos.toString(3,3).c_str());
+         
         if (sP.name == SkinPart_s[SKIN_LEFT_FOREARM] || sP.name == SkinPart_s[SKIN_RIGHT_FOREARM])
         {
-            // the taxels at the centers of respective triangles [note that i == taxelID == (line in the .txt file +1)]
-            // e.g. first triangle of upper arm is at lines 1-12, center at line 4, thus i=2
-            if(  (i==3) || (i==15)  ||  (i==27) ||  (i==39) ||  (i==51) ||  (i==63) ||  (i==75) ||  (i==87) ||
-                (i==99) || (i==111) || (i==123) || (i==135) || (i==147) || (i==159) || (i==171) || (i==183) ||
-               (i==207) || (i==255) || (i==291) || (i==303) || (i==315) || (i==339) || (i==351) )
+            // the taxels at the centers of respective triangles  -
+            // e.g. first triangle of forearm arm is at lines 1-12, center at line 4, taxelID = 3           
+            if(  (j==3) || (j==15)  ||  (j==27) ||  (j==39) ||  (j==51) ||  (j==63) ||  (j==75) ||  (j==87) ||
+                (j==99) || (j==111) || (j==123) || (j==135) || (j==147) || (j==159) || (j==171) || (j==183) ||
+               (j==207) || (j==255) || (j==291) || (j==303) || (j==315) || (j==339) || (j==351) )
 
-            // if(  (i==3) ||  (i==39) || (i==207) || (i==255) || (i==291)) // Taxels that are evenly distributed throughout the forearm
+            // if(  (j==3) ||  (j==39) || (j==207) || (j==255) || (j==291)) // Taxels that are evenly distributed throughout the forearm
                                                                          // in order to cover it as much as we can
-            // if(  (i==3) ||  (i==15) ||  (i==27) || (i==183)) // taxels that are in the big patch but closest to the little patch (internally)
+            // if(  (j==3) ||  (j==15) ||  (j==27) || (j==183)) // taxels that are in the big patch but closest to the little patch (internally)
                                                                 // 27 is proximal, 15 next, 3 next, 183 most distal
-            // if((i==135) || (i==147) || (i==159) || (i==171))  // this is the second column, farther away from the stitch
+            // if((j==135) || (j==147) || (j==159) || (j==171))  // this is the second column, farther away from the stitch
                                                                  // 159 is most proximal, 147 is next, 135 next,  171 most distal
-            // if((i==87) || (i==75)  || (i==39)|| (i==51)) // taxels that are in the big patch and closest to the little patch (externally)
+            // if((j==87) || (j==75)  || (j==39)|| (j==51)) // taxels that are in the big patch and closest to the little patch (externally)
             //                                              // 87 most proximal, 75 then, 39 then, 51 distal
 
-            // if((i==27)  || (i==15)  || (i==3)   || (i==183) ||              // taxels used for the experimentations on the pps paper
-            //    (i==135) || (i==147) || (i==159) || (i==171) ||
-            //    (i==87)  || (i==75)  || (i==39)  || (i==51))
+            // if((j==27)  || (j==15)  || (j==3)   || (j==183) ||              // taxels used for the experimentations on the PLOS paper
+            //    (j==135) || (j==147) || (j==159) || (j==171) ||
+            //    (j==87)  || (j==75)  || (j==39)  || (j==51))
 
-            // if((i==27)  || (i==15)  || (i==3)   || (i==183) ||              // taxels used for the experimentations on the IROS paper
-            //    (i==87)  || (i==75)  || (i==39)  || (i==51))
+            // if((j==27)  || (j==15)  || (j==3)   || (j==183) ||              // taxels used for the experimentations on the IROS paper
+            //    (j==87)  || (j==75)  || (j==39)  || (j==51))
             {
                 sP.size++;
                 if (modality=="1D")
                 {
-                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNrm,i));
+                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNrm,j));
                 }
                 else
                 {
-                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNrm,i));
+                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNrm,j));
                 }
             }
             else
@@ -1306,16 +1313,16 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
         else if (sP.name == SkinPart_s[SKIN_LEFT_HAND])
         { //we want to represent the 48 taxels of the palm (ignoring fingertips) with 5 taxels -
          // manually marking 5 regions of the palm and selecting their "centroids" as the representatives
-            if((i==99) || (i==101) || (i==109) || (i==122) || (i==134))
+            if((j==99) || (j==101) || (j==109) || (j==122) || (j==134))
             {
                 sP.size++;
                 if (modality=="1D")
                 {
-                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNrm,i));
+                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNrm,j));
                 }
                 else
                 {
-                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNrm,i));
+                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNrm,j));
                 }
             }
             else
@@ -1325,17 +1332,16 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
         }
         else if (sP.name == SkinPart_s[SKIN_RIGHT_HAND])
         { //right hand has different taxel nr.s than left hand
-            // if((i==101) || (i==103) || (i==118) || (i==137)) // || (i==124)) remove one taxel
-            if((i==101) || (i==103) || (i==118) || (i==137) || (i==124))
+            if((j==101) || (j==103) || (j==118) || (j==137) || (j==124))
             {
                 sP.size++;
                 if (modality=="1D")
                 {
-                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNrm,i));
+                    sP.taxels.push_back(new TaxelPWE1D(taxelPos,taxelNrm,j));
                 }
                 else
                 {
-                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNrm,i));
+                    sP.taxels.push_back(new TaxelPWE2D(taxelPos,taxelNrm,j));
                 }
             }
             else
