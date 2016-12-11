@@ -15,9 +15,14 @@ For a video on the peripersonal space, click on the image below (you will be red
 
 [![peripersonal space video](http://img.youtube.com/vi/3IaXxNwC_7E/0.jpg)](http://www.youtube.com/watch?v=3IaXxNwC_7E)
 
-## Publication
+## Demo
+To demonstrate the functionality of this software - similarly to the above video - you can find instructions under [app/README_DEMO.md](https://github.com/robotology/peripersonal-space/blob/master/app/README_DEMO.md)
 
-Roncone, A.; Hoffmann, M.; Pattacini, U. & Metta, G. (2015), Learning peripersonal space representation through artificial skin for avoidance and reaching with whole body surface, in 'Intelligent Robots and Systems (IROS), 2015 IEEE/RSJ International Conference on', pp. 3366-3373.
+## Publications
+
+Roncone A, Hoffmann M, Pattacini U, Fadiga L, Metta G (2016) Peripersonal Space and Margin of Safety around the Body: Learning Visuo-Tactile Associations in a Humanoid Robot with Artificial Skin. PLoS ONE 11(10): e0163713. [[doi:10.1371/journal.pone.0163713]](http://dx.doi.org/10.1371/journal.pone.0163713).
+
+Roncone, A.; Hoffmann, M.; Pattacini, U. & Metta, G. (2015), Learning peripersonal space representation through artificial skin for avoidance and reaching with whole body surface, in 'Intelligent Robots and Systems (IROS), 2015 IEEE/RSJ International Conference on', pp. 3366-3373. [[IEEE Xplore]](http://dx.doi.org/10.1109/IROS.2015.7353846) [[postprint]](https://sites.google.com/site/matejhof/publications/RonconeEtAl_PPS_IROS2015postprint.pdf?attredirects=0).
 
 ## Repository Structure
 

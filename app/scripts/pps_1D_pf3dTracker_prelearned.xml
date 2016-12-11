@@ -52,6 +52,13 @@
         <tag>PF3DTracker_viewer</tag>
     </module>
 
+     <module>
+        <name>demoAvoidance</name>
+        <parameters></parameters>
+        <node>localhost</node>
+        <stdio></stdio>
+    </module>
+
     <!--module>
         <name></name>
         <parameters></parameters>
@@ -63,13 +70,13 @@
    
     <connection>
         <from>/visuoTactileRF/pps_events_aggreg:o</from>
-	<to>/ppsAggregEventsForiCubGui/pps_events_aggreg:i</to>
+	    <to>/ppsAggregEventsForiCubGui/pps_events_aggreg:i</to>
         <protocol>udp</protocol>
     </connection>
 
     <connection>
         <from>/ppsAggregEventsForiCubGui/contacts:o</from>
-	<to>/iCubGui/forces</to>
+	    <to>/iCubGui/forces</to>
         <protocol>udp</protocol>
     </connection>
         
@@ -100,7 +107,7 @@
         <protocol>tcp</protocol>
     </connection>
    
-    <connection>
+    <!--connection>
         <from>/icub/camcalib/left/out</from>
         <to>/visuoTactileRF/imageL:i</to>
         <protocol>udp</protocol>
@@ -109,7 +116,7 @@
         <from>/icub/camcalib/right/out</from>
         <to>/visuoTactileRF/imageR:i</to>
         <protocol>udp</protocol>
-    </connection>
+    </connection-->
    
     <connection>
         <from>/visuoTactileWrapper/events:o</from>
@@ -118,26 +125,31 @@
     </connection>
    
     <connection>
-    <from>/visuoTactileRF/skinGuiForearmL:o</from>
+        <from>/visuoTactileRF/skinGuiForearmL:o</from>
         <to>/skinGui/left_forearm_virtual:i</to>
         <protocol>tcp</protocol>
     </connection>
     <connection>
-    <from>/visuoTactileRF/skinGuiForearmR:o</from>
+        <from>/visuoTactileRF/skinGuiForearmR:o</from>
         <to>/skinGui/right_forearm_virtual:i</to>
         <protocol>tcp</protocol>
     </connection>
     <connection>
-    <from>/visuoTactileRF/skinGuiHandL:o</from>
+        <from>/visuoTactileRF/skinGuiHandL:o</from>
         <to>/skinGui/left_hand_virtual:i</to>
         <protocol>tcp</protocol>
     </connection>
     <connection>
-    <from>/visuoTactileRF/skinGuiHandR:o</from>
+        <from>/visuoTactileRF/skinGuiHandR:o</from>
         <to>/skinGui/right_hand_virtual:i</to>
         <protocol>tcp</protocol>
     </connection>
  
+    <connection>
+        <from>/visuoTactileRF/pps_events_aggreg:o</from>
+        <to>/avoidance/data:i</to>
+        <protocol>tcp</protocol>
+    </connection>
 
     <!--connection>
         <from></from>
