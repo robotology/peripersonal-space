@@ -57,7 +57,7 @@ That is robot will reach with activated skin part rather than avoid.
 
 Simplest: start `visuotactileRF` with no taxels file specified. This starts from a blank state. 
 Approach with red ball and touch skin. After a while, you will see green activations.
-The default `.ini` file is `taxels1D.ini`.  If you save using `rpc` (see below), it will be saved there, but this is not strictly necessary for the demo. Default behavior: no saving of learned file.
+The default `.ini` file is `taxels1D.ini`.  If you save using `rpc` (see below) or at module exit it will be saved to `taxels1D_out.ini`.
 
 #### rpc port
 
