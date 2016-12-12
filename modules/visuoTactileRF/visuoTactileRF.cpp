@@ -335,7 +335,7 @@ public:
             gazeRF.setDefaultContext("iKinGazeCtrl");
             robot=="icub"?gazeRF.setDefaultConfigFile("config.ini"):gazeRF.setDefaultConfigFile("configSim.ini");
             gazeRF.configure(0,NULL);
-            double head_version=gazeRF.check("headV2")?2.0:1.0;
+            double head_version=gazeRF.check("head_version",Value(1.0)).asDouble();
 
             ResourceFinder eyeAlignRF;
 
