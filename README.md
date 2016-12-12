@@ -16,7 +16,7 @@ For a video on the peripersonal space, click on the image below (you will be red
 [![peripersonal space video](http://img.youtube.com/vi/3IaXxNwC_7E/0.jpg)](http://www.youtube.com/watch?v=3IaXxNwC_7E)
 
 ## Demo
-To demonstrate the functionality of this software - similarly to the above video - you can find instructions under [app/README_DEMO.md](https://github.com/robotology/peripersonal-space/blob/master/app/README_DEMO.md)
+To demonstrate the functionality of this software - similarly to the above video - you can find instructions under [app/README.md](https://github.com/robotology/peripersonal-space/blob/master/app/README.md)
 
 ## Publications
 
