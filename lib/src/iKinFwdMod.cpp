@@ -1162,7 +1162,7 @@ using namespace iCub::ctrl;
         for (unsigned int j=0; j<=i; j++)
         {
             Z=intH[j];
-            w=cross(Z,2,PN-Z,3,verbose);
+            w=cross(Z,2,PN-Z,3);
 
             J(0,j)=w[0];
             J(1,j)=w[1];
@@ -1209,7 +1209,7 @@ using namespace iCub::ctrl;
             else
                 Z=intH[j];
 
-            w=cross(Z,2,PN-Z,3,verbose);
+            w=cross(Z,2,PN-Z,3);
 
             J(0,i)=w[0];
             J(1,i)=w[1];
