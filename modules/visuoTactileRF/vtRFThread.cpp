@@ -21,7 +21,7 @@ IncomingEvent eventFromBottle(const Bottle &b)
 
 vtRFThread::vtRFThread(int _rate, const string &_name, const string &_robot, const string &_modality,
                        int _v, const ResourceFinder &_moduleRF, vector<string> _fnames,
-                       double _hV, const ResourceFinder &_eyeCalibRF) :
+                       double _hV, double _armV, const ResourceFinder &_eyeCalibRF) :
                        RateThread(_rate), name(_name), robot(_robot), modality(_modality),
                        verbosity(_v), filenames(_fnames)
 {
@@ -34,9 +34,17 @@ vtRFThread::vtRFThread(int _rate, const string &_name, const string &_robot, con
         skinPortIn    = new BufferedPort<iCub::skinDynLib::skinContactList>;
 
     //******************* ARMS, EYEWRAPPERS ******************
-        armR = new iCubArm("right");
-        armL = new iCubArm("left");
-
+        
+        std::ostringstream strR;
+        strR<<"right_v"<<_armV;
+        std::string typeR = strR.str();
+        armR = new iCubArm(typeR);
+        
+        std::ostringstream strL;
+        strL<<"left_v"<<_armV;
+        std::string typeL = strL.str();
+        armL = new iCubArm(typeL);
+              
         eWR  = new eyeWrapper("right",_hV,_eyeCalibRF);
         eWL  = new eyeWrapper("left", _hV,_eyeCalibRF);
 

@@ -327,7 +327,7 @@ public:
     // CONSTRUCTOR
     vtRFThread(int _rate, const string &_name, const string &_robot, const string &_modality,
                int _v, const ResourceFinder &_moduleRF, vector<string> _fnames,
-               double _hV, const ResourceFinder &_eyeCalibRF);
+               double _hV, double _armV, const ResourceFinder &_eyeCalibRF);
     // INIT
     virtual bool threadInit();
     // RUN

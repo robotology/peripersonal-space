@@ -266,7 +266,7 @@ public:
             skinRF.setDefaultContext("skinGui");                //overridden by --context parameter
             skinRF.setDefaultConfigFile("skinManAll.ini"); //overridden by --from parameter
             skinRF.configure(0,NULL);
-
+            
             vector<string> filenames;
             //int partNum=4;
 
@@ -404,7 +404,7 @@ public:
             if( filenames.size() > 0 )
             {
                 vtRFThrd = new vtRFThread(rate, name, robot, modality, verbosity, rf,
-                                          filenames, head_version, eyeAlignRF);
+                                          filenames, head_version, arm_version, eyeAlignRF);
                 if (!vtRFThrd -> start())
                 {
                     delete vtRFThrd;
@@ -473,7 +473,8 @@ int main(int argc, char * argv[])
         yInfo("  --from       from:   the name of the .ini file (default visuoTactileRF.ini).");
         yInfo("  --name       name:   the name of the module (default visuoTactileRF).");
         yInfo("  --robot      robot:  the name of the robot. Default icub.");
-        yInfo("  --rate       rate:   the period used by the thread. Default 50ms.");
+        yInfo("  --arm_version   arm_version:  arm kinematics version. Default 2.0 for icub, 1.0 for icubSim.");
+        yInfo("  --rate       rate:   the period used by the thread. Default 20ms.");
         yInfo("  --verbosity  int:    verbosity level (default 0).");
         yInfo("  --modality   string: which modality to use (either 1D or 2D, default 1D).");
         yInfo("  --taxelsFile string: the file from which load and save taxels' PPS representations. Defaults:");
