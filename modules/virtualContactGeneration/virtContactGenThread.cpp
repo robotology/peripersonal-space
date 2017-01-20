@@ -7,11 +7,13 @@ int virtContactGenerationThread::initSkinParts()
 {
     SkinPart skin_part_name; 
     int OFFSET = 4; //the taxel pos files have as of May 2015 first 4 lines with metainfo
+    // enhancement - would be better to rely on ResourceFinder to read the [calibration] group as in vtRFThread.cpp
        
     string line;
     ifstream posFile;
     yarp::sig::Vector taxelPos(3,0.0);
     yarp::sig::Vector taxelNorm(3,0.0);
+    string skinVersion = "";
    
     string filename; 
     //go through skin parts and initialize them
@@ -24,9 +26,28 @@ int virtContactGenerationThread::initSkinParts()
         posFile.open(skinPartPosFilePaths[skin_part_name].c_str());  
         if (!posFile.is_open())
         {
-           yWarning("[virtContactGenerationThread] File %s has not been opened!",skinPartPosFilePaths[skin_part_name].c_str());
+           yError("[virtContactGenerationThread] File %s has not been opened!",skinPartPosFilePaths[skin_part_name].c_str());
            return false;
         }
+        
+        // Assign the version of the skinPart according to the filename (hardcoded)
+        if      ((skinPartPosFilePaths[skin_part_name].find("left_forearm_mesh.txt") != std::string::npos) ||
+                 (skinPartPosFilePaths[skin_part_name].find("left_forearm_nomesh.txt") != std::string::npos) || 
+                 (skinPartPosFilePaths[skin_part_name].find("right_forearm_mesh.txt") != std::string::npos) || 
+                 (skinPartPosFilePaths[skin_part_name].find("right_forearm_nomesh.txt") != std::string::npos) )  
+            skinVersion="V1";   
+        else if ((skinPartPosFilePaths[skin_part_name].find("left_forearm_V2.txt") != std::string::npos) ||
+                (skinPartPosFilePaths[skin_part_name].find("right_forearm_V2.txt") != std::string::npos))
+            skinVersion="V2";
+        else if ((skinPartPosFilePaths[skin_part_name].find("left_hand_V2_1.txt") != std::string::npos) ||
+                  (skinPartPosFilePaths[skin_part_name].find("right_hand_V2_1.txt") != std::string::npos) )  
+            skinVersion = "V2.1";
+        else
+        {
+            yError("[virtContactGenerationThread] Unexpected skin part file name: %s.\n",skinPartPosFilePaths[skin_part_name].c_str());
+            return false;
+        }
+          
         printMessage(4,"[virtContactGenerationThread] Initializing %s from %s.\n",
                         SkinPart_s[skin_part_name].c_str(),skinPartPosFilePaths[skin_part_name].c_str());
         posFile.clear(); 
@@ -80,7 +101,6 @@ int virtContactGenerationThread::initSkinParts()
                 
             case SKIN_LEFT_FOREARM:
             case SKIN_RIGHT_FOREARM:
-
                 for(int i= 0; getline(posFile,line); i++)
                 {
                     line.erase(line.find_last_not_of(" \n\r\t")+1);
@@ -99,6 +119,7 @@ int virtContactGenerationThread::initSkinParts()
                     skinPartWithTaxels.setSize(skinPartWithTaxels.getSize()+1); //this is incremented for all lines - size of "port"
 
                     if((i>=0+OFFSET) && (i<=191+OFFSET)) //first patch - full one, 16 triangles, lower part of forearm (though in Marco's files, it is called upper)
+                    //this patch is identical for V1 and V2 skin (though calibration from taxel pos files is different)
                     {
                         if( (((i-OFFSET) % 12) != 6) && (((i-OFFSET) % 12) != 10))
                         { //every 7th and 11th taxel of a triangle are thermal pads  
@@ -108,45 +129,64 @@ int virtContactGenerationThread::initSkinParts()
                         }
                     }
                     else if((i>=192+OFFSET) && (i<=383+OFFSET))
-                    { //second patch - 7 triangles in skin V1, upper part of forearm (though in Marco's files, it is called lower)
-                        if( ((i>=204+OFFSET) && (i<=215+OFFSET)) && (i!=204+6+OFFSET) && (i!=204+10+OFFSET))
-                        { //first triangle without thermal pads
+                    { //second patch -  upper part of forearm (though in Marco's files, it is called lower)
+                        //7 triangles in skin V1, //8 triangles - partially different IDs, in V2
+                        if( (skinVersion=="V2") && ((i>=192+OFFSET) && (i<=203+OFFSET)) && (i!=192+6+OFFSET) && (i!=203+10+OFFSET))
+                        { //first V2 triangle without thermal pads
                             skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,i-OFFSET));
                             printMessage(10,"[virtContactGenerationThread]Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",
                                              i-OFFSET,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
                         }
-                        else  if( ((i>=252+OFFSET) && (i<=263+OFFSET)) && (i!=252+6+OFFSET) && (i!=252+10+OFFSET))
-                        { //2nd triangle without thermal pads
+                        if( ((i>=204+OFFSET) && (i<=215+OFFSET)) && (i!=204+6+OFFSET) && (i!=204+10+OFFSET))
+                        { //first V1 triangle / 2nd V2 triangle without thermal pads
+                            skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,i-OFFSET));
+                            printMessage(10,"[virtContactGenerationThread]Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",
+                                             i-OFFSET,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                        }
+                        if( (skinVersion=="V2") && ((i>=228+OFFSET) && (i<=239+OFFSET)) && (i!=228+6+OFFSET) && (i!=239+10+OFFSET))
+                        { //geometrically last V2 triangle without thermal pads
+                            skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,i-OFFSET));
+                            printMessage(10,"[virtContactGenerationThread]Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",
+                                             i-OFFSET,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                        }
+                        else if( (skinVersion=="V1") && ((i>=252+OFFSET) && (i<=263+OFFSET)) && (i!=252+6+OFFSET) && (i!=252+10+OFFSET))
+                        { //geometrically last V1 triangle without thermal pads
+                            skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,i-OFFSET));
+                            printMessage(10,"[virtContactGenerationThread]Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",
+                                             i-OFFSET,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                        }
+                        if( (skinVersion=="V2") && ((i>=264+OFFSET) && (i<=275+OFFSET)) && (i!=264+6+OFFSET) && (i!=275+10+OFFSET))
+                        { //V2 triangle without thermal pads
                             skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,i-OFFSET));
                             printMessage(10,"[virtContactGenerationThread]Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",
                                              i-OFFSET,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
                         }
                         else if( ((i>=288+OFFSET) && (i<=299+OFFSET)) && (i!=288+6+OFFSET) && (i!=288+10+OFFSET))
-                        { //3rd triangle without thermal pads
+                        { //triangle without thermal pads
                             skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,i-OFFSET));
                             printMessage(10,"[virtContactGenerationThread]Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",
                                              i-OFFSET,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
                         }
                         else if( ((i>=300+OFFSET) && (i<=311+OFFSET)) && (i!=300+6+OFFSET) && (i!=300+10+OFFSET))
-                        { //4th triangle without thermal pads
+                        { //triangle without thermal pads
                             skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,i-OFFSET));
                             printMessage(10,"[virtContactGenerationThread]Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",
                                              i-OFFSET,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
                         }
-                        else if( ((i>=312+OFFSET) && (i<=323+OFFSET)) && (i!=312+6+OFFSET) && (i!=312+10+OFFSET))
-                        { //5th triangle without thermal pads
+                        else if( (skinVersion=="V1") && ((i>=312+OFFSET) && (i<=323+OFFSET)) && (i!=312+6+OFFSET) && (i!=312+10+OFFSET))
+                        { //V1 triangle without thermal pads
                             skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,i-OFFSET));
                             printMessage(10,"[virtContactGenerationThread]Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",
                                              i-OFFSET,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
                         }
                         else if( ((i>=336+OFFSET) && (i<=347+OFFSET)) && (i!=336+6+OFFSET) && (i!=336+10+OFFSET))
-                        { //6th triangle without thermal pads
+                        { //triangle without thermal pads
                             skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,i-OFFSET));
                             printMessage(10,"[virtContactGenerationThread]Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",
                                              i-OFFSET,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
                         }
                         else if( ((i>=348+OFFSET) && (i<=359+OFFSET)) && (i!=348+6+OFFSET) && (i!=348+10+OFFSET))
-                        { //7th triangle without thermal pads
+                        { //triangle without thermal pads
                             skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,i-OFFSET));
                             printMessage(10,"[virtContactGenerationThread]Pushing taxel ID:%d, pos:%f %f %f; norm:%f %f %f.\n",
                                              i-OFFSET,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
