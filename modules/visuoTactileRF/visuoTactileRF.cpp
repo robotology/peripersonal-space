@@ -38,7 +38,7 @@ YARP, ICUB libraries and OPENCV
 - Where to find the called resource.
 
 --from          \e from
-- The name of the .ini file with the configuration parameters.
+- The name of the .ini file with the configuration parameters (default visuoTactileRF.ini).
 
 --name          \e name
 - The name of the module (default visuoTactileRF).
@@ -46,12 +46,19 @@ YARP, ICUB libraries and OPENCV
 --robot         \e rob
 - The name of the robot (either "icub" or "icub"). Default icub.
 
+--arm_version   \e ver
+- Version of the arm kinematics (default: 1.0 for robot==icubSim; 2.0 for robot==icub). 
+
 --rate          \e rate
 - The period used by the thread. Default 100ms.
 
 --taxelsFile    \e file
-- The name of the file the receptive fields are gonna be saved in (and loaded from).
-  Default 'taxels1D.ini' if modality is 1D, otherwise 'taxels2D.ini'.
+- The name of the file from which a learned peripersonal space representation will be loaded from.
+  Default 'taxels1D.ini' if modality is 1D, otherwise 'taxels2D.ini'. 
+  Saving will by default be into [file]_out.ini
+  
+--verbosity     \e verb
+- verbosity level
 
 \section portsc_sec Ports Created
 - <i> /<name>/contacts:i </i> it reads the skinContacts from the skinManager.
@@ -68,7 +75,7 @@ None.
 \section tested_os_sec Tested OS
 Linux (Ubuntu 12.04, Ubuntu 14.04, Debian Squeeze, Debian Wheezy).
 
-\author: Alessandro Roncone
+\authors: Alessandro Roncone, Matej Hoffmann
 */ 
 
 #include <yarp/os/all.h>
@@ -107,6 +114,7 @@ private:
 
     string robot,name,modality;
     int verbosity,rate;
+    double arm_version;
 
 public:
     visuoTactileRF()
@@ -215,6 +223,18 @@ public:
                 yInfo("Robot is %s", robot.c_str());
             }
             else yInfo("Could not find robot option in the config file; using %s as default",robot.c_str());
+            
+        //******************* ARM VERSION ******************
+            if(robot == "icub")
+                arm_version = 2.0;
+            else //icubSim
+                arm_version = 1.0;
+            if (rf.check("arm_version"))
+            {
+                arm_version = rf.find("arm_version").asDouble();
+                yInfo("Setting arm version to %f", arm_version);
+            }
+            else yInfo("Could not find arm_version option in the config file; using %f as default for this robot type",arm_version);    
 
         //***************** MODALITY *****************
             if (rf.check("modality"))
@@ -240,27 +260,27 @@ public:
             }
             else yInfo("Could not find rate in the config file; using %i ms as default",rate);
 
-        //************* skinTaxels' Resource finder **************
+        //************* skinManager Resource finder **************
             ResourceFinder skinRF;
             skinRF.setVerbose(false);
             skinRF.setDefaultContext("skinGui");                //overridden by --context parameter
-            skinRF.setDefaultConfigFile("skinManForearms.ini"); //overridden by --from parameter
+            skinRF.setDefaultConfigFile("skinManAll.ini"); //overridden by --from parameter
             skinRF.configure(0,NULL);
-
+            
             vector<string> filenames;
-            int partNum=4;
+            //int partNum=4;
 
             Bottle &skinEventsConf = skinRF.findGroup("SKIN_EVENTS");
             if(!skinEventsConf.isNull())
             {
                 yInfo("SKIN_EVENTS section found\n");
 
-                if(skinEventsConf.check("skinParts"))
+                /*if(skinEventsConf.check("skinParts"))
                 {
                     Bottle* skinPartList = skinEventsConf.find("skinParts").asList();
                     partNum=skinPartList->size();
-                }
-
+                }*/
+                // the code below relies on a fixed ordre of taxel pos files in skinManAll.ini
                 if(skinEventsConf.check("taxelPositionFiles"))
                 {
                     Bottle *taxelPosFiles = skinEventsConf.find("taxelPositionFiles").asList();
@@ -273,7 +293,7 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                yInfo("[visuoTactileRF] filePath [%i] %s\n",0,filePath.c_str());
+                                yInfo("[visuoTactileRF] filePath leftHand: %s\n",filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
@@ -283,49 +303,73 @@ public:
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                yInfo("[visuoTactileRF] filePath [%i] %s\n",1,filePath.c_str());
+                                yInfo("[visuoTactileRF] filePath leftForeArm: %s\n",filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
                         if (rf.check("rightHand"))
                         {
-                            string taxelPosFile = taxelPosFiles->get(2).asString().c_str();
+                            string taxelPosFile = taxelPosFiles->get(3).asString().c_str();
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                yInfo("[visuoTactileRF] filePath [%i] %s\n",2,filePath.c_str());
+                                yInfo("[visuoTactileRF] filePath rightHand: %s\n",filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
                         if (rf.check("rightForeArm"))
                         {
-                            string taxelPosFile = taxelPosFiles->get(3).asString().c_str();
+                            string taxelPosFile = taxelPosFiles->get(4).asString().c_str();
                             string filePath(skinRF.findFile(taxelPosFile.c_str()));
                             if (filePath!="")
                             {
-                                yInfo("[visuoTactileRF] filePath [%i] %s\n",3,filePath.c_str());
+                                yInfo("[visuoTactileRF] filePath rightForeArm: %s\n",filePath.c_str());
                                 filenames.push_back(filePath);
                             }
                         }
                     }
                     else
                     {
-                        for(int i=0;i<partNum;i++)     // all of the skinparts
+                        string taxelPosFile = taxelPosFiles->get(0).asString().c_str();
+                        string filePath(skinRF.findFile(taxelPosFile.c_str()));
+                        if (filePath!="")
                         {
-                            string taxelPosFile = taxelPosFiles->get(i).asString().c_str();
-                            string filePath(skinRF.findFile(taxelPosFile.c_str()));
-                            if (filePath!="")
-                            {
-                                yInfo("[visuoTactileRF] filePath [%i] %s\n",i,filePath.c_str());
-                                filenames.push_back(filePath);
-                            }
+                            yInfo("[visuoTactileRF] filePath leftHand: %s\n",filePath.c_str());
+                            filenames.push_back(filePath);
                         }
+                        taxelPosFile.clear(); filePath.clear();
+                        
+                        taxelPosFile = taxelPosFiles->get(1).asString().c_str();
+                        filePath = skinRF.findFile(taxelPosFile.c_str());
+                        if (filePath!="")
+                        {
+                            yInfo("[visuoTactileRF] filePath leftForeArm: %s\n",filePath.c_str());
+                            filenames.push_back(filePath);
+                        }
+                        taxelPosFile.clear(); filePath.clear();
+                        
+                        taxelPosFile = taxelPosFiles->get(3).asString().c_str();
+                        filePath = skinRF.findFile(taxelPosFile.c_str());
+                        if (filePath!="")
+                        {
+                            yInfo("[visuoTactileRF] filePath rightHand: %s\n",filePath.c_str());
+                            filenames.push_back(filePath);
+                        }
+                        taxelPosFile.clear(); filePath.clear();
+                        
+                        taxelPosFile = taxelPosFiles->get(4).asString().c_str();
+                        filePath = skinRF.findFile(taxelPosFile.c_str());
+                        if (filePath!="")
+                        {
+                            yInfo("[visuoTactileRF] filePath rightForeArm: %s\n",filePath.c_str());
+                            filenames.push_back(filePath);
+                        }                        
                     }
                 }
             }
             else
             {
-                yError(" No skin's configuration files found.");
+                yError(" No skin configuration files found.");
                 return 0;
             }
 
@@ -360,7 +404,7 @@ public:
             if( filenames.size() > 0 )
             {
                 vtRFThrd = new vtRFThread(rate, name, robot, modality, verbosity, rf,
-                                          filenames, head_version, eyeAlignRF);
+                                          filenames, head_version, arm_version, eyeAlignRF);
                 if (!vtRFThrd -> start())
                 {
                     delete vtRFThrd;
@@ -429,7 +473,8 @@ int main(int argc, char * argv[])
         yInfo("  --from       from:   the name of the .ini file (default visuoTactileRF.ini).");
         yInfo("  --name       name:   the name of the module (default visuoTactileRF).");
         yInfo("  --robot      robot:  the name of the robot. Default icub.");
-        yInfo("  --rate       rate:   the period used by the thread. Default 50ms.");
+        yInfo("  --arm_version   arm_version:  arm kinematics version. Default 2.0 for icub, 1.0 for icubSim.");
+        yInfo("  --rate       rate:   the period used by the thread. Default 20ms.");
         yInfo("  --verbosity  int:    verbosity level (default 0).");
         yInfo("  --modality   string: which modality to use (either 1D or 2D, default 1D).");
         yInfo("  --taxelsFile string: the file from which load and save taxels' PPS representations. Defaults:");
