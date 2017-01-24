@@ -46,3 +46,7 @@ The modules are located under the `modules` directory. Some of them include:
  * [Alessandro Roncone (@alecive)](https://github.com/alecive)
  * [Matej Hoffmann (@matejhof)](https://github.com/matejhof)
  * [Ugo Pattacini (@pattacini)](https://github.com/pattacini)
+
+## Links to related repositories
+
+ * Visualization and handcrafted PPS generation: https://github.com/towardthesea/PPS-visualization
