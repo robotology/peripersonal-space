@@ -28,7 +28,7 @@
 
     <module>
         <name>visuoTactileRF</name>
-        <parameters>--taxelsFile taxels1D_learnedAll.ini --rate 20</parameters>
+        <parameters>--taxelsFile taxelsFiles/taxels1D_45cmRF_skinV2_perfect_all.ini --rate 20</parameters>
         <node>localhost</node>
         <stdio></stdio>
     </module>
