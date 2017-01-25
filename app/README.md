@@ -11,6 +11,9 @@ Use the main branch of the repository.
 4. `iCubGui`
   * For `iCubGui`, connect everything apart from `/wholeBodyDynamics/contacts:o` `/iCubGui/forces`
 
+Note, for correct operation of the PPS, you need to have the skin of the hands and forearms configured correctly. This pertains in particular to:
+ 1. taxel position files - as per https://github.com/robotology/icub-main/tree/master/app/skinGui/conf/positions - make sure you have the latest ones that are appropriate for your robot in the relevant directories - in particular the left/right_forearm_V2.txt in case you have a V2 skin version robot.
+ 2. `skinManager` configuration, in particular the `skinManAll.ini` (in `icub-main/app/skinGui/conf`). The `taxelPositionFiles` section specifies which taxel positions files will be loaded. For V2 skin, make sure it refers to V2 forearms files.
 
 There are several modalities that can be run with the `visuoTactileRF` software.
 `visuoTactileRF --help`
