@@ -38,7 +38,7 @@ Alternatively, from terminal:
 
 ```[visuoTactileRF --help]```
 
-```visuotactileRF --taxelsFile taxels1D_learnedAll.ini --rate 20```
+```visuotactileRF --taxelsFile taxelsFiles/taxels1D_45cmRF_skinV2_perfect_all.ini --rate 20```
 
 ### Avoidance demo
 
@@ -67,7 +67,7 @@ You can `save`, `load` - from `.ini` file, `reset`, `stop` (learning), `rest` (r
 #### “All in one” demo version
 That is, learning and demonstration.
 
-`visuotactileRF --taxelsFile taxels1D_learned_allButRightForearm.ini`
+`visuotactileRF --taxelsFile taxelsFiles/taxels1D_45cmRF_skinV2_perfect_allButRightForearm.ini`
 
 With this file, there is blank right forearm - so you can show learning there, with correct (already learned responses) for other body parts.
 
