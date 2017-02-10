@@ -21,7 +21,7 @@ vtWThread::vtWThread(int _rate, const string &_name, const string &_robot, int _
 
     fgtTrackerPos.resize(3,0.0);
     fgtTrackerVel.resize(3,0.0);
-    
+
     armR = new iCubArm("right");
     armL = new iCubArm("left");
 
@@ -41,7 +41,7 @@ bool vtWThread::threadInit()
     outPortGui.open(("/"+name+"/gui:o").c_str());
     eventsPort.open(("/"+name+"/events:o").c_str());
     depth2kinPort.open(("/"+name+"/depth2kin:o").c_str());
-    
+
     //Network::connect("/ultimateTracker/Manager/events:o",("/"+name+"/optFlow:i").c_str());
     //Network::connect("/pf3dTracker/data:o",("/"+name+"/pf3dTracker:i").c_str());
     //Network::connect("/SensationManager/objects:o",("/"+name+"/sensManager:i").c_str());
@@ -65,7 +65,7 @@ bool vtWThread::threadInit()
     igaze -> setSaccadesMode(false);
     igaze -> setNeckTrajTime(0.75);
     igaze -> setEyesTrajTime(0.5);
-    
+
     /**************************/
     if (!rf->check("noDoubleTouch"))
     {
@@ -126,7 +126,7 @@ bool vtWThread::threadInit()
     linEst_fgtTracker  = new AWLinEstimator(16,0.05);
 
     timeNow = yarp::os::Time::now();
-    
+
     return true;
 }
 
@@ -169,7 +169,7 @@ void vtWThread::run()
         {
             yDebug("Computing data from the optFlowTracker %g\n",getEstUsed());
             optFlowPos.zero();
-            
+
             optFlowPos[0]=optFlowBottle->get(0).asDouble();
             optFlowPos[1]=optFlowBottle->get(1).asDouble();
             optFlowPos[2]=optFlowBottle->get(2).asDouble();
@@ -200,7 +200,7 @@ void vtWThread::run()
                     yDebug("Computing data from the pf3dTracker %g\n",getEstUsed());
                     Vector x,o;
                     igaze->getLeftEyePose(x,o);
-                    
+
                     Matrix T=axis2dcm(o);
                     T(0,3)=x[0];
                     T(1,3)=x[1];
@@ -208,17 +208,17 @@ void vtWThread::run()
 
                     pf3dTrackerPos=T*fp;
                     pf3dTrackerPos.pop_back();
-                    
+
                     AWPolyElement el(pf3dTrackerPos,Time::now());
                     pf3dTrackerVel=linEst_pf3dTracker->estimate(el);
-                    
+
                     events.push_back(IncomingEvent(pf3dTrackerPos,pf3dTrackerVel,0.05,"pf3dTracker"));
                     isEvent=true;
                 }
             }
         }
     }
-    
+
     // process the SensationManager port
     if (sensManagerBottle = sensManagerPort.read(false))
     {
@@ -250,14 +250,14 @@ void vtWThread::run()
             }
         }
     }
-   
+
     if (!rf->check("noDoubleTouch"))
     {
         // processes the fingertipTracker
         if(fgtTrackerBottle = fgtTrackerPort.read(false))
         {
             if (doubleTouchBottle = doubleTouchPort.read(false))
-            {           
+            {
                 if(fgtTrackerBottle != NULL && doubleTouchBottle != NULL)
                 {
                     if (doubleTouchBottle->get(3).asString() != "" && fgtTrackerBottle->get(0).asInt() != 0)
@@ -296,7 +296,7 @@ void vtWThread::run()
                     Matrix T = eye(4);
                     Vector fingertipPos(4,0.0);
                     doubleTouchPos.resize(4,0.0);
-                    
+
                     currentTask = doubleTouchBottle->get(3).asString();
                     doubleTouchStep = doubleTouchBottle->get(0).asInt();
                     fingertipPos = iCub::skinDynLib::matrixFromBottle(*doubleTouchBottle,20,4,4).subcol(0,3,3); // fixed translation from the palm
@@ -310,32 +310,32 @@ void vtWThread::run()
                     else if(doubleTouchStep>1 && doubleTouchStep<8)
                     {
                         if(currentTask=="LtoR" || currentTask=="LHtoR") //right to left -> the right index finger will be generating events
-                        { 
+                        {
                             iencsR->getEncoders(encsR->data());
                             Vector qR=encsR->subVector(0,6);
-                            armR -> setAng(qR*CTRL_DEG2RAD);                        
+                            armR -> setAng(qR*CTRL_DEG2RAD);
                             T = armR -> getH(3+6, true);  // torso + up to wrist
-                            doubleTouchPos = T * fingertipPos; 
-                            //optionally, get the finger encoders and get the fingertip position using iKin Finger based on the current joint values 
+                            doubleTouchPos = T * fingertipPos;
+                            //optionally, get the finger encoders and get the fingertip position using iKin Finger based on the current joint values
                             //http://wiki.icub.org/iCub/main/dox/html/icub_cartesian_interface.html#sec_cart_tipframe
                             doubleTouchPos.pop_back(); //take out the last dummy value from homogenous form
                         }
                         else if(currentTask=="RtoL" || currentTask=="RHtoL") //left to right -> the left index finger will be generating events
-                        {   
+                        {
                             iencsL->getEncoders(encsL->data());
                             Vector qL=encsL->subVector(0,6);
-                            armL -> setAng(qL*CTRL_DEG2RAD);                        
+                            armL -> setAng(qL*CTRL_DEG2RAD);
                             T = armL -> getH(3+6, true);  // torso + up to wrist
-                            doubleTouchPos = T * fingertipPos; 
-                            //optionally, get the finger encoders and get the fingertip position using iKin Finger based on the current joint values 
+                            doubleTouchPos = T * fingertipPos;
+                            //optionally, get the finger encoders and get the fingertip position using iKin Finger based on the current joint values
                             //http://wiki.icub.org/iCub/main/dox/html/icub_cartesian_interface.html#sec_cart_tipframe
                             doubleTouchPos.pop_back(); //take out the last dummy value from homogenous form
-                        } 
+                        }
                         else
                         {
                             yError(" [vtWThread] Unknown task received from the double touch thread!");
                         }
-                        
+
                         yDebug("Computing data from the doubleTouch %g\n",getEstUsed());
                         AWPolyElement el2(doubleTouchPos,Time::now());
                         doubleTouchVel=linEst_doubleTouch->estimate(el2);
@@ -346,16 +346,16 @@ void vtWThread::run()
             }
         }
     }
-    
+
     if (pf3dTrackerPos[0]!=0.0 && pf3dTrackerPos[1]!=0.0 && pf3dTrackerPos[2]!=0.0)
         igaze -> lookAtFixationPoint(pf3dTrackerPos);
     else if (doubleTouchPos[0]!=0.0 && doubleTouchPos[1]!=0.0 && doubleTouchPos[2]!=0.0)
         igaze -> lookAtFixationPoint(doubleTouchPos);
     else if (optFlowPos[0]!=0.0 && optFlowPos[1]!=0.0 && optFlowPos[2]!=0.0)
         igaze -> lookAtFixationPoint(optFlowPos);
-    
+
     if (isEvent)
-    {        
+    {
         Bottle& eventsBottle = eventsPort.prepare();
         eventsBottle.clear();
         for (size_t i = 0; i < events.size(); i++)
@@ -387,36 +387,36 @@ void vtWThread::sendGuiEvents()
         Bottle obj;
 
         for (std::vector<IncomingEvent>::const_iterator it = events.begin() ; it != events.end(); ++it){
-         
+
             stringstream ss;
             obj.clear();
             obj.addString("object");
             ss << "obstacle" << counter;
             obj.addString(ss.str());
-        
-            // size 
+
+            // size
             obj.addDouble(1000.0* (*it).Radius);
             obj.addDouble(1000.0* (*it).Radius);
             obj.addDouble(1000.0* (*it).Radius);
-        
+
             // positions
             obj.addDouble(1000.0 * (*it).Pos[0]);
             obj.addDouble(1000.0 * (*it).Pos[1]);
             obj.addDouble(1000.0 * (*it).Pos[2]);
-        
+
             // orientation
             obj.addDouble(0.0);
             obj.addDouble(0.0);
             obj.addDouble(0.0);
-        
+
             // color
             obj.addInt(50 + (*it).Threat*200.0); //threatening objects will be more red
             obj.addInt(50);
             obj.addInt(50);
-        
+
             // transparency
             obj.addDouble(0.9);
-        
+
             outPortGui.write(obj);
             counter++;
        }
@@ -458,16 +458,14 @@ void vtWThread::threadRelease()
         deleteGuiEvents();
 
     yDebug("Closing gaze controller..");
-        Vector ang(3,0.0);
-        igaze -> lookAtAbsAngles(ang);
-        igaze -> restoreContext(contextGaze);
         igaze -> stopControl();
+        igaze -> restoreContext(contextGaze);
         ddG.close();
 
     yDebug("Closing estimators..");
         delete linEst_optFlow;
         linEst_optFlow = NULL;
-        
+
         delete linEst_pf3dTracker;
         linEst_pf3dTracker = NULL;
 
@@ -481,27 +479,27 @@ void vtWThread::threadRelease()
         optFlowPort.interrupt();
         optFlowPort.close();
         yTrace("optFlowPort successfully closed!");
-        
+
         pf3dTrackerPort.interrupt();
         pf3dTrackerPort.close();
         yTrace("pf3dTrackerPort successfully closed!");
-        
+
         doubleTouchPort.interrupt();
         doubleTouchPort.close();
         yTrace("doubleTouchPort successfully closed!");
-                
+
         genericObjectsPort.interrupt();
         genericObjectsPort.close();
         yTrace("genericObjectsPort successfully closed!");
-        
+
         sensManagerPort.interrupt();
         sensManagerPort.close();
         yTrace("sensManagerPort successfully closed!");
-               
+
         eventsPort.interrupt();
         eventsPort.close();
         yTrace("eventsPort successfully closed!");
-       
+
         depth2kinPort.interrupt();
         depth2kinPort.close();
         yTrace("depth2kinPort successfully closed!");
