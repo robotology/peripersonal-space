@@ -245,6 +245,17 @@ public:
                 }
             }
             else yInfo("Could not find [skin_parts] SKIN_RIGHT_UPPER_ARM option in the config file; set to default, i.e. off"); 
+            
+            if (bSkinParts.check("SKIN_FRONT_TORSO"))
+            {
+                if(bSkinParts.find("SKIN_FRONT_TORSO").asString()=="on")
+                {
+                    partOfSkin = SKIN_FRONT_TORSO;
+                    activeSkinPartsNamesVector.push_back(partOfSkin);
+                    yInfo("Adding SKIN_FRONT_TORSO to active skin parts.");
+                }
+            }
+            else yInfo("Could not find [skin_parts] SKIN_FRONT_TORSO option in the config file; set to default, i.e. off"); 
         }
         else{ //bSkinParts.isNull()
             yInfo("Could not find [skin_parts] group in the config file; set all to default, i.e. off"); 
