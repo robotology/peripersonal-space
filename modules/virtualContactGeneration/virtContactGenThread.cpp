@@ -2,6 +2,8 @@
 #include <yarp/sig/Image.h>
 
 #define VIRT_CONTACT_PRESSURE 100
+#define FINGER_VIRT_CONTACT 1 //default: 0 - only palm stimulations are generated with SKIN_LEFT_HAND / SKIN_RIGHT_HAND on
+//with FINGER_VIRT_CONTACT 1, contacts on fingers are also generated
 
 using namespace std;
 
@@ -72,6 +74,90 @@ int virtContactGenerationThread::initSkinParts()
         {
             case SKIN_LEFT_HAND:
             case SKIN_RIGHT_HAND:
+                if(FINGER_VIRT_CONTACT)
+                {
+                    //the coordinates are just approximate - same for all taxels on one fingertip
+                    //and assuming the hand in default open posture
+                    //axes orientation
+                    // x is always pointing along fingers
+                    // y away from thumb
+                    // z - left hand: through palm; right hand: out of palm
+                    // thus, pos same for left and right, because z is 0.0
+                    // normal z 1.0 for right, -1.0 for left
+                    int j=1;    
+                    for(j=1;j<=12;j++) //index finger
+                    {
+                         taxelPos.zero(); taxelNorm.zero();
+                         taxelPos[0] = 0.04;
+                         taxelPos[1] = -0.035;
+                         taxelPos[2] = 0.0;
+                         if (skin_part_name == SKIN_LEFT_HAND)
+                            taxelNorm[2] = -1.0;
+                         else if (skin_part_name == SKIN_RIGHT_HAND)
+                            taxelNorm[2] = 1.0;
+                         skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,j-1));
+                        printMessage(10,"[virtContactGenerationThread] Pushing taxel ID:%d, pos:%.3f %.3f %.3f; norm:%.3f %.3f %.3f.\n",
+                                         j-1,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                    }
+                    for(j=13;j<=24;j++) //middle finger
+                    {
+                         taxelPos.zero(); taxelNorm.zero();
+                         taxelPos[0] = 0.05;
+                         taxelPos[1] = -0.01;
+                         taxelPos[2] = 0.0;
+                         if (skin_part_name == SKIN_LEFT_HAND)
+                            taxelNorm[2] = -1.0;
+                         else if (skin_part_name == SKIN_RIGHT_HAND)
+                            taxelNorm[2] = 1.0;
+                         skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,j-1));
+                        printMessage(10,"[virtContactGenerationThread] Pushing taxel ID:%d, pos:%.3f %.3f %.3f; norm:%.3f %.3f %.3f.\n",
+                                         j-1,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                    }
+                    for(j=25;j<=36;j++) //ring finger
+                    {
+                         taxelPos.zero(); taxelNorm.zero();
+                         taxelPos[0] = 0.05;
+                         taxelPos[1] = 0.015;
+                         taxelPos[2] = 0.0;
+                         if (skin_part_name == SKIN_LEFT_HAND)
+                            taxelNorm[2] = -1.0;
+                         else if (skin_part_name == SKIN_RIGHT_HAND)
+                            taxelNorm[2] = 1.0;
+                         skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,j-1));
+                        printMessage(10,"[virtContactGenerationThread] Pushing taxel ID:%d, pos:%.3f %.3f %.3f; norm:%.3f %.3f %.3f.\n",
+                                         j-1,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                    }
+                    for(j=37;j<=48;j++) //little finger
+                    {
+                         taxelPos.zero(); taxelNorm.zero();
+                         taxelPos[0] = 0.04;
+                         taxelPos[1] = 0.035;
+                         taxelPos[2] = 0.0;
+                         if (skin_part_name == SKIN_LEFT_HAND)
+                            taxelNorm[2] = -1.0;
+                         else if (skin_part_name == SKIN_RIGHT_HAND)
+                            taxelNorm[2] = 1.0;
+                         skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,j-1));
+                        printMessage(10,"[virtContactGenerationThread] Pushing taxel ID:%d, pos:%.3f %.3f %.3f; norm:%.3f %.3f %.3f.\n",
+                                         j-1,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                    }
+                    for(j=49;j<=60;j++) //thumb
+                    {
+                         taxelPos.zero(); taxelNorm.zero();
+                         taxelPos[0] = -0.02;
+                         taxelPos[1] = -0.035;
+                         taxelPos[2] = 0.0;
+                         if (skin_part_name == SKIN_LEFT_HAND)
+                            taxelNorm[2] = -1.0;
+                         else if (skin_part_name == SKIN_RIGHT_HAND)
+                            taxelNorm[2] = 1.0;
+                         skinPartWithTaxels.taxels.push_back(new Taxel(taxelPos,taxelNorm,j-1));
+                        printMessage(10,"[virtContactGenerationThread] Pushing taxel ID:%d, pos:%.3f %.3f %.3f; norm:%.3f %.3f %.3f.\n",
+                                         j-1,taxelPos[0],taxelPos[1],taxelPos[2],taxelNorm[0],taxelNorm[1],taxelNorm[2]);
+                    }
+                    
+                }    
+              
                 for(int i= 0; getline(posFile,line); i++)
                 {
                     line.erase(line.find_last_not_of(" \n\r\t")+1);
