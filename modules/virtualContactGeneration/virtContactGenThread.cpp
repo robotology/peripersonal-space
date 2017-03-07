@@ -1,6 +1,16 @@
 #include "virtContactGenThread.h"
 #include <yarp/sig/Image.h>
 
+#define VIRT_CONTACT_PRESSURE 100
+
+using namespace std;
+
+using namespace yarp;
+using namespace yarp::os;
+using namespace yarp::sig;
+
+using namespace iCub::skinDynLib;
+
 //see also Compensator::setTaxelPosesFromFile in icub-main/src/modules/skinManager/src/compensator.cpp
 //see also dbool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
 int virtContactGenerationThread::initSkinParts()
