@@ -102,6 +102,7 @@ private:
     int verbosity;
     int threadPeriod;
     string type;    
+    double contactDurationSeconds;
        
     vector<SkinPart> activeSkinPartsNamesVector;
     map<SkinPart,string> skinPartsPositionsFilePaths;
@@ -120,7 +121,9 @@ public:
         robot =  "icubSim";
         threadPeriod = 100; //period of the virtContactGenThread in ms
         verbosity = 0;
-        type = "random"; //selection of the 
+        type = "random"; //selection of the type of contact generation
+        contactDurationSeconds = 3.0;
+        
         
         SkinPart partOfSkin;
         //******************************************************
@@ -148,12 +151,12 @@ public:
             else yInfo("Could not find robot option in the config file; using %s as default",robot.c_str());
 
             //****************** rate ******************
-            if (bGeneral.check("rate"))
+            if (bGeneral.check("period_ms"))
             {
-                threadPeriod = bGeneral.find("rate").asInt();
+                threadPeriod = bGeneral.find("period_ms").asInt();
                 yInfo("virtContactGenThread rateThread working at %i ms.",threadPeriod);
             }
-            else yInfo("Could not find rate in the config file; using %i ms as default period",threadPeriod);
+            else yInfo("Could not find period_ms in the config file; using %i ms as default period",threadPeriod);
            
             //******************* VERBOSE ******************
             if (bGeneral.check("verbosity"))
@@ -170,6 +173,14 @@ public:
                 yInfo("Type is: %s", type.c_str());
             }
             else yInfo("Could not find type option in the config file; using %s as default",type.c_str());
+            
+            //******************* VIRTUAL CONTACT DURATION ******************
+            if (bGeneral.check("duration_s"))
+            {
+                contactDurationSeconds = bGeneral.find("duration_s").asDouble();
+                yInfo("virtContactGenThread duration_s set to %f s.",contactDurationSeconds);
+            }
+            else yInfo("Could not find duration_s in the config file; using %f s as default",contactDurationSeconds);
 
         //*************** ACTIVE SKIN PARTS GROUP ****************
         Bottle &bSkinParts=rf.findGroup("skin_parts");
