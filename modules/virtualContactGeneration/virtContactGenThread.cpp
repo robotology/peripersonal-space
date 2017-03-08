@@ -502,6 +502,7 @@ virtContactGenerationThread::virtContactGenerationThread(int _rate, const string
 bool virtContactGenerationThread::threadInit()
 {
     ts.update();
+    timeLastContactStart = ts.getTime();
     
     skinEventsOutPort->open(("/"+name+"/virtualContacts:o").c_str());
     
@@ -542,20 +543,23 @@ bool virtContactGenerationThread::threadInit()
 void virtContactGenerationThread::run()
 {
     ts.update();
-     
-    if (type == "random")
+    if((ts.getTime()-timeLastContactStart) > 3.0)
     {
-        taxelIDinList.clear();
-        skinPartIndexInVector = rand() % activeSkinPartsNames.size(); //so e.g. for size 3, this should give 0, 1, or 2, which is right
-        skinPartPickedName = activeSkinPartsNames[skinPartIndexInVector];
-        skinPartPicked = activeSkinParts[skinPartPickedName];
-        taxelPickedIndex = rand() % skinPartPicked.taxels.size(); 
-        taxelPicked = *(skinPartPicked.taxels[taxelPickedIndex]);
-        taxelIDinList.push_back(taxelPicked.getID()); //there will be only a single taxel in the list, but we want to keep the information which taxel it was
-        printMessage(3,"Randomly selecting taxel ID: %d, from %s. Pose in local FoR (pos,norm): %f %f %f; norm:%f %f %f.\n",
-                        taxelPicked.getID(),SkinPart_s[skinPartPickedName].c_str(),taxelPicked.getPosition()[0],
-                        taxelPicked.getPosition()[1],taxelPicked.getPosition()[2],taxelPicked.getNormal()[0],
-                        taxelPicked.getNormal()[1],taxelPicked.getNormal()[2]);  
+        timeLastContactStart=ts.getTime(); //resetting counter
+        if (type == "random")
+        {
+            taxelIDinList.clear();
+            skinPartIndexInVector = rand() % activeSkinPartsNames.size(); //so e.g. for size 3, this should give 0, 1, or 2, which is right
+            skinPartPickedName = activeSkinPartsNames[skinPartIndexInVector];
+            skinPartPicked = activeSkinParts[skinPartPickedName];
+            taxelPickedIndex = rand() % skinPartPicked.taxels.size(); 
+            taxelPicked = *(skinPartPicked.taxels[taxelPickedIndex]);
+            taxelIDinList.push_back(taxelPicked.getID()); //there will be only a single taxel in the list, but we want to keep the information which taxel it was
+            printMessage(3,"Randomly selecting taxel ID: %d, from %s. Pose in local FoR (pos,norm): %f %f %f; norm:%f %f %f.\n",
+                            taxelPicked.getID(),SkinPart_s[skinPartPickedName].c_str(),taxelPicked.getPosition()[0],
+                            taxelPicked.getPosition()[1],taxelPicked.getPosition()[2],taxelPicked.getNormal()[0],
+                            taxelPicked.getNormal()[1],taxelPicked.getNormal()[2]);  
+        }
     }
     
     skinContact c(getBodyPart(skinPartPickedName), skinPartPickedName, getLinkNum(skinPartPickedName), taxelPicked.getPosition(), 

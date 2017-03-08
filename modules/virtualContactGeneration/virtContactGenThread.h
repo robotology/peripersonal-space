@@ -68,6 +68,8 @@ protected:
     // Stamp for the setEnvelope for the ports
     yarp::os::Stamp ts;
     
+    double timeLastContactStart;
+    
     // Port with the fake contacts:
     yarp::os::BufferedPort<iCub::skinDynLib::skinContactList> *skinEventsOutPort;
     
