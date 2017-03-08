@@ -119,7 +119,7 @@ public:
         
         name = "virtualContactGeneration";
         robot =  "icubSim";
-        threadPeriod = 100; //period of the virtContactGenThread in ms
+        threadPeriod = 20; //period of the virtContactGenThread in ms
         verbosity = 0;
         type = "random"; //selection of the type of contact generation
         contactDurationSeconds = 3.0;
