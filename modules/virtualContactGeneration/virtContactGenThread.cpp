@@ -488,9 +488,10 @@ void virtContactGenerationThread::printInitializedSkinParts()
 
 
 virtContactGenerationThread::virtContactGenerationThread(int _rate, const string &_name, const string &_robot, int _v,
-                                                         const string &_type, const vector<SkinPart> &_activeSkinPartsNames,
+                                                         const string &_type, const double _contactDuration,const vector<SkinPart> &_activeSkinPartsNames,
                                                          const map<SkinPart,string> &_skinPartPosFilePaths) :  
-                                                         RateThread(_rate),name(_name), robot(_robot), verbosity(_v), type(_type),
+                                                         RateThread(_rate), name(_name), robot(_robot), verbosity(_v), type(_type), 
+                                                         contactDuration(_contactDuration),
                                                          activeSkinPartsNames(_activeSkinPartsNames), skinPartPosFilePaths(_skinPartPosFilePaths)
 {
    

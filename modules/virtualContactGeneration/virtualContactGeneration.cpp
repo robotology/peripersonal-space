@@ -316,7 +316,7 @@ public:
            
         //******************************************************
         //*********************** THREAD **********************
-        virtContactGenThrd = new virtContactGenerationThread(threadPeriod,name,robot,verbosity,type,activeSkinPartsNamesVector,skinPartsPositionsFilePaths);
+        virtContactGenThrd = new virtContactGenerationThread(threadPeriod,name,robot,verbosity,type,contactDurationSeconds,activeSkinPartsNamesVector,skinPartsPositionsFilePaths);
         if (!virtContactGenThrd -> start())
         {
               delete virtContactGenThrd;

@@ -51,10 +51,12 @@ protected:
     std::string robot;
     // Resource finder used to find for files and configurations:
     yarp::os::ResourceFinder* rf;
-    //the period used by the thread. 
+    //the period used by the thread (ms). 
     int threadPeriod; 
     // type of selection of contacts - e.g. random
     std::string type;
+    // duration of every contact (before a new one is chosen), in seconds
+    double contactDuration; 
     
     //based on .ini file, contains a list of skin parts that will be part of the virtual contact generation
     std::vector<iCub::skinDynLib::SkinPart> activeSkinPartsNames;
@@ -100,7 +102,7 @@ protected:
 public:
     // CONSTRUCTOR
     virtContactGenerationThread(int _rate, const std::string &_name, const std::string &_robot,
-                                int _v, const std::string &_type, const std::vector<iCub::skinDynLib::SkinPart> &_activeSkinPartsNames,
+                                int _v, const std::string &_type, const double _contactDuration,const std::vector<iCub::skinDynLib::SkinPart> &_activeSkinPartsNames,
                                 const std::map<iCub::skinDynLib::SkinPart,std::string> &_skinPartPosFilePaths);
     // INIT
     virtual bool threadInit();
