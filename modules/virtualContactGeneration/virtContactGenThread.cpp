@@ -13,8 +13,14 @@ using namespace yarp::sig;
 
 using namespace iCub::skinDynLib;
 
-//see also Compensator::setTaxelPosesFromFile in icub-main/src/modules/skinManager/src/compensator.cpp
-//see also dbool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
+/* 
+ * The version here is a custom (adding fingertips) and more controlled version (not relying on 0s in taxel pos file)
+ *  than the one in skinDynLib. 
+ * see also:
+ * - iCub::skinDynLib::skinPart::setTaxelPosesFromFile(const std::string &_filePath, const std::string &_spatial_sampling)
+ * - Compensator::setTaxelPosesFromFile in icub-main/src/modules/skinManager/src/compensator.cpp
+ * - dbool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)  
+ */
 int virtContactGenerationThread::initSkinParts()
 {
     SkinPart skin_part_name; 
@@ -23,8 +29,8 @@ int virtContactGenerationThread::initSkinParts()
        
     string line;
     ifstream posFile;
-    yarp::sig::Vector taxelPos(3,0.0);
-    yarp::sig::Vector taxelNorm(3,0.0);
+    Vector taxelPos(3,0.0);
+    Vector taxelNorm(3,0.0);
     string skinVersion = "";
    
     string filename; 
@@ -32,8 +38,7 @@ int virtContactGenerationThread::initSkinParts()
     for (std::vector<SkinPart>::const_iterator it = activeSkinPartsNames.begin() ; it != activeSkinPartsNames.end(); ++it)
     {
         skin_part_name = *it;
-        iCub::skinDynLib::skinPart skinPartWithTaxels; 
-        
+       
         // Open File
         posFile.open(skinPartPosFilePaths[skin_part_name].c_str());  
         if (!posFile.is_open())
@@ -41,7 +46,7 @@ int virtContactGenerationThread::initSkinParts()
            yError("[virtContactGenerationThread] File %s has not been opened!",skinPartPosFilePaths[skin_part_name].c_str());
            return false;
         }
-        
+               
         // Assign the version of the skinPart according to the filename (hardcoded)
         if      ((skinPartPosFilePaths[skin_part_name].find("left_forearm_mesh.txt") != std::string::npos) ||
                  (skinPartPosFilePaths[skin_part_name].find("left_forearm_nomesh.txt") != std::string::npos) || 
@@ -70,6 +75,36 @@ int virtContactGenerationThread::initSkinParts()
         posFile.clear(); 
         posFile.seekg(0, std::ios::beg);//rewind iterator
         
+        //this constructor (with file name) will be calling also setTaxelPosesFromFile and initRepresentativeTaxels
+        skinPart skinPartWithTaxels(skinPartPosFilePaths[skin_part_name]); 
+        skinPartWithTaxels.name = SkinPart_s[skin_part_name];
+        skinPartWithTaxels.version = skinVersion;
+        skinPartWithTaxels.taxels.clear();//:KLUDGE - but here we use the custom initialization of taxels below
+        //so we clear them, but keep the repr. taxel list mapping
+        skinPartWithTaxels.size = 0;
+        
+        /*printf("taxel2Repr mapping.\n taxelID:  representative:\n");
+        for(vector<int>::iterator it2 = skinPartWithTaxels.taxel2Repr.begin() ; it2 != skinPartWithTaxels.taxel2Repr.end(); ++it2)
+        {
+            printf("%d %d,  ",std::distance(skinPartWithTaxels.taxel2Repr.begin(),it2),*it2);
+            if (((std::distance(skinPartWithTaxels.taxel2Repr.begin(), it2)+1) % 12) == 0)
+                printf("\n");
+        }
+        printf("\n"); */
+        
+        if(verbosity >= 2)
+        {
+            printf("repr2TaxelList mapping.\n rep. taxelID:  {full triangle}\n");
+            for(map<int, list<unsigned int> >::iterator it3 = skinPartWithTaxels.repr2TaxelList.begin();
+                it3 != skinPartWithTaxels.repr2TaxelList.end(); ++it3)
+            {
+                printf("%d {",it3->first);
+                for (std::list<unsigned int>::iterator it4=(it3->second).begin(); it4 != (it3->second).end(); ++it4)
+                    printf("%u, ",*it4);
+                printf("}\n",it3->first);    
+            }
+        }
+                
         switch(skin_part_name)
         {
             case SKIN_LEFT_HAND:
@@ -187,21 +222,8 @@ int virtContactGenerationThread::initSkinParts()
                     yWarning("[virtContactGenerationThread]::initSkinParts():initalizing %s from file, 192 positions expected, but %d present.\n",
                                                                                  SkinPart_s[skin_part_name].c_str(),skinPartWithTaxels.getSize());
                 }
-                skinPartWithTaxels.name = skin_part_name;
-                if (skin_part_name == SKIN_LEFT_HAND)
-                {
-                   activeSkinParts[SKIN_LEFT_HAND] = skinPartWithTaxels;
-                   printMessage(4,"[virtContactGenerationThread]Adding SKIN_LEFT_HAND (%d valid taxels) to activeSkinParts, it now has %d members.\n",
-                                activeSkinParts[SKIN_LEFT_HAND].getTaxelsSize(), activeSkinParts.size());
-                }
-                else    // skin_part_name == SKIN_RIGHT_HAND
-                {   
-                    activeSkinParts[SKIN_RIGHT_HAND] = skinPartWithTaxels;
-                    printMessage(4,"[virtContactGenerationThread]Adding SKIN_RIGHT_HAND (%d valid taxels) to activeSkinParts, it now has %d members.\n",
-                                 activeSkinParts[SKIN_RIGHT_HAND].getTaxelsSize(), activeSkinParts.size());
-                }
                 break;
-                
+                 
             case SKIN_LEFT_FOREARM:
             case SKIN_RIGHT_FOREARM:
                 for(int i= 0; getline(posFile,line); i++)
@@ -301,20 +323,6 @@ int virtContactGenerationThread::initSkinParts()
                     yWarning("[virtContactGenerationThread]::initSkinParts():initalizing %s from file, 384 positions expected, but %d present.\n",
                                                                                   SkinPart_s[skin_part_name].c_str(),skinPartWithTaxels.getSize());
                 }
-                skinPartWithTaxels.name = skin_part_name;
-                if (skin_part_name == SKIN_LEFT_FOREARM)
-                {
-                   activeSkinParts[SKIN_LEFT_FOREARM] = skinPartWithTaxels;
-
-                   printMessage(4,"[virtContactGenerationThread]Adding SKIN_LEFT_FOREARM (%d valid taxels) to activeSkinParts, it now has %d members.\n",
-                                activeSkinParts[SKIN_LEFT_FOREARM].getTaxelsSize(),activeSkinParts.size());
-                }
-                else
-                {  // skin_part_name == SKIN_RIGHT_FOREARM
-                    activeSkinParts[SKIN_RIGHT_FOREARM] = skinPartWithTaxels;
-                    printMessage(4,"[virtContactGenerationThread]Adding SKIN_RIGHT_FOREARM (%d valid taxels) to activeSkinParts, it now has %d members.\n",
-                                 activeSkinParts[SKIN_RIGHT_FOREARM].getTaxelsSize(), activeSkinParts.size());
-                }
                 break;
            
             case SKIN_LEFT_UPPER_ARM: // note that for upper arm, left and right are different 
@@ -353,10 +361,6 @@ int virtContactGenerationThread::initSkinParts()
                     yWarning("[virtContactGenerationThread]::initSkinParts():initalizing %s from file, 768 positions expected, but %d present.\n",
                                                                                   SkinPart_s[skin_part_name].c_str(),skinPartWithTaxels.getSize());
                 }
-                skinPartWithTaxels.name = skin_part_name;
-                activeSkinParts[SKIN_LEFT_UPPER_ARM] = skinPartWithTaxels;
-                printMessage(4,"[virtContactGenerationThread]Adding SKIN_LEFT_UPPER_ARM (%d valid taxels) to activeSkinParts, it now has %d members.\n",
-                             activeSkinParts[SKIN_LEFT_UPPER_ARM].getTaxelsSize(),activeSkinParts.size());
                 break;
                 
             case SKIN_RIGHT_UPPER_ARM:
@@ -395,10 +399,6 @@ int virtContactGenerationThread::initSkinParts()
                     yWarning("[virtContactGenerationThread]::initSkinParts():initalizing %s from file, 768 positions expected, but %d present.\n",
                                                                                   SkinPart_s[skin_part_name].c_str(),skinPartWithTaxels.getSize());
                 }
-                skinPartWithTaxels.name = skin_part_name;
-                activeSkinParts[SKIN_RIGHT_UPPER_ARM] = skinPartWithTaxels;
-                printMessage(4,"[virtContactGenerationThread]Adding SKIN_RIGHT_UPPER_ARM  (%d valid taxels) to activeSkinParts, it now has %d members.\n",
-                             activeSkinParts[SKIN_RIGHT_UPPER_ARM].getTaxelsSize(),activeSkinParts.size());
                 break;
             
             case SKIN_FRONT_TORSO:
@@ -436,20 +436,21 @@ int virtContactGenerationThread::initSkinParts()
                     yWarning("[virtContactGenerationThread]::initSkinParts():initalizing %s from file, 768 positions expected, but %d present.\n",
                                                                                   SkinPart_s[skin_part_name].c_str(),skinPartWithTaxels.getSize());
                 }
-                skinPartWithTaxels.name = skin_part_name;
-                activeSkinParts[SKIN_FRONT_TORSO] = skinPartWithTaxels;
-                printMessage(4,"[virtContactGenerationThread]Adding SKIN_FRONT_TORSO (%d valid taxels) to activeSkinParts, it now has %d members.\n",
-                             activeSkinParts[SKIN_FRONT_TORSO].getTaxelsSize(),activeSkinParts.size());
                 break;
                 
                 
             default: 
                 yError("[virtContactGenerationThread] Asked to initialize skinDynLib::SkinPart:: %s, but it is not implemented yet.\n",
-                                                                                                                       SkinPart_s[skin_part_name].c_str());
+                                                                                                  SkinPart_s[skin_part_name].c_str());
                 return -1;
         }
         
+        activeSkinParts[skin_part_name] = skinPartWithTaxels;
+        printMessage(4,"[virtContactGenerationThread] Adding %s (%d valid taxels) to activeSkinParts, it now has %d members.\n",
+                               SkinPart_s[skin_part_name].c_str(),activeSkinParts[skin_part_name].getTaxelsSize(), activeSkinParts.size());
+        printInitializedSkinParts();        
         posFile.close();
+      
     }
     
     return 0;
@@ -463,8 +464,8 @@ void virtContactGenerationThread::printInitializedSkinParts()
     {
         iCub::skinDynLib::skinPart locSkinPartTaxel = it->second;
         vector<Taxel*> taxels = locSkinPartTaxel.taxels;
-        printMessage(6,"Iterating through activeSkinParts (%d members), now: it->first: %d, locSkinPartTaxel.name: %s.\n",
-                                                          activeSkinParts.size(),it->first,locSkinPartTaxel.name.c_str());
+        printMessage(6,"Iterating through activeSkinParts (%d members), now: it->first: %d - %s, locSkinPartTaxel.name: %s.\n",
+                                                          activeSkinParts.size(),it->first,SkinPart_s[it->first].c_str(),locSkinPartTaxel.name.c_str());
         ofstream outFile;   
         outFile.open(locSkinPartTaxel.name.c_str());
         if (outFile.fail())          // Check for file creation and return error.
@@ -552,16 +553,20 @@ void virtContactGenerationThread::run()
             skinPartIndexInVector = rand() % activeSkinPartsNames.size(); //so e.g. for size 3, this should give 0, 1, or 2, which is right
             skinPartPickedName = activeSkinPartsNames[skinPartIndexInVector];
             skinPartPicked = activeSkinParts[skinPartPickedName];
-            taxelPickedIndex = rand() % skinPartPicked.taxels.size(); 
+            taxelPickedIndex = rand() % skinPartPicked.taxels.size();  //first we get a random index into the taxel vector (they are not taxel IDs!)
             taxelPicked = *(skinPartPicked.taxels[taxelPickedIndex]);
-            taxelIDinList.push_back(taxelPicked.getID()); //there will be only a single taxel in the list, but we want to keep the information which taxel it was
-            printMessage(3,"Randomly selecting taxel ID: %d, from %s. Pose in local FoR (pos,norm): %f %f %f; norm:%f %f %f.\n",
+            //the taxel picked is an indivudual taxel, but the list will always be a full triangle 
+            list<unsigned int> l =  skinPartPicked.repr2TaxelList[skinPartPicked.taxel2Repr[taxelPicked.getID()]]; 
+            for (std::list<unsigned int>::iterator it=l.begin(); it != l.end(); ++it)
+                   taxelIDinList.push_back(*it); 
+            printMessage(2,"Randomly selecting taxel ID: %d, from %s. \n Pose in local FoR (pos,norm): %.3f %.3f %.3f; norm:%.3f %.3f %.3f.\n nr. taxels in rep. list: %d, in contact list: %d\n",
                             taxelPicked.getID(),SkinPart_s[skinPartPickedName].c_str(),taxelPicked.getPosition()[0],
                             taxelPicked.getPosition()[1],taxelPicked.getPosition()[2],taxelPicked.getNormal()[0],
-                            taxelPicked.getNormal()[1],taxelPicked.getNormal()[2]);  
+                            taxelPicked.getNormal()[1],taxelPicked.getNormal()[2],l.size(),taxelIDinList.size());  
+            
         }
     }
-    
+    //:KLUDGE the coordinates are of the individual single taxel picked; list of taxels is full triangle
     skinContact c(getBodyPart(skinPartPickedName), skinPartPickedName, getLinkNum(skinPartPickedName), taxelPicked.getPosition(), 
                                           taxelPicked.getPosition(),taxelIDinList,VIRT_CONTACT_PRESSURE,taxelPicked.getNormal());  
     //   skinContact(const BodyPart &_bodyPart, const SkinPart &_skinPart, unsigned int _linkNumber, const yarp::sig::Vector &_CoP, 
