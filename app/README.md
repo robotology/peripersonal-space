@@ -74,6 +74,26 @@ That is, learning and demonstration.
 
 With this file, there is blank right forearm - so you can show learning there, with correct (already learned responses) for other body parts.
 
+## "Avoidance during circular movement" demo
+Similar to **red-ball demo**, this also uses the [pf3dtracker](https://github.com/robotology/icub-basic-demos/tree/master/pf3dTracker) to track the approaching ball as obstacle.
+
+### Prerequisites:
+- Application script to use: [ppsAndReactControl_icub_Lyon.xml](https://github.com/robotology/peripersonal-space/blob/master/app/scripts/ppsAndReactControl_icub_Lyon.xml)
+- [react-controller](https://github.com/robotology/react-control)
+
+### Setting and Running:
+1. (Optional) If using the *green fluo ball* as in the script, please adjust some parameters of the `frameGrabberGui2` of left camera as following:
+- **Saturation** (in Features (adv)): 0.6
+- **Gamma** (in Features (adv)): 0.6
+- **Gain** (in Features): 0.2
+
+2. Run and connect all modules in application.
+
+3. Connect to the *rpc service* of *react-controller*, and make the *controlled arm* (left by default) move in a circle:
+```
+yarp rpc /reactController/rpc:i  
+set_relative_circular_xd 0.08 0.27
+```
 ## “Arbitrary objects” version
 
 Use the script `PPS_with_Optical_Flow` 
