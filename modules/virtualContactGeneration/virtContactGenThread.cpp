@@ -2,7 +2,7 @@
 #include <yarp/sig/Image.h>
 
 #define VIRT_CONTACT_PRESSURE 100
-#define FINGER_VIRT_CONTACT 1 //default: 0 - only palm stimulations are generated with SKIN_LEFT_HAND / SKIN_RIGHT_HAND on
+#define FINGER_VIRT_CONTACT 0 //default: 0 - only palm stimulations are generated with SKIN_LEFT_HAND / SKIN_RIGHT_HAND on
 //with FINGER_VIRT_CONTACT 1, contacts on fingers are also generated
 
 using namespace std;
