@@ -152,9 +152,7 @@ private:
                 normal(2) =  collPointBottle->get(6).asDouble();
                 normalized_activation = collPointBottle->get(13).asDouble();
 
-                //hack - in current iCubGui version, in bvhnode.h, ForceArrow,
-                //there is an atan that gives a wrong direction for force vectors of the form (0 0 1)   
-                force(0)=0.000001; force(1)=0.000001;
+                force(0)=-1.0*amplification*normalized_activation*normal(0); force(1)=-1.0*amplification*normalized_activation*normal(1);
                 force(2) = -1.0*amplification*normalized_activation*normal(2);
                 
                 //see  iCubGui/src/objectsthread.h    ObjectsManager::manage(iCub::skinDynLib::skinContactList &forces)

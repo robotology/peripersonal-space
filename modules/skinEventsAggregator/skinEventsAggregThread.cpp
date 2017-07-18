@@ -1,7 +1,7 @@
 #include <algorithm>
 #include "skinEventsAggregThread.h"
 
-#define MIN_NUMBER_OF_TAXELS_ACTIVATED 3 //to filter out phantoms
+#define MIN_NUMBER_OF_TAXELS_ACTIVATED 3 //default: 3; to filter out phantoms
 #define SKIN_ACTIVATION_MAX_ICUB_SIM 100
 #define SKIN_ACTIVATION_MAX_ICUB 30
 

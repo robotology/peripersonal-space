@@ -33,22 +33,12 @@
 #include <yarp/os/Stamp.h>
 
 #include <iCub/skinDynLib/skinContact.h>
- #include <iCub/skinDynLib/skinPart.h>
+#include <iCub/skinDynLib/skinPart.h>
 #include <iCub/skinDynLib/skinContactList.h>
 
 #include <iCub/periPersonalSpace/utils.h>
 
-#define VIRT_CONTACT_PRESSURE 100
-
-using namespace std;
-
-using namespace yarp;
-using namespace yarp::os;
-using namespace yarp::sig;
-
-using namespace iCub::skinDynLib;
-
-class virtContactGenerationThread: public RateThread
+class virtContactGenerationThread: public yarp::os::RateThread
 {
 protected:
     /***************************************************************************/
@@ -56,19 +46,21 @@ protected:
     // Flag that manages verbosity (v=1 -> more text printed out; v=2 -> even more text):
     int verbosity;
     // Name of the module (to change port names accordingly):
-    string name;
+    std::string name;
     // Name of the robot (to address the module toward icub or icubSim):
-    string robot;
+    std::string robot;
     // Resource finder used to find for files and configurations:
-    ResourceFinder* rf;
-    //the period used by the thread. 
+    yarp::os::ResourceFinder* rf;
+    //the period used by the thread (ms). 
     int threadPeriod; 
     // type of selection of contacts - e.g. random
-    string type;
+    std::string type;
+    // duration of every contact (before a new one is chosen), in seconds
+    double contactDuration; 
     
     //based on .ini file, contains a list of skin parts that will be part of the virtual contact generation
-    vector<SkinPart> activeSkinPartsNames;
-    map<SkinPart,string> skinPartPosFilePaths;
+    std::vector<iCub::skinDynLib::SkinPart> activeSkinPartsNames;
+    std::map<iCub::skinDynLib::SkinPart,std::string> skinPartPosFilePaths;
        
     /***************************************************************************/
     // INTERNAL VARIABLES
@@ -76,16 +68,18 @@ protected:
     // Stamp for the setEnvelope for the ports
     yarp::os::Stamp ts;
     
+    double timeLastContactStart;
+    
     // Port with the fake contacts:
-    BufferedPort<skinContactList> *skinEventsOutPort;
+    yarp::os::BufferedPort<iCub::skinDynLib::skinContactList> *skinEventsOutPort;
     
     //will contain actual skin parts with list of taxels and their positions
-    map<SkinPart,iCub::skinDynLib::skinPart> activeSkinParts;
+    std::map<iCub::skinDynLib::SkinPart,iCub::skinDynLib::skinPart> activeSkinParts;
     int skinPartIndexInVector;
-    SkinPart skinPartPickedName;
+    iCub::skinDynLib::SkinPart skinPartPickedName;
     iCub::skinDynLib::skinPart skinPartPicked;
     int taxelPickedIndex;
-    Taxel taxelPicked;
+    iCub::skinDynLib::Taxel taxelPicked;
     std::vector<unsigned int> taxelIDinList;
    
     /**
@@ -109,9 +103,9 @@ protected:
     
 public:
     // CONSTRUCTOR
-    virtContactGenerationThread(int _rate, const string &_name, const string &_robot,
-                                int _v, const string &_type, const vector<SkinPart> &_activeSkinPartsNames,
-                                const map<SkinPart,string> &_skinPartPosFilePaths);
+    virtContactGenerationThread(int _rate, const std::string &_name, const std::string &_robot,
+                                int _v, const std::string &_type, const double _contactDuration,const std::vector<iCub::skinDynLib::SkinPart> &_activeSkinPartsNames,
+                                const std::map<iCub::skinDynLib::SkinPart,std::string> &_skinPartPosFilePaths);
     // INIT
     virtual bool threadInit();
     // RUN
