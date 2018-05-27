@@ -123,7 +123,7 @@ protected:
 
     // "Classical" interfaces - SLAVE ARM
     IEncoders         *iencsL;
-    IPositionControl2 *iposL;
+    IPositionControl  *iposL;
     IInteractionMode  *imodeL;
     IImpedanceControl *iimpL;
     IControlLimits    *ilimL;
@@ -133,7 +133,7 @@ protected:
         
     // "Classical" interfaces - MASTER ARM
     IEncoders         *iencsR;
-    IPositionControl2 *iposR;
+    IPositionControl  *iposR;
     IImpedanceControl *iimpR;
     IInteractionMode  *imodeR;
     IControlLimits    *ilimR;
@@ -143,7 +143,7 @@ protected:
 
     // "Classical" interfaces - SLAVE ARM
     IEncoders         *iencsS;
-    IPositionControl2 *iposS;
+    IPositionControl  *iposS;
     IInteractionMode  *imodeS;
     IImpedanceControl *iimpS;
     IControlLimits    *ilimS;
@@ -153,7 +153,7 @@ protected:
         
     // "Classical" interfaces - MASTER ARM
     IEncoders         *iencsM;
-    IPositionControl2 *iposM;
+    IPositionControl  *iposM;
     IImpedanceControl *iimpM;
     IInteractionMode  *imodeM;
     IControlLimits    *ilimM;
