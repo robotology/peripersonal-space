@@ -8,7 +8,6 @@ project(visuoTactileRF)
 file(GLOB source *.cpp)
 file(GLOB header *.h)
 
-include_directories(${YARP_INCLUDE_DIRS})
 include_directories(${ICUB_INCLUDE_DIRS})
 
 source_group("Source Files" FILES ${source})

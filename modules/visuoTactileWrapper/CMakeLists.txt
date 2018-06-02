@@ -8,7 +8,6 @@ project(visuoTactileWrapper)
 file(GLOB source *.cpp)
 file(GLOB header *.h)
 
-include_directories(${YARP_INCLUDE_DIRS})
 include_directories(${periPersonalSpace_INCLUDE_DIRS})
 include_directories(${ctrlLib_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})

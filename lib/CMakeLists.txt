@@ -7,7 +7,6 @@ project(periPersonalSpace)
 
 find_package(IPOPT REQUIRED)
 
-include_directories(${YARP_INCLUDE_DIRS})
 include_directories(${ICUB_INCLUDE_DIRS})
 include_directories(${IPOPT_INCLUDE_DIRS})
 
@@ -35,7 +34,7 @@ add_library(${PROJECT_NAME} ${folder_source} ${folder_header})
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " ${IPOPT_LINK_FLAGS}")
 target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES} iKin skinDynLib ${IPOPT_LIBRARIES})
 icubcontrib_export_library(${PROJECT_NAME} INTERNAL_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include
-                                           EXTERNAL_INCLUDE_DIRS ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${IPOPT_INCLUDE_DIRS}
+                                           EXTERNAL_INCLUDE_DIRS ${ICUB_INCLUDE_DIRS} ${IPOPT_INCLUDE_DIRS}
                                            DESTINATION include/iCub/${PROJECT_NAME}
                                            FILES ${folder_header})
 # export library
