@@ -1,7 +1,7 @@
 #include "kalmanThread.h"
 
 kalmanThread::kalmanThread(int _rate, const string &_name, const string &_robot, int _v, double _nDThr, unsigned int _kalOrder) :
-                       RateThread(_rate), name(_name), robot(_robot), verbosity(_v), noDataThres(_nDThr),kalOrder(_kalOrder)
+                           PeriodicThread((double)_rate/1000.0), name(_name), robot(_robot), verbosity(_v), noDataThres(_nDThr),kalOrder(_kalOrder)
 {
     setKalmanState(KALMAN_INIT);
     timeNow = yarp::os::Time::now();

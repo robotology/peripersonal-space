@@ -27,7 +27,7 @@
 #include <sstream>
 
 #include <yarp/os/Time.h>
-#include <yarp/os/RateThread.h>
+#include <yarp/os/PeriodicThread.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/RFModule.h>
 #include <yarp/os/Stamp.h>
@@ -40,7 +40,7 @@
 
 using namespace std;
 
-class skinEventsAggregThread: public yarp::os::RateThread
+class skinEventsAggregThread: public yarp::os::PeriodicThread
 {
 private:
     /***************************************************************************/

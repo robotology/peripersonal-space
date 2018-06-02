@@ -23,7 +23,7 @@
 #define __FGTTRACKERTHREAD_H__
 
 #include <yarp/os/Time.h>
-#include <yarp/os/RateThread.h>
+#include <yarp/os/PeriodicThread.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/Log.h>
 
@@ -54,7 +54,7 @@ using namespace yarp::os;
 
 using namespace std;
 
-class fgtThread: public RateThread
+class fgtThread: public PeriodicThread
 {
 protected:
     /***************************************************************************/

@@ -4,12 +4,11 @@
 #include <iomanip>
 
 #define VEL_THRES      0.000001        // m/s?
-// VEL_THRES * getRate()
 
 doubleTouchThread::doubleTouchThread(int _rate, const string &_name, const string &_robot, int _v,
                                      std::vector<SkinPart> _skinParts, double _jnt_vels, int _record, string _filename, string _color,
                                      bool _autoconnect, bool _dontgoback, const Vector &_hand_poss_master, const Vector &_hand_poss_slave) :
-                                     RateThread(_rate), name(_name), robot(_robot),verbosity(_v), skinParts(_skinParts), record(_record),
+                                     PeriodicThread((double)_rate/1000.0), name(_name), robot(_robot),verbosity(_v), skinParts(_skinParts), record(_record),
                                      filename(_filename), color(_color), autoconnect(_autoconnect), jnt_vels(_jnt_vels), dontgoback(_dontgoback),
                                      handPossMaster(_hand_poss_master),handPossSlave(_hand_poss_slave)
 {
@@ -519,12 +518,12 @@ bool doubleTouchThread::checkMotionDone()
     double normL = norm(eeL - oldEEL);
     double normR = norm(eeR - oldEER);
     printMessage(4,"step: %i  result: %i  normL: %g\tnormR: %g\n", step,
-        (normL <= VEL_THRES * getRate()) && (normR <= VEL_THRES * getRate()), normL, normR);
+        (normL <= VEL_THRES * (1000.0*getPeriod())) && (normR <= VEL_THRES * (1000.0*getPeriod())), normL, normR);
 
     oldEEL = eeL;
     oldEER = eeR;
 
-    if ((normL <= VEL_THRES * getRate()) && (normR <= VEL_THRES * getRate())) {
+    if ((normL <= VEL_THRES * (1000.0*getPeriod())) && (normR <= VEL_THRES * (1000.0*getPeriod()))) {
         return true;
     }
 

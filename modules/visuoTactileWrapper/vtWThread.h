@@ -23,7 +23,7 @@
 #define __VTWTHREAD_H__
 
 #include <yarp/os/Time.h>
-#include <yarp/os/RateThread.h>
+#include <yarp/os/PeriodicThread.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/RFModule.h>
 #include <yarp/os/Log.h>
@@ -65,7 +65,7 @@ using namespace iCub::ctrl;
 
 using namespace std;
 
-class vtWThread: public RateThread
+class vtWThread: public PeriodicThread
 {
 protected:
     /***************************************************************************/

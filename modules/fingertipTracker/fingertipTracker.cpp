@@ -64,7 +64,7 @@ Linux (Ubuntu 12.04, Debian Squeeze, Debian Wheezy).
 \author: Alessandro Roncone and Ugo Pattacini
 */ 
 
-#include <yarp/os/RateThread.h>
+#include <yarp/os/PeriodicThread.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/RFModule.h>
 #include <yarp/os/Log.h>

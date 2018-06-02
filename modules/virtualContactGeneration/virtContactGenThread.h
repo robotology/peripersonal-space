@@ -27,7 +27,7 @@
 #include <sstream>
 
 #include <yarp/os/Time.h>
-#include <yarp/os/RateThread.h>
+#include <yarp/os/PeriodicThread.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/RFModule.h>
 #include <yarp/os/Stamp.h>
@@ -38,7 +38,7 @@
 
 #include <iCub/periPersonalSpace/utils.h>
 
-class virtContactGenerationThread: public yarp::os::RateThread
+class virtContactGenerationThread: public yarp::os::PeriodicThread
 {
 protected:
     /***************************************************************************/

@@ -8,7 +8,7 @@
 #include "vtWThread.h"
 
 vtWThread::vtWThread(int _rate, const string &_name, const string &_robot, int _v, const ResourceFinder &_moduleRF) :
-                       RateThread(_rate), name(_name), robot(_robot), verbosity(_v)
+                     PeriodicThread((double)_rate/1000.0), name(_name), robot(_robot), verbosity(_v)
 {
     optFlowPos.resize(3,0.0);
     optFlowVel.resize(3,0.0);
@@ -167,7 +167,7 @@ void vtWThread::run()
     {
         if (optFlowBottle->size()>=3)
         {
-            yDebug("Computing data from the optFlowTracker %g\n",getEstUsed());
+            yDebug("Computing data from the optFlowTracker %g [s]\n",getEstimatedUsed());
             optFlowPos.zero();
 
             optFlowPos[0]=optFlowBottle->get(0).asDouble();
@@ -197,7 +197,7 @@ void vtWThread::run()
 
                 if (!gsl_isnan(fp[0]) && !gsl_isnan(fp[1]) && !gsl_isnan(fp[2]))
                 {
-                    yDebug("Computing data from the pf3dTracker %g\n",getEstUsed());
+                    yDebug("Computing data from the pf3dTracker %g [s]\n",getEstimatedUsed());
                     Vector x,o;
                     igaze->getLeftEyePose(x,o);
 
@@ -262,7 +262,7 @@ void vtWThread::run()
                 {
                     if (doubleTouchBottle->get(3).asString() != "" && fgtTrackerBottle->get(0).asInt() != 0)
                     {
-                        yDebug("Computing data from the fingertipTracker %g\n",getEstUsed());
+                        yDebug("Computing data from the fingertipTracker %g [s]\n",getEstimatedUsed());
                         doubleTouchStep = doubleTouchBottle->get(0).asInt();
                         fgtTrackerPos[0] = fgtTrackerBottle->get(1).asDouble();
                         fgtTrackerPos[1] = fgtTrackerBottle->get(2).asDouble();
@@ -336,7 +336,7 @@ void vtWThread::run()
                             yError(" [vtWThread] Unknown task received from the double touch thread!");
                         }
 
-                        yDebug("Computing data from the doubleTouch %g\n",getEstUsed());
+                        yDebug("Computing data from the doubleTouch %g [s]\n",getEstimatedUsed());
                         AWPolyElement el2(doubleTouchPos,Time::now());
                         doubleTouchVel=linEst_doubleTouch->estimate(el2);
                         events.push_back(IncomingEvent(doubleTouchPos,doubleTouchVel,-1.0,"doubleTouch"));

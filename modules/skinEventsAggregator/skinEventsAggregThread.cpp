@@ -15,7 +15,7 @@ using namespace iCub::skinDynLib;
 /*************** public methods section ********************************************/
 
 skinEventsAggregThread::skinEventsAggregThread(int _rate, const string &_name, const string &_robot, int _v) : 
-                                               RateThread(_rate),name(_name), robot(_robot), verbosity(_v) 
+                                               PeriodicThread((double)_rate/1000.0),name(_name), robot(_robot), verbosity(_v) 
 {
 
 }

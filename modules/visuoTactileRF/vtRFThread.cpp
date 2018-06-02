@@ -22,7 +22,7 @@ IncomingEvent eventFromBottle(const Bottle &b)
 vtRFThread::vtRFThread(int _rate, const string &_name, const string &_robot, const string &_modality,
                        int _v, const ResourceFinder &_moduleRF, vector<string> _fnames,
                        double _hV, double _armV, const ResourceFinder &_eyeCalibRF) :
-                       RateThread(_rate), name(_name), robot(_robot), modality(_modality),
+                       PeriodicThread((double)_rate/1000.0), name(_name), robot(_robot), modality(_modality),
                        verbosity(_v), filenames(_fnames)
 {
     //******************* PORTS ******************

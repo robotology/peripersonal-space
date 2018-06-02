@@ -22,7 +22,7 @@
 #define __VTRFTHREAD_H__
 
 #include <yarp/os/Time.h>
-#include <yarp/os/RateThread.h>
+#include <yarp/os/PeriodicThread.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/RFModule.h>
 
@@ -67,7 +67,7 @@ using namespace iCub::skinDynLib;
 
 using namespace std;
 
-class vtRFThread: public RateThread
+class vtRFThread: public PeriodicThread
 {
 protected:
     /***************************************************************************/

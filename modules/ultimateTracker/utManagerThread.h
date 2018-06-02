@@ -40,7 +40,7 @@ using namespace yarp::math;
 
 using namespace std;
 
-class utManagerThread: public RateThread
+class utManagerThread: public PeriodicThread
 {
 protected:
     /***************************************************************************/

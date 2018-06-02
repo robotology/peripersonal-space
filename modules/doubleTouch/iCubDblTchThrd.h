@@ -23,7 +23,7 @@
 #define __DOUBLETOUCHTHREAD_H__
 
 #include <yarp/os/Time.h>
-#include <yarp/os/RateThread.h>
+#include <yarp/os/PeriodicThread.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/Log.h>
 
@@ -61,7 +61,7 @@ using namespace iCub::iKin;
 
 using namespace std;
 
-class doubleTouchThread: public RateThread
+class doubleTouchThread: public PeriodicThread
 {
 protected:
     /***************************************************************************/

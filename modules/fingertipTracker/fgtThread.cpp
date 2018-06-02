@@ -3,7 +3,7 @@
 
 fgtThread::fgtThread(int _rate, const string &_name, const string &_robot, int _v,
                      const Vector &_hsvmin, const Vector &_hsvmax) :
-                     RateThread(_rate), name(_name), robot(_robot), verbosity(_v)
+                     PeriodicThread((double)_rate/1000.0), name(_name), robot(_robot), verbosity(_v)
 {
     stateFlag = 0;
     timeNow   = yarp::os::Time::now();

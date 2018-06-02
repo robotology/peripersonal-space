@@ -52,7 +52,7 @@ using namespace std;
 #define KALMAN_NEWINPUT 3
 #define KALMAN_STOPPED  4
 
-class kalmanThread: public RateThread
+class kalmanThread: public PeriodicThread
 {
 protected:
     /***************************************************************************/

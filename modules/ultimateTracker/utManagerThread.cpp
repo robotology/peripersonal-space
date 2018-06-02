@@ -1,7 +1,7 @@
 #include "utManagerThread.h"
 
 utManagerThread::utManagerThread(int _rate, const string &_name, const string &_robot, int _v, kalmanThread *_kT, bool _useDispBlobber) :
-                       RateThread(_rate), name(_name), robot(_robot), verbosity(_v), useDispBlobber(_useDispBlobber)
+                                 PeriodicThread((double)_rate/1000.0), name(_name), robot(_robot), verbosity(_v), useDispBlobber(_useDispBlobber)
 {
     kalThrd   = _kT;
 
