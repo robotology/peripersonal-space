@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "iCub/periPersonalSpace/taxelPWE.h"
 
 using namespace  yarp::os;
@@ -197,7 +198,7 @@ using namespace       std;
                    //printf("  event: %s \n",it->toString().c_str());
                    //printf("\t locResp = locResp  + locResp * min(1.0,Evnt.Threat + stress_modulation)\n");
                    //printf("\t    = %.2f  + %.2f * min(1.0,%.2f + %.2f)\n",locResp,locResp,it->Threat,stress_modulation);
-                   locResp = locResp + (locResp * min(1.0,it->Threat + stress_modulation)); //with this amplification,
+                   locResp = locResp + (locResp * std::min(1.0,it->Threat + stress_modulation)); //with this amplification,
                    //may come out of the range (which used to be <0,255>, now <0,1> after 9.8.2016)
                    //- in fact up to double that range
                    //printf("\t locResp  = %.2f  \n",locResp);

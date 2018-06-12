@@ -5,9 +5,11 @@
 cmake_minimum_required(VERSION 2.8)
 project(periPersonalSpace)
 
+find_package(GSL REQUIRED)
 find_package(IPOPT REQUIRED)
 
 include_directories(${ICUB_INCLUDE_DIRS})
+include_directories(${GSL_INCLUDE_DIRS})
 include_directories(${IPOPT_INCLUDE_DIRS})
 
 set(folder_source src/iCubDblTchSlv.cpp
@@ -32,9 +34,9 @@ source_group("Header Files" FILES ${folder_header})
 add_definitions(${IPOPT_DEFINITIONS} -D_USE_MATH_DEFINES)
 add_library(${PROJECT_NAME} ${folder_source} ${folder_header})
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " ${IPOPT_LINK_FLAGS}")
-target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES} iKin skinDynLib ${IPOPT_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES} iKin skinDynLib ${GSL_LIBRARIES} ${IPOPT_LIBRARIES})
 icubcontrib_export_library(${PROJECT_NAME} INTERNAL_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include
-                                           EXTERNAL_INCLUDE_DIRS ${ICUB_INCLUDE_DIRS} ${IPOPT_INCLUDE_DIRS}
+                                           EXTERNAL_INCLUDE_DIRS ${ICUB_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${IPOPT_INCLUDE_DIRS}
                                            DESTINATION include/iCub/${PROJECT_NAME}
                                            FILES ${folder_header})
 # export library
