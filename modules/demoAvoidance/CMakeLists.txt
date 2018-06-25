@@ -2,10 +2,8 @@
 # Author: Alessandro Roncone
 # CopyPolicy: Released under the terms of the GNU GPL v2.0.
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 project(demoAvoidance)
-
-include_directories(${ICUB_INCLUDE_DIRS})
 
 set(sources demoAvoidance.cpp)
 source_group("Source Files" FILES ${sources})
