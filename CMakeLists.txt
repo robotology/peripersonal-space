@@ -12,17 +12,13 @@ project(PPS)
 
 find_package(YARP REQUIRED COMPONENTS OS dev sig math gsl)
 find_package(ICUB)
-list(APPEND CMAKE_MODULE_PATH ${YARP_MODULE_PATH})
 list(APPEND CMAKE_MODULE_PATH ${ICUB_MODULE_PATH})
-include(YarpInstallationHelpers)
 
 find_package(ICUBcontrib)
 list(APPEND CMAKE_MODULE_PATH ${ICUBCONTRIB_MODULE_PATH})
 include(ICUBcontribHelpers)
 include(ICUBcontribOptions)
 icubcontrib_set_default_prefix()
-
-include(YarpInstallationHelpers)   # pick up yarp's cmake scripts
 
 ## add libraries
 add_subdirectory(lib)
