@@ -112,7 +112,7 @@ public:
             switch (command.get(0).asVocab())
             {
                 //-----------------
-                case VOCAB3('s','e','t'):
+                case createVocab('s','e','t'):
                 {
                     reply.addString(command.get(1).asString());
 

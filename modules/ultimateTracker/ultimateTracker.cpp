@@ -115,7 +115,7 @@ public:
             switch (command.get(0).asVocab())
             {
                 //-----------------
-                case VOCAB4('s','a','v','e'):
+                case createVocab('s','a','v','e'):
                 {
                     // int res=Vocab::encode("saved");
                     // if (utMngrThrd -> save())

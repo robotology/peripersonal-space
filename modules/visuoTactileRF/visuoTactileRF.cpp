@@ -131,7 +131,7 @@ public:
         {
             switch (command.get(0).asVocab())
             {
-                case VOCAB4('s','a','v','e'):
+                case createVocab('s','a','v','e'):
                 {
                     int res=Vocab::encode("saved");
                     string fileName = vtRFThrd -> save();
@@ -149,7 +149,7 @@ public:
                     reply.addVocab(res);
                     return true;
                 }
-                case VOCAB4('l','o','a','d'):
+                case createVocab('l','o','a','d'):
                 {
                     int res=Vocab::encode("loaded");
                     string fileName=vtRFThrd -> load();
@@ -167,19 +167,19 @@ public:
                     reply.addVocab(res);
                     return true;
                 }
-                case VOCAB4('r','e','s','e'):
+                case createVocab('r','e','s','e'):
                 {
                     vtRFThrd -> resetParzenWindows();
                     reply.addVocab(ack);
                     return true;
                 }
-                case VOCAB4('s','t','o','p'):
+                case createVocab('s','t','o','p'):
                 {
                     vtRFThrd -> stopLearning();
                     reply.addVocab(ack);
                     return true;
                 }
-               case VOCAB4('r','e','s','t'):
+               case createVocab('r','e','s','t'):
                 {
                     vtRFThrd -> restoreLearning();
                     reply.addVocab(ack);

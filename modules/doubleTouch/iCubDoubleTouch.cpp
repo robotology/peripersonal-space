@@ -181,7 +181,7 @@ public:
             switch (command.get(0).asVocab())
             {
                 //-----------------
-                case VOCAB4('c','o','n','n'):
+                case createVocab('c','o','n','n'):
                 {
                     Network yarpNetwork;
                     if (yarpNetwork.connect("/skinManager/skin_events:o",("/"+name+"/contacts:i").c_str()))
@@ -192,7 +192,7 @@ public:
                 }
 
                 //-----------------
-                case VOCAB4('s','t','a','r'):
+                case createVocab('s','t','a','r'):
                 {
                     dblTchThrd = new doubleTouchThread(rate, name, robot, verbosity, _sPs,
                                                        jnt_vels, record, filename, color,
@@ -211,7 +211,7 @@ public:
                 }
 
                 //-----------------
-                case VOCAB4('d','i','s','c'):
+                case createVocab('d','i','s','c'):
                 {
                     Network yarpNetwork;
                     if (yarpNetwork.disconnect("/skinManager/skin_events:o",("/"+name+"/contacts:i").c_str()))
@@ -222,7 +222,7 @@ public:
                 }
 
                 //-----------------
-                case VOCAB4('s','t','o','p'):
+                case createVocab('s','t','o','p'):
                 {
                     if (dblTchThrd)
                     {
