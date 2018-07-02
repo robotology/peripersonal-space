@@ -10,7 +10,7 @@ endif(COMMAND cmake_policy)
 
 project(PPS)
 
-find_package(YARP REQUIRED COMPONENTS OS dev sig math gsl)
+find_package(YARP REQUIRED COMPONENTS OS dev sig math gsl idl_tools)
 find_package(ICUB)
 list(APPEND CMAKE_MODULE_PATH ${ICUB_MODULE_PATH})
 
