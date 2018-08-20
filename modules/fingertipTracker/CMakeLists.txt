@@ -9,7 +9,6 @@ file(GLOB source *.cpp)
 file(GLOB header *.h)
 
 include_directories(${periPersonalSpace_INCLUDE_DIRS})
-include_directories(${OpenCV_INCLUDE_DIRS})
 
 source_group("Source Files" FILES ${source})
 source_group("Header Files" FILES ${header})
