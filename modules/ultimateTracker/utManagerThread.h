@@ -34,7 +34,6 @@
 #include <iCub/periPersonalSpace/utils.h>
 #include "kalmanThread.h"
 
-using namespace yarp;
 using namespace yarp::sig;
 using namespace yarp::math;
 

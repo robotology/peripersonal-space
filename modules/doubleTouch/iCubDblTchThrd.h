@@ -51,7 +51,6 @@
 #include <iCub/periPersonalSpace/utils.h>
 
 
-using namespace yarp;
 using namespace yarp::os;
 using namespace yarp::sig;
 using namespace yarp::math;

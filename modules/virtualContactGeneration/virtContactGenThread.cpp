@@ -7,7 +7,6 @@
 
 using namespace std;
 
-using namespace yarp;
 using namespace yarp::os;
 using namespace yarp::sig;
 
@@ -101,7 +100,7 @@ int virtContactGenerationThread::initSkinParts()
                 printf("%d {",it3->first);
                 for (std::list<unsigned int>::iterator it4=(it3->second).begin(); it4 != (it3->second).end(); ++it4)
                     printf("%u, ",*it4);
-                printf("}\n",it3->first);    
+                printf("}\n");    
             }
         }
                 

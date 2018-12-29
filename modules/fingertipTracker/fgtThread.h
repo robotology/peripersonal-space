@@ -37,21 +37,23 @@
 
 #include <yarp/math/Math.h>
 
+#include <yarp/cv/Cv.h>
+
 #include <iostream>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include <opencv2/opencv.hpp>
 
 #include <iCub/periPersonalSpace/utils.h>
 
 
-using namespace yarp;
 using namespace yarp::sig;
 using namespace yarp::dev;
 using namespace yarp::math;
 using namespace yarp::os;
-
+using namespace yarp::cv;
 using namespace std;
 
 class fgtThread: public PeriodicThread

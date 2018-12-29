@@ -70,7 +70,6 @@ Linux (Ubuntu 12.04, Debian Squeeze, Debian Wheezy).
 #include "utManagerThread.h"
 #include "kalmanThread.h"
 
-using namespace yarp;
 using namespace yarp::os;
 using namespace std;
 

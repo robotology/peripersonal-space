@@ -140,10 +140,10 @@ bool fgtThread::processImages(ImageOf<PixelRgb> &_oL, ImageOf<PixelRgb> &_oR)
     ImageOf<PixelRgb> imageOL=*imageInL;
     ImageOf<PixelRgb> imageOR=*imageInR;
 
-    cv::Mat imgL=cv::cvarrToMat(imageOL.getIplImage());
-    cv::Mat imgR=cv::cvarrToMat(imageOR.getIplImage());
-    cv::Mat mskL=cv::cvarrToMat(maskL.getIplImage());
-    cv::Mat mskR=cv::cvarrToMat(maskR.getIplImage());
+    cv::Mat imgL=toCvMat(std::move(imageOL));
+    cv::Mat imgR=toCvMat(std::move(imageOR));
+    cv::Mat mskL=toCvMat(std::move(maskL));
+    cv::Mat mskR=toCvMat(std::move(maskR));
     cv::Mat imgLHSV;
     cv::Mat imgRHSV;
 

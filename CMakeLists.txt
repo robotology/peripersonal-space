@@ -10,11 +10,11 @@ endif(COMMAND cmake_policy)
 
 project(PPS)
 
-find_package(YARP REQUIRED COMPONENTS OS dev sig math gsl idl_tools)
-find_package(ICUB)
-list(APPEND CMAKE_MODULE_PATH ${ICUB_MODULE_PATH})
-
 find_package(ICUBcontrib)
+find_package(YARP 3.1.100 REQUIRED COMPONENTS OS dev sig math cv gsl idl_tools)
+find_package(ICUB)
+
+list(APPEND CMAKE_MODULE_PATH ${ICUB_MODULE_PATH})
 list(APPEND CMAKE_MODULE_PATH ${ICUBCONTRIB_MODULE_PATH})
 include(ICUBcontribHelpers)
 include(ICUBcontribOptions)

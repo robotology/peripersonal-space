@@ -91,7 +91,6 @@ Linux (Ubuntu 12.04, Ubuntu 14.04, Debian Squeeze, Debian Wheezy).
 #include "vtRFThread.h"
 
 
-using namespace yarp;
 using namespace yarp::os;
 using namespace yarp::sig;
 using namespace yarp::math;

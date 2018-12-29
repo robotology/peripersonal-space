@@ -73,7 +73,6 @@ Linux (Ubuntu 12.04, Debian Squeeze, Debian Wheezy).
 #include "fgtThread.h"
 
 
-using namespace yarp;
 using namespace yarp::os;
 using namespace std;
 

@@ -80,7 +80,6 @@ Linux (Ubuntu 12.04).
 
 #include "virtContactGenThread.h"
 
-using namespace yarp;
 using namespace yarp::os;
 using namespace std;
 

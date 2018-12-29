@@ -5,7 +5,6 @@
 #define SKIN_ACTIVATION_MAX_ICUB_SIM 100
 #define SKIN_ACTIVATION_MAX_ICUB 30
 
-using namespace yarp;
 using namespace yarp::os;
 using namespace yarp::sig;
 

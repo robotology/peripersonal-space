@@ -81,7 +81,6 @@ Linux (Ubuntu 12.04).
 
 #include "skinEventsAggregThread.h"
 
-using namespace yarp;
 using namespace yarp::os;
 using namespace std;
 
