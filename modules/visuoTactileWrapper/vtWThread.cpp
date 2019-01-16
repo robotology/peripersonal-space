@@ -212,7 +212,7 @@ void vtWThread::run()
                     AWPolyElement el(pf3dTrackerPos,Time::now());
                     pf3dTrackerVel=linEst_pf3dTracker->estimate(el);
 
-                    events.push_back(IncomingEvent(pf3dTrackerPos,pf3dTrackerVel,0.05,"pf3dTracker"));
+                    events.push_back(IncomingEvent(pf3dTrackerPos,pf3dTrackerVel,0.05, 1.0,"pf3dTracker"));
                     isEvent=true;
                 }
             }
