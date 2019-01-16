@@ -52,12 +52,12 @@ These demos uses the [pf3dtracker](https://github.com/robotology/icub-basic-demo
 	yarp rpc /reactController/rpc:i  
 	set_xd (-0.3 -0.15 0.1)
 	```
-	- In a circle: in this mode, robot moves its end-effector along a circle trajectory in the y and z axes, relative to the current end-effector position, while avoiding the approaching red ball.
+	- In a circle: in this mode, robot moves its end-effector along a circle trajectory in the y and z axes, relative to the current end-effector position, while avoiding the approaching red ball. The first command moves robot's arm to a tested *safe* initial position for the circle trajectory.
 	```
 	set_xd (-0.3 -0.15 0.1)
 	set_relative_circular_xd 0.08 0.27
 	```
-		- The first command moves robot's arm to a tested *safe* initial position for the circle trajectory.
+		
 
 ## Demos without react-ctrl
 
