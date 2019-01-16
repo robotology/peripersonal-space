@@ -6,10 +6,10 @@ Use the main branch of the repository.
 # Table of Contents
 1. [Prerequisites](#prerequisites)  
 2. [Demos](#demos)
-	- [Demos with react-ctrl](##demos-with-react-ctrl)
-	- [Demos without react-ctrl](##demos-without-react-ctrl)
+	- [Demos with react-ctrl](#demos-with-react-ctrl)
+	- [Demos without react-ctrl](#demos-without-react-ctrl)
 	- Demos with human tracking: Check the [script](https://github.com/robotology/skeleton3D/blob/master/app/script/PPS_modulation_iCub_skeleton3D.xml) of [skeleton3D](https://github.com/robotology/skeleton3D) 
-	- [Arbitrary objects version](##arbitrary-objects-version)
+	- [Arbitrary objects version](#arbitrary-objects-version)
 
 
 # Prerequisites
@@ -33,7 +33,7 @@ For the demo, we usually use: 1D version (only position) and red ball as stimulu
 # Demos
 
 ## Demos with react-ctrl
-These demos uses the [pf3dtracker](https://github.com/robotology/icub-basic-demos/tree/master/pf3dTracker) to track the approaching ball as obstacle.
+These demos uses the [pf3dtracker](https://github.com/robotology/icub-basic-demos/tree/master/pf3dTracker) to track the approaching ball as obstacle, and [react-controller](https://github.com/robotology/react-control) to move the robot's arm.
 
 ### Prerequisites:
 - Application script to use: [PPS_and_reactCtrl_with_redBall](https://github.com/robotology/peripersonal-space/blob/master/app/scripts/ppsAndReactControl_icub_redBall.xml)
@@ -57,7 +57,7 @@ These demos uses the [pf3dtracker](https://github.com/robotology/icub-basic-demo
 	set_xd (-0.3 -0.15 0.1)
 	set_relative_circular_xd 0.08 0.27
 	```
-	The first command moves robot's arm to a tested *safe* initial position for the circle trajectory.
+		- The first command moves robot's arm to a tested *safe* initial position for the circle trajectory.
 
 ## Demos without react-ctrl
 
