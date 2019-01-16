@@ -5,11 +5,13 @@ This demo illustrates the most important features of learning and using the peri
 Use the main branch of the repository. 
 
 ## Prerequisites
+Using following application in **yarpmanager**
 1. `CalibCameras`
 2. `iCubStartup` (need `iKinCartesianController`, `iKinCartesianSolver`,  `iKinGazeCtrl`, `wholebodyDynamics`, `gravityCompensator`)
 3. `Skin_Gui_All` - in fact, the demo operates on hand and forearms only.
 4. `iCubGui`
   * For `iCubGui`, connect everything apart from `/wholeBodyDynamics/contacts:o` `/iCubGui/forces`
+5. [PPS_and_reactCtrl_with_redBall](https://github.com/robotology/peripersonal-space/blob/master/app/scripts/ppsAndReactControl_icub_redBall.xml)
 
 Note, for correct operation of the PPS, you need to have the skin of the hands and forearms configured correctly. This pertains in particular to:
  1. taxel position files - as per https://github.com/robotology/icub-main/tree/master/app/skinGui/conf/positions - make sure you have the latest ones that are appropriate for your robot in the relevant directories - in particular the left/right_forearm_V2.txt in case you have a V2 skin version robot.
