@@ -1,12 +1,12 @@
 <application>
-    <name>PPS_and_Reactcontrol_Lyon</name>
+    <name>PPS_and_reactCtrl_with_redBall</name>
 
     <dependencies>
     </dependencies>
 
    <module>
         <name>reactController</name>
-        <parameters>--referenceGen minJerk --additionalControlPoints off</parameters>
+        <parameters>--referenceGen minJerk --additionalControlPoints off --stiff off</parameters>
         <node>icub22</node>
         <stdio></stdio>
         <tag>reactController</tag>
@@ -30,7 +30,7 @@
 
     <module>
         <name>pf3dTracker</name>
-        <parameters>--from fluoBall.ini</parameters>
+<!--        <parameters>--from fluoBall.ini</parameters>-->
         <node>icub21</node>
         <tag>PF3DTracker</tag>
     </module>
@@ -173,14 +173,5 @@
         <to>/skinGui/right_hand_virtual:i</to>
         <protocol>tcp</protocol>
     </connection>
-    
 
-   
- 
-
-    <!--connection>
-        <from></from>
-	<to></to>
-        <protocol>udp</protocol>
-    </connection-->
 </application>
