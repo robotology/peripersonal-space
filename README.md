@@ -3,7 +3,7 @@ Peripersonal Space
 
 This repository deals with the implementation of peripersonal space representations on the iCub humanoid robot.
 
-<a href="https://zenhub.com"><img src="https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png"></a>
+[![ZenHub](https://img.shields.io/badge/Shipping_faster_with-ZenHub-435198.svg)](https://zenhub.com)
 
 ## Overall Idea
 
