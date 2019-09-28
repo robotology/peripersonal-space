@@ -16,7 +16,8 @@
  * Public License for more details
 */
 
-#include <stdio.h>
+#include <cstdio>
+#include <mutex>
 #include <string>
 #include <cctype>
 #include <algorithm>
@@ -59,7 +60,7 @@ protected:
 
     RpcServer          rpcSrvr;
 
-    Mutex mutex;
+    mutex mtx;
     struct Data {
         ICartesianControl *iarm;
         Vector point, dir;
@@ -97,7 +98,7 @@ protected:
                 }
 
                 transform(arm.begin(),arm.end(),arm.begin(),::tolower);
-                mutex.lock();
+                lock_guard<mutex> lg(mtx);
                 map<string,Data>::iterator it=data.find(arm);
                 if (it!=data.end())
                 {
@@ -111,7 +112,6 @@ protected:
                     d.persistence=PPS_AVOIDANCE_PERSISTENCE;
                     d.timeout=PPS_AVOIDANCE_TIMEOUT;
                 }
-                mutex.unlock();
             }
         }
 
@@ -368,7 +368,7 @@ public:
     //********************************************
     bool updateModule()
     {
-        mutex.lock();
+        lock_guard<mutex> lg(mtx);
         if (useLeftArm)
         {
             manageArm(data["left"]);
@@ -378,7 +378,6 @@ public:
         {
             manageArm(data["right"]);
         }
-        mutex.unlock();
         return true;
     }
 

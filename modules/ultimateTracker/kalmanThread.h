@@ -27,10 +27,11 @@
 #include <yarp/sig/Matrix.h>
 #include <yarp/math/Math.h>
 
+#include <mutex>
 #include <iostream>
 #include <string>
-#include <stdio.h>
-#include <stdarg.h>
+#include <cstdio>
+#include <cstdarg>
 #include <vector>
 #include <math.h>
 
@@ -70,13 +71,13 @@ protected:
     double timeNow;                     // time of the latest acquisition
 
     Vector kalIn;        // Input variable                
-    Mutex  inputMutex;   // Mutex that handles the writing/reading of kalIn
+    mutex  inputMutex;   // Mutex that handles the writing/reading of kalIn
 
     int    kalState;     // State of the thread
-    Mutex  stateMutex;   // Mutex that handles the writing/reading of kalState
+    mutex  stateMutex;   // Mutex that handles the writing/reading of kalState
 
     Vector kalOut;       // Estimated kalman variable
-    Mutex  outMutex;     // Mutex that handles the writing/reading of kalOut
+    mutex  outMutex;     // Mutex that handles the writing/reading of kalOut
 
     vector <iCub::ctrl::Kalman> posVelKalman;
     unsigned int kalOrder;      // The order of the kalman filters
