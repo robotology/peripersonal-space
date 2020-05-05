@@ -488,7 +488,6 @@ int main(int argc, char * argv[])
 
     
     ResourceFinder rf;
-    rf.setVerbose(false);
     rf.setDefaultContext("periPersonalSpace");
     rf.setDefaultConfigFile("doubleTouch.ini");
     rf.configure(argc,argv);

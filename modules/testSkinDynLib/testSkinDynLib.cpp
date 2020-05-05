@@ -111,7 +111,6 @@ public:
 
         //************* skinTaxels' Resource finder **************
             ResourceFinder skinRF;
-            skinRF.setVerbose(false);
             skinRF.setDefaultContext("skinGui");                //overridden by --context parameter
             skinRF.setDefaultConfigFile("skinManForearms.ini"); //overridden by --from parameter
             skinRF.configure(0,NULL);
@@ -175,7 +174,6 @@ int main(int argc, char * argv[])
     Network yarp;
 
     ResourceFinder moduleRF;
-    moduleRF.setVerbose(false);
     moduleRF.configure(argc,argv);
 
     if (moduleRF.check("help"))

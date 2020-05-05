@@ -445,7 +445,6 @@ int main(int argc, char * argv[])
     Network yarp;
 
     ResourceFinder moduleRF;
-    moduleRF.setVerbose(false);
     moduleRF.setDefaultContext("periPersonalSpace");
     moduleRF.setDefaultConfigFile("demoAvoidance.ini");
     moduleRF.configure(argc,argv);

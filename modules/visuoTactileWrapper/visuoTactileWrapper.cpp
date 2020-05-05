@@ -243,7 +243,6 @@ int main(int argc, char * argv[])
 
     
     ResourceFinder moduleRF;
-    moduleRF.setVerbose(true);
     moduleRF.setDefaultContext("periPersonalSpace");
     moduleRF.setDefaultConfigFile("visuoTactileWrapper.ini");
     moduleRF.configure(argc,argv);

@@ -261,7 +261,6 @@ public:
 
         //************* skinManager Resource finder **************
             ResourceFinder skinRF;
-            skinRF.setVerbose(false);
             skinRF.setDefaultContext("skinGui");                //overridden by --context parameter
             skinRF.setDefaultConfigFile("skinManAll.ini"); //overridden by --from parameter
             skinRF.configure(0,NULL);
@@ -374,7 +373,6 @@ public:
 
         //*************** eyes' Resource finder ****************
             ResourceFinder gazeRF;
-            gazeRF.setVerbose(verbosity!=0);
             gazeRF.setDefaultContext("iKinGazeCtrl");
             robot=="icub"?gazeRF.setDefaultConfigFile("config.ini"):gazeRF.setDefaultConfigFile("configSim.ini");
             gazeRF.configure(0,NULL);
@@ -386,7 +384,6 @@ public:
 
             if(!camerasGroup.isNull())
             {
-                eyeAlignRF.setVerbose(verbosity!=0);
                 camerasGroup.check("context")?
                 eyeAlignRF.setDefaultContext(camerasGroup.find("context").asString().c_str()):
                 eyeAlignRF.setDefaultContext(gazeRF.getContext().c_str());
@@ -459,7 +456,6 @@ int main(int argc, char * argv[])
     Network yarp;
     
     ResourceFinder moduleRF;
-    moduleRF.setVerbose(false);
     moduleRF.setDefaultContext("periPersonalSpace");
     moduleRF.setDefaultConfigFile("visuoTactileRF.ini");
     moduleRF.configure(argc,argv);

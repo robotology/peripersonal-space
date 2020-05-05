@@ -211,7 +211,6 @@ int main(int argc, char * argv[])
     Network yarp;
 
     ResourceFinder rf;
-    rf.setVerbose(true);
     rf.setDefaultContext("periPersonalSpace");
     rf.setDefaultConfigFile("skinEventsAggregation.ini");
     rf.configure(argc,argv);

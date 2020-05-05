@@ -247,7 +247,6 @@ int main(int argc, char * argv[])
 
     
     ResourceFinder moduleRF;
-    moduleRF.setVerbose(false);
     moduleRF.setDefaultContext("periPersonalSpace");
     moduleRF.setDefaultConfigFile("fingertipTracker.ini");
     moduleRF.configure(argc,argv);

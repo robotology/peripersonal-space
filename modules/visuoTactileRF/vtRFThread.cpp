@@ -681,9 +681,7 @@ bool vtRFThread::detectContact(iCub::skinDynLib::skinContactList *_sCL, int &idx
 
 string vtRFThread::load()
 {
-    rf->setVerbose(true);
     string fileName=rf->findFile("taxelsFile").c_str();
-    rf->setVerbose(false);
     if (fileName=="")
     {
         yWarning("[vtRF::load] No filename has been found. Skipping..");
@@ -1249,7 +1247,6 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
     //filename = filename.substr(0, filename.find_last_of("_"));
 
     yarp::os::ResourceFinder rf;
-    rf.setVerbose(false);
     rf.setDefaultContext("skinGui");            //overridden by --context parameter
     rf.setDefaultConfigFile(filePath.c_str()); //overridden by --from parameter
     if (!rf.configure(0,NULL))
@@ -1258,7 +1255,6 @@ bool vtRFThread::setTaxelPosesFromFile(const string filePath, skinPartPWE &sP)
         yError("%s",filename.c_str());
         return false;
     }
-    rf.setVerbose(true);
 
     yarp::os::Bottle &calibration = rf.findGroup("calibration");
     if (calibration.isNull())

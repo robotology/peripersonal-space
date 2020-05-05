@@ -294,7 +294,6 @@ int main(int argc, char * argv[])
     Network yarp;
 
     ResourceFinder moduleRF;
-    moduleRF.setVerbose(true);
     moduleRF.setDefaultContext("periPersonalSpace");
     moduleRF.setDefaultConfigFile("ultimateTracker.ini");
     moduleRF.configure(argc,argv);

@@ -276,10 +276,8 @@ public:
         
          ResourceFinder skinRF;
          int partNum;
-         skinRF.setVerbose(false);
          skinRF.setDefaultContext("skinGui");   //overridden by --context parameter
          skinRF.setDefaultConfigFile("skinManAll.ini"); //overridden by --from parameter
-         skinRF.setVerbose(true);
          skinRF.configure(0,NULL);
             
          Bottle &skinEventsConf = skinRF.findGroup("SKIN_EVENTS");
@@ -370,7 +368,6 @@ int main(int argc, char * argv[])
     Network yarp;
 
     ResourceFinder rf;
-    rf.setVerbose(true);
     rf.setDefaultContext("periPersonalSpace");
     rf.setDefaultConfigFile("virtualContactGeneration.ini");
     rf.configure(argc,argv);
