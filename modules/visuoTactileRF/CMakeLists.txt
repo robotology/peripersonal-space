@@ -15,7 +15,7 @@ source_group("Header Files" FILES ${header})
 
 add_executable(visuoTactileRF ${source} ${header})
 
-target_link_libraries(visuoTactileRF periPersonalSpace ${YARP_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(visuoTactileRF periPersonalSpace ${YARP_LIBRARIES} ${OpenCV_LIBS})
 
 install(TARGETS visuoTactileRF DESTINATION bin)
 
